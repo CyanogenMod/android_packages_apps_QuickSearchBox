@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_bar"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/suggestions_scroll"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/search_edit_frame"
+        >
+
+        <!-- The minHeight is a trick to always be able to scroll past the
+             tab strip. -->
+        <view xmlns:android="http://schemas.android.com/apk/res/android"
+            class="com.android.quicksearchbox.SuggestionsView"
+            android:id="@+id/suggestions"
+            android:minHeight="400dip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:addStatesFromChildren="true"
+                    android:background="@drawable/tab_strip_bg" />
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+              </FrameLayout>
+            </LinearLayout>
+        </view>
+
+    </ScrollView>
+
+    <!-- The search plate is after the suggestions, to give it a higher
+         z-index. -->
+    <LinearLayout
+        android:id="@+id/search_edit_frame"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="-10dip"
+        android:orientation="horizontal"
+        android:background="@drawable/search_plate_global"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        >
+
+        <EditText
+            android:id="@+id/search_src_text"
+            android:background="@drawable/textfield_search"
+            android:layout_height="wrap_content"
+            android:layout_width="0dip"
+            android:layout_weight="1.0"
+            android:drawablePadding="2dip"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:inputType="text|textAutoComplete"
+            android:imeOptions="actionSearch"
+        />
+
+        <ImageButton 
+            android:id="@+id/search_go_btn"
+            android:background="@drawable/btn_search_dialog"
+            android:src="@drawable/ic_btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+        />
+
+        <ImageButton
+            android:id="@+id/search_voice_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="8dip"
+            android:background="@drawable/btn_search_dialog_voice"
+            android:src="@drawable/ic_btn_speak_now"
+        />
+    </LinearLayout>
+
+</RelativeLayout>
