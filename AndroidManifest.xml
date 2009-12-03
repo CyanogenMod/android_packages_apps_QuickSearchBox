@@ -15,9 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.android.quicksearchbox"
-      android:versionCode="1"
-      android:versionName="1.0">
+      package="com.android.quicksearchbox">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
