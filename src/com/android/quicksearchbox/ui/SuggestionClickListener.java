@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.ui;
 
-import java.util.ArrayList;
+import com.android.quicksearchbox.SuggestionPosition;
+
+import android.graphics.Rect;
 
 /**
- * Provides a set of suggestion results for a query..
- *
+ * Listener interface for clicks on suggestions.
  */
-public interface SuggestionsProvider {
-    /**
-     * Gets suggestions for a query. This method will be called on a background thread.
-     *
-     * @return A {@link Suggestions} object. Implementations are allowed to call
-     *         {@link Suggestions#addSourceResult(SuggestionCursor)} after returning,
-     *         but must do so on the UI thread.
-     */
-    Suggestions getSuggestions(String query);
-
-    ArrayList<Source> getOrderedSources();
-
-    void close();
+public interface SuggestionClickListener {
+    void onIconClicked(SuggestionPosition suggestion, Rect rect);
+    void onItemClicked(SuggestionPosition suggestion);
 }

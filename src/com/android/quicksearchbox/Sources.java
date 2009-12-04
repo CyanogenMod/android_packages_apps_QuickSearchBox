@@ -35,9 +35,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Maintains the list of all suggestion sources.
@@ -106,8 +104,7 @@ public class Sources implements SourceLookup {
      */
     public synchronized Collection<Source> getSources() {
         if (!mLoaded) {
-            Log.w(TAG, "getSuggestionSources() called, but sources not loaded.");
-            return Collections.<Source>emptyList();
+            throw new IllegalStateException("getSources(): sources not loaded.");
         }
         return mSources.values();
     }
@@ -132,10 +129,9 @@ public class Sources implements SourceLookup {
      * @return All enabled suggestion sources (does not include the web search source).
      *         Callers must not modify the returned list.
      */
-    public synchronized List<Source> getEnabledSources() {
+    public synchronized ArrayList<Source> getEnabledSources() {
         if (!mLoaded) {
-            Log.w(TAG, "getEnabledSources() called, but sources not loaded.");
-            return Collections.<Source>emptyList();
+            throw new IllegalStateException("getEnabledSources(): sources not loaded.");
         }
         return mEnabledSources;
     }
@@ -143,8 +139,7 @@ public class Sources implements SourceLookup {
     /** {@inheritDoc} */
     public synchronized Source getSelectedWebSearchSource() {
         if (!mLoaded) {
-            Log.w(TAG, "getSelectedWebSearchSource() called, but sources not loaded.");
-            return null;
+            throw new IllegalStateException("getSelectedWebSearchSource(): sources not loaded.");
         }
         return mSelectedWebSearchSource;
     }
@@ -203,8 +198,7 @@ public class Sources implements SourceLookup {
      */
     public synchronized void load() {
         if (mLoaded) {
-            Log.w(TAG, "Already loaded, ignoring call to load().");
-            return;
+            throw new IllegalStateException("load(): Already loaded.");
         }
 
         // Listen for searchables changes.
@@ -233,8 +227,7 @@ public class Sources implements SourceLookup {
      */
     public synchronized void close() {
         if (!mLoaded) {
-            Log.w(TAG, "Not loaded, ignoring call to close().");
-            return;
+            throw new IllegalStateException("close(): Not loaded.");
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.getContentResolver().unregisterContentObserver(
@@ -344,36 +337,6 @@ public class Sources implements SourceLookup {
             }
         }
         return webSearchSource;
-    }
-
-    /**
-     * Gets the sources that should be queried for the given query.
-     */
-    public synchronized ArrayList<Source> getSourcesToQuery(String query) {
-        if (!mLoaded) {
-            Log.w(TAG, "getSourcesToQuery(" + query + ") called, but sources not loaded.");
-            return null;
-        }
-        if (query.length() == 0) {
-            return new ArrayList<Source>();
-        }
-        int sourceCount = mEnabledSources.size();
-        ArrayList<Source> sourcesToQuery = new ArrayList<Source>(1 + sourceCount);
-        Source webSource = getSelectedWebSearchSource();
-        if (webSource != null) {
-            sourcesToQuery.add(webSource);
-        }
-        for (int i = 0; i < sourceCount; i++) {
-            Source source = mEnabledSources.get(i);
-            if (shouldQuerySource(source, query)) {
-                sourcesToQuery.add(source);
-            }
-        }
-        return sourcesToQuery;
-    }
-
-    private boolean shouldQuerySource(Source source, String query) {
-        return query.length() >= source.getQueryThreshold();
     }
 
     /**

@@ -57,7 +57,6 @@ public class SourceResult extends CursorBackedSuggestionCursor {
 
     @Override
     public String toString() {
-        return "SourceResult{source=" + mSource + ",query=" + getUserQuery()
-                + ",count=" + getCount() + "}";
+        return "SourceResult{source=" + mSource + ",query=" + getUserQuery() + "}";
     }
 }

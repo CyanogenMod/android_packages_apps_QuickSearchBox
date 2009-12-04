@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.ui;
+
+import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.SuggestionPosition;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,10 +36,21 @@ import android.widget.TextView;
  * sources, and suggestions under each source.
  *
  */
-public class SuggestionView extends RelativeLayout {
+public class SuggestionView extends RelativeLayout implements View.OnClickListener {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SuggestionView";
+
+    /**
+     * The cursor that contains the current suggestion.
+     */
+    private SuggestionCursor mCursor;
+    /**
+     * The position within the cursor of the current suggestion.
+     */
+    private int mPos;
+
+    private SuggestionClickListener mSuggestionClickListener;
 
     private TextView mText1;
     private TextView mText2;
@@ -61,7 +78,35 @@ public class SuggestionView extends RelativeLayout {
         mIcon2 = (ImageView) findViewById(R.id.icon2);
     }
 
+    public void setSuggestionClickListener(SuggestionClickListener listener) {
+        mSuggestionClickListener = listener;
+    }
+
+    public void onClick(View v) {
+        if (mSuggestionClickListener == null) {
+            return;
+        }
+        if (v == this) {
+            mSuggestionClickListener.onItemClicked(getSuggestionPosition());
+        } else if (v == mIcon1) {
+            mSuggestionClickListener.onIconClicked(getSuggestionPosition(),
+                    getOnScreenRect(mIcon1));
+        }
+    }
+
+    /**
+     * Gets the suggestion that this view is showing.
+     */
+    public SuggestionPosition getSuggestionPosition() {
+        if (mCursor == null) {
+            throw new IllegalStateException("No cursor in SuggestionView");
+        }
+        return new SuggestionPosition(mCursor, mPos);
+    }
+
     public void bindAsSuggestion(SuggestionCursor suggestion) {
+        mCursor = suggestion;
+        mPos = suggestion.getPosition();
         CharSequence text1 = suggestion.getSuggestionFormattedText1();
         CharSequence text2 = suggestion.getSuggestionFormattedText2();
         Drawable icon1 = suggestion.getSuggestionDrawableIcon1();
@@ -74,12 +119,10 @@ public class SuggestionView extends RelativeLayout {
         setText2(text2);
         setIcon1(icon1);
         setIcon2(icon2);
-    }
 
-    public void setIconClickListener(OnClickListener listener) {
+        setOnClickListener(this);
         if (mIcon1 != null) {
-            mIcon1.setOnClickListener(listener);
-            mIcon1.setClickable(listener != null);
+            mIcon1.setOnClickListener(this);
         }
     }
 
@@ -119,6 +162,17 @@ public class SuggestionView extends RelativeLayout {
         } else {
             mIcon2.setVisibility(VISIBLE);
         }
+    }
+
+    private Rect getOnScreenRect(View view) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        Rect rect = new Rect();
+        rect.left = location[0];
+        rect.top = location[1];
+        rect.right = rect.left + view.getWidth();
+        rect.bottom = rect.top + view.getHeight();
+        return rect;
     }
 
 }

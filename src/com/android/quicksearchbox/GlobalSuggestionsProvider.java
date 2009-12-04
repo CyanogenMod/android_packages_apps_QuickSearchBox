@@ -71,13 +71,47 @@ public class GlobalSuggestionsProvider implements SuggestionsProvider {
         mQueryExecutor.cancelPendingTasks();
     }
 
+    // TODO: Order sources based on click stats.
+    // TODO: Cache this list?
+    public ArrayList<Source> getOrderedSources() {
+        ArrayList<Source> orderedSources = new ArrayList<Source>();
+        Source webSource = mSources.getSelectedWebSearchSource();
+        if (webSource != null) {
+            orderedSources.add(webSource);
+        }
+        orderedSources.addAll(mSources.getEnabledSources());
+        return orderedSources;
+    }
+
+    /**
+     * Gets the sources that should be queried for the given query.
+     *
+     */
+    private ArrayList<Source> getSourcesToQuery(String query) {
+        if (query.length() == 0) {
+            return new ArrayList<Source>();
+        }
+        ArrayList<Source> orderedSources = getOrderedSources();
+        ArrayList<Source> sourcesToQuery = new ArrayList<Source>(orderedSources.size());
+        for (Source source : orderedSources) {
+            if (shouldQuerySource(source, query)) {
+                sourcesToQuery.add(source);
+            }
+        }
+        return sourcesToQuery;
+    }
+
+    private boolean shouldQuerySource(Source source, String query) {
+        return query.length() >= source.getQueryThreshold();
+    }
+
     /**
      * Gets suggestions for the given query.
      */
     public Suggestions getSuggestions(String query) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
-        ArrayList<Source> sourcesToQuery = mSources.getSourcesToQuery(query);
+        ArrayList<Source> sourcesToQuery = getSourcesToQuery(query);
         Suggestions suggestions = new Suggestions(mPromoter,
                 mConfig.getMaxPromotedSuggestions(),
                 query,
@@ -86,10 +120,11 @@ public class GlobalSuggestionsProvider implements SuggestionsProvider {
             suggestions.setShortcuts(mShortcutRepo.getShortcutsForQuery(query));
         }
 
+        int maxResultsPerSource = mConfig.getMaxResultsPerSource();
         for (Source source : sourcesToQuery) {
             QueryTask task = new QueryTask(query,
                     source,
-                    mConfig.getMaxResultsPerSource(),
+                    maxResultsPerSource,
                     suggestions);
             mQueryExecutor.execute(task);
         }

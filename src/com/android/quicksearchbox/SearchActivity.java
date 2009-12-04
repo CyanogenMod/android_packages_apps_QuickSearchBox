@@ -16,6 +16,11 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.SuggestionClickListener;
+import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.ui.SuggestionsAdapter;
+import com.android.quicksearchbox.ui.SuggestionsView;
+
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
@@ -37,6 +42,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+
+import java.util.ArrayList;
 
 // TODO: close / deactivate cursors in onPause() or onStop()
 // TODO: use permission to get extended Genie suggestions
@@ -71,6 +78,8 @@ public class SearchActivity extends Activity {
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
 
+    protected SuggestionsAdapter mSuggestionsAdapter;
+
     protected EditText mQueryTextView;
 
     protected ScrollView mSuggestionsScrollView;
@@ -95,12 +104,18 @@ public class SearchActivity extends Activity {
         setContentView(R.layout.search_bar);
 
         Config config = getConfig();
+        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
+        mSuggestionsAdapter = new SuggestionsAdapter(viewFactory);
+        mSuggestionsAdapter
+                .setInitialSourceResultWaitMillis(config.getInitialSourceResultWaitMillis());
+        mSuggestionsAdapter
+                .setSourceResultPublishDelayMillis(config.getSourceResultPublishDelayMillis());
+        mSuggestionsAdapter.setSources(getSuggestionsProvider().getOrderedSources());
+
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
         mSuggestionsScrollView = (ScrollView) findViewById(R.id.suggestions_scroll);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
-        mSuggestionsView
-                .setInitialSourceResultWaitMillis(config.getInitialSourceResultWaitMillis())
-                .setSourceResultPublishDelayMillis(config.getSourceResultPublishDelayMillis());
+        mSuggestionsView.setAdapter(mSuggestionsAdapter);
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
@@ -129,7 +144,8 @@ public class SearchActivity extends Activity {
         mVoiceSearchButton.setVisibility(
                 mLauncher.isVoiceSearchAvailable() ? View.VISIBLE : View.GONE);
 
-        mSuggestionsView.setClickListener(new SuggestionsClickListener());
+        mSuggestionsView.setSuggestionClickListener(new ClickHandler());
+        mSuggestionsView.setInteractionListener(new InputMethodCloser());
     }
 
     private QsbApplication getQsbApplication() {
@@ -148,14 +164,15 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getSuggestionsProvider();
     }
 
+    private SuggestionViewFactory getSuggestionViewFactory() {
+        return getQsbApplication().getSuggestionViewFactory();
+    }
+
     @Override
     protected void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy()");
         super.onDestroy();
-        if (mSuggestionsView != null) {
-            mSuggestionsView.close();
-            mSuggestionsView = null;
-        }
+        mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 
     @Override
@@ -173,7 +190,7 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onResume()");
         // Close all open suggestion cursors. The query will be redone in onStart()
         // if we come back to this activity.
-        mSuggestionsView.setSuggestions(null);
+        mSuggestionsAdapter.setSuggestions(null);
         super.onStop();
     }
 
@@ -291,12 +308,6 @@ public class SearchActivity extends Activity {
         restoreUserQuery();
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (DBG) Log.d(TAG, "onKeyUp(" + event + ")");
-        return super.onKeyUp(keyCode, event);
-    }
-
     /**
      * Hides the input method.
      */
@@ -360,7 +371,7 @@ public class SearchActivity extends Activity {
         } else {
             stopSearchProgress();
         }
-        mSuggestionsView.setSuggestions(suggestions);
+        mSuggestionsAdapter.setSuggestions(suggestions);
         scrollPastTabs();
         latency.addEvent("shortcuts_shown");
         long userVisibleLatency = latency.getUserVisibleLatency();
@@ -393,7 +404,6 @@ public class SearchActivity extends Activity {
      */
     private class QueryTextViewKeyListener implements View.OnKeyListener {
         public boolean onKey(View view, int keyCode, KeyEvent event) {
-            if (DBG) Log.d(TAG, "QueryTextViewKeyListener.onKey(" + event + ")");
             // Handle IME search action key
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
                 onSearchClicked();
@@ -402,17 +412,19 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private class SuggestionsClickListener implements SuggestionsView.ClickListener {
+    private class InputMethodCloser implements SuggestionsView.InteractionListener {
+        public void onInteraction() {
+            hideInputMethod();
+        }
+    }
+
+    private class ClickHandler implements SuggestionClickListener {
        public void onIconClicked(SuggestionPosition suggestion, Rect rect) {
            SearchActivity.this.onIconClicked(suggestion, rect);
        }
 
        public void onItemClicked(SuggestionPosition suggestion) {
            SearchActivity.this.onSuggestionClicked(suggestion);
-       }
-
-       public void onInteraction() {
-           hideInputMethod();
        }
     }
 

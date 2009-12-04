@@ -16,6 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.ui.SuggestionViewInflater;
+
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,6 +32,7 @@ public class QsbApplication extends Application {
     private ShortcutRepository mShortcutRepository;
     private SourceTaskExecutor mSourceTaskExecutor;
     private SuggestionsProvider mSuggestionsProvider;
+    private SuggestionViewFactory mSuggestionViewFactory;
 
     @Override
     public void onTerminate() {
@@ -122,4 +126,16 @@ public class QsbApplication extends Application {
                 getShortcutRepository());
         return provider;
     }
+
+    public SuggestionViewFactory getSuggestionViewFactory() {
+        if (mSuggestionViewFactory == null) {
+            mSuggestionViewFactory = createSuggestionViewFactory();
+        }
+        return mSuggestionViewFactory;
+    }
+
+    protected SuggestionViewFactory createSuggestionViewFactory() {
+        return new SuggestionViewInflater(this);
+    }
+
 }

@@ -51,11 +51,6 @@ public class SourcesTest extends AndroidTestCase {
         assertNotNull(mSources.getSelectedWebSearchSource());
     }
 
-    public void testGetSourcesToQuery() {
-        assertEmpty(mSources.getSourcesToQuery(""));
-        assertNotEmpty(mSources.getSourcesToQuery("m"));
-    }
-
     static void assertEmpty(Collection<?> collection) {
         assertNotNull(collection);
         assertTrue(collection.isEmpty());

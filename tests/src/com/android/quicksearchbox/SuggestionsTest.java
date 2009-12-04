@@ -39,15 +39,6 @@ public class SuggestionsTest extends AndroidTestCase {
         mSuggestions = null;
     }
 
-    public void testProgress() {
-        assertEquals(0, mSuggestions.getProgress());
-        mSuggestions.addSourceResult(new DataSuggestionCursor("foo"));
-        assertEquals(50, mSuggestions.getProgress());
-        mSuggestions.addSourceResult(new DataSuggestionCursor("foo"));
-        assertEquals(100, mSuggestions.getProgress());
-        mSuggestions.close();
-    }
-
     public void testGetExpectedSourceCount() {
         assertEquals(2, mSuggestions.getExpectedSourceCount());
     }

@@ -52,8 +52,5 @@ public interface SourceLookup {
      */
     Collection<Source> getSources();
 
-    /**
-     * Gets the sources that should be queried for the given query.
-     */
-    ArrayList<Source> getSourcesToQuery(String query);
+    ArrayList<Source> getEnabledSources();
 }

@@ -16,16 +16,16 @@
 
 package com.android.quicksearchbox;
 
-import java.util.ArrayList;
-
+import android.content.ComponentName;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
-import android.os.Handler;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
- * Contains all non-empty {@link SuggestionCursor} objects that have been reported so far.
- *
+ * Contains all {@link SuggestionCursor} objects that have been reported.
  */
 public class Suggestions {
 
@@ -46,17 +46,17 @@ public class Suggestions {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     /**
-     * All non-empty {@link SuggestionCursor} objects that have been published so far.
+     * All {@link SuggestionCursor} objects that have been published so far,
+     * in the order that they were published.
      * This object may only be accessed on the UI thread.
      * */
     private final ArrayList<SuggestionCursor> mSourceResults;
 
     /**
-     * The number of sources that have reported so far. This may be greater
-     * that the size of {@link #mSourceResults}, since this count also includes
-     * sources that failed or reported zero results.
-     */
-    private int mPublishedSourceCount = 0;
+     * All {@link SuggestionCursor} objects that have been published so far.
+     * This object may only be accessed on the UI thread.
+     * */
+    private final HashMap<ComponentName,SuggestionCursor> mSourceResultsBySource;
 
     private SuggestionCursor mShortcuts;
 
@@ -79,6 +79,7 @@ public class Suggestions {
         mQuery = query;
         mExpectedSourceCount = expectedSourceCount;
         mSourceResults = new ArrayList<SuggestionCursor>(mExpectedSourceCount);
+        mSourceResultsBySource = new HashMap<ComponentName,SuggestionCursor>(mExpectedSourceCount);
         mPromoted = null;  // will be set by updatePromoted()
     }
 
@@ -91,23 +92,6 @@ public class Suggestions {
      */
     public int getExpectedSourceCount() {
         return mExpectedSourceCount;
-    }
-
-    /**
-     * Gets the number of sources whose results have been published. This may be higher than
-     * {@link #getSourceCount()}, since empty results are not included in
-     * {@link #getSourceCount()}.
-     */
-    public int getPublishedSourceCount() {
-        return mPublishedSourceCount;
-    }
-
-    /**
-     * Gets the current progress of the suggestions, in the inclusive range 0-100.
-     */
-    public int getProgress() {
-        if (mExpectedSourceCount == 0) return 100;
-        return 100 * mPublishedSourceCount / mExpectedSourceCount;
     }
 
     /**
@@ -149,24 +133,25 @@ public class Suggestions {
     public void close() {
         if (DBG) Log.d(TAG, "close()");
         if (mClosed) {
-            Log.w(TAG, "Double close()");
-            return;
+            throw new IllegalStateException("Double close()");
         }
         mDataSetObservable.unregisterAll();
         mClosed = true;
         if (mShortcuts != null) {
             mShortcuts.close();
+            mShortcuts = null;
         }
         for (SuggestionCursor result : mSourceResults) {
             result.close();
         }
         mSourceResults.clear();
+        mSourceResultsBySource.clear();
     }
 
     @Override
     protected void finalize() {
         if (!mClosed) {
-            Log.e(TAG, "Leak! Finalized without being closed.");
+            Log.e(TAG, "LEAK! Finalized without being closed: Suggestions[" + mQuery + "]");
             close();
         }
     }
@@ -176,7 +161,7 @@ public class Suggestions {
      * Must be called on the UI thread, or before this object is seen by the UI thread.
      */
     public boolean isDone() {
-        return mPublishedSourceCount >= mExpectedSourceCount;
+        return mSourceResults.size() >= mExpectedSourceCount;
     }
 
     public SuggestionCursor getShortcuts() {
@@ -184,7 +169,7 @@ public class Suggestions {
     }
 
     public void setShortcuts(SuggestionCursor shortcuts) {
-        if (DBG)  Log.d(TAG, "setShortcuts(" + shortcuts + ")");
+        if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
         mShortcuts = shortcuts;
     }
 
@@ -203,11 +188,10 @@ public class Suggestions {
           throw new IllegalArgumentException("Got result for wrong query: "
                 + mQuery + " != " + sourceResult.getUserQuery());
         }
-        boolean changed = publishSourceResult(sourceResult);
-        if (changed) {
-            mPromoted = null;
-            notifyDataSetChanged();
-        }
+        mSourceResults.add(sourceResult);
+        mSourceResultsBySource.put(sourceResult.getSourceComponentName(), sourceResult);
+        mPromoted = null;
+        notifyDataSetChanged();
     }
 
     private void updatePromoted() {
@@ -216,33 +200,6 @@ public class Suggestions {
             return;
         }
         mPromoter.pickPromoted(mShortcuts, mSourceResults, mMaxPromoted, mPromoted);
-    }
-
-    /**
-     * Publishes the result from a source. Does not notify the observers.
-     * Must be called on the UI thread, or before this object is seen by the UI thread.
-     * If called after the UI has seen this object, {@link #notifyDataSetChanged()}
-     * must be called if this method returns {@code true}.
-     *
-     * @param sourceResult
-     * @return {@code true} if any suggestions were added or the state changed to done.
-     */
-    private boolean publishSourceResult(SuggestionCursor sourceResult) {
-        if (mClosed) {
-            throw new IllegalStateException("publishSourceResult(" + sourceResult
-                + ") after close()");
-        }
-        if (DBG) Log.d(TAG, "publishSourceResult(" + sourceResult + ")");
-        mPublishedSourceCount++;
-        final int count = sourceResult.getCount();
-        boolean added = false;
-        if (count > 0) {
-            added = true;
-            mSourceResults.add(sourceResult);
-        } else {
-            sourceResult.close();
-        }
-        return (added || isDone());
     }
 
     /**
@@ -263,6 +220,22 @@ public class Suggestions {
     }
 
     /**
+     * Gets a given source result.
+     * Must be called on the UI thread, or before this object is seen by the UI thread.
+     *
+     * @param source Source name.
+     * @return The source result for the given source. {@code null} if the source has not
+     *         yet returned.
+     */
+    public SuggestionCursor getSourceResult(ComponentName source) {
+        if (mClosed) {
+            throw new IllegalStateException("Called getSourceResult(" + source
+                + ") when closed.");
+        }
+        return mSourceResultsBySource.get(source);
+    }
+
+    /**
      * Gets the number of source results.
      * Must be called on the UI thread, or before this object is seen by the UI thread.
      */
@@ -272,5 +245,4 @@ public class Suggestions {
         }
         return mSourceResults == null ? 0 : mSourceResults.size();
     }
-
 }

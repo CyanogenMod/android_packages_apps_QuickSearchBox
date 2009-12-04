@@ -34,6 +34,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     public static final String SUGGEST_COLUMN_SECONDARY_INTENT = "suggestion_secondary_intent";
     public static final String TARGET_RECT_KEY = "target_rect";
 
+    private static final boolean DBG = true;
     protected static final String TAG = "QSB.CursorBackedSuggestionCursor";
 
     /** The suggestions, or {@code null} if the suggestions query failed. */
@@ -88,9 +89,9 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     }
 
     public void close() {
+        if (DBG) Log.d(TAG, "close()");
         if (mClosed) {
-            Log.w(TAG, "Double close()");
-            return;
+            throw new IllegalStateException("Double close()");
         }
         mClosed = true;
         if (mCursor != null) {
