@@ -16,8 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.framework.Searchables;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
@@ -34,6 +32,7 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.server.search.Searchables;
 import android.util.Log;
 
 import java.util.List;

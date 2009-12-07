@@ -16,11 +16,8 @@
 
 package com.android.quicksearchbox;
 
-import java.util.Arrays;
-
-import com.android.quicksearchbox.framework.SearchableInfo;
-
 import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -31,6 +28,8 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
+
+import java.util.Arrays;
 
 /**
  * Represents a single suggestion source, e.g. Contacts.

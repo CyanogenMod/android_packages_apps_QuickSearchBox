@@ -16,10 +16,8 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.framework.SearchManagerService;
-import com.android.quicksearchbox.framework.SearchableInfo;
-
 import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -64,7 +62,7 @@ public class Sources implements SourceLookup {
 
     private final Context mContext;
     private final Config mConfig;
-    private final SearchManagerService mSearchManager;
+    private final SearchManager mSearchManager;
     private final SharedPreferences mPreferences;
     private boolean mLoaded;
 
@@ -91,7 +89,7 @@ public class Sources implements SourceLookup {
     public Sources(Context context, Config config) {
         mContext = context;
         mConfig = config;
-        mSearchManager = new SearchManagerService(context);
+        mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         mPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
         mLoaded = false;
         HandlerThread t = new HandlerThread("Sources.UpdateThread",
@@ -241,8 +239,6 @@ public class Sources implements SourceLookup {
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.getContentResolver().unregisterContentObserver(
                 mShowWebSuggestionsSettingChangeObserver);
-
-        mSearchManager.close();
 
         mSources = null;
         mSelectedWebSearchSource = null;
