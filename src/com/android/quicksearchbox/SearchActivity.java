@@ -125,8 +125,6 @@ public class SearchActivity extends Activity {
                 mLauncher.isVoiceSearchAvailable() ? View.VISIBLE : View.GONE);
 
         mSuggestionsView.setClickListener(new SuggestionsClickListener());
-        // TODO: Doesn't seem to work.
-        mQueryTextView.requestFocus();
     }
 
     private QsbApplication getQsbApplication() {
@@ -168,6 +166,12 @@ public class SearchActivity extends Activity {
         // if we come back to this activity.
         mSuggestionsView.setSuggestions(null);
         super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mQueryTextView.requestFocus();
     }
 
     @Override
