@@ -46,6 +46,7 @@ public class Config {
             Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
     private static final long SOURCE_RESULT_PUBLISH_DELAY_MILLIS = 200;
+    private static final long INITIAL_SOURCE_RESULT_WAIT_MILLIS = 5000;
 
     private static final long MAX_STAT_AGE_MILLIS = 7 * DAY_MILLIS;
     private static final long MAX_SOURCE_EVENT_AGE_MILLIS = 30 * DAY_MILLIS;
@@ -147,6 +148,12 @@ public class Config {
         return SOURCE_RESULT_PUBLISH_DELAY_MILLIS;
     }
 
+    /**
+     * Milliseconds to wait for the first source result before showing an empty list.
+     */
+    public long getInitialSourceResultWaitMillis() {
+        return INITIAL_SOURCE_RESULT_WAIT_MILLIS;
+    }
 
     public long getMaxStatAgeMillis(){
         return MAX_STAT_AGE_MILLIS;

@@ -78,15 +78,14 @@ public class GlobalSuggestionsProvider implements SuggestionsProvider {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
         ArrayList<Source> sourcesToQuery = mSources.getSourcesToQuery(query);
-        Suggestions suggestions = new Suggestions(mPublishThread,
-                mPromoter,
+        Suggestions suggestions = new Suggestions(mPromoter,
                 mConfig.getMaxPromotedSuggestions(),
-                mConfig.getSourceResultPublishDelayMillis(),
                 query,
                 sourcesToQuery.size());
         if (mShortcutRepo != null) {
             suggestions.setShortcuts(mShortcutRepo.getShortcutsForQuery(query));
         }
+
         for (Source source : sourcesToQuery) {
             QueryTask task = new QueryTask(query,
                     source,

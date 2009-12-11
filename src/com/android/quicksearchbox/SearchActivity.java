@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -93,9 +94,13 @@ public class SearchActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_bar);
 
+        Config config = getConfig();
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
         mSuggestionsScrollView = (ScrollView) findViewById(R.id.suggestions_scroll);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
+        mSuggestionsView
+                .setInitialSourceResultWaitMillis(config.getInitialSourceResultWaitMillis())
+                .setSourceResultPublishDelayMillis(config.getSourceResultPublishDelayMillis());
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
@@ -129,6 +134,10 @@ public class SearchActivity extends Activity {
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getApplication();
+    }
+
+    private Config getConfig() {
+        return getQsbApplication().getConfig();
     }
 
     private ShortcutRepository getShortcutRepository() {
@@ -321,10 +330,12 @@ public class SearchActivity extends Activity {
     }
 
     private void stopSearchProgress() {
-        Animatable animation = (Animatable) mSearchGoButton.getDrawable();
-        // TODO: Is this needed, or is it done automatically when the
-        // animation is removed?
-        animation.stop();
+        Drawable animation = mSearchGoButton.getDrawable();
+        if (animation instanceof Animatable) {
+            // TODO: Is this needed, or is it done automatically when the
+            // animation is removed?
+            ((Animatable) animation).stop();
+        }
         mSearchGoButton.setImageResource(R.drawable.ic_btn_search);
     }
 
@@ -346,6 +357,8 @@ public class SearchActivity extends Activity {
         if (!suggestions.isDone()) {
             suggestions.registerDataSetObserver(new ProgressUpdater(suggestions));
             startSearchProgress();
+        } else {
+            stopSearchProgress();
         }
         mSuggestionsView.setSuggestions(suggestions);
         scrollPastTabs();

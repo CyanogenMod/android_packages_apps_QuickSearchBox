@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -31,7 +30,7 @@ public class SuggestionsTest extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        mSuggestions = new Suggestions(new Handler(), null, 0, 0, "foo", 2);
+        mSuggestions = new Suggestions(null, 0, "foo", 2);
     }
 
     @Override
@@ -43,10 +42,8 @@ public class SuggestionsTest extends AndroidTestCase {
     public void testProgress() {
         assertEquals(0, mSuggestions.getProgress());
         mSuggestions.addSourceResult(new DataSuggestionCursor("foo"));
-        mSuggestions.publishSourceResults();
         assertEquals(50, mSuggestions.getProgress());
         mSuggestions.addSourceResult(new DataSuggestionCursor("foo"));
-        mSuggestions.publishSourceResults();
         assertEquals(100, mSuggestions.getProgress());
         mSuggestions.close();
     }

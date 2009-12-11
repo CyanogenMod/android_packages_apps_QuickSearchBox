@@ -32,11 +32,7 @@ public class Suggestions {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.Suggestions";
 
-    private final Handler mUiThread;
-
     private final int mMaxPromoted;
-
-    private final long mPublishDelay;
 
     private final String mQuery;
 
@@ -56,12 +52,6 @@ public class Suggestions {
     private final ArrayList<SuggestionCursor> mSourceResults;
 
     /**
-     * All {@link SuggestionCursor} objects that have been reported but not yet published.
-     * This object may be accessed on any thread.
-     * */
-    private final ArrayList<SuggestionCursor> mUnpublishedSourceResults;
-
-    /**
      * The number of sources that have reported so far. This may be greater
      * that the size of {@link #mSourceResults}, since this count also includes
      * sources that failed or reported zero results.
@@ -73,12 +63,6 @@ public class Suggestions {
     /** True if {@link Suggestions#close} has been called. */
     private boolean mClosed = false;
 
-    private final Runnable mPublishRunnable = new Runnable() {
-        public void run() {
-            publishSourceResults();
-        }
-    };
-
     private final Promoter mPromoter;
 
     private ListSuggestionCursor mPromoted;
@@ -88,16 +72,13 @@ public class Suggestions {
      *
      * @param expectedSourceCount The number of sources that are expected to report.
      */
-    public Suggestions(Handler uiThread, Promoter promoter, int maxPromoted, long publishDelay,
+    public Suggestions(Promoter promoter, int maxPromoted,
             String query, int expectedSourceCount) {
-        mUiThread = uiThread;
         mPromoter = promoter;
         mMaxPromoted = maxPromoted;
-        mPublishDelay = publishDelay;
         mQuery = query;
         mExpectedSourceCount = expectedSourceCount;
         mSourceResults = new ArrayList<SuggestionCursor>(mExpectedSourceCount);
-        mUnpublishedSourceResults = new ArrayList<SuggestionCursor>();
         mPromoted = null;  // will be set by updatePromoted()
     }
 
@@ -148,6 +129,9 @@ public class Suggestions {
     }
 
     public SuggestionCursor getPromoted() {
+        if (mPromoted == null) {
+            updatePromoted();
+        }
         return mPromoted;
     }
 
@@ -170,7 +154,6 @@ public class Suggestions {
         }
         mDataSetObservable.unregisterAll();
         mClosed = true;
-        cancelPublishCalls();
         if (mShortcuts != null) {
             mShortcuts.close();
         }
@@ -178,10 +161,6 @@ public class Suggestions {
             result.close();
         }
         mSourceResults.clear();
-        for (SuggestionCursor result : mUnpublishedSourceResults) {
-            result.close();
-        }
-        mUnpublishedSourceResults.clear();
     }
 
     @Override
@@ -207,12 +186,11 @@ public class Suggestions {
     public void setShortcuts(SuggestionCursor shortcuts) {
         if (DBG)  Log.d(TAG, "setShortcuts(" + shortcuts + ")");
         mShortcuts = shortcuts;
-        updatePromoted();
     }
 
     /**
-     * Adds a source result, possibly with some delay.
-     * Must be called on the UI thread, or before this object is seen by the UI thread.
+     * Adds a source result. Must be called on the UI thread, or before this
+     * object is seen by the UI thread.
      *
      * @param sourceResult The source result.
      */
@@ -225,49 +203,9 @@ public class Suggestions {
           throw new IllegalArgumentException("Got result for wrong query: "
                 + mQuery + " != " + sourceResult.getUserQuery());
         }
-        mUnpublishedSourceResults.add(sourceResult);
-        int newReportedCount = mPublishedSourceCount + mUnpublishedSourceResults.size();
-        if (newReportedCount >= mExpectedSourceCount) {
-            // This is the last result, publish immediately.
-            if (DBG) Log.d(TAG, "Publishing immediately: " + sourceResult);
-            // Since we are already on the UI thread, we could call mPublishRunnable
-            // directly. Doing it through the handler for uniformity.
-            mUiThread.post(mPublishRunnable);
-        } else if (sourceResult.getCount() > 0) {
-            // We are waiting for more results, but this result was non-empty, schedule
-            // a delayed publish.
-            if (DBG) Log.d(TAG, "Publish delayed by " + mPublishDelay + "ms: " + sourceResult);
-            mUiThread.postDelayed(mPublishRunnable, mPublishDelay);
-        } else {
-            // We are waiting for more results, and this result was empty, don't publish now.
-            if (DBG) Log.d(TAG, "Not publishing empty results: " + sourceResult);
-        }
-    }
-
-    /**
-     * Cancels all pending calls to {@link #publishSourceResults()}.
-     */
-    protected void cancelPublishCalls() {
-        mUiThread.removeCallbacks(mPublishRunnable);
-    }
-
-    /**
-     * Publishes the reported but unpublished source results, and notifies the observers if needed.
-     * Must be called on the UI thread, or before this object is seen by the UI thread.
-     */
-    protected void publishSourceResults() {
-        if (DBG) Log.d(TAG, "publishSourceResults()");
-        // Remove any duplicate publish calls
-        cancelPublishCalls();
-        boolean changed = false;
-        int unpublishedCount = mUnpublishedSourceResults.size();
-        for (int i = 0; i < unpublishedCount; i++) {
-            boolean thisChanged = publishSourceResult(mUnpublishedSourceResults.get(i));
-            changed |= thisChanged;
-        }
-        mUnpublishedSourceResults.clear();
+        boolean changed = publishSourceResult(sourceResult);
         if (changed) {
-            updatePromoted();
+            mPromoted = null;
             notifyDataSetChanged();
         }
     }

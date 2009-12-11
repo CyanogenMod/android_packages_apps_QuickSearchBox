@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -43,7 +44,9 @@ public class SuggestionsView extends TabHost {
 
     private final TabContentFactory mTabContentFactory = new SuggestionTabContentFactory();
 
-    private final DataSetObserver mDataSetObserver = new SuggestionsObserver();
+    private BatchedDataSetObserver mDataSetObserver;
+    private long mSourceResultPublishDelayMillis;
+    private long mInitialSourceResultWaitMillis;
 
     private LayoutInflater mInflater;
 
@@ -56,6 +59,16 @@ public class SuggestionsView extends TabHost {
         void onIconClicked(SuggestionPosition result, Rect rect);
         void onItemClicked(SuggestionPosition result);
         void onInteraction();
+    }
+
+    public SuggestionsView setSourceResultPublishDelayMillis(long millis) {
+        mSourceResultPublishDelayMillis = millis;
+        return this;
+    }
+
+    public SuggestionsView setInitialSourceResultWaitMillis(long millis) {
+        mInitialSourceResultWaitMillis = millis;
+        return this;
     }
 
     public SuggestionsView(Context context, AttributeSet attrs) {
@@ -114,6 +127,14 @@ public class SuggestionsView extends TabHost {
      * Sets the suggestions that this view is showing.
      */
     public void setSuggestions(Suggestions suggestions) {
+        if (mDataSetObserver == null) {
+            mDataSetObserver = new BatchedDataSetObserver(
+                    new Handler(mContext.getMainLooper()),
+                    new SuggestionsObserver(),
+                    mSourceResultPublishDelayMillis);
+        }
+        mDataSetObserver.cancelPendingChanges();
+
         if (mSuggestions != null && mSuggestions != suggestions) {
             mSuggestions.close();
         }
@@ -121,7 +142,13 @@ public class SuggestionsView extends TabHost {
         if (mSuggestions != null) {
             mSuggestions.registerDataSetObserver(mDataSetObserver);
         }
-        onDataSetChanged();
+        if (suggestions == null || mSuggestions.getShortcuts().getCount() > 0) {
+            // We have some suggestions, update view immediately.
+            onDataSetChanged();
+        } else {
+            // Allow some time for suggestions to arrive before updating view.
+            mDataSetObserver.delayOnChanged(mInitialSourceResultWaitMillis);
+        }
     }
 
     public void close() {
@@ -141,7 +168,7 @@ public class SuggestionsView extends TabHost {
         // TabHost weirdness?
         if (mGestureDetector.onTouchEvent(event)) {
             return true;
-        };
+        }
         return super.onInterceptTouchEvent(event);
     }
 
