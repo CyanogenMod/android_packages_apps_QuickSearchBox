@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.KeyEvent;
 
 import java.util.ArrayList;
 
@@ -121,5 +122,9 @@ public class DataSuggestionCursor extends AbstractSourceSuggestionCursor {
 
     public String getSuggestionKey() {
         return current().getSuggestionKey();
+    }
+
+    public String getActionKeyMsg(int keyCode) {
+        return current().getActionMsg(keyCode);
     }
 }

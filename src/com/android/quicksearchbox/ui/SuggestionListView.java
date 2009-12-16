@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.SuggestionPosition;
+
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
@@ -23,9 +25,6 @@ import android.util.Log;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
-
-// TODO: It would be faster to have this be a ListView, but ListViews
-// don't work inside ScrollViews.
 
 /**
  * View for a list of suggestions.
@@ -37,7 +36,7 @@ public class SuggestionListView extends LinearLayout {
 
     private static final int RECYCLING_BIN_CAPACITY = 20;
 
-    private final DataSetObserver mDataSetObserver = new AdapterObserver();
+    private DataSetObserver mDataSetObserver;
 
     private SuggestionCursorAdapter mAdapter;
 
@@ -66,9 +65,24 @@ public class SuggestionListView extends LinearLayout {
         return mAdapter == null ? 0 : mAdapter.getCount();
     }
 
+    public int getSelectedPosition() {
+        SuggestionView view = (SuggestionView) getFocusedChild();
+        if (view == null) return -1;
+        return indexOfChild(view);  // TODO: this is a linear search, not great
+    }
+
+    public SuggestionPosition getSelectedSuggestion() {
+        SuggestionView view = (SuggestionView) getFocusedChild();
+        if (view == null) return null;
+        return view.getSuggestionPosition();
+    }
+
     public void setAdapter(SuggestionCursorAdapter adapter) {
         if (mAdapter == adapter) {
             return;
+        }
+        if (mDataSetObserver == null) {
+            mDataSetObserver = new AdapterObserver();
         }
         if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(mDataSetObserver);
@@ -124,4 +138,5 @@ public class SuggestionListView extends LinearLayout {
             onDataSetChanged();
         }
     }
+
 }

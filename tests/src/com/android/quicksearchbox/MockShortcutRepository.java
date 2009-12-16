@@ -35,14 +35,12 @@ public class MockShortcutRepository implements ShortcutRepository {
 
     public SuggestionCursor getShortcutsForQuery(String query) {
         DataSuggestionCursor cursor = new DataSuggestionCursor(query);
-        SuggestionData s1 = new SuggestionData.Builder(MockSource.SOURCE_1)
-                .text1(query + "_1_shortcut")
-                .displayQuery(query + "_1_shortcut")
-                .build();
-        SuggestionData s2 = new SuggestionData.Builder(MockSource.SOURCE_2)
-                .text1(query + "_2_shortcut")
-                .displayQuery(query + "_2_shortcut")
-                .build();
+        SuggestionData s1 = new SuggestionData(MockSource.SOURCE_1);
+        s1.setText1(query + "_1_shortcut");
+        s1.setDisplayQuery(query + "_1_shortcut");
+        SuggestionData s2 = new SuggestionData(MockSource.SOURCE_2);
+        s2.setText1(query + "_2_shortcut");
+        s2.setDisplayQuery(query + "_2_shortcut");
         cursor.add(s1);
         cursor.add(s2);
         return cursor;

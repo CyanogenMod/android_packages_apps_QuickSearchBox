@@ -78,6 +78,10 @@ public class TabView extends TabHost {
         return new TabViewContentFactory();
     }
 
+    public void setTabWidgetOnFocusChangeListener(View.OnFocusChangeListener listener) {
+        getTabWidget().setOnFocusChangeListener(listener);
+    }
+
     @Override
     public void onFinishInflate() {
         setup();

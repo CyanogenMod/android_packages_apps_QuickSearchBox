@@ -262,6 +262,20 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
            return getStringOrNull(SUGGEST_COLUMN_SECONDARY_INTENT) != null;
        }
 
+    public String getActionKeyMsg(int keyCode) {
+        String result = null;
+        String column = getSource().getSuggestActionMsgColumn(keyCode);
+        if (column != null) {
+            result = getStringOrNull(column);
+        }
+        // If the cursor didn't give us a message, see if there's a single message defined
+        // for the actionkey (for all suggestions)
+        if (result == null) {
+            result = getSource().getSuggestActionMsg(keyCode);
+        }
+        return result;
+    }
+
     /**
      * Gets the intent action for the current suggestion.
      */

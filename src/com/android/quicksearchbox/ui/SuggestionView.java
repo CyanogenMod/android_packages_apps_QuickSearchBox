@@ -36,7 +36,8 @@ import android.widget.TextView;
  * sources, and suggestions under each source.
  *
  */
-public class SuggestionView extends RelativeLayout implements View.OnClickListener {
+public class SuggestionView extends RelativeLayout
+        implements View.OnClickListener, View.OnFocusChangeListener {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SuggestionView";
@@ -94,6 +95,16 @@ public class SuggestionView extends RelativeLayout implements View.OnClickListen
         }
     }
 
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (DBG) Log.d(TAG, "onFocusChange(" + hasFocus + ")");
+        if (mSuggestionClickListener == null) {
+            return;
+        }
+        if (hasFocus) {
+            mSuggestionClickListener.onItemSelected(getSuggestionPosition());
+        }
+    }
+
     /**
      * Gets the suggestion that this view is showing.
      */
@@ -124,6 +135,7 @@ public class SuggestionView extends RelativeLayout implements View.OnClickListen
         if (mIcon1 != null) {
             mIcon1.setOnClickListener(this);
         }
+        setOnFocusChangeListener(this);
     }
 
     /**

@@ -147,4 +147,9 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
     public String getSuggestionKey() {
         return current().getSuggestionKey();
     }
+
+    public String getActionKeyMsg(int keyCode) {
+        return current().getActionKeyMsg(keyCode);
+    }
+
 }

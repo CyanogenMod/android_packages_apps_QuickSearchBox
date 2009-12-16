@@ -26,4 +26,5 @@ import android.graphics.Rect;
 public interface SuggestionClickListener {
     void onIconClicked(SuggestionPosition suggestion, Rect rect);
     void onItemClicked(SuggestionPosition suggestion);
+    void onItemSelected(SuggestionPosition suggestion);
 }

@@ -28,6 +28,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.ListView;
 
 import java.util.Arrays;
 
@@ -217,6 +218,18 @@ public class SearchableSource implements Source {
 
     public ComponentName getSearchActivity() {
         return mSearchable.getSearchActivity();
+    }
+
+    public String getSuggestActionMsg(int keyCode) {
+        SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
+        if (actionKey == null) return null;
+        return actionKey.getSuggestActionMsg();
+    }
+
+    public String getSuggestActionMsgColumn(int keyCode) {
+        SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
+        if (actionKey == null) return null;
+        return actionKey.getSuggestActionMsgColumn();
     }
 
 }

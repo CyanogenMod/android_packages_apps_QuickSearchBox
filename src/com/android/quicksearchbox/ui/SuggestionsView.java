@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.SuggestionPosition;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -43,6 +45,29 @@ public class SuggestionsView extends TabView {
 
     public void setInteractionListener(InteractionListener listener) {
         mInteractionListener = listener;
+    }
+
+    /**
+     * Gets the position of the selected suggestion in the currently
+     * displayed tab.
+     *
+     * @return A 0-based index, or {@code -1} if no suggestion is selected.
+     */
+    public int getSelectedPosition() {
+        SuggestionListView view = (SuggestionListView) getCurrentTabView();
+        if (view == null) return -1;
+        return view.getSelectedPosition();
+    }
+
+    /**
+     * Gets the selected suggestion in the currently displayed tab.
+     *
+     * @return {@code null} if no suggestion is selected.
+     */
+    public SuggestionPosition getSelectedSuggestion() {
+        SuggestionListView view = (SuggestionListView) getCurrentTabView();
+        if (view == null) return null;
+        return view.getSelectedSuggestion();
     }
 
     @Override

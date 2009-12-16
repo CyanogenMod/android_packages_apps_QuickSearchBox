@@ -19,6 +19,8 @@ package com.android.quicksearchbox;
 import android.app.SearchManager;
 import android.content.Intent;
 
+import java.util.Map;
+
 /**
  * Holds data for each suggest item including the display data and how to launch the result.
  * Used for passing from the provider to the suggest cursor.
@@ -28,15 +30,20 @@ import android.content.Intent;
 public class SuggestionData {
 
     private final Source mSource;
-    private final String mFormat;
-    private final String mText1;
-    private final String mText2;
-    private final String mIcon1;
-    private final String mIcon2;
-    private final Intent mIntent;
-    private final Intent mSecondaryIntent;
-    private final String mDisplayQuery;
-    private final String mShortcutId;
+    private String mFormat;
+    private String mText1;
+    private String mText2;
+    private String mIcon1;
+    private String mIcon2;
+    private Intent mIntent;
+    private Intent mSecondaryIntent;
+    private String mDisplayQuery;
+    private String mShortcutId;
+    private Map<Integer,String> mActionMsgs;
+
+    public SuggestionData(Source source) {
+        mSource = source;
+    }
 
     public SuggestionData(
             Source source,
@@ -48,7 +55,8 @@ public class SuggestionData {
             Intent intent,
             Intent secondaryIntent,
             String displayQuery,
-            String shortcutId) {
+            String shortcutId,
+            Map<Integer,String> actionMsgs) {
         mSource = source;
         mFormat = format;
         mText1 = text1;
@@ -59,6 +67,7 @@ public class SuggestionData {
         mSecondaryIntent = secondaryIntent == null ? null : new Intent(intent);
         mDisplayQuery = displayQuery;
         mShortcutId = shortcutId;
+        mActionMsgs = actionMsgs;
     }
 
     /**
@@ -110,6 +119,10 @@ public class SuggestionData {
         return mIntent == null ? null : new Intent(mIntent);
     }
 
+    public boolean hasSecondaryIntent() {
+        return mSecondaryIntent != null;
+    }
+
     /**
      * The secondary intent for the suggestion.
      */
@@ -131,8 +144,52 @@ public class SuggestionData {
         return mShortcutId;
     }
 
-    public boolean hasSecondaryIntent() {
-        return mSecondaryIntent != null;
+    public String getActionMsg(int keyCode) {
+        return mActionMsgs == null ? null : mActionMsgs.get(keyCode);
+    }
+
+    public Map<Integer, String> getActionMsgs() {
+        return mActionMsgs;
+    }
+
+    public void setActionMsgs(Map<Integer, String> actionMsgs) {
+        mActionMsgs = actionMsgs;
+    }
+
+    public void setFormat(String format) {
+        mFormat = format;
+    }
+
+    public void setText1(String text1) {
+        mText1 = text1;
+    }
+
+    public void setText2(String text2) {
+        mText2 = text2;
+    }
+
+    public void setIcon1(String icon1) {
+        mIcon1 = icon1;
+    }
+
+    public void setIcon2(String icon2) {
+        mIcon2 = icon2;
+    }
+
+    public void setIntent(Intent intent) {
+        mIntent = intent == null ? null : new Intent(intent);
+    }
+
+    public void setSecondaryIntent(Intent intent) {
+        mSecondaryIntent = intent == null ? null : new Intent(intent);
+    }
+
+    public void setDisplayQuery(String displayQuery) {
+        mDisplayQuery = displayQuery;
+    }
+
+    public void setShortcutId(String shortcutId) {
+        mShortcutId = shortcutId;
     }
 
     private String makeKeyComponent(String str) {
@@ -158,21 +215,6 @@ public class SuggestionData {
                 .append('#')
                 .append(query)
                 .toString();
-    }
-
-    /**
-     * Gets a builder initialized with the values from this suggestion.
-     */
-    public Builder buildUpon() {
-        return new Builder(getSource())
-                .format(getFormat())
-                .text1(getText1())
-                .text2(getText2())
-                .icon1(getIcon1())
-                .icon2(getIcon2())
-                .intent(getIntent())
-                .secondaryIntent(getSecondaryIntent())
-                .shortcutId(getShortcutId());
     }
 
     private String getIntentString() {
@@ -209,6 +251,7 @@ public class SuggestionData {
         if (notEqual(getIntentString(), that.getIntentString())) return false;
         if (notEqual(getSecondaryIntentString(), that.getSecondaryIntentString())) return false;
         if (notEqual(mShortcutId, that.mShortcutId)) return false;
+        if (notEqual(mActionMsgs, that.mActionMsgs)) return false;
         return true;
     }
 
@@ -233,11 +276,12 @@ public class SuggestionData {
         result = addHashCode(result, getIntentString());
         result = addHashCode(result, getSecondaryIntentString());
         result = addHashCode(result, mShortcutId);
+        result = addHashCode(result, mActionMsgs);
         return result;
     }
 
-    private static int addHashCode(int old, String str) {
-        return 31 * old + (str != null ? str.hashCode() : 0);
+    private static int addHashCode(int old, Object obj) {
+        return 31 * old + (obj != null ? obj.hashCode() : 0);
     }
 
     /**
@@ -263,131 +307,4 @@ public class SuggestionData {
         return builder.toString();
     }
 
-    /**
-     * Builder for {@link SuggestionData}.
-     */
-    public static class Builder {
-        private Source mSource;
-        private String mFormat;
-        private String mText1;
-        private String mText2;
-        private String mIcon1;
-        private String mIcon2;
-        private Intent mIntent;
-        private Intent mSecondaryIntent;
-        private String mDisplayQuery;
-        private String mShortcutId;
-
-        /**
-         * Creates a new suggestion builder.
-         *
-         * @param source The suggestion source that this suggestion comes from.
-         */
-        public Builder(Source source) {
-            mSource = source;
-        }
-
-        /**
-         * Builds a suggestion using the values set in the builder.
-         */
-        public SuggestionData build() {
-            return new SuggestionData(
-                    mSource,
-                    mFormat,
-                    mText1,
-                    mText2,
-                    mIcon1,
-                    mIcon2,
-                    mIntent,
-                    mSecondaryIntent,
-                    mDisplayQuery,
-                    mShortcutId);
-        }
-
-        /**
-         * Sets the format of the text in the title and description.
-         */
-        public Builder format(String format) {
-            mFormat = format;
-            return this;
-        }
-
-        /**
-         * Sets the first text line.
-         */
-        public Builder text1(String text1) {
-            mText1 = text1;
-            return this;
-        }
-
-        /**
-         * Sets the second text line.
-         */
-        public Builder text2(String text2) {
-            mText2 = text2;
-            return this;
-        }
-
-        /**
-         * Sets the resource ID or URI for the first icon (typically shown on the left).
-         */
-        public Builder icon1(String icon1) {
-            mIcon1 = icon1;
-            return this;
-        }
-
-        /**
-         * Sets the resource ID for the first icon (typically shown on the left).
-         */
-        public Builder icon1(int icon1) {
-            return icon1(String.valueOf(icon1));
-        }
-
-        /**
-         * Sets the resource ID or URI for the second icon (typically shown on the right).
-         */
-        public Builder icon2(String icon2) {
-            mIcon2 = icon2;
-            return this;
-        }
-
-        /**
-         * Sets the resource ID for the second icon (typically shown on the right).
-         */
-        public Builder icon2(int icon2) {
-            return icon2(String.valueOf(icon2));
-        }
-
-        /**
-         * Sets the intent to launch.
-         */
-        public Builder intent(Intent intent) {
-            mIntent = intent;
-            return this;
-        }
-
-        /**
-         * Sets the secondary intent .
-         */
-        public Builder secondaryIntent(Intent intent) {
-            mSecondaryIntent = intent;
-            return this;
-        }
-
-        /**
-         * Sets the query that will be displayed when this suggestion is selected.
-         */
-        public Builder displayQuery(String displayQuery) {
-            mDisplayQuery = displayQuery;
-            return this;
-        }
-
-        /**
-         * Sets the shortcut id.
-         */
-        public Builder shortcutId(String shortcutId) {
-            mShortcutId = shortcutId;
-            return this;
-        }
-    }
 }

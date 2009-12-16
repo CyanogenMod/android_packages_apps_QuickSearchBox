@@ -187,4 +187,13 @@ public interface SuggestionCursor {
      * Gets the second suggestion icon.
      */
     Drawable getSuggestionDrawableIcon2();
+
+    /**
+     * Gets the action message for a key code for the current suggestion.
+     *
+     * @param keyCode Key code, see {@link android.view.KeyEvent}.
+     * @return The action message for the key, or {@code null} if there is none.
+     */
+    String getActionKeyMsg(int keyCode);
+
 }

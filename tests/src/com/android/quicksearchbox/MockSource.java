@@ -92,18 +92,16 @@ public class MockSource implements Source {
         DataSuggestionCursor cursor = new DataSuggestionCursor(query);
         Intent i1 = new Intent(Intent.ACTION_VIEW);
         i1.setData(Uri.parse("content://com.android.quicksearchbox.MockSource/1"));
-        SuggestionData s1 = new SuggestionData.Builder(this)
-                .text1(query + "_1")
-                .displayQuery(query + "_1")
-                .intent(i1)
-                .build();
+        SuggestionData s1 = new SuggestionData(this);
+        s1.setText1(query + "_1");
+        s1.setDisplayQuery(query + "_1");
+        s1.setIntent(i1);
         Intent i2 = new Intent(Intent.ACTION_VIEW);
         i1.setData(Uri.parse("content://com.android.quicksearchbox.MockSource/2"));
-        SuggestionData s2 = new SuggestionData.Builder(this)
-                .text1(query + "_2")
-                .displayQuery(query + "_2")
-                .intent(i2)
-                .build();
+        SuggestionData s2 = new SuggestionData(this);
+        s2.setText1(query + "_2");
+        s2.setDisplayQuery(query + "_2");
+        s2.setIntent(i2);
         cursor.add(s1);
         cursor.add(s2);
         return cursor;
@@ -123,6 +121,14 @@ public class MockSource implements Source {
 
     public boolean shouldRewriteQueryFromText() {
         return false;
+    }
+
+    public String getSuggestActionMsg(int keyCode) {
+        return null;
+    }
+
+    public String getSuggestActionMsgColumn(int keyCode) {
+        return null;
     }
 
 }

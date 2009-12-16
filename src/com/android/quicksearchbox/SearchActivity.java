@@ -43,27 +43,26 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 
-import java.util.ArrayList;
-
-// TODO: close / deactivate cursors in onPause() or onStop()
-// TODO: use permission to get extended Genie suggestions
-// TODO: show spinner until done
-// TODO: don't show new results until there is at least one, or it's done
-// TODO: add timeout for source queries
-// TODO: group refreshes that happen close to each other.
+// TODO: restore user query when using dpad to move up from top suggestion
+// TODO: focus tab handle on dpad down from query text view?
+// TODO: nicer progress animation. one per source?
 // TODO: handle long clicks
-// TODO: search / voice search when button pressed
-// TODO: use queryAfterZeroResults()
 // TODO: support action keys
 // TODO: support IME search action
 // TODO: allow typing everywhere in the UI
+// TODO: Show tabs at bottom too
+
+// TODO: don't show new results until there is at least one, or it's done
+// TODO: add timeout for source queries
+// TODO: group refreshes that happen close to each other.
+// TODO: use queryAfterZeroResults()
+
+// TODO: use permission to get extended Genie suggestions
 // TODO: support intent extras for source (e.g. launcher widget)
 // TODO: support intent extras for initial state, e.g. query, selection
 // TODO: make Config server-side configurable
-// TODO: add resourced for hi-res version, and fix layouts
 // TODO: log impressions
 // TODO: use source ranking
-// TODO: Show tabs at bottom too
 
 /**
  * The main activity for Quick Search Box. Shows the search UI.
@@ -115,17 +114,13 @@ public class SearchActivity extends Activity {
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
         mSuggestionsScrollView = (ScrollView) findViewById(R.id.suggestions_scroll);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
+        mSuggestionsView.setSuggestionClickListener(new ClickHandler());
+        mSuggestionsView.setInteractionListener(new InputMethodCloser());
+        mSuggestionsView.setOnKeyListener(new SuggestionsListKeyListener());
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-
-        mQueryTextView.addTextChangedListener(new SearchTextWatcher());
-        mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
-        mQueryTextView.setOnFocusChangeListener(new SuggestListFocusListener());
-
-        mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
-        mVoiceSearchButton.setOnClickListener(new VoiceSearchButtonClickListener());
 
         Bundle appSearchData = null;
 
@@ -144,8 +139,15 @@ public class SearchActivity extends Activity {
         mVoiceSearchButton.setVisibility(
                 mLauncher.isVoiceSearchAvailable() ? View.VISIBLE : View.GONE);
 
-        mSuggestionsView.setSuggestionClickListener(new ClickHandler());
-        mSuggestionsView.setInteractionListener(new InputMethodCloser());
+        mQueryTextView.addTextChangedListener(new SearchTextWatcher());
+        mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
+        mQueryTextView.setOnFocusChangeListener(new SuggestListFocusListener());
+
+        mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
+        mSearchGoButton.setOnKeyListener(new ButtonsKeyListener());
+
+        mVoiceSearchButton.setOnClickListener(new VoiceSearchButtonClickListener());
+        mVoiceSearchButton.setOnKeyListener(new ButtonsKeyListener());
     }
 
     private QsbApplication getQsbApplication() {
@@ -268,29 +270,35 @@ public class SearchActivity extends Activity {
         mLauncher.startVoiceSearch();
     }
 
-    protected boolean onSuggestionClicked(SuggestionPosition suggestion) {
-        if (DBG) Log.d(TAG, "Clicked on suggestion " + suggestion);
-        // TODO: handle action keys
-        mLauncher.launchSuggestion(suggestion, KeyEvent.KEYCODE_UNKNOWN, null);
+    protected boolean launchSuggestion(SuggestionPosition suggestion) {
+        return launchSuggestion(suggestion, KeyEvent.KEYCODE_UNKNOWN, null);
+    }
+
+    protected boolean launchSuggestion(SuggestionPosition suggestion,
+            int actionKey, String actionMsg) {
+        if (DBG) Log.d(TAG, "Launching suggestion " + suggestion);
+        mLauncher.launchSuggestion(suggestion, actionKey, actionMsg);
         getShortcutRepository().reportClick(suggestion);
         // Update search widgets, since the top shortcuts can have changed.
         SearchWidgetProvider.updateSearchWidgets(this);
         return true;
     }
 
-    protected boolean onIconClicked(SuggestionPosition suggestion, Rect target) {
+    protected boolean launchSuggestionSecondary(SuggestionPosition suggestion, Rect target) {
       if (DBG) Log.d(TAG, "Clicked on suggestion icon " + suggestion);
       mLauncher.launchSuggestionSecondary(suggestion, target);
       getShortcutRepository().reportClick(suggestion);
       return true;
     }
 
-    protected boolean onSuggestionLongClicked(SuggestionCursor sourceResult) {
+    protected boolean onSuggestionLongClicked(SuggestionPosition suggestion) {
+        SuggestionCursor sourceResult = suggestion.getSuggestion();
         if (DBG) Log.d(TAG, "Long clicked on suggestion " + sourceResult.getSuggestionText1());
         return false;
     }
 
-    protected void onSuggestionSelected(SuggestionCursor sourceResult) {
+    protected void onSuggestionSelected(SuggestionPosition suggestion) {
+        SuggestionCursor sourceResult = suggestion.getSuggestion();
         String displayQuery = sourceResult.getSuggestionDisplayQuery();
         if (DBG) {
             Log.d(TAG, "Selected suggestion " + sourceResult.getSuggestionText1()
@@ -303,9 +311,33 @@ public class SearchActivity extends Activity {
         }
     }
 
+    protected boolean onSuggestionKeyDown(SuggestionPosition suggestion,
+            int keyCode, KeyEvent event) {
+        // Treat enter or search as a click
+        if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
+            return launchSuggestion(suggestion);
+        }
+
+        // Handle source-specified action keys
+        String actionMsg = suggestion.getSuggestion().getActionKeyMsg(keyCode);
+        if (actionMsg != null) {
+            return launchSuggestion(suggestion, keyCode, actionMsg);
+        }
+
+        return false;
+    }
+
     protected void onSourceSelected() {
         if (DBG) Log.d(TAG, "No suggestion selected");
         restoreUserQuery();
+    }
+
+    protected int getSelectedPosition() {
+        return mSuggestionsView.getSelectedPosition();
+    }
+
+    protected SuggestionPosition getSelectedSuggestion() {
+        return mSuggestionsView.getSelectedSuggestion();
     }
 
     /**
@@ -412,6 +444,42 @@ public class SearchActivity extends Activity {
         }
     }
 
+    /**
+     * Handles key events on the search and voice search buttons,
+     * by refocusing to EditText.
+     */
+    private class ButtonsKeyListener implements View.OnKeyListener {
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            if (!event.isSystem() &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_UP) &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_LEFT) &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_CENTER)) {
+                if (mQueryTextView.requestFocus()) {
+                    return mQueryTextView.dispatchKeyEvent(event);
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Handles key events on the suggestions list view.
+     *
+     * TODO: This actually never gets called, don't know why yet.
+     */
+    private class SuggestionsListKeyListener implements View.OnKeyListener {
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                SuggestionPosition suggestion = getSelectedSuggestion();
+                if (suggestion != null) {
+                    return onSuggestionKeyDown(suggestion, keyCode, event);
+                }
+            }
+            return false;
+        }
+    }
+
     private class InputMethodCloser implements SuggestionsView.InteractionListener {
         public void onInteraction() {
             hideInputMethod();
@@ -420,11 +488,15 @@ public class SearchActivity extends Activity {
 
     private class ClickHandler implements SuggestionClickListener {
        public void onIconClicked(SuggestionPosition suggestion, Rect rect) {
-           SearchActivity.this.onIconClicked(suggestion, rect);
+           launchSuggestionSecondary(suggestion, rect);
        }
 
        public void onItemClicked(SuggestionPosition suggestion) {
-           SearchActivity.this.onSuggestionClicked(suggestion);
+           launchSuggestion(suggestion);
+       }
+
+       public void onItemSelected(SuggestionPosition suggestion) {
+           onSuggestionSelected(suggestion);
        }
     }
 
