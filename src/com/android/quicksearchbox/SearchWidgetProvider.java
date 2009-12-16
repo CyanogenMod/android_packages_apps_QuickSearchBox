@@ -126,16 +126,14 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         try {
             if (shortcuts != null && shortcuts.getCount() > 0) {
                 shortcuts.moveTo(0);
-
-                // TODO: Eclair 2.1 adds RemoteViews.addView(), use that instead,
-                // so that we can show multiple suggestions.
-                // RemoteViews shortcutView = new RemoteViews(context.getPackageName(), R.layout.suggestion);
-                // views.addView(R.id.widget_shortcuts, shortcutView);
-                // bindRemoteViewSuggestion(context, shortcutView, shortcuts);
-
-                bindRemoteViewSuggestion(context, views, shortcuts);
+                RemoteViews shortcutView = new RemoteViews(context.getPackageName(),
+                        R.layout.widget_suggestion);
+                bindRemoteViewSuggestion(context, shortcutView, shortcuts);
+                views.addView(R.id.widget_shortcuts, shortcutView);
+                views.setViewVisibility(R.id.widget_shortcuts, View.VISIBLE);
             } else {
-                clearRemoteViewSuggestion(context, views);
+                if (DBG) Log.d(TAG, "No shortcuts, hiding drop-down.");
+                views.setViewVisibility(R.id.widget_shortcuts, View.GONE);
             }
         } finally {
             if (shortcuts != null) {
@@ -146,14 +144,8 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetIds, views);
     }
 
-    private void clearRemoteViewSuggestion(Context context, RemoteViews views) {
-// TODO: These throw exceptions because of http://b/issue?id=2301242
-//        setText1(views, null);
-//        setIcon1(views, null);
-//        setPendingIntent(views, null);
-    }
-
-    private void bindRemoteViewSuggestion(Context context, RemoteViews views, SuggestionCursor suggestion) {
+    private void bindRemoteViewSuggestion(Context context, RemoteViews views,
+            SuggestionCursor suggestion) {
         CharSequence text1 = suggestion.getSuggestionFormattedText1();
         CharSequence text2 = suggestion.getSuggestionFormattedText2();
         Uri icon1 = suggestion.getIconUri(suggestion.getSuggestionIcon1());
@@ -189,8 +181,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     }
 
     private void setPendingIntent(RemoteViews views, PendingIntent pendingIntent) {
-        // TODO: Use R.id.suggestion when we switch to RemoteViews.addView()
-        views.setOnClickPendingIntent(R.id.shortcut_1, pendingIntent);
+        views.setOnClickPendingIntent(R.id.widget_suggestion, pendingIntent);
     }
 
     private QsbApplication getQsbApplication(Context context) {
