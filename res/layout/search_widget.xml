@@ -38,8 +38,8 @@
         android:paddingTop="13dip"
         android:paddingBottom="12dip"
         android:background="@drawable/search_floater"
+        android:visibility="invisible"
         >
-        <include android:id="@+id/shortcut_1" layout="@layout/widget_suggestion" />
     </LinearLayout>
 
     <LinearLayout
