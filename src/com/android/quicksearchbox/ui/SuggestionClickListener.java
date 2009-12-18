@@ -24,7 +24,8 @@ import android.graphics.Rect;
  * Listener interface for clicks on suggestions.
  */
 public interface SuggestionClickListener {
-    void onIconClicked(SuggestionPosition suggestion, Rect rect);
-    void onItemClicked(SuggestionPosition suggestion);
-    void onItemSelected(SuggestionPosition suggestion);
+    void onSuggestionClicked(SuggestionPosition suggestion);
+    boolean onSuggestionLongClicked(SuggestionPosition suggestion);
+    void onSuggestionSelected(SuggestionPosition suggestion);
+    void onSuggestionIconClicked(SuggestionPosition suggestion, Rect rect);
 }

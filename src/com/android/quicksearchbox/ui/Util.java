@@ -16,30 +16,23 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.R;
-
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.util.AttributeSet;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.graphics.Rect;
+import android.view.View;
 
 /**
- * Suggestion tab handle view.
+ * UI utilities.
  */
-public class TabHandleView extends RelativeLayout {
+public class Util {
 
-    public TabHandleView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public TabHandleView(Context context) {
-        super(context);
-    }
-
-    public void setIcon(Drawable icon) {
-        ImageView imageView = (ImageView) findViewById(R.id.tab_icon);
-        imageView.setImageDrawable(icon);
+    public static Rect getOnScreenRect(View view) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        Rect rect = new Rect();
+        rect.left = location[0];
+        rect.top = location[1];
+        rect.right = rect.left + view.getWidth();
+        rect.bottom = rect.top + view.getHeight();
+        return rect;
     }
 
 }

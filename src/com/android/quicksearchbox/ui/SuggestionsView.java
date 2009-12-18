@@ -20,13 +20,16 @@ import com.android.quicksearchbox.SuggestionPosition;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 /**
- * Shows all suggestions in a tabbed interface.
- *
+ * Holds a list of suggestions.
  */
-public class SuggestionsView extends TabView {
+public class SuggestionsView extends ListView {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SuggestionsView";
@@ -39,6 +42,17 @@ public class SuggestionsView extends TabView {
         super(context, attrs);
     }
 
+    @Override
+    public void onFinishInflate() {
+        super.onFinishInflate();
+        setOnItemClickListener(new ItemClickListener());
+        setOnItemLongClickListener(new ItemLongClickListener());
+        // TODO: the OnItemSelectedListener gets fired by ListView even when
+        // the selection changes without user interaction, e.g. when changing
+        // the cursor. Disabling until we can figure out a way around that.
+        //setOnItemSelectedListener(new ItemSelectedListener());
+    }
+
     public void setSuggestionClickListener(SuggestionClickListener listener) {
         mSuggestionClickListener = listener;
     }
@@ -48,26 +62,21 @@ public class SuggestionsView extends TabView {
     }
 
     /**
-     * Gets the position of the selected suggestion in the currently
-     * displayed tab.
+     * Gets the position of the selected suggestion.
      *
      * @return A 0-based index, or {@code -1} if no suggestion is selected.
      */
     public int getSelectedPosition() {
-        SuggestionListView view = (SuggestionListView) getCurrentTabView();
-        if (view == null) return -1;
-        return view.getSelectedPosition();
+        return getSelectedItemPosition();
     }
 
     /**
-     * Gets the selected suggestion in the currently displayed tab.
+     * Gets the selected suggestion.
      *
      * @return {@code null} if no suggestion is selected.
      */
     public SuggestionPosition getSelectedSuggestion() {
-        SuggestionListView view = (SuggestionListView) getCurrentTabView();
-        if (view == null) return null;
-        return view.getSelectedSuggestion();
+        return (SuggestionPosition) getSelectedItem();
     }
 
     @Override
@@ -78,13 +87,6 @@ public class SuggestionsView extends TabView {
         return super.onInterceptTouchEvent(event);
     }
 
-    @Override
-    protected SuggestionListView createTabContentView(int position) {
-        SuggestionListView view = (SuggestionListView) super.createTabContentView(position);
-        view.setSuggestionClickListener(mSuggestionClickListener);
-        return view;
-    }
-
     public interface InteractionListener {
         /**
          * Called when the user interacts with this view.
@@ -92,4 +94,40 @@ public class SuggestionsView extends TabView {
         void onInteraction();
     }
 
+    private class ItemClickListener implements AdapterView.OnItemClickListener {
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if (DBG) Log.d(TAG, "onItemClick(" + position + ")");
+            SuggestionView suggestionView = (SuggestionView) view;
+            SuggestionPosition suggestion = suggestionView.getSuggestionPosition();
+            if (mSuggestionClickListener != null) {
+                mSuggestionClickListener.onSuggestionClicked(suggestion);
+            }
+        }
+    }
+
+    private class ItemLongClickListener implements AdapterView.OnItemLongClickListener {
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            if (DBG) Log.d(TAG, "onItemLongClick(" + position + ")");
+            SuggestionView suggestionView = (SuggestionView) view;
+            SuggestionPosition suggestion = suggestionView.getSuggestionPosition();
+            if (mSuggestionClickListener != null) {
+                return mSuggestionClickListener.onSuggestionLongClicked(suggestion);
+            }
+            return false;
+        }
+    }
+
+    private class ItemSelectedListener implements AdapterView.OnItemSelectedListener {
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (DBG) Log.d(TAG, "onItemSelected(" + position + ")");
+            SuggestionView suggestionView = (SuggestionView) view;
+            SuggestionPosition suggestion = suggestionView.getSuggestionPosition();
+            if (mSuggestionClickListener != null) {
+                mSuggestionClickListener.onSuggestionSelected(suggestion);
+            }
+        }
+
+        public void onNothingSelected(AdapterView<?> parent) {
+        }
+    }
 }

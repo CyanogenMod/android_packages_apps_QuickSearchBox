@@ -16,23 +16,21 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
 
-import android.database.DataSetObservable;
+import android.content.ComponentName;
 import android.database.DataSetObserver;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.ArrayList;
+import android.widget.BaseAdapter;
 
 /**
- * Uses a {@link Suggestions} object to back a {@link TabView}.
+ * Uses a {@link Suggestions} object to back a {@link SuggestionsView}.
  */
-public class SuggestionsAdapter implements TabAdapter {
+public class SuggestionsAdapter extends BaseAdapter {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SuggestionsAdapter";
@@ -40,16 +38,13 @@ public class SuggestionsAdapter implements TabAdapter {
     private long mSourceResultPublishDelayMillis;
     private long mInitialSourceResultWaitMillis;
 
-    private final DataSetObservable mDataSetObservable = new DataSetObservable();
+    private DataSetObserver mDataSetObserver;
 
     private final SuggestionViewFactory mViewFactory;
 
-    private DataSetObserver mDataSetObserver;
+    private SuggestionCursor mCursor;
 
-    /**
-     * The tabs, in their display order.
-     */
-    private final ArrayList<Tab> mTabs = new ArrayList<Tab>();
+    private ComponentName mSource = null;
 
     private Suggestions mSuggestions;
 
@@ -67,28 +62,9 @@ public class SuggestionsAdapter implements TabAdapter {
         mInitialSourceResultWaitMillis = millis;
     }
 
-    public int getTabCount() {
-        return mTabs.size();
-    }
-
-    public void setSources(ArrayList<Source> sources) {
-        setSuggestions(null);
-        mTabs.clear();
-        SuggestionCursorAdapter promoted = new SuggestionCursorAdapter(mViewFactory);
-        mTabs.add(new PromotedTab(promoted));
-        int count = sources.size();
-        for (int i = 0; i < count; i++) {
-            Source source = sources.get(i);
-            // TODO: Each source should specify its own view factory
-            SuggestionCursorAdapter adapter = new SuggestionCursorAdapter(mViewFactory);
-            mTabs.add(new SourceTab(source, adapter));
-        }
-        notifyDataSetChanged();
-    }
-
     public void close() {
         setSuggestions(null);
-        mTabs.clear();
+        mSource = null;
         mClosed = true;
     }
 
@@ -117,53 +93,79 @@ public class SuggestionsAdapter implements TabAdapter {
         onSuggestionsChanged();
     }
 
-    public View getTabContentView(int position, ViewGroup parent) {
-        if (DBG) Log.d(TAG, "getTabContent(" + position + ")");
-        return getTab(position).getListView(parent);
+    /**
+     * Sets the source whose results are displayed.
+     *
+     * @param source The name of a source, or {@code null} to show
+     *        the promoted results.
+     */
+    public void setSource(ComponentName source) {
+        mSource = source;
+        onSuggestionsChanged();
     }
 
-    public View getTabHandleView(int position, ViewGroup parent) {
-        return getTab(position).getTabHandleView(parent);
+    public int getCount() {
+        return mCursor == null ? 0 : mCursor.getCount();
     }
 
-    private Tab getTab(int position) {
-        if (mClosed) {
-            throw new IllegalStateException("SuggestionsAdapter is closed.");
+    public SuggestionPosition getItem(int position) {
+        if (mCursor == null) return null;
+        return new SuggestionPosition(mCursor, position);
+    }
+
+    public long getItemId(int position) {
+        return position;
+    }
+
+    public View getView(int position, View convertView, ViewGroup parent) {
+        if (DBG) Log.d(TAG, "getView(" + position + ")");
+        if (mCursor == null) {
+            throw new IllegalStateException("getView() called with null cursor");
         }
-        return mTabs.get(position);
-    }
-
-    public String getTag(int position) {
-        return String.valueOf(position);
-    }
-
-    public int getTabPosition(String tag) {
-        return Integer.parseInt(tag);
-    }
-
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.registerObserver(observer);
-    }
-
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.unregisterObserver(observer);
-    }
-
-    protected void notifyDataSetChanged() {
-        mDataSetObservable.notifyChanged();
-    }
-
-    protected void notifyDataSetInvalidated() {
-        mDataSetObservable.notifyInvalidated();
+        SuggestionView view;
+        if (convertView == null) {
+            view = mViewFactory.createSuggestionView(parent);
+        } else {
+            view = (SuggestionView) convertView;
+        }
+        mCursor.moveTo(position);
+        view.bindAsSuggestion(mCursor);
+        return view;
     }
 
     protected void onSuggestionsChanged() {
         if (DBG) Log.d(TAG, "onSuggestionsChanged(), mSuggestions=" + mSuggestions);
-        // TODO: It's inefficient to change all cursors every time a
-        // new one is added to Suggestions, we should get a set of
-        // changed ones in the call.
-        for (Tab tab : mTabs) {
-            tab.update();
+        SuggestionCursor cursor = getCursor();
+        changeCursor(cursor);
+    }
+
+    /**
+     * Gets the cursor for the selected source.
+     */
+    private SuggestionCursor getCursor() {
+        if (mSuggestions == null) return null;
+        if (mSource == null) return mSuggestions.getPromoted();
+        return mSuggestions.getSourceResult(mSource);
+    }
+
+    /**
+     * Replace the cursor.
+     *
+     * This does not close the old cursor. Instead, all the cursors are closed in
+     * {@link #setSuggestions(Suggestions)}.
+     */
+    private void changeCursor(SuggestionCursor newCursor) {
+        if (DBG) Log.d(TAG, "changeCursor(" + newCursor + ")");
+        if (newCursor == mCursor) {
+            return;
+        }
+        mCursor = newCursor;
+        if (mCursor != null) {
+            // TODO: Register observers here to watch for
+            // changes in the cursor, e.g. shortcut refreshes?
+            notifyDataSetChanged();
+        } else {
+            notifyDataSetInvalidated();
         }
     }
 
@@ -171,79 +173,6 @@ public class SuggestionsAdapter implements TabAdapter {
         @Override
         public void onChanged() {
             onSuggestionsChanged();
-        }
-    }
-
-    private abstract class Tab {
-        private final SuggestionCursorAdapter mAdapter;
-
-        public Tab(SuggestionCursorAdapter adapter) {
-            mAdapter = adapter;
-        }
-
-        public SuggestionCursorAdapter getAdapter() {
-            return mAdapter;
-        }
-
-        public void update() {
-            if (mSuggestions == null) {
-                mAdapter.changeCursor(null);
-            } else {
-                mAdapter.changeCursor(getCursor(mSuggestions));
-            }
-        }
-
-        protected abstract SuggestionCursor getCursor(Suggestions suggestions);
-
-        protected abstract Drawable getIcon();
-
-        public View getTabHandleView(ViewGroup parent) {
-            TabHandleView view = mViewFactory.createSuggestionTabView(parent);
-            view.setIcon(getIcon());
-            return view;
-        }
-
-        public View getListView(ViewGroup parent) {
-            if (DBG) Log.d(TAG, "getListView()");
-            SuggestionListView view = mViewFactory.createSuggestionListView(parent);
-            view.setAdapter(mAdapter);
-            return view;
-        }
-    }
-
-    private class PromotedTab extends Tab {
-
-        public PromotedTab(SuggestionCursorAdapter adapter) {
-            super(adapter);
-        }
-
-        @Override
-        protected SuggestionCursor getCursor(Suggestions suggestions) {
-            return suggestions.getPromoted();
-        }
-
-        @Override
-        protected Drawable getIcon() {
-            return mViewFactory.getPromotedIcon();
-        }
-    }
-
-    private class SourceTab extends Tab {
-        private final Source mSource;
-
-        public SourceTab(Source source, SuggestionCursorAdapter adapter) {
-            super(adapter);
-            mSource = source;
-        }
-
-        @Override
-        protected SuggestionCursor getCursor(Suggestions suggestions) {
-            return suggestions.getSourceResult(mSource.getComponentName());
-        }
-
-        @Override
-        protected Drawable getIcon() {
-            return mSource.getSourceIcon();
         }
     }
 

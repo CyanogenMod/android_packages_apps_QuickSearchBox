@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.SourceSelector;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
@@ -23,6 +24,8 @@ import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
@@ -40,17 +43,13 @@ import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.ScrollView;
 
 // TODO: restore user query when using dpad to move up from top suggestion
-// TODO: focus tab handle on dpad down from query text view?
 // TODO: nicer progress animation. one per source?
 // TODO: handle long clicks
 // TODO: support action keys
 // TODO: support IME search action
 // TODO: allow typing everywhere in the UI
-// TODO: Show tabs at bottom too
 
 // TODO: don't show new results until there is at least one, or it's done
 // TODO: add timeout for source queries
@@ -77,29 +76,39 @@ public class SearchActivity extends Activity {
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
 
+    private static final int REQUEST_SELECT_SOURCE = 0;
+
     protected SuggestionsAdapter mSuggestionsAdapter;
 
     protected EditText mQueryTextView;
 
-    protected ScrollView mSuggestionsScrollView;
     protected SuggestionsView mSuggestionsView;
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
-    protected ProgressBar mProgressBar;
+    protected SourceSelector mSourceSelector;
 
     private Launcher mLauncher;
 
-    private boolean mUpdateSuggestions = true;
-    private String mUserQuery = "";
-    private boolean mSelectAll = false;
+    private Source mSource;
+    private boolean mUpdateSuggestions;
+    private Bundle mAppSearchData;
+    private String mUserQuery;
+    private boolean mSelectAll;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (DBG) Log.d(TAG, "onCreate()");
-        // TODO: Use savedInstanceState to restore state
         super.onCreate(savedInstanceState);
+
+        // TODO: Use savedInstanceState to restore state
+        mSource = null;
+        mUpdateSuggestions = true;
+        mAppSearchData = null;
+        mUserQuery = "";
+        mSelectAll = false;
+
         setContentView(R.layout.search_bar);
 
         Config config = getConfig();
@@ -109,33 +118,24 @@ public class SearchActivity extends Activity {
                 .setInitialSourceResultWaitMillis(config.getInitialSourceResultWaitMillis());
         mSuggestionsAdapter
                 .setSourceResultPublishDelayMillis(config.getSourceResultPublishDelayMillis());
-        mSuggestionsAdapter.setSources(getSuggestionsProvider().getOrderedSources());
 
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
-        mSuggestionsScrollView = (ScrollView) findViewById(R.id.suggestions_scroll);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
         mSuggestionsView.setSuggestionClickListener(new ClickHandler());
         mSuggestionsView.setInteractionListener(new InputMethodCloser());
-        mSuggestionsView.setOnKeyListener(new SuggestionsListKeyListener());
-        mSuggestionsView.setAdapter(mSuggestionsAdapter);
+        mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-
-        Bundle appSearchData = null;
+        mSourceSelector = (SourceSelector) findViewById(R.id.source_selector);
 
         Intent intent = getIntent();
         // getIntent() currently always returns non-null, but the API does not guarantee
         // that it always will.
         if (intent != null) {
-            String initialQuery = intent.getStringExtra(SearchManager.QUERY);
-            if (!TextUtils.isEmpty(initialQuery)) {
-                mUserQuery = initialQuery;
-            }
-            // TODO: Declare an intent extra for selectAll
-            appSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
+            setupFromIntent(intent);
         }
-        mLauncher = new Launcher(this, appSearchData);
+        mLauncher = new Launcher(this, mAppSearchData);
         mVoiceSearchButton.setVisibility(
                 mLauncher.isVoiceSearchAvailable() ? View.VISIBLE : View.GONE);
 
@@ -148,6 +148,52 @@ public class SearchActivity extends Activity {
 
         mVoiceSearchButton.setOnClickListener(new VoiceSearchButtonClickListener());
         mVoiceSearchButton.setOnKeyListener(new ButtonsKeyListener());
+
+        // Do this at the end, to avoid updating the list view when setSource()
+        // is called.
+        mSuggestionsView.setAdapter(mSuggestionsAdapter);
+
+        // Must be done after the source is set
+        mSourceSelector.setSearchInfo(new SearchInfo());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_SELECT_SOURCE) {
+            if (resultCode == RESULT_OK && data != null) {
+                setupFromIntent(data);
+            }
+        }
+    }
+
+    private void setupFromIntent(Intent intent) {
+        if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
+        ComponentName sourceName = SourceSelector.getGlobalSearchComponent(intent);
+        setSource(sourceName);
+
+        String initialQuery = intent.getStringExtra(SearchManager.QUERY);
+        if (!TextUtils.isEmpty(initialQuery)) {
+            mUserQuery = initialQuery;
+        }
+        // TODO: Declare an intent extra for selectAll
+        mAppSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
+    }
+
+    private void setSource(ComponentName sourceName) {
+        if (sourceName == null) {
+            mSource = null;
+            mSuggestionsAdapter.setSource(null);
+        } else {
+            SourceLookup sources = getSources();
+            mSource = sources.getSourceByComponentName(sourceName);
+            if (mSource != null) {
+                mSuggestionsAdapter.setSource(sourceName);
+            } else {
+                Log.w(TAG, "Unknown source " + sourceName);
+                mSuggestionsAdapter.setSource(null);
+            }
+        }
+        mSourceSelector.update();
     }
 
     private QsbApplication getQsbApplication() {
@@ -156,6 +202,10 @@ public class SearchActivity extends Activity {
 
     private Config getConfig() {
         return getQsbApplication().getConfig();
+    }
+
+    private SourceLookup getSources() {
+        return getQsbApplication().getSources();
     }
 
     private ShortcutRepository getShortcutRepository() {
@@ -218,7 +268,7 @@ public class SearchActivity extends Activity {
         return true;
     }
 
-    private String getQuery() {
+    protected String getQuery() {
         CharSequence q = mQueryTextView.getText();
         return q == null ? "" : q.toString();
     }
@@ -382,17 +432,6 @@ public class SearchActivity extends Activity {
         mSearchGoButton.setImageResource(R.drawable.ic_btn_search);
     }
 
-    private void scrollPastTabs() {
-        // TODO: Right after starting, the scroll view hasn't been measured,
-        // so it doesn't know whether its contents are tall enough to scroll.
-        int yOffset = mSuggestionsView.getTabHeight();
-        mSuggestionsScrollView.scrollTo(0, yOffset);
-        if (DBG) {
-            Log.d(TAG, "After scrollTo(0," + yOffset + "), scrollY="
-                    + mSuggestionsScrollView.getScrollY());
-        }
-    }
-
     private void updateSuggestions(String query) {
         LatencyTracker latency = new LatencyTracker(TAG);
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(query);
@@ -404,7 +443,6 @@ public class SearchActivity extends Activity {
             stopSearchProgress();
         }
         mSuggestionsAdapter.setSuggestions(suggestions);
-        scrollPastTabs();
         latency.addEvent("shortcuts_shown");
         long userVisibleLatency = latency.getUserVisibleLatency();
         if (DBG) {
@@ -465,10 +503,8 @@ public class SearchActivity extends Activity {
 
     /**
      * Handles key events on the suggestions list view.
-     *
-     * TODO: This actually never gets called, don't know why yet.
      */
-    private class SuggestionsListKeyListener implements View.OnKeyListener {
+    private class SuggestionsViewKeyListener implements View.OnKeyListener {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 SuggestionPosition suggestion = getSelectedSuggestion();
@@ -487,16 +523,20 @@ public class SearchActivity extends Activity {
     }
 
     private class ClickHandler implements SuggestionClickListener {
-       public void onIconClicked(SuggestionPosition suggestion, Rect rect) {
-           launchSuggestionSecondary(suggestion, rect);
-       }
-
-       public void onItemClicked(SuggestionPosition suggestion) {
+       public void onSuggestionClicked(SuggestionPosition suggestion) {
            launchSuggestion(suggestion);
        }
 
-       public void onItemSelected(SuggestionPosition suggestion) {
-           onSuggestionSelected(suggestion);
+       public boolean onSuggestionLongClicked(SuggestionPosition suggestion) {
+           return SearchActivity.this.onSuggestionLongClicked(suggestion);
+       }
+
+       public void onSuggestionSelected(SuggestionPosition suggestion) {
+           SearchActivity.this.onSuggestionSelected(suggestion);
+       }
+
+       public void onSuggestionIconClicked(SuggestionPosition suggestion, Rect rect) {
+           launchSuggestionSecondary(suggestion, rect);
        }
     }
 
@@ -533,6 +573,28 @@ public class SearchActivity extends Activity {
             if (mSuggestions.isDone()) {
                 stopSearchProgress();
             }
+        }
+    }
+
+    private class SearchInfo implements SourceSelector.SearchInfo {
+        public Bundle getAppSearchData() {
+            return mAppSearchData;
+        }
+        public Drawable getSourceIcon() {
+            if (mSource == null) {
+                return getSuggestionViewFactory().getGlobalSearchIcon();
+            } else {
+                return mSource.getSourceIcon();
+            }
+        }
+        public String getQuery() {
+            return SearchActivity.this.getQuery();
+        }
+        public ComponentName getSourceName() {
+            return mSource == null ? null : mSource.getComponentName();
+        }
+        public void startActivity(Intent intent) throws ActivityNotFoundException {
+            startActivityForResult(intent, REQUEST_SELECT_SOURCE);
         }
     }
 }

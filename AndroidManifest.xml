@@ -44,6 +44,17 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SelectSearchSourceActivity"
+                  android:theme="@style/Theme.SelectSearchSource"
+                  android:noHistory="true"
+                  android:windowSoftInputMode="stateUnchanged|adjustResize"
+                  >
+            <intent-filter>
+                <action android:name="android.intent.action.SELECT_SEARCH_SOURCE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".SearchSettings"
                 android:label="@string/search_settings">
             <intent-filter>

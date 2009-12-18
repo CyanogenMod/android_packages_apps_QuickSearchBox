@@ -34,6 +34,8 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
 
     private final Context mContext;
 
+    private SuggestionClickListener mSuggestionClickListener;
+
     public SuggestionViewInflater(Context context) {
         mContext = context;
     }
@@ -42,29 +44,33 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    public void setSuggestionClickListener(SuggestionClickListener listener) {
+        mSuggestionClickListener = listener;
+    }
+
     public SuggestionView createSuggestionView(ViewGroup parentViewType) {
         if (DBG) Log.d(TAG, "createSuggestionView()");
         SuggestionView view = (SuggestionView)
                 getInflater().inflate(R.layout.suggestion, parentViewType, false);
+        if (mSuggestionClickListener != null) {
+            view.setSuggestionClickListener(mSuggestionClickListener);
+        }
         return view;
     }
 
-    public SuggestionListView createSuggestionListView(ViewGroup parentViewType) {
-        if (DBG) Log.d(TAG, "createSuggestionListView()");
-        SuggestionListView view = (SuggestionListView)
-                getInflater().inflate(R.layout.suggestion_list, parentViewType, false);
+    public SourceView createSourceView(ViewGroup parentViewType) {
+        if (DBG) Log.d(TAG, "createSourceView()");
+        SourceView view = (SourceView)
+                getInflater().inflate(R.layout.source_list_item, parentViewType, false);
         return view;
     }
 
-    public TabHandleView createSuggestionTabView(ViewGroup parentViewType) {
-        if (DBG) Log.d(TAG, "createSuggestionTabView()");
-        TabHandleView view = (TabHandleView)
-                getInflater().inflate(R.layout.tab_indicator, parentViewType, false);
-        return view;
+    public String getGlobalSearchLabel() {
+        return mContext.getString(R.string.global_search_label);
     }
 
-    public Drawable getPromotedIcon() {
-        return mContext.getResources().getDrawable(R.drawable.promoted_tab_icon);
+    public Drawable getGlobalSearchIcon() {
+        return mContext.getResources().getDrawable(R.drawable.global_search_source);
     }
 
 }

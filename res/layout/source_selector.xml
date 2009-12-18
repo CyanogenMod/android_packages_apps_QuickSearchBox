@@ -14,21 +14,32 @@
      limitations under the License.
 -->
 
-<!-- TODO: We actually want -3dip margins, but for some reason,
-     the margin becomes 1dip too wide, so we need to specify -4dip. -->
-<view xmlns:android="http://schemas.android.com/apk/res/android"
-    class="com.android.quicksearchbox.ui.TabHandleView"
-    android:layout_width="0dip"
-    android:layout_height="40dip"
-    android:layout_weight="1"
-    android:layout_marginLeft="-4dip"
-    android:layout_marginRight="-4dip"
-    android:background="@drawable/tab_indicator_bg">
+<view
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    class="com.android.quicksearchbox.ui.SourceSelector"
+    android:id="@+id/source_selector"
+    android:layout_width="48dip"
+    android:layout_height="fill_parent"
+    >
 
-    <ImageView android:id="@+id/tab_icon"
+    <ImageButton
+        android:id="@+id/source_selector_icon"
+        android:background="@drawable/source_selector_bg"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:scaleType="centerInside"
+        android:focusable="true"
+        android:clickable="true"
+    />
+
+    <ImageView
+        android:id="@+id/source_selector_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/source_selector_arrow"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="4dip"
+        android:layout_marginRight="4dip"
     />
 
 </view>

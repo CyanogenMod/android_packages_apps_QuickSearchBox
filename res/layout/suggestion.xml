@@ -21,8 +21,6 @@
     android:paddingRight="2dip"
     android:layout_width="fill_parent"
     android:background="@drawable/suggestion_background"
-    android:focusable="true"
-    android:clickable="true"
     android:layout_height="56dip" >
 
     <!-- Icons come first in the layout, since their placement doesn't depend on

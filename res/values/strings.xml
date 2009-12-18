@@ -21,6 +21,9 @@
     <string name="search_widget">Quick Search Box</string>
     <string name="search_widget_hint">Quick Search Box</string>
 
+    <!-- Source selector -->
+    <string name="global_search_label">Everything</string>
+
     <!-- Search settings stuff -->
 
     <!-- Search settings menu item -->

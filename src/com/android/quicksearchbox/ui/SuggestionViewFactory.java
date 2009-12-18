@@ -31,23 +31,10 @@ public interface SuggestionViewFactory {
      */
     SuggestionView createSuggestionView(ViewGroup parentViewType);
 
-    /**
-     * Creates a suggestion list view.
-     *
-     * @param parentViewType Used to create LayoutParams of the right type.
-     */
-    SuggestionListView createSuggestionListView(ViewGroup parentViewType);
+    SourceView createSourceView(ViewGroup parentViewType);
 
-    /**
-     * Creates a tab handle view.
-     *
-     * @param parentViewType Used to create LayoutParams of the right type.
-     */
-    TabHandleView createSuggestionTabView(ViewGroup parentViewType);
+    String getGlobalSearchLabel();
 
-    /**
-     * Gets the icon to use for the promoted tab.
-     */
-    Drawable getPromotedIcon();
+    Drawable getGlobalSearchIcon();
 
 }
