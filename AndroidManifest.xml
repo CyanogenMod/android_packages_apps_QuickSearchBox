@@ -30,6 +30,7 @@
                  android:debuggable="true">
         <activity android:name=".SearchActivity"
                   android:label="@string/app_name"
+                  android:launchMode="singleTask"
                   android:windowSoftInputMode="stateVisible|adjustResize"
                   android:theme="@style/Theme.QuickSearchBox">
             <!-- Show app icon in Launcher. -->
@@ -46,12 +47,19 @@
 
         <activity android:name=".SelectSearchSourceActivity"
                   android:theme="@style/Theme.SelectSearchSource"
-                  android:noHistory="true"
+                  android:launchMode="singleTop"
+                  android:excludeFromRecents="true"
+                  android:taskAffinity="com.android.quicksearchbox.task.selectsearchsource"
                   android:windowSoftInputMode="stateUnchanged|adjustResize"
                   >
             <intent-filter>
                 <action android:name="android.intent.action.SELECT_SEARCH_SOURCE" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SELECT_SEARCH_SOURCE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" android:mimeType="application/vnd.android.application" />
             </intent-filter>
         </activity>
 

@@ -16,7 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.ui.SourceSelector;
+import com.android.quicksearchbox.ui.SearchSourceSelector;
 import com.android.quicksearchbox.ui.SourcesAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 
@@ -24,11 +24,10 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -52,11 +51,31 @@ public class SelectSearchSourceActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
-        Rect target = intent.getSourceBounds();
+        setContentView(R.layout.select_search_source);
+        mSourceList = (GridView) findViewById(R.id.source_list);
+        mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getSuggestionsProvider()));
+        mSourceList.setOnItemClickListener(new SourceClickListener());
+        // TODO: for some reason, putting this in the XML layout instead makes
+        // the list items unclickable.
+        mSourceList.setFocusable(true);
+
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (DBG) Log.d(TAG, "handleIntent(" + getIntent().toUri(0) + ")");
+        setupWindow(intent.getSourceBounds());
+    }
+
+    private void setupWindow(Rect target) {
         if (target == null) {
             Log.w(TAG, "No source bounds in intent.");
             target = new Rect(0,0,0,0);
@@ -70,10 +89,11 @@ public class SelectSearchSourceActivity extends Activity {
         if (DBG) Log.d(TAG, "Screen size: " + screenWidth + "x" + screenHeight);
 
         WindowManager.LayoutParams lp = window.getAttributes();
-        // TODO: Figure out formula to position the window with the point at the center
-        // bottom of the source selector, regardless of where that is on the screen.
-        lp.x = 0; // target.right;
-        lp.y = 0; // target.bottom;
+        // TODO: Get these offsets from the position of the bubble arrow
+        int offsetX = 30;
+        int offsetY = 0;
+        lp.x = target.centerX() - offsetX;
+        lp.y = target.centerY() - offsetY;
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.gravity = Gravity.TOP | Gravity.LEFT;
@@ -81,14 +101,6 @@ public class SelectSearchSourceActivity extends Activity {
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         window.setAttributes(lp);
         if (DBG) Log.d(TAG, "Window params: " + lp);
-
-        setContentView(R.layout.select_search_source);
-        mSourceList = (GridView) findViewById(R.id.source_list);
-        mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getSuggestionsProvider()));
-        mSourceList.setOnItemClickListener(new SourceClickListener());
-        // TODO: for some reason, putting this in the XML layout instead makes
-        // the list items unclickable.
-        mSourceList.setFocusable(true);
     }
 
     private QsbApplication getQsbApplication() {
@@ -105,8 +117,9 @@ public class SelectSearchSourceActivity extends Activity {
 
     protected void selectSource(Source source) {
         // If a new source was selected, start QSB with that source.
+        // Also, always start QSB if no source (= global search) is selected.
         // If the old source was selected, just finish.
-        if (!isPreviousSource(source)) {
+        if (source == null || !isPreviousSource(source)) {
             switchSource(source);
         }
         finish();
@@ -114,37 +127,32 @@ public class SelectSearchSourceActivity extends Activity {
 
     private boolean isPreviousSource(Source source) {
         Intent intent = getIntent();
-        ComponentName previousSource = SourceSelector.getGlobalSearchComponent(intent);
+        ComponentName previousSource = SearchSourceSelector.getSource(intent);
         if (source == null) return previousSource == null;
         return source.getComponentName().equals(previousSource);
     }
 
     private void switchSource(Source source) {
+        if (DBG) Log.d(TAG, "switchSource(" + source + ")");
         Intent selectIntent = getIntent();
         String query = selectIntent.getStringExtra(SearchManager.QUERY);
         Bundle appSearchData = selectIntent.getBundleExtra(SearchManager.APP_DATA);
 
-        Intent searchIntent = new Intent(this, SearchActivity.class);
+        Intent searchIntent = new Intent(Intent.ACTION_GLOBAL_SEARCH);
+        searchIntent.setClass(this, SearchActivity.class);
+        searchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (source != null) {
-            SourceSelector.setGlobalSearchComponent(searchIntent, source.getComponentName());
+            searchIntent.putExtra(SearchActivity.EXTRA_KEY_SEARCH_SOURCE,
+                    source.getComponentName().flattenToShortString());
         }
-        if (query != null) {
-            searchIntent.putExtra(SearchManager.QUERY, query);
-        }
-        if (appSearchData != null) {
-            searchIntent.putExtra(SearchManager.APP_DATA, appSearchData);
-        }
+        searchIntent.putExtra(SearchManager.QUERY, query);
+        searchIntent.putExtra(SearchManager.APP_DATA, appSearchData);
 
-        if (getCallingPackage() == null) {
-            // startActivityForResult() was not used, start a new QSB activity
-            try {
-                startActivity(searchIntent);
-            } catch (ActivityNotFoundException ex) {
-                Log.e(TAG, "Couldn't start QSB: " + ex);
-            }
-        } else {
-            // startActivityForResult() was used, return result instead of starting a new activity
-            setResult(RESULT_OK, searchIntent);
+        try {
+            if (DBG) Log.d(TAG, "startActivity(" + searchIntent.toUri(0) + ")");
+            startActivity(searchIntent);
+        } catch (ActivityNotFoundException ex) {
+            Log.e(TAG, "Couldn't start QSB: " + ex);
         }
     }
 

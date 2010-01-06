@@ -115,7 +115,7 @@ public class DelayingSourceTaskExecutor implements SourceTaskExecutor {
                     // Wait until there are no running tasks, or the timeout expires.
                     mExecutor.waitUntilNoRunningTasks(mDelayNanos);
                     // Grab the next task.
-                    Runnable r = mDelayedTasks.take();
+                    Runnable r = mDelayedTasks.take();  // TODO: I've seen this throw IllegalMonitorStateException
                     // Run/queue it in the thread pool
                     mExecutor.execute(r);
                     // Wait for some task to start, so that we don't add multiple

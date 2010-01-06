@@ -36,34 +36,30 @@ public class Launcher {
     private final Context mContext;
 
     /** Data sent by the app that launched QSB. */
-    private final Bundle mAppSearchData;
-
-    private final Intent mVoiceSearchIntent;
+    private Bundle mAppSearchData = null;
 
     /**
      * Data sent by the app that launched QSB.
      *
      * @param appSearchData
      */
-    public Launcher(Context context, Bundle appSearchData) {
+    public Launcher(Context context) {
         mContext = context;
+    }
+
+    public void setAppSearchData(Bundle appSearchData) {
         mAppSearchData = appSearchData;
-        mVoiceSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        mVoiceSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mVoiceSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        // TODO: Should we include SearchManager.APP_DATA in the voice search intent?
-        // SearchDialog doesn't seem to, but it would make sense.
     }
 
     public boolean isVoiceSearchAvailable() {
+        Intent intent = createVoiceSearchIntent();
         ResolveInfo ri = mContext.getPackageManager().
-                resolveActivity(mVoiceSearchIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
         return ri != null;
     }
 
     public void startVoiceSearch() {
-        launchIntent(mVoiceSearchIntent);
+        launchIntent(createVoiceSearchIntent());
     }
 
     /**
@@ -74,6 +70,16 @@ public class Launcher {
         if (intent != null) {
             launchIntent(intent);
         }
+    }
+
+    private Intent createVoiceSearchIntent() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+        // TODO: Should we include SearchManager.APP_DATA in the voice search intent?
+        // SearchDialog doesn't seem to, but it would make sense.
+        return intent;
     }
 
     private Intent createWebSearchIntent(String query) {

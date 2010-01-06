@@ -28,6 +28,9 @@ public interface SourceLookup {
 
     /**
      * Gets a suggestion source (or the current web search source) by component name.
+     *
+     * @return A source, or {@code null} if the source was not found or
+     *         {@code componentName} was null.
      */
     Source getSourceByComponentName(ComponentName componentName);
 

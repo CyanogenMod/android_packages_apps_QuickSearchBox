@@ -17,6 +17,7 @@
 package com.android.quicksearchbox.ui;
 
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.view.ViewGroup;
 
 /**
@@ -37,4 +38,5 @@ public interface SuggestionViewFactory {
 
     Drawable getGlobalSearchIcon();
 
+    Uri getGlobalSearchIconUri();
 }

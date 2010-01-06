@@ -16,7 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.ui.SourceSelector;
+import com.android.quicksearchbox.ui.SearchSourceSelector;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
@@ -24,7 +24,6 @@ import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
 import android.app.SearchManager;
-import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.database.DataSetObserver;
@@ -76,7 +75,12 @@ public class SearchActivity extends Activity {
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
 
-    private static final int REQUEST_SELECT_SOURCE = 0;
+    public static final String EXTRA_KEY_SEARCH_SOURCE
+            = "search_source";
+
+    // Keys for the saved instance state.
+    private static final String INSTANCE_KEY_SOURCE = "source";
+    private static final String INSTANCE_KEY_USER_QUERY = "query";
 
     protected SuggestionsAdapter mSuggestionsAdapter;
 
@@ -86,13 +90,12 @@ public class SearchActivity extends Activity {
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
-    protected SourceSelector mSourceSelector;
+    protected SearchSourceSelector mSourceSelector;
 
     private Launcher mLauncher;
 
-    private Source mSource;
+    private ComponentName mSourceName;
     private boolean mUpdateSuggestions;
-    private Bundle mAppSearchData;
     private String mUserQuery;
     private boolean mSelectAll;
 
@@ -101,13 +104,6 @@ public class SearchActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
-
-        // TODO: Use savedInstanceState to restore state
-        mSource = null;
-        mUpdateSuggestions = true;
-        mAppSearchData = null;
-        mUserQuery = "";
-        mSelectAll = false;
 
         setContentView(R.layout.search_bar);
 
@@ -127,15 +123,9 @@ public class SearchActivity extends Activity {
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-        mSourceSelector = (SourceSelector) findViewById(R.id.source_selector);
+        mSourceSelector = new SearchSourceSelector(findViewById(R.id.search_source_selector));
 
-        Intent intent = getIntent();
-        // getIntent() currently always returns non-null, but the API does not guarantee
-        // that it always will.
-        if (intent != null) {
-            setupFromIntent(intent);
-        }
-        mLauncher = new Launcher(this, mAppSearchData);
+        mLauncher = new Launcher(this);
         mVoiceSearchButton.setVisibility(
                 mLauncher.isVoiceSearchAvailable() ? View.VISIBLE : View.GONE);
 
@@ -149,51 +139,83 @@ public class SearchActivity extends Activity {
         mVoiceSearchButton.setOnClickListener(new VoiceSearchButtonClickListener());
         mVoiceSearchButton.setOnKeyListener(new ButtonsKeyListener());
 
+        mUpdateSuggestions = true;
+
+        // First get setup from intent
+        Intent intent = getIntent();
+        setupFromIntent(intent);
+        // Then restore any saved instance state
+        restoreInstanceState(savedInstanceState);
+
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
-
-        // Must be done after the source is set
-        mSourceSelector.setSearchInfo(new SearchInfo());
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SELECT_SOURCE) {
-            if (resultCode == RESULT_OK && data != null) {
-                setupFromIntent(data);
-            }
-        }
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        setupFromIntent(intent);
+    }
+
+    protected void restoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState == null) return;
+        ComponentName sourceName = savedInstanceState.getParcelable(INSTANCE_KEY_SOURCE);
+        String query = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
+        setSource(getSourceByComponentName(sourceName));
+        setUserQuery(query);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // We don't save appSearchData, since we always get the value
+        // from the intent and the user can't change it.
+        outState.putParcelable(INSTANCE_KEY_SOURCE, mSourceName);
+        outState.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
     }
 
     private void setupFromIntent(Intent intent) {
         if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
-        ComponentName sourceName = SourceSelector.getGlobalSearchComponent(intent);
-        setSource(sourceName);
-
-        String initialQuery = intent.getStringExtra(SearchManager.QUERY);
-        if (!TextUtils.isEmpty(initialQuery)) {
-            mUserQuery = initialQuery;
-        }
-        // TODO: Declare an intent extra for selectAll
-        mAppSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
+        Source source = getSourceByName(intent.getStringExtra(EXTRA_KEY_SEARCH_SOURCE));
+        setSource(source);
+        // TODO: Should this be SearchManager.INITIAL_QUERY?
+        setUserQuery(intent.getStringExtra(SearchManager.QUERY));
+        // TODO: Expose SearchManager.SELECT_INITIAL_QUERY
+        mSelectAll = false;
+        setAppSearchData(intent.getBundleExtra(SearchManager.APP_DATA));
     }
 
-    private void setSource(ComponentName sourceName) {
+    private Source getSourceByName(String sourceNameStr) {
+        if (sourceNameStr == null) return null;
+        ComponentName sourceName = ComponentName.unflattenFromString(sourceNameStr);
         if (sourceName == null) {
-            mSource = null;
-            mSuggestionsAdapter.setSource(null);
-        } else {
-            SourceLookup sources = getSources();
-            mSource = sources.getSourceByComponentName(sourceName);
-            if (mSource != null) {
-                mSuggestionsAdapter.setSource(sourceName);
-            } else {
-                Log.w(TAG, "Unknown source " + sourceName);
-                mSuggestionsAdapter.setSource(null);
-            }
+            Log.w(TAG, "Malformed source name: " + sourceName);
+            return null;
         }
-        mSourceSelector.update();
+        return getSourceByComponentName(sourceName);
+    }
+
+    private Source getSourceByComponentName(ComponentName sourceName) {
+        Source source = getSources().getSourceByComponentName(sourceName);
+        if (source == null) {
+            Log.w(TAG, "Unknown source " + sourceName);
+            return null;
+        }
+        return source;
+    }
+
+    private void setSource(Source source) {
+        mSourceName = source == null ? null : source.getComponentName();
+        Drawable sourceIcon;
+        if (source == null) {
+            sourceIcon = getSuggestionViewFactory().getGlobalSearchIcon();
+        } else {
+            sourceIcon = source.getSourceIcon();
+        }
+        mSuggestionsAdapter.setSource(mSourceName);
+        mSourceSelector.setSource(mSourceName);
+        mSourceSelector.setSourceIcon(sourceIcon);
     }
 
     private QsbApplication getQsbApplication() {
@@ -228,19 +250,9 @@ public class SearchActivity extends Activity {
     }
 
     @Override
-    protected void onStart() {
-        if (DBG) Log.d(TAG, "onStart()");
-        super.onStart();
-        setQuery(mUserQuery, mSelectAll);
-        // Only select everything the first time after creating the activity.
-        mSelectAll = false;
-        updateSuggestions(mUserQuery);
-    }
-
-    @Override
     protected void onStop() {
-        if (DBG) Log.d(TAG, "onResume()");
-        // Close all open suggestion cursors. The query will be redone in onStart()
+        if (DBG) Log.d(TAG, "onStop()");
+        // Close all open suggestion cursors. The query will be redone in onResume()
         // if we come back to this activity.
         mSuggestionsAdapter.setSuggestions(null);
         super.onStop();
@@ -248,7 +260,12 @@ public class SearchActivity extends Activity {
 
     @Override
     protected void onResume() {
+        if (DBG) Log.d(TAG, "onResume()");
         super.onResume();
+        setQuery(mUserQuery, mSelectAll);
+        // Only select everything the first time after creating the activity.
+        mSelectAll = false;
+        updateSuggestions(mUserQuery);
         mQueryTextView.requestFocus();
     }
 
@@ -266,6 +283,21 @@ public class SearchActivity extends Activity {
                 .setIntent(settings);
 
         return true;
+    }
+
+    /**
+     * Sets the query as typed by the user. Does not update the suggestions
+     * or the text in the query box.
+     */
+    protected void setUserQuery(String userQuery) {
+        if (userQuery == null) userQuery = "";
+        mUserQuery = userQuery;
+        mSourceSelector.setQuery(mUserQuery);
+    }
+
+    protected void setAppSearchData(Bundle appSearchData) {
+        mLauncher.setAppSearchData(appSearchData);
+        mSourceSelector.setAppSearchData(appSearchData);
     }
 
     protected String getQuery() {
@@ -457,7 +489,7 @@ public class SearchActivity extends Activity {
         public void afterTextChanged(Editable s) {
             if (mUpdateSuggestions) {
                 String query = s == null ? "" : s.toString();
-                mUserQuery = query;
+                setUserQuery(query);
                 updateSuggestions(query);
             }
         }
@@ -576,25 +608,4 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private class SearchInfo implements SourceSelector.SearchInfo {
-        public Bundle getAppSearchData() {
-            return mAppSearchData;
-        }
-        public Drawable getSourceIcon() {
-            if (mSource == null) {
-                return getSuggestionViewFactory().getGlobalSearchIcon();
-            } else {
-                return mSource.getSourceIcon();
-            }
-        }
-        public String getQuery() {
-            return SearchActivity.this.getQuery();
-        }
-        public ComponentName getSourceName() {
-            return mSource == null ? null : mSource.getComponentName();
-        }
-        public void startActivity(Intent intent) throws ActivityNotFoundException {
-            startActivityForResult(intent, REQUEST_SELECT_SOURCE);
-        }
-    }
 }

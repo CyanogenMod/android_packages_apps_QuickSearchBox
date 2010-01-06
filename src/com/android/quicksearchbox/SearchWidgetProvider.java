@@ -16,6 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.SearchSourceSelector;
+import com.android.quicksearchbox.ui.SuggestionViewFactory;
+
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetManager;
@@ -98,6 +101,9 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         Bundle widgetAppData = new Bundle();
         widgetAppData.putString(SOURCE, WIDGET_SEARCH_SOURCE);
 
+        // Source selector
+        bindSourceSelector(context, views, widgetAppData);
+
         // Text field
         Intent qsbIntent = new Intent(Intent.ACTION_MAIN);
         qsbIntent.setClass(context, SearchActivity.class);
@@ -152,6 +158,25 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         }
     }
 
+    private void bindSourceSelector(Context context, RemoteViews views, Bundle widgetAppData) {
+        // TODO: Get the last source selected by the user?
+        ComponentName currentSource = null;
+        // We don't call setSearchSource(), since we want the source selector to always open QSB,
+        // regardless of which source is clicked.
+        Uri sourceIconUri = getSourceIconUri(context, currentSource);
+        views.setImageViewUri(SearchSourceSelector.ICON_VIEW_ID, sourceIconUri);
+        Intent intent = SearchSourceSelector.createIntent(currentSource, "", widgetAppData);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        views.setOnClickPendingIntent(SearchSourceSelector.ICON_VIEW_ID, pendingIntent);
+    }
+
+    private Uri getSourceIconUri(Context context, ComponentName source) {
+        if (source == null) {
+            return getSuggestionViewFactory(context).getGlobalSearchIconUri();
+        }
+        return getSources(context).getSourceByComponentName(source).getSourceIconUri();
+    }
+
     private void bindRemoteViewSuggestion(Context context, RemoteViews views,
             SuggestionCursor suggestion) {
         CharSequence text1 = suggestion.getSuggestionFormattedText1();
@@ -196,8 +221,16 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         return (QsbApplication) context.getApplicationContext();
     }
 
+    private SourceLookup getSources(Context context) {
+        return getQsbApplication(context).getSources();
+    }
+
     private ShortcutRepository getShortcutRepository(Context context) {
         return getQsbApplication(context).getShortcutRepository();
+    }
+
+    private SuggestionViewFactory getSuggestionViewFactory(Context context) {
+        return getQsbApplication(context).getSuggestionViewFactory();
     }
 
 }

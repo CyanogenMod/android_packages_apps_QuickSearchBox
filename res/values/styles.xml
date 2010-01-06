@@ -20,10 +20,7 @@
     </style>
 
     <style name="Theme.SelectSearchSource" parent="@android:style/Theme.Light.Panel">
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 
 </resources>

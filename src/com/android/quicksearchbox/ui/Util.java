@@ -20,18 +20,21 @@ import android.graphics.Rect;
 import android.view.View;
 
 /**
- * UI utilities.
+ * General utilities.
  */
 public class Util {
 
-    public static Rect getOnScreenRect(View view) {
-        int[] location = new int[2];
-        view.getLocationOnScreen(location);
-        Rect rect = new Rect();
-        rect.left = location[0];
-        rect.top = location[1];
-        rect.right = rect.left + view.getWidth();
-        rect.bottom = rect.top + view.getHeight();
+    public static Rect getOnScreenRect(View v) {
+        final float appScale =
+                v.getContext().getResources().getCompatibilityInfo().applicationScale;
+        final int[] pos = new int[2];
+        v.getLocationOnScreen(pos);
+
+        final Rect rect = new Rect();
+        rect.left = (int) (pos[0] * appScale + 0.5f);
+        rect.top = (int) (pos[1] * appScale + 0.5f);
+        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
+        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
         return rect;
     }
 

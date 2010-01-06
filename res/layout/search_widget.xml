@@ -56,6 +56,9 @@
         android:paddingBottom="12dip"
         android:background="@drawable/search_floater" >
 
+        <include android:id="@+id/widget_search_source_selector"
+            layout="@layout/search_source_selector" />
+
         <TextView
             android:id="@+id/search_widget_text"
             android:layout_width="0dip"

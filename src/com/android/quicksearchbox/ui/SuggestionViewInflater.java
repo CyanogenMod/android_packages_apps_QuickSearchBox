@@ -18,8 +18,10 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.R;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -73,4 +75,11 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return mContext.getResources().getDrawable(R.drawable.global_search_source);
     }
 
+    public Uri getGlobalSearchIconUri() {
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(mContext.getPackageName())
+                .appendEncodedPath(String.valueOf(R.drawable.global_search_source))
+                .build();
+    }
 }
