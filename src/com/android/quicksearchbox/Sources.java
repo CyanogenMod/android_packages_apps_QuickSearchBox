@@ -43,7 +43,7 @@ import java.util.HashMap;
 public class Sources implements SourceLookup {
 
     // set to true to enable the more verbose debug logging for this file
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.Sources";
 
     // Name of the preferences file used to store suggestion source preferences
