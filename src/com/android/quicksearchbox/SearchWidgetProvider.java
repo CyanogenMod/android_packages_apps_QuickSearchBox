@@ -40,6 +40,8 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SearchWidgetProvider";
 
+    private static final boolean SHOW_SHORTCUT_IN_WIDGET = false;
+
     private static final String ACTION_UPDATE_SEARCH_WIDGETS =
             "com.android.quicksearchbox.UPDATE_SEARCH_WIDGETS";
 
@@ -120,7 +122,15 @@ public class SearchWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.search_widget_voice_btn, View.GONE);
         }
 
-        // Show the top shortcut
+        // Shortcuts
+        if (SHOW_SHORTCUT_IN_WIDGET) {
+            bindShortcuts(context, views);
+        }
+
+        appWidgetManager.updateAppWidget(appWidgetIds, views);
+    }
+
+    private void bindShortcuts(Context context, RemoteViews views) {
         ShortcutRepository shortcutRepo = getShortcutRepository(context);
         SuggestionCursor shortcuts = shortcutRepo.getShortcutsForQuery("");
         try {
@@ -140,8 +150,6 @@ public class SearchWidgetProvider extends AppWidgetProvider {
                 shortcuts.close();
             }
         }
-
-        appWidgetManager.updateAppWidget(appWidgetIds, views);
     }
 
     private void bindRemoteViewSuggestion(Context context, RemoteViews views,
