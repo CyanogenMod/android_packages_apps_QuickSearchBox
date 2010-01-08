@@ -24,11 +24,7 @@ import java.util.ArrayList;
  */
 public interface SuggestionsProvider {
     /**
-     * Gets suggestions for a query. This method will be called on a background thread.
-     *
-     * @return A {@link Suggestions} object. Implementations are allowed to call
-     *         {@link Suggestions#addSourceResult(SuggestionCursor)} after returning,
-     *         but must do so on the UI thread.
+     * Gets suggestions for a query.
      */
     Suggestions getSuggestions(String query);
 

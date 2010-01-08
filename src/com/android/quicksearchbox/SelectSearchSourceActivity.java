@@ -55,7 +55,7 @@ public class SelectSearchSourceActivity extends Activity {
 
         setContentView(R.layout.select_search_source);
         mSourceList = (GridView) findViewById(R.id.source_list);
-        mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getSuggestionsProvider()));
+        mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getGlobalSuggestionsProvider()));
         mSourceList.setOnItemClickListener(new SourceClickListener());
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
@@ -107,8 +107,8 @@ public class SelectSearchSourceActivity extends Activity {
         return (QsbApplication) getApplication();
     }
 
-    private SuggestionsProvider getSuggestionsProvider() {
-        return getQsbApplication().getSuggestionsProvider();
+    private SuggestionsProvider getGlobalSuggestionsProvider() {
+        return getQsbApplication().getGlobalSuggestionsProvider();
     }
 
     private SuggestionViewFactory getViewFactory() {

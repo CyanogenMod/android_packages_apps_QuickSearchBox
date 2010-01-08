@@ -118,7 +118,6 @@ public class SuggestionsAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (DBG) Log.d(TAG, "getView(" + position + ")");
         if (mCursor == null) {
             throw new IllegalStateException("getView() called with null cursor");
         }

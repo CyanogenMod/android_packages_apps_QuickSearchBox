@@ -28,7 +28,6 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.ListView;
 
 import java.util.Arrays;
 
@@ -39,7 +38,7 @@ import java.util.Arrays;
 public class SearchableSource implements Source {
 
     private static final boolean DBG = true;
-    private static final String TAG = "SearchableSource";
+    private static final String TAG = "QSB.SearchableSource";
 
     private final Context mContext;
 

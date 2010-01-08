@@ -27,11 +27,12 @@ import java.util.concurrent.ThreadFactory;
 
 public class QsbApplication extends Application {
 
+    private Handler mUiThreadHandler;
     private Config mConfig;
     private Sources mSources;
     private ShortcutRepository mShortcutRepository;
     private SourceTaskExecutor mSourceTaskExecutor;
-    private SuggestionsProvider mSuggestionsProvider;
+    private SuggestionsProvider mGlobalSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
 
     @Override
@@ -53,10 +54,21 @@ public class QsbApplication extends Application {
             mSourceTaskExecutor.close();
             mSourceTaskExecutor = null;
         }
-        if (mSuggestionsProvider != null) {
-            mSuggestionsProvider.close();
-            mSuggestionsProvider = null;
+        if (mGlobalSuggestionsProvider != null) {
+            mGlobalSuggestionsProvider.close();
+            mGlobalSuggestionsProvider = null;
         }
+    }
+
+    public Handler getUiThreadHandler() {
+        if (mUiThreadHandler == null) {
+            mUiThreadHandler = createUiThreadHandler();
+        }
+        return mUiThreadHandler;
+    }
+
+    protected Handler createUiThreadHandler() {
+        return new Handler(Looper.myLooper());
     }
 
     public Config getConfig() {
@@ -108,14 +120,35 @@ public class QsbApplication extends Application {
         return new DelayingSourceTaskExecutor(config, queryThreadFactory);
     }
 
-    public SuggestionsProvider getSuggestionsProvider() {
-        if (mSuggestionsProvider == null) {
-            mSuggestionsProvider = createSuggestionsProvider();
+
+    public SuggestionsProvider getSuggestionsProvider(Source source) {
+        if (source == null) {
+            return getGlobalSuggestionsProvider();
         }
-        return mSuggestionsProvider;
+        // TODO: Cache this to avoid creating a new one for each key press
+        return createSuggestionsProvider(source);
     }
 
-    protected SuggestionsProvider createSuggestionsProvider() {
+    protected SuggestionsProvider createSuggestionsProvider(Source source) {
+        // TODO: We could use simpler promoter here
+        Promoter promoter =  new ShortcutPromoter(new RoundRobinPromoter());
+        SingleSourceSuggestionsProvider provider = new SingleSourceSuggestionsProvider(getConfig(),
+                source,
+                getSourceTaskExecutor(),
+                getUiThreadHandler(),
+                promoter,
+                getShortcutRepository());
+        return provider;
+    }
+
+    public SuggestionsProvider getGlobalSuggestionsProvider() {
+        if (mGlobalSuggestionsProvider == null) {
+            mGlobalSuggestionsProvider = createGlobalSuggestionsProvider();
+        }
+        return mGlobalSuggestionsProvider;
+    }
+
+    protected SuggestionsProvider createGlobalSuggestionsProvider() {
         Handler uiThread = new Handler(Looper.myLooper());
         Promoter promoter =  new ShortcutPromoter(new RoundRobinPromoter());
         GlobalSuggestionsProvider provider = new GlobalSuggestionsProvider(getConfig(),

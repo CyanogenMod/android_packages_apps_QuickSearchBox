@@ -69,7 +69,7 @@ import android.widget.ImageButton;
 public class SearchActivity extends Activity {
 
     private static final boolean DBG = true;
-    private static final String TAG = "SearchActivity";
+    private static final String TAG = "QSB.SearchActivity";
 
     // TODO: This is hidden in SearchManager
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
@@ -94,7 +94,7 @@ public class SearchActivity extends Activity {
 
     private Launcher mLauncher;
 
-    private ComponentName mSourceName;
+    private Source mSource;
     private boolean mUpdateSuggestions;
     private String mUserQuery;
     private boolean mSelectAll;
@@ -171,7 +171,7 @@ public class SearchActivity extends Activity {
         super.onSaveInstanceState(outState);
         // We don't save appSearchData, since we always get the value
         // from the intent and the user can't change it.
-        outState.putParcelable(INSTANCE_KEY_SOURCE, mSourceName);
+        outState.putParcelable(INSTANCE_KEY_SOURCE, getSourceName());
         outState.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
     }
 
@@ -206,16 +206,21 @@ public class SearchActivity extends Activity {
     }
 
     private void setSource(Source source) {
-        mSourceName = source == null ? null : source.getComponentName();
+        mSource = source;
         Drawable sourceIcon;
         if (source == null) {
             sourceIcon = getSuggestionViewFactory().getGlobalSearchIcon();
         } else {
             sourceIcon = source.getSourceIcon();
         }
-        mSuggestionsAdapter.setSource(mSourceName);
-        mSourceSelector.setSource(mSourceName);
+        ComponentName sourceName = getSourceName();
+        mSuggestionsAdapter.setSource(sourceName);
+        mSourceSelector.setSource(sourceName);
         mSourceSelector.setSourceIcon(sourceIcon);
+    }
+
+    private ComponentName getSourceName() {
+        return mSource == null ? null : mSource.getComponentName();
     }
 
     private QsbApplication getQsbApplication() {
@@ -234,8 +239,8 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getShortcutRepository();
     }
 
-    private SuggestionsProvider getSuggestionsProvider() {
-        return getQsbApplication().getSuggestionsProvider();
+    private SuggestionsProvider getSuggestionsProvider(Source source) {
+        return getQsbApplication().getSuggestionsProvider(source);
     }
 
     private SuggestionViewFactory getSuggestionViewFactory() {
@@ -466,7 +471,7 @@ public class SearchActivity extends Activity {
 
     private void updateSuggestions(String query) {
         LatencyTracker latency = new LatencyTracker(TAG);
-        Suggestions suggestions = getSuggestionsProvider().getSuggestions(query);
+        Suggestions suggestions = getSuggestionsProvider(mSource).getSuggestions(query);
         latency.addEvent("getSuggestions_done");
         if (!suggestions.isDone()) {
             suggestions.registerDataSetObserver(new ProgressUpdater(suggestions));

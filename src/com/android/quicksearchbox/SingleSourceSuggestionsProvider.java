@@ -21,41 +21,38 @@ import android.os.Handler;
 import java.util.ArrayList;
 
 /**
- * A suggestions provider that gets suggestions from all enabled sources that
- * want to be included in global search.
+ * A suggestions provider that gets suggestions from a single source.
  */
-public class GlobalSuggestionsProvider extends AbstractSuggestionsProvider {
+public class SingleSourceSuggestionsProvider extends AbstractSuggestionsProvider {
 
-    private final SourceLookup mSources;
+    private final Source mSource;
+
+    private final ArrayList<Source> mSources;
 
     private final ShortcutRepository mShortcutRepo;
 
-    public GlobalSuggestionsProvider(Config config, SourceLookup sources,
+    public SingleSourceSuggestionsProvider(Config config, Source source,
             SourceTaskExecutor queryExecutor,
             Handler publishThread,
             Promoter promoter,
             ShortcutRepository shortcutRepo) {
         super(config, queryExecutor, publishThread, promoter);
-        mSources = sources;
+        mSource = source;
+        mSources = new ArrayList<Source>(1);
+        mSources.add(source);
         mShortcutRepo = shortcutRepo;
     }
 
-    // TODO: Order sources based on click stats.
-    // TODO: Cache this list?
     public ArrayList<Source> getOrderedSources() {
-        ArrayList<Source> orderedSources = new ArrayList<Source>();
-        Source webSource = mSources.getSelectedWebSearchSource();
-        if (webSource != null) {
-            orderedSources.add(webSource);
-        }
-        orderedSources.addAll(mSources.getEnabledSources());
-        return orderedSources;
+        return mSources;
     }
 
     @Override
     protected SuggestionCursor getShortcutsForQuery(String query) {
         if (mShortcutRepo == null) return null;
-        return mShortcutRepo.getShortcutsForQuery(query);
+        // TODO: Allow restricting shortcuts by source
+        //return mShortcutRepo.getShortcutsForQuery(mSource.getComponentName(), query);
+        return null;
     }
 
 }

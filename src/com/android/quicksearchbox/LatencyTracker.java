@@ -49,7 +49,7 @@ public class LatencyTracker {
     /**
      * The time of each event that has been logged.
      */
-    private HashMap<String,Long> mTimeStamps;
+    private final HashMap<String,Long> mTimeStamps;
 
     /**
      * Creates a new latency tracker.
@@ -63,7 +63,7 @@ public class LatencyTracker {
         mTimeStamps = new HashMap<String,Long>();
     }
 
-    public void addEvent(String event) {
+    public synchronized void addEvent(String event) {
         long now = System.nanoTime();
         long total = now - mStartTime;
         long diff = now - mLastTime;
@@ -79,7 +79,7 @@ public class LatencyTracker {
      *
      * @return The latency in milliseconds.
      */
-    public int getUserVisibleLatency() {
+    public synchronized int getUserVisibleLatency() {
         return ms(mLastTime - mStartTime);
     }
 
@@ -88,7 +88,7 @@ public class LatencyTracker {
      *
      * @return The latency in milliseconds, or {@code -1} if the latency is unknown.
      */
-    public int getNetworkRoundtripLatency() {
+    public synchronized int getNetworkRoundtripLatency() {
         Long start = mTimeStamps.get(NETWORK_ROUNDTRIP_START);
         Long end = mTimeStamps.get(NETWORK_ROUNDTRIP_END);
         if (start == null || end == null) {
