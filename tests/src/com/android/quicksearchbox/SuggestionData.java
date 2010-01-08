@@ -291,7 +291,7 @@ public class SuggestionData {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("SuggestionData(");
-        builder.append("source=").append(mSource.getComponentName().toShortString())
+        builder.append("source=").append(mSource.getFlattenedComponentName())
                 .append(", title=").append(mText1);
         if (mIntent != null) {
             builder.append(", intent=").append(getIntentString());

@@ -177,13 +177,27 @@ public class SearchActivity extends Activity {
 
     private void setupFromIntent(Intent intent) {
         if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
-        Source source = getSourceByName(intent.getStringExtra(EXTRA_KEY_SEARCH_SOURCE));
-        setSource(source);
+        if (intent.hasExtra(EXTRA_KEY_SEARCH_SOURCE)) {
+            Source source = getSourceByName(intent.getStringExtra(EXTRA_KEY_SEARCH_SOURCE));
+            setSource(source);
+            // The source was selected by the user, save it.
+            setLastSelectedSource(source);
+        } else {
+            Source source = getSources().getLastSelectedSource();
+            if (DBG) Log.d(TAG, "Setting source from preferences: " + source);
+            setSource(source);
+        }
         // TODO: Should this be SearchManager.INITIAL_QUERY?
         setUserQuery(intent.getStringExtra(SearchManager.QUERY));
         // TODO: Expose SearchManager.SELECT_INITIAL_QUERY
         mSelectAll = false;
         setAppSearchData(intent.getBundleExtra(SearchManager.APP_DATA));
+    }
+
+    private void setLastSelectedSource(Source source) {
+        getSources().setLastSelectedSource(source);
+        // Update search widgets to show the new source.
+        SearchWidgetProvider.updateSearchWidgets(this);
     }
 
     private Source getSourceByName(String sourceNameStr) {
@@ -206,6 +220,7 @@ public class SearchActivity extends Activity {
     }
 
     private void setSource(Source source) {
+        if (DBG) Log.d(TAG, "setSource(" + source + ")");
         mSource = source;
         Drawable sourceIcon;
         if (source == null) {

@@ -159,22 +159,19 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     }
 
     private void bindSourceSelector(Context context, RemoteViews views, Bundle widgetAppData) {
-        // TODO: Get the last source selected by the user?
-        ComponentName currentSource = null;
-        // We don't call setSearchSource(), since we want the source selector to always open QSB,
-        // regardless of which source is clicked.
-        Uri sourceIconUri = getSourceIconUri(context, currentSource);
+        Source source = getSources(context).getLastSelectedSource();
+        Uri sourceIconUri = getSourceIconUri(context, source);
         views.setImageViewUri(SearchSourceSelector.ICON_VIEW_ID, sourceIconUri);
-        Intent intent = SearchSourceSelector.createIntent(currentSource, "", widgetAppData);
+        Intent intent = SearchSourceSelector.createIntent(null, "", widgetAppData);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         views.setOnClickPendingIntent(SearchSourceSelector.ICON_VIEW_ID, pendingIntent);
     }
 
-    private Uri getSourceIconUri(Context context, ComponentName source) {
+    private Uri getSourceIconUri(Context context, Source source) {
         if (source == null) {
             return getSuggestionViewFactory(context).getGlobalSearchIconUri();
         }
-        return getSources(context).getSourceByComponentName(source).getSourceIconUri();
+        return source.getSourceIconUri();
     }
 
     private void bindRemoteViewSuggestion(Context context, RemoteViews views,

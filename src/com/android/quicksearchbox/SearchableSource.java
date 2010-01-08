@@ -27,6 +27,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -78,6 +79,10 @@ public class SearchableSource implements Source {
         return mSearchable.getSearchActivity();
     }
 
+    public String getFlattenedComponentName() {
+        return getComponentName().flattenToShortString();
+    }
+
     public Drawable getIcon(String drawableId) {
         return mIconLoader.getIcon(drawableId);
     }
@@ -118,7 +123,12 @@ public class SearchableSource implements Source {
     }
 
     public Uri getSourceIconUri() {
-        return mIconLoader.getIconUri(String.valueOf(getSourceIconResource()));
+        int resourceId = getSourceIconResource();
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(getComponentName().getPackageName())
+                .appendEncodedPath(String.valueOf(resourceId))
+                .build();
     }
 
     private int getSourceIconResource() {
@@ -204,7 +214,7 @@ public class SearchableSource implements Source {
 
     @Override
     public String toString() {
-        return "SearchableSource{component=" + getComponentName().flattenToShortString() + "}";
+        return "SearchableSource{component=" + getFlattenedComponentName() + "}";
     }
 
     public String getDefaultIntentAction() {

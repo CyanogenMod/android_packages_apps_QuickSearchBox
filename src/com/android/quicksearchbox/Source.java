@@ -33,6 +33,11 @@ public interface Source {
     ComponentName getComponentName();
 
     /**
+     * Convenience method that gets the flattened component name for the source.
+     */
+    String getFlattenedComponentName();
+
+    /**
      * Gets the localized, human-readable label for this source.
      */
     CharSequence getLabel();

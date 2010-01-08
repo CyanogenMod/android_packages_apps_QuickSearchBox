@@ -43,6 +43,10 @@ public class MockSource implements Source {
                 "com.android.quicksearchbox.MockSource." + mName);
     }
 
+    public String getFlattenedComponentName() {
+        return getComponentName().flattenToShortString();
+    }
+
     public String getDefaultIntentAction() {
         return null;
     }

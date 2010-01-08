@@ -52,6 +52,9 @@ public class Sources implements SourceLookup {
     // The key for the preference that holds the selected web search source
     public static final String WEB_SEARCH_SOURCE_PREF = "web_search_source";
 
+    // The key for the preference that holds the last selected search source
+    public static final String LAST_SELECTED_SEARCH_SOURCE_PREF = "last_selected_search_source";
+
     private static final int MSG_UPDATE_SOURCES = 0;
 
     // The number of milliseconds that source update requests are delayed to
@@ -76,6 +79,9 @@ public class Sources implements SourceLookup {
 
     // All enabled suggestion sources. This does not include the web search source.
     private ArrayList<Source> mEnabledSources;
+
+    // The last source selected by the user.
+    private Source mLastSelectedSource;
 
     // Updates the inclusion of the web search provider.
     private ShowWebSuggestionsSettingChangeObserver mShowWebSuggestionsSettingChangeObserver;
@@ -144,13 +150,22 @@ public class Sources implements SourceLookup {
         return mSelectedWebSearchSource;
     }
 
+    public Source getLastSelectedSource() {
+        return mLastSelectedSource;
+    }
+
+    public void setLastSelectedSource(Source source) {
+        mLastSelectedSource = source;
+        saveLastSelectedSource(source);
+    }
+
     /**
      * Gets the preference key of the preference for whether the given source
      * is enabled. The preference is stored in the {@link #PREFERENCES_NAME}
      * preferences file.
      */
     public static String getSourceEnabledPreference(Source source) {
-        return "enable_source_" + source.getComponentName().flattenToString();
+        return "enable_source_" + source.getFlattenedComponentName();
     }
 
     // Broadcast receiver for package change notifications
@@ -218,6 +233,8 @@ public class Sources implements SourceLookup {
 
         // update list of sources
         updateSources();
+
+        mLastSelectedSource = findLastSelectedSource();
         mLoaded = true;
     }
 
@@ -337,6 +354,34 @@ public class Sources implements SourceLookup {
             }
         }
         return webSearchSource;
+    }
+
+    private Source findLastSelectedSource() {
+        if (mPreferences == null) {
+            Log.w(TAG, "Search preferences " + PREFERENCES_NAME + " not found.");
+            return null;
+        }
+        String sourceNameStr = mPreferences.getString(LAST_SELECTED_SEARCH_SOURCE_PREF, null);
+        if (sourceNameStr == null) {
+            return null;
+        }
+        ComponentName sourceName = ComponentName.unflattenFromString(sourceNameStr);
+        if (sourceName == null) {
+            return null;
+        }
+        return getSourceByComponentName(sourceName);
+    }
+
+    private void saveLastSelectedSource(Source source) {
+        if (mPreferences == null) {
+            Log.w(TAG, "Search preferences " + PREFERENCES_NAME + " not found.");
+            return;
+        }
+        String sourceNameStr = null;
+        if (source != null) {
+            sourceNameStr = source.getFlattenedComponentName();
+        }
+        mPreferences.edit().putString(LAST_SELECTED_SEARCH_SOURCE_PREF, sourceNameStr).commit();
     }
 
     /**
