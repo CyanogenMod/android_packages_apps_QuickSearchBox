@@ -19,14 +19,14 @@
     class="com.android.quicksearchbox.ui.SourceSelector"
     android:id="@+id/source_selector"
     android:layout_width="48dip"
-    android:layout_height="fill_parent"
+    android:layout_height="match_parent"
     >
 
     <ImageButton
         android:id="@+id/source_selector_icon"
         android:background="@drawable/source_selector_bg"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="centerInside"
         android:focusable="true"
         android:clickable="true"
