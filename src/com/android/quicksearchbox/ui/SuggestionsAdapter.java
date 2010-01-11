@@ -35,9 +35,6 @@ public class SuggestionsAdapter extends BaseAdapter {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SuggestionsAdapter";
 
-    private long mSourceResultPublishDelayMillis;
-    private long mInitialSourceResultWaitMillis;
-
     private DataSetObserver mDataSetObserver;
 
     private final SuggestionViewFactory mViewFactory;
@@ -54,12 +51,8 @@ public class SuggestionsAdapter extends BaseAdapter {
         mViewFactory = viewFactory;
     }
 
-    public void setSourceResultPublishDelayMillis(long millis) {
-        mSourceResultPublishDelayMillis = millis;
-    }
-
-    public void setInitialSourceResultWaitMillis(long millis) {
-        mInitialSourceResultWaitMillis = millis;
+    public boolean isClosed() {
+        return mClosed;
     }
 
     public void close() {
@@ -91,6 +84,17 @@ public class SuggestionsAdapter extends BaseAdapter {
             mSuggestions.registerDataSetObserver(mDataSetObserver);
         }
         onSuggestionsChanged();
+    }
+
+    protected Suggestions getSuggestions() {
+        return mSuggestions;
+    }
+
+    /**
+     * Gets the source whose results are displayed.
+     */
+    public ComponentName getSource() {
+        return mSource;
     }
 
     /**
@@ -134,17 +138,17 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     protected void onSuggestionsChanged() {
         if (DBG) Log.d(TAG, "onSuggestionsChanged(), mSuggestions=" + mSuggestions);
-        SuggestionCursor cursor = getCursor();
+        SuggestionCursor cursor = getSourceCursor(mSuggestions, mSource);
         changeCursor(cursor);
     }
 
     /**
-     * Gets the cursor for the selected source.
+     * Gets the cursor for the given source.
      */
-    private SuggestionCursor getCursor() {
-        if (mSuggestions == null) return null;
-        if (mSource == null) return mSuggestions.getPromoted();
-        return mSuggestions.getSourceResult(mSource);
+    protected SuggestionCursor getSourceCursor(Suggestions suggestions, ComponentName source) {
+        if (suggestions == null) return null;
+        if (source == null) return suggestions.getPromoted();
+        return suggestions.getSourceResult(source);
     }
 
     /**

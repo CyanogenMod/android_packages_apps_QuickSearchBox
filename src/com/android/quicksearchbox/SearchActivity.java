@@ -107,13 +107,7 @@ public class SearchActivity extends Activity {
 
         setContentView(R.layout.search_bar);
 
-        Config config = getConfig();
-        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
-        mSuggestionsAdapter = new SuggestionsAdapter(viewFactory);
-        mSuggestionsAdapter
-                .setInitialSourceResultWaitMillis(config.getInitialSourceResultWaitMillis());
-        mSuggestionsAdapter
-                .setSourceResultPublishDelayMillis(config.getSourceResultPublishDelayMillis());
+        mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
 
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
@@ -241,10 +235,6 @@ public class SearchActivity extends Activity {
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getApplication();
-    }
-
-    private Config getConfig() {
-        return getQsbApplication().getConfig();
     }
 
     private SourceLookup getSources() {

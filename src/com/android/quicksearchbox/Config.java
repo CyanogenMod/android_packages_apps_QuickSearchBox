@@ -45,9 +45,6 @@ public class Config {
     private static final int QUERY_THREAD_PRIORITY =
             Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
-    private static final long SOURCE_RESULT_PUBLISH_DELAY_MILLIS = 200;
-    private static final long INITIAL_SOURCE_RESULT_WAIT_MILLIS = 5000;
-
     private static final long MAX_STAT_AGE_MILLIS = 7 * DAY_MILLIS;
     private static final long MAX_SOURCE_EVENT_AGE_MILLIS = 30 * DAY_MILLIS;
     private static final int MIN_IMPRESSIONS_FOR_SOURCE_RANKING = 5;
@@ -139,20 +136,6 @@ public class Config {
      */
     public int getQueryThreadPriority() {
         return QUERY_THREAD_PRIORITY;
-    }
-
-    /**
-     * The maximum delay with which a new source result is published, in milliseconds.
-     */
-    public long getSourceResultPublishDelayMillis() {
-        return SOURCE_RESULT_PUBLISH_DELAY_MILLIS;
-    }
-
-    /**
-     * Milliseconds to wait for the first source result before showing an empty list.
-     */
-    public long getInitialSourceResultWaitMillis() {
-        return INITIAL_SOURCE_RESULT_WAIT_MILLIS;
     }
 
     public long getMaxStatAgeMillis(){

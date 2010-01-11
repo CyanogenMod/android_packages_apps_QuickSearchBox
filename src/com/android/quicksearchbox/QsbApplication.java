@@ -16,8 +16,10 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
+import com.android.quicksearchbox.ui.SuggestionsAdapter;
 
 import android.app.Application;
 import android.os.Handler;
@@ -171,4 +173,10 @@ public class QsbApplication extends Application {
         return new SuggestionViewInflater(this);
     }
 
+    public SuggestionsAdapter createSuggestionsAdapter() {
+        Config config = getConfig();
+        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
+        DelayingSuggestionsAdapter adapter = new DelayingSuggestionsAdapter(viewFactory);
+        return adapter;
+    }
 }
