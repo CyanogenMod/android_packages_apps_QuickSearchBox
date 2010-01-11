@@ -126,6 +126,7 @@ public class SearchActivity extends Activity {
         mSourceSelector = new SearchSourceSelector(findViewById(R.id.search_source_selector));
 
         mLauncher = new Launcher(this);
+        // TODO: should this check for voice search in the current source?
         mVoiceSearchButton.setVisibility(
                 mLauncher.isVoiceSearchAvailable() ? View.VISIBLE : View.GONE);
 
@@ -364,11 +365,12 @@ public class SearchActivity extends Activity {
     protected void onSearchClicked() {
         String query = getQuery();
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
-        mLauncher.startWebSearch(query);
+        mLauncher.startSearch(mSource, query);
     }
 
     protected void onVoiceSearchClicked() {
         if (DBG) Log.d(TAG, "Voice Search clicked");
+        // TODO: should this start voice search in the current source?
         mLauncher.startVoiceSearch();
     }
 

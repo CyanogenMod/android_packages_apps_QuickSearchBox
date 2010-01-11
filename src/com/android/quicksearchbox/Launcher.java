@@ -62,6 +62,15 @@ public class Launcher {
         launchIntent(createVoiceSearchIntent());
     }
 
+    public void startSearch(Source source, String query) {
+        if (source == null) {
+            startWebSearch(query);
+        } else {
+            Intent intent = createSourceSearchIntent(source, query);
+            launchIntent(intent);
+        }
+    }
+
     /**
      * Launches a web search.
      */
@@ -79,6 +88,23 @@ public class Launcher {
                 RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         // TODO: Should we include SearchManager.APP_DATA in the voice search intent?
         // SearchDialog doesn't seem to, but it would make sense.
+        return intent;
+    }
+
+    // TODO: not all apps handle ACTION_SEARCH properly, e.g. ApplicationsProvider.
+    // Maybe we should add a flag to searchable, so that QSB can hide the search button?
+    private Intent createSourceSearchIntent(Source source, String query) {
+        Intent intent = new Intent(Intent.ACTION_SEARCH);
+        intent.setComponent(source.getComponentName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // We need CLEAR_TOP to avoid reusing an old task that has other activities
+        // on top of the one we want.
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(SearchManager.USER_QUERY, query);
+        intent.putExtra(SearchManager.QUERY, query);
+        if (mAppSearchData != null) {
+            intent.putExtra(SearchManager.APP_DATA, mAppSearchData);
+        }
         return intent;
     }
 
