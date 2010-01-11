@@ -48,6 +48,11 @@ public interface SourceLookup {
     boolean isTrustedSource(Source source);
 
     /**
+     * Checks if the source is enabled.
+     */
+    boolean isEnabledSource(Source source);
+
+    /**
      * Gets all suggestion sources. This does not include any web search sources.
      *
      * @return A list of suggestion sources, including sources that are not enabled.

@@ -195,5 +195,4 @@ public interface SuggestionCursor {
      * @return The action message for the key, or {@code null} if there is none.
      */
     String getActionKeyMsg(int keyCode);
-
 }

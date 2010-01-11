@@ -307,7 +307,7 @@ public class Sources implements SourceLookup {
     private ArrayList<Source> findEnabledSources() {
         ArrayList<Source> enabledSources = new ArrayList<Source>();
         for (Source source : mSources.values()) {
-            if (isSourceEnabled(source)) {
+            if (isEnabledSource(source)) {
                 if (DBG) Log.d(TAG, "Adding enabled source " + source);
                 enabledSources.add(source);
             }
@@ -315,7 +315,8 @@ public class Sources implements SourceLookup {
         return enabledSources;
     }
 
-    private boolean isSourceEnabled(Source source) {
+    public synchronized boolean isEnabledSource(Source source) {
+        if (source == null) return false;
         boolean defaultEnabled = isTrustedSource(source);
         if (mPreferences == null) {
             Log.w(TAG, "Search preferences " + PREFERENCES_NAME + " not found.");

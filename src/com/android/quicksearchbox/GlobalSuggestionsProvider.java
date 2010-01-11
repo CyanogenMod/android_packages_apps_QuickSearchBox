@@ -16,15 +16,21 @@
 
 package com.android.quicksearchbox;
 
+import android.content.ComponentName;
 import android.os.Handler;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 /**
  * A suggestions provider that gets suggestions from all enabled sources that
  * want to be included in global search.
  */
 public class GlobalSuggestionsProvider extends AbstractSuggestionsProvider {
+
+    private static final boolean DBG = true;
+    private static final String TAG = "QSB.GlobalSuggestionsProvider";
 
     private final SourceLookup mSources;
 
@@ -40,16 +46,30 @@ public class GlobalSuggestionsProvider extends AbstractSuggestionsProvider {
         mShortcutRepo = shortcutRepo;
     }
 
-    // TODO: Order sources based on click stats.
     // TODO: Cache this list?
     public ArrayList<Source> getOrderedSources() {
-        ArrayList<Source> orderedSources = new ArrayList<Source>();
+        // Using a LinkedHashSet to get the sources in the order added while
+        // avoiding duplicates.
+        LinkedHashSet<Source> orderedSources = new LinkedHashSet<Source>();
+        // Add web search source first, so that it's always queried first,
+        // to do network traffic while the rest are using the CPU.
         Source webSource = mSources.getSelectedWebSearchSource();
         if (webSource != null) {
             orderedSources.add(webSource);
         }
+        // Then add all ranked sources
+        ArrayList<ComponentName> rankedSources = mShortcutRepo.getSourceRanking();
+        if (DBG) Log.d(TAG, "Ranked sources: " + rankedSources);
+        for (ComponentName sourceName : rankedSources) {
+            Source source = mSources.getSourceByComponentName(sourceName);
+            if (source != null && mSources.isEnabledSource(source)) {
+                orderedSources.add(source);
+            }
+        }
+        // Last, add all unranked enabled sources.
         orderedSources.addAll(mSources.getEnabledSources());
-        return orderedSources;
+        if (DBG) Log.d(TAG, "All sources ordered " + orderedSources);
+        return new ArrayList<Source>(orderedSources);
     }
 
     @Override

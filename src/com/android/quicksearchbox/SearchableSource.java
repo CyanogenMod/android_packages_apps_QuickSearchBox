@@ -27,7 +27,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -210,6 +209,20 @@ public class SearchableSource implements Source {
 
     public boolean shouldRewriteQueryFromText() {
         return mSearchable.shouldRewriteQueryFromText();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o != null && o.getClass().equals(this.getClass())) {
+            SearchableSource s = (SearchableSource) o;
+            return s.mSearchable.getSearchActivity().equals(mSearchable.getSearchActivity());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mSearchable.getSearchActivity().hashCode();
     }
 
     @Override

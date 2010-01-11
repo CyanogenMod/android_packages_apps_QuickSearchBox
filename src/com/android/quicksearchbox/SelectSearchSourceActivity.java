@@ -26,7 +26,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -55,7 +54,6 @@ public class SelectSearchSourceActivity extends Activity {
 
         setContentView(R.layout.select_search_source);
         mSourceList = (GridView) findViewById(R.id.source_list);
-        mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getGlobalSuggestionsProvider()));
         mSourceList.setOnItemClickListener(new SourceClickListener());
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
@@ -73,6 +71,7 @@ public class SelectSearchSourceActivity extends Activity {
     private void handleIntent(Intent intent) {
         if (DBG) Log.d(TAG, "handleIntent(" + getIntent().toUri(0) + ")");
         setupWindow(intent.getSourceBounds());
+        updateSources();
     }
 
     private void setupWindow(Rect target) {
@@ -101,6 +100,10 @@ public class SelectSearchSourceActivity extends Activity {
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         window.setAttributes(lp);
         if (DBG) Log.d(TAG, "Window params: " + lp);
+    }
+
+    private void updateSources() {
+        mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getGlobalSuggestionsProvider()));
     }
 
     private QsbApplication getQsbApplication() {
