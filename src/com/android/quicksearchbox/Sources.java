@@ -63,6 +63,7 @@ public class Sources implements SourceLookup {
 
     private final Context mContext;
     private final Config mConfig;
+    private final SourceFactory mSourceFactory;
     private final SearchManager mSearchManager;
     private final SharedPreferences mPreferences;
     private boolean mLoaded;
@@ -90,9 +91,10 @@ public class Sources implements SourceLookup {
      *
      * @param context Used for looking up source information etc.
      */
-    public Sources(Context context, Config config) {
+    public Sources(Context context, Config config, SourceFactory sourceFactory) {
         mContext = context;
         mConfig = config;
+        mSourceFactory = sourceFactory;
         mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         mPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
         mLoaded = false;
@@ -143,11 +145,17 @@ public class Sources implements SourceLookup {
     }
 
     /** {@inheritDoc} */
-    public synchronized Source getSelectedWebSearchSource() {
+    public synchronized Source getWebSearchSource() {
         if (!mLoaded) {
             throw new IllegalStateException("getSelectedWebSearchSource(): sources not loaded.");
         }
         return mSelectedWebSearchSource;
+    }
+
+    public boolean areWebSuggestionsEnabled() {
+        return (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SHOW_WEB_SUGGESTIONS,
+                1 /* default on until user actually changes it */) == 1);
     }
 
     public Source getLastSelectedSource() {
@@ -273,16 +281,14 @@ public class Sources implements SourceLookup {
         ArrayList<Source> trusted = new ArrayList<Source>();
         ArrayList<Source> untrusted = new ArrayList<Source>();
         for (SearchableInfo searchable : mSearchManager.getSearchablesInGlobalSearch()) {
-            try {
-                Source source = new SearchableSource(mContext, searchable);
+            Source source = mSourceFactory.createSource(searchable);
+            if (source != null) {
                 if (DBG) Log.d(TAG, "Created source " + source);
                 if (isTrustedSource(source)) {
                     trusted.add(source);
                 } else {
                     untrusted.add(source);
                 }
-            } catch (NameNotFoundException ex) {
-                Log.e(TAG, "Searchable activity not found: " + ex.getMessage());
             }
         }
         for (Source s : trusted) {
@@ -336,25 +342,7 @@ public class Sources implements SourceLookup {
      * Finds the selected web search source.
      */
     private Source findWebSearchSource() {
-        Source webSearchSource = null;
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SHOW_WEB_SUGGESTIONS,
-                1 /* default on until user actually changes it */) == 1) {
-            SearchableInfo webSearchable = mSearchManager.getDefaultSearchableForWebSearch();
-            if (webSearchable != null) {
-                if (DBG) Log.d(TAG, "Adding web source " + webSearchable.getSearchActivity());
-                // Construct a SearchableSource around the web search source. Allow
-                // the web search source to provide a larger number of results with
-                // WEB_RESULTS_OVERRIDE_LIMIT.
-                try {
-                    webSearchSource =
-                            new SearchableSource(mContext, webSearchable, true);
-                } catch (NameNotFoundException ex) {
-                    Log.e(TAG, "Searchable activity not found: " + ex.getMessage());
-                }
-            }
-        }
-        return webSearchSource;
+        return mSourceFactory.createWebSearchSource();
     }
 
     private Source findLastSelectedSource() {

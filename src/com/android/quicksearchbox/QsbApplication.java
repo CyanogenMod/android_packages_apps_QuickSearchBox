@@ -29,6 +29,8 @@ import java.util.concurrent.ThreadFactory;
 
 public class QsbApplication extends Application {
 
+    private static final String TAG ="QSB.QsbApplication";
+
     private Handler mUiThreadHandler;
     private Config mConfig;
     private Sources mSources;
@@ -36,6 +38,7 @@ public class QsbApplication extends Application {
     private SourceTaskExecutor mSourceTaskExecutor;
     private SuggestionsProvider mGlobalSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
+    private SourceFactory mSourceFactory;
 
     @Override
     public void onTerminate() {
@@ -92,7 +95,7 @@ public class QsbApplication extends Application {
     }
 
     protected Sources createSources() {
-        Sources sources = new Sources(this, getConfig());
+        Sources sources = new Sources(this, getConfig(), getSourceFactory());
         sources.load();
         return sources;
     }
@@ -178,5 +181,16 @@ public class QsbApplication extends Application {
         SuggestionViewFactory viewFactory = getSuggestionViewFactory();
         DelayingSuggestionsAdapter adapter = new DelayingSuggestionsAdapter(viewFactory);
         return adapter;
+    }
+
+    public SourceFactory getSourceFactory() {
+        if (mSourceFactory == null) {
+            mSourceFactory = createSourceFactory();
+        }
+        return mSourceFactory;
+    }
+
+    protected SourceFactory createSourceFactory() {
+        return new SearchableSourceFactory(this);
     }
 }

@@ -35,7 +35,7 @@ public class SourcesTest extends AndroidTestCase {
         super.setUp();
 
         Config config = new Config(mContext);
-        mSources = new Sources(mContext, config);
+        mSources = new Sources(mContext, config, new MockSourceFactory());
         mSources.load();
     }
 
@@ -48,7 +48,7 @@ public class SourcesTest extends AndroidTestCase {
     }
 
     public void testHasSelectedWebSearchSource() {
-        assertNotNull(mSources.getSelectedWebSearchSource());
+        assertNotNull(mSources.getWebSearchSource());
     }
 
     static void assertEmpty(Collection<?> collection) {

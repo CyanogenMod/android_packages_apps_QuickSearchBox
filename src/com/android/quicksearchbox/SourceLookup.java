@@ -35,12 +35,16 @@ public interface SourceLookup {
     Source getSourceByComponentName(ComponentName componentName);
 
     /**
-     * Returns the web search source set in the preferences, or the default source
-     * if no web search source has been selected.
+     * Returns the web search source.
      *
      * @return <code>null</code> only if there is no web search source available.
      */
-    Source getSelectedWebSearchSource();
+    Source getWebSearchSource();
+
+    /**
+     * Checks whether web suggestions are enabled.
+     */
+    boolean areWebSuggestionsEnabled();
 
     /**
      * Checks if we trust the given source not to be spammy.

@@ -17,12 +17,17 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_TAGS := eng
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_STATIC_JAVA_LIBRARIES := google-framework google-common
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := QuickSearchBox
+LOCAL_OVERRIDES_PACKAGES := GoogleSearch
 LOCAL_CERTIFICATE := shared
+
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 include $(BUILD_PACKAGE)
 

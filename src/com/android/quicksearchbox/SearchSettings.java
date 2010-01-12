@@ -19,7 +19,6 @@ package com.android.quicksearchbox;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,7 +31,6 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.server.search.Searchables;
 import android.util.Log;
 
 import java.util.List;
@@ -120,79 +118,26 @@ public class SearchSettings extends PreferenceActivity
      * search settings.
      */
     private void populateSearchEnginePreference() {
-        PackageManager pm = getPackageManager();
+        Intent intent = new Intent(SearchManager.INTENT_ACTION_WEB_SEARCH_SETTINGS);
+        intent.setPackage(getPackageName());
 
-        // Try to find EnhancedGoogleSearch if installed.
-        ComponentName webSearchComponent;
-        try {
-            webSearchComponent = ComponentName.unflattenFromString(
-                    Searchables.ENHANCED_GOOGLE_SEARCH_COMPONENT_NAME);
-            pm.getActivityInfo(webSearchComponent, 0);
-        } catch (PackageManager.NameNotFoundException e1) {
-            // EnhancedGoogleSearch is not installed. Try to get GoogleSearch.
-            try {
-                webSearchComponent = ComponentName.unflattenFromString(
-                        Searchables.GOOGLE_SEARCH_COMPONENT_NAME);
-                pm.getActivityInfo(webSearchComponent, 0);
-            } catch (PackageManager.NameNotFoundException e2) {
-                throw new RuntimeException("could not find a web search provider");
-            }
-        }
-
-        ResolveInfo matchedInfo = findWebSearchSettingsActivity(webSearchComponent);
-        if (matchedInfo == null) {
-            throw new RuntimeException("could not find settings for web search provider");
-        }
-
-        Intent intent = createWebSearchSettingsIntent(matchedInfo);
-        String searchEngineSettingsLabel =
-                matchedInfo.activityInfo.loadLabel(pm).toString();
-        mSearchEngineSettingsPreference.setTitle(searchEngineSettingsLabel);
-        
+        CharSequence webSearchSettingsLabel = getActivityLabel(intent);
+        mSearchEngineSettingsPreference.setTitle(webSearchSettingsLabel);
         mSearchEngineSettingsPreference.setIntent(intent);
     }
 
-    /**
-     * Returns the activity in the provided package that satisfies the
-     * {@link SearchManager#INTENT_ACTION_WEB_SEARCH_SETTINGS} intent, or null
-     * if none.
-     */
-    private ResolveInfo findWebSearchSettingsActivity(ComponentName component) {
-        // Get all the activities which satisfy the WEB_SEARCH_SETTINGS intent.
+    private CharSequence getActivityLabel(Intent intent) {
         PackageManager pm = getPackageManager();
-        Intent intent = new Intent(SearchManager.INTENT_ACTION_WEB_SEARCH_SETTINGS);
-        List<ResolveInfo> activitiesWithWebSearchSettings = pm.queryIntentActivities(intent, 0);
-
-        String packageName = component.getPackageName();
-        String name = component.getClassName();
-
-        // Iterate through them and see if any of them are the activity we're looking for.
-        for (ResolveInfo resolveInfo : activitiesWithWebSearchSettings) {
-            if (packageName.equals(resolveInfo.activityInfo.packageName)
-                    && name.equals(resolveInfo.activityInfo.name)) {
-                return resolveInfo;
-            }
+        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent, 0);
+        if (resolveInfos.size() == 0) {
+            Log.e(TAG, "No web search settings activity");
+            return null;
         }
-
-        // If there is no exact match, look for one in the right package
-        for (ResolveInfo resolveInfo : activitiesWithWebSearchSettings) {
-            if (packageName.equals(resolveInfo.activityInfo.packageName)) {
-                return resolveInfo;
-            }
+        if (resolveInfos.size() > 1) {
+            Log.e(TAG, "More than one web search settings activity");
+            return null;
         }
-
-        return null;
-    }
-
-    /**
-     * Creates an intent for accessing the web search settings from the provided ResolveInfo
-     * representing an activity.
-     */
-    private Intent createWebSearchSettingsIntent(ResolveInfo info) {
-        Intent intent = new Intent(SearchManager.INTENT_ACTION_WEB_SEARCH_SETTINGS);
-        intent.setComponent(
-                new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
-        return intent;
+        return resolveInfos.get(0).activityInfo.loadLabel(pm);
     }
 
     /**

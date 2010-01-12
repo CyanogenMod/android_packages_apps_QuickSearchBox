@@ -51,11 +51,13 @@ public class GlobalSuggestionsProvider extends AbstractSuggestionsProvider {
         // Using a LinkedHashSet to get the sources in the order added while
         // avoiding duplicates.
         LinkedHashSet<Source> orderedSources = new LinkedHashSet<Source>();
-        // Add web search source first, so that it's always queried first,
-        // to do network traffic while the rest are using the CPU.
-        Source webSource = mSources.getSelectedWebSearchSource();
-        if (webSource != null) {
-            orderedSources.add(webSource);
+        if (mSources.areWebSuggestionsEnabled()) {
+            // Add web search source first, so that it's always queried first,
+            // to do network traffic while the rest are using the CPU.
+            Source webSource = mSources.getWebSearchSource();
+            if (webSource != null) {
+                orderedSources.add(webSource);
+            }
         }
         // Then add all ranked sources
         ArrayList<ComponentName> rankedSources = mShortcutRepo.getSourceRanking();
