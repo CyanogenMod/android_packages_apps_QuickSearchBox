@@ -144,7 +144,7 @@ public class GoogleSearch extends Activity {
             // will not send the location info for this query.
             mLocationUtils.showLocationOptIn();
         } else if (mLocationUtils.userAcceptedLocationOptIn() &&
-                Settings.Secure.isLocationProviderEnabled(cr, LocationManager.NETWORK_PROVIDER)) {
+                isLocationProviderEnabled(cr, LocationManager.NETWORK_PROVIDER)) {
             Location location = ((LocationManager) getSystemService(
                     Context.LOCATION_SERVICE)).getLastKnownLocation(
                             LocationManager.NETWORK_PROVIDER);
@@ -156,4 +156,25 @@ public class GoogleSearch extends Activity {
         }
         return postData;
     }
+
+    /**
+     * Utility method copied from android.provider.Settings.Secure.
+     *
+     * Helper method for determining if a location provider is enabled.
+     * @param cr the content resolver to use
+     * @param provider the location provider to query
+     * @return true if the provider is enabled
+     */
+    private static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
+        String allowedProviders = Settings.Secure.getString(cr,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        if (allowedProviders != null) {
+            return (allowedProviders.equals(provider) ||
+                    allowedProviders.contains("," + provider + ",") ||
+                    allowedProviders.startsWith(provider + ",") ||
+                    allowedProviders.endsWith("," + provider));
+        }
+        return false;
+    }
+
 }

@@ -25,8 +25,8 @@ import android.test.suitebuilder.annotation.MediumTest;
 @MediumTest
 public class PackageIconLoaderTest extends IconLoaderTest {
 
-    protected IconLoader create() {
-        return new PackageIconLoader(mContext);
+    protected IconLoader create() throws Exception {
+        return new PackageIconLoader(mContext, mContext.getPackageName());
     }
 
 }

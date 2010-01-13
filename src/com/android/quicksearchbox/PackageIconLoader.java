@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -46,12 +47,14 @@ public class PackageIconLoader implements IconLoader {
     /**
      * Creates a new icon loader.
      *
-     * @param packageContext The context which will be used for finding icon resources.
+     * @param packageName The name of the package from which the icons will be loaded.
      *        Resource IDs without an explicit package will be resolved against the package
      *        of this context.
+     * @throws PackageManager.NameNotFoundException If the package is not found.
      */
-    public PackageIconLoader(Context packageContext) {
-        mPackageContext = packageContext;
+    public PackageIconLoader(Context context, String packageName)
+            throws PackageManager.NameNotFoundException, SecurityException {
+        mPackageContext = context.createPackageContext(packageName, 0);
     }
 
     public Drawable getIcon(String drawableId) {

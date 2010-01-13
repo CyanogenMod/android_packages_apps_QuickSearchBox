@@ -19,7 +19,11 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_STATIC_JAVA_LIBRARIES := google-framework google-common
+# Build against the SDK
+# Commented out until the last few uses of hidden stuff have been fixed
+#LOCAL_SDK_VERSION := current
+
+LOCAL_STATIC_JAVA_LIBRARIES := google-framework google-common android-common
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 

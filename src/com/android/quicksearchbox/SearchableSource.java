@@ -69,9 +69,17 @@ public class SearchableSource implements Source {
         mActivityInfo = context.getPackageManager().getActivityInfo(componentName, 0);
         mIsWebSuggestionSource = isWebSuggestionSource;
 
-        Context activityContext = searchable.getActivityContext(context);
-        Context providerContext = searchable.getProviderContext(context, activityContext);
-        mIconLoader = new CachingIconLoader(new PackageIconLoader(providerContext));
+        mIconLoader = createIconLoader(context, searchable.getSuggestPackage());
+    }
+
+    private IconLoader createIconLoader(Context context, String providerPackage) {
+        if (providerPackage == null) return null;
+        try {
+            return new CachingIconLoader(new PackageIconLoader(context, providerPackage));
+        } catch (PackageManager.NameNotFoundException ex) {
+            Log.e(TAG, "Suggestion provider package not found: " + providerPackage);
+            return null;
+        }
     }
 
     public ComponentName getComponentName() {
@@ -83,11 +91,11 @@ public class SearchableSource implements Source {
     }
 
     public Drawable getIcon(String drawableId) {
-        return mIconLoader.getIcon(drawableId);
+        return mIconLoader == null ? null : mIconLoader.getIcon(drawableId);
     }
 
     public Uri getIconUri(String drawableId) {
-        return mIconLoader.getIconUri(drawableId);
+        return mIconLoader == null ? null : mIconLoader.getIconUri(drawableId);
     }
 
     public CharSequence getLabel() {

@@ -24,17 +24,18 @@ import android.view.View;
  */
 public class Util {
 
+    // NOTE: The version of this method in android.app.SearchSourceSelector
+    // uses getCompatibilityInfo(), since it may be running in compatibility
+    // mode. QuickSearchBox doesn't run in compatibility mode, and
+    // getCompatibilityInfo() is hidden, so we don't use it here.
     public static Rect getOnScreenRect(View v) {
-        final float appScale =
-                v.getContext().getResources().getCompatibilityInfo().applicationScale;
         final int[] pos = new int[2];
         v.getLocationOnScreen(pos);
-
         final Rect rect = new Rect();
-        rect.left = (int) (pos[0] * appScale + 0.5f);
-        rect.top = (int) (pos[1] * appScale + 0.5f);
-        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
-        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+        rect.left = pos[0];
+        rect.top = pos[1];
+        rect.right = pos[0] + v.getWidth();
+        rect.bottom = pos[1] + v.getHeight();
         return rect;
     }
 

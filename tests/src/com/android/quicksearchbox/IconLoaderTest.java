@@ -31,7 +31,7 @@ public abstract class IconLoaderTest extends AndroidTestCase {
         mLoader = create();
     }
 
-    protected abstract IconLoader create();
+    protected abstract IconLoader create() throws Exception;
 
     public void testGetIcon() {
         assertNull(mLoader.getIcon(null));

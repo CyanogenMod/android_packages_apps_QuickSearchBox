@@ -177,22 +177,10 @@ public class SearchSourceSelector implements View.OnClickListener {
         }
     }
 
-    // TODO: This code is replicated in lots of places:
-    // - android.provider.ContactsContract.QuickContact.showQuickContact()
-    // - android.widget.RemoteViews.setOnClickPendingIntent()
-    // - com.android.launcher2.Launcher.onClick()
-    // - com.android.launcher.Launcher.onClick()
-    // - com.android.server.status.StatusBarService.Launcher.onClick()
+    // Note: this is different from android.app.SearchSourceSelector,
+    // since the implementation there uses a hidden method.
     private static Rect getOnScreenRect(View v) {
-        final float appScale = v.getResources().getCompatibilityInfo().applicationScale;
-        final int[] pos = new int[2];
-        v.getLocationOnScreen(pos);
-        final Rect rect = new Rect();
-        rect.left = (int) (pos[0] * appScale + 0.5f);
-        rect.top = (int) (pos[1] * appScale + 0.5f);
-        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
-        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
-        return rect;
+        return Util.getOnScreenRect(v);
     }
 
 }
