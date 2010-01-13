@@ -46,7 +46,7 @@
             </intent-filter>
             <!-- Handle global search. -->
             <intent-filter>
-                <action android:name="android.intent.action.GLOBAL_SEARCH" />
+                <action android:name="android.search.action.GLOBAL_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
