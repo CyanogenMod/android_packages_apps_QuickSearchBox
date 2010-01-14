@@ -37,7 +37,7 @@ public abstract class AbstractSourceSuggestionCursor extends AbstractSuggestionC
     protected abstract Source getSource();
 
     public ComponentName getSourceComponentName() {
-        return getSource().getSearchActivity();
+        return getSource().getComponentName();
     }
 
     public CharSequence getSourceLabel() {

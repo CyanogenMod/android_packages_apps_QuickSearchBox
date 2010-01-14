@@ -71,10 +71,6 @@ public class MockSource implements Source {
         return 0;
     }
 
-    public ComponentName getSearchActivity() {
-        return getComponentName();
-    }
-
     public String getSettingsDescription() {
         return "Suggestions from MockSource " + mName;
     }

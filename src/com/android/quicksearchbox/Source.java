@@ -131,11 +131,6 @@ public interface Source {
     String getDefaultIntentData();
 
     /**
-     * Gets the activity name of the source.
-     */
-    ComponentName getSearchActivity();
-
-    /**
      * Gets the action message for a give action key code for suggestions from
      * this source. This is only used if {@link #getSuggestActionMsgColumn}
      * does not get an action message.
