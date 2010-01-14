@@ -39,8 +39,7 @@ public class SearchableSourceFactory implements SourceFactory {
     }
 
     protected ComponentName getWebSearchComponent() {
-        String name = mContext.getString(R.string.web_search_component);
-        return ComponentName.unflattenFromString(name);
+        return new ComponentName(mContext, GoogleSearch.class);
     }
 
     public Source createSource(SearchableInfo searchable) {
