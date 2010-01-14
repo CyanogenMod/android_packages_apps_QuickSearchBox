@@ -246,10 +246,6 @@ public class SearchableSource implements Source {
         return mSearchable.getSuggestIntentData();
     }
 
-    public ComponentName getSearchActivity() {
-        return mSearchable.getSearchActivity();
-    }
-
     public String getSuggestActionMsg(int keyCode) {
         SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
         if (actionKey == null) return null;
