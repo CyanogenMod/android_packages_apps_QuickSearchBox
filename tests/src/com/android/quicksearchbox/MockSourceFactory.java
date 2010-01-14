@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchableInfo;
+import android.content.Context;
 
 /**
  * Mock implementation of {@link SourceFactory}.
@@ -24,16 +25,22 @@ import android.app.SearchableInfo;
  */
 public class MockSourceFactory implements SourceFactory {
 
-    public static final Source SOURCE_1 = new MockSource("SOURCE_1");
+    private Context mContext;
 
-    public static final Source SOURCE_2 = new MockSource("SOURCE_2");
+    public MockSourceFactory(Context context) {
+        mContext = context;
+    }
 
     public Source createSource(SearchableInfo searchable) {
-        return SOURCE_1;
+        try {
+            return new SearchableSource(mContext, searchable);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public Source createWebSearchSource() {
-        return SOURCE_2;
+        return new MockSource("WEB");
     }
 
 }
