@@ -39,8 +39,8 @@ public class MockSource implements Source {
 
     public ComponentName getComponentName() {
         // Not an activity, but no code should treat it as one.
-        return new ComponentName("com.android.quicksearchbox",
-                "com.android.quicksearchbox.MockSource." + mName);
+        return new ComponentName(TestUtil.getTargetPackage(),
+                getClass().getName() + "." + mName);
     }
 
     public String getFlattenedComponentName() {
@@ -72,9 +72,7 @@ public class MockSource implements Source {
     }
 
     public ComponentName getSearchActivity() {
-        // Not an activity, so this will case intent resolution to fail
-        return new ComponentName("com.android.quicksearchbox",
-                "com.android.quicksearchbox.MockSource." + mName + ".Target");
+        return getComponentName();
     }
 
     public String getSettingsDescription() {
@@ -95,13 +93,13 @@ public class MockSource implements Source {
         }
         DataSuggestionCursor cursor = new DataSuggestionCursor(query);
         Intent i1 = new Intent(Intent.ACTION_VIEW);
-        i1.setData(Uri.parse("content://com.android.quicksearchbox.MockSource/1"));
+        i1.setData(Uri.parse("content://" + getClass().getName() + "/1"));
         SuggestionData s1 = new SuggestionData(this);
         s1.setText1(query + "_1");
         s1.setDisplayQuery(query + "_1");
         s1.setIntent(i1);
         Intent i2 = new Intent(Intent.ACTION_VIEW);
-        i1.setData(Uri.parse("content://com.android.quicksearchbox.MockSource/2"));
+        i1.setData(Uri.parse("content://" + getClass().getName() + "/1"));
         SuggestionData s2 = new SuggestionData(this);
         s2.setText1(query + "_2");
         s2.setDisplayQuery(query + "_2");

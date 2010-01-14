@@ -35,7 +35,7 @@ public class SourcesTest extends AndroidTestCase {
         super.setUp();
 
         Config config = new Config(mContext);
-        mSources = new Sources(mContext, config, new MockSourceFactory());
+        mSources = new Sources(mContext, config, new MockSourceFactory(mContext));
         mSources.load();
     }
 
