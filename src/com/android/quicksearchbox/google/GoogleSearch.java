@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.googlesearch;
+package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.R;
 

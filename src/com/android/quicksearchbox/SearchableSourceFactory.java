@@ -16,12 +16,12 @@
 
 package com.android.quicksearchbox;
 
-import com.android.googlesearch.GoogleSearch;
-
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
@@ -29,17 +29,27 @@ public class SearchableSourceFactory implements SourceFactory {
 
     private static final String TAG = "QSB.SearchableSourceFactory";
 
-    private Context mContext;
+    private final Context mContext;
 
-    private SearchManager mSearchManager;
+    private final SearchManager mSearchManager;
 
     public SearchableSourceFactory(Context context) {
         mContext = context;
         mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
     }
 
+    protected Context getContext() {
+        return mContext;
+    }
+
     protected ComponentName getWebSearchComponent() {
-        return new ComponentName(mContext, GoogleSearch.class);
+        // Looks for an activity in the current package that handles ACTION_WEB_SEARCH.
+        // This indirect method is used to allow easy replacement of the web
+        // search activity when extending this package.
+        Intent webSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+        webSearchIntent.setPackage(mContext.getPackageName());
+        PackageManager pm = mContext.getPackageManager();
+        return webSearchIntent.resolveActivity(pm);
     }
 
     public Source createSource(SearchableInfo searchable) {

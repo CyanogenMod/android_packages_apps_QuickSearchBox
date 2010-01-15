@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.googlesearch;
+package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.R;
 
@@ -29,7 +29,7 @@ import android.provider.Settings.System;
 /**
  * Activity for setting Google search preferences.
  */
-public class Settings extends PreferenceActivity implements OnPreferenceClickListener {
+public class GoogleSettings extends PreferenceActivity implements OnPreferenceClickListener {
 
     private static final String SHOW_WEB_SUGGESTIONS_PREF = "show_web_suggestions";
 

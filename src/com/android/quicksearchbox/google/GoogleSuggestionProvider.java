@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.googlesearch;
-
-import com.android.quicksearchbox.R;
+package com.android.quicksearchbox.google;
 
 import com.android.common.AndroidHttpClient;
+import com.android.quicksearchbox.R;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -51,7 +49,7 @@ import java.util.Locale;
  *
  * Future:  Merge live suggestions with saved recent queries
  */
-public class SuggestionProvider extends ContentProvider {
+public class GoogleSuggestionProvider extends ContentProvider {
 
     private static final boolean DBG = true;
     private static final String LOG_TAG = "GoogleSearch";
@@ -111,7 +109,7 @@ public class SuggestionProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
-        String query = selectionArgs[0];
+        String query = getQuery(uri);
         if (TextUtils.isEmpty(query)) {
             return null;
         }
@@ -180,6 +178,17 @@ public class SuggestionProvider extends ContentProvider {
             Log.w(LOG_TAG, "Error", e);
         }
         return null;
+    }
+
+    /**
+     * Gets the search text from a uri.
+     */
+    private String getQuery(Uri uri) {
+        if (uri.getPathSegments().size() > 1) {
+            return uri.getLastPathSegment();
+        } else {
+            return "";
+        }
     }
 
     private boolean isNetworkConnected() {

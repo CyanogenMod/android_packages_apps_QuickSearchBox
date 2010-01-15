@@ -88,9 +88,7 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/search_widget_info" />
         </receiver>
 
-	<!-- GoogleSearch stuff. -->
-
-        <activity android:name="com.android.googlesearch.GoogleSearch"
+        <activity android:name="com.android.quicksearchbox.google.GoogleSearch"
                 android:label="@string/google_search_label"
                 android:icon="@drawable/google_icon"
                 android:theme="@android:style/Theme.NoDisplay"
@@ -107,7 +105,7 @@
                 android:resource="@xml/google_searchable" />
         </activity>
 
-        <activity android:name="com.android.googlesearch.Settings"
+        <activity android:name="com.android.quicksearchbox.google.GoogleSettings"
                 android:label="@string/google_search_settings"
                 android:excludeFromRecents="true">
             <intent-filter>
@@ -116,11 +114,9 @@
             </intent-filter>
         </activity>
 
-        <provider android:name="com.android.googlesearch.SuggestionProvider"
+        <provider android:name="com.android.quicksearchbox.google.GoogleSuggestionProvider"
             android:label="@string/google_search_label"
-            android:authorities="com.android.googlesearch.SuggestionProvider" />
-
-	<!-- End GoogleSearch stuff. -->
+            android:authorities="com.android.quicksearchbox.google" />
 
     </application>
 </manifest> 
