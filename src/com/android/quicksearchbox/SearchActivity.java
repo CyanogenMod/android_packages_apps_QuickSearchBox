@@ -251,6 +251,7 @@ public class SearchActivity extends Activity {
         // Close all open suggestion cursors. The query will be redone in onResume()
         // if we come back to this activity.
         mSuggestionsAdapter.setSuggestions(null);
+        getQsbApplication().getShortcutRefresher().reset();
         super.onStop();
     }
 

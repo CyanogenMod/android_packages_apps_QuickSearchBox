@@ -62,15 +62,4 @@ public interface ShortcutRepository {
      * @return A ranking of suggestion sources based on clicks and impressions.
      */
     ArrayList<ComponentName> getSourceRanking();
-
-    /**
-     * Refreshes a shortcut.
-     *
-     * @param source Identifies the source of the shortcut.
-     * @param shortcutId Identifies the shortcut.
-     * @param refreshed An up to date shortcut, or <code>null</code> if the shortcut should be
-     *   removed.
-     */
-    void refreshShortcut(ComponentName source, String shortcutId, SuggestionPosition refreshed);
-
 }

@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -53,6 +54,10 @@ public class DataSuggestionCursor extends AbstractSourceSuggestionCursor {
 
     public void close() {
         mSuggestions.clear();
+    }
+
+    public boolean requery() {
+        return true;
     }
 
     public boolean isFailed() {
@@ -103,9 +108,17 @@ public class DataSuggestionCursor extends AbstractSourceSuggestionCursor {
         return current().getIcon2();
     }
 
+    public boolean isSpinnerWhileRefreshing() {
+        return current().isSpinnerWhileRefreshing();
+    }
+
     public Intent getSuggestionIntent(Context context, Bundle appSearchData, int actionKey,
             String actionMsg) {
         return current().getIntent();
+    }
+
+    public String getSuggestionIntentExtraData() {
+        return current().getIntentExtraData();
     }
 
     public String getSuggestionText1() {

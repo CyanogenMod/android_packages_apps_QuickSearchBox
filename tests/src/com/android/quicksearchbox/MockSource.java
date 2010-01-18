@@ -105,6 +105,10 @@ public class MockSource implements Source {
         return cursor;
     }
 
+    public SuggestionCursor refreshShortcut(String shortcutId, String extraData) {
+        return null;
+    }
+
     public boolean isWebSuggestionSource() {
         return false;
     }

@@ -39,6 +39,7 @@ public class SuggestionData {
     private Intent mSecondaryIntent;
     private String mDisplayQuery;
     private String mShortcutId;
+    private boolean mIsSpinnerWhileRefreshing;
     private Map<Integer,String> mActionMsgs;
 
     public SuggestionData(Source source) {
@@ -56,6 +57,7 @@ public class SuggestionData {
             Intent secondaryIntent,
             String displayQuery,
             String shortcutId,
+            boolean isSpinnerWhileRefreshing,
             Map<Integer,String> actionMsgs) {
         mSource = source;
         mFormat = format;
@@ -67,6 +69,7 @@ public class SuggestionData {
         mSecondaryIntent = secondaryIntent == null ? null : new Intent(intent);
         mDisplayQuery = displayQuery;
         mShortcutId = shortcutId;
+        mIsSpinnerWhileRefreshing = isSpinnerWhileRefreshing;
         mActionMsgs = actionMsgs;
     }
 
@@ -113,10 +116,21 @@ public class SuggestionData {
     }
 
     /**
+     * Whether to show a spinner while refreshing.
+     */
+    public boolean isSpinnerWhileRefreshing() {
+        return mIsSpinnerWhileRefreshing;
+    }
+
+    /**
      * The intent to launch.
      */
     public Intent getIntent() {
         return mIntent == null ? null : new Intent(mIntent);
+    }
+
+    public String getIntentExtraData() {
+        return mIntent == null ? null : mIntent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
     }
 
     public boolean hasSecondaryIntent() {

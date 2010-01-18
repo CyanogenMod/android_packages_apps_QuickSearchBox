@@ -66,7 +66,7 @@ public class SearchSettings extends PreferenceActivity
         super.onCreate(savedInstanceState);
 
         mSources = getSources();
-        mShortcuts = ShortcutRepositoryImplLog.create(this, getConfig(), mSources);
+        mShortcuts = getQSBApplication().getShortcutRepository();
         getPreferenceManager().setSharedPreferencesName(Sources.PREFERENCES_NAME);
 
         addPreferencesFromResource(R.xml.preferences);

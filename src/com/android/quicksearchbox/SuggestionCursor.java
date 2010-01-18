@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -73,6 +74,22 @@ public interface SuggestionCursor {
     void close();
 
     /**
+     * Register an observer that is called when changes happen to the contents
+     * of this cursor's data set.
+     *
+     * @param observer the object that gets notified when the data set changes.
+     */
+    public void registerDataSetObserver(DataSetObserver observer);
+
+    /**
+     * Unregister an observer that has previously been registered with this cursor
+     * via {@link #registerDataSetObserver(DataSetObserver)}
+     *
+     * @param observer the object to unregister.
+     */
+    public void unregisterDataSetObserver(DataSetObserver observer);
+
+    /**
      * Gets the number of suggestions in this result.
      *
      * @return The number of suggestions, or {@code 0} if this result represents a failed query.
@@ -101,6 +118,11 @@ public interface SuggestionCursor {
      * Gets the shortcut ID of the current suggestion.
      */
     String getShortcutId();
+
+    /**
+     * Whether to show a spinner while refreshing this shortcut.
+     */
+    boolean isSpinnerWhileRefreshing();
 
     /**
      * Gets the format of the text returned by {@link #getSuggestionText1()}
@@ -144,6 +166,8 @@ public interface SuggestionCursor {
      */
     Intent getSuggestionIntent(Context context, Bundle appSearchData,
             int actionKey, String actionMsg);
+
+    String getSuggestionIntentExtraData();
 
     /**
      * Gets the secondary intent associated with this suggestion.

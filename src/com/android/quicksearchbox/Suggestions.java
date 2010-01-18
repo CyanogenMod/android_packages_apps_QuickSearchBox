@@ -60,6 +60,8 @@ public class Suggestions {
 
     private SuggestionCursor mShortcuts;
 
+    private MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
+
     /** True if {@link Suggestions#close} has been called. */
     private boolean mClosed = false;
 
@@ -164,13 +166,18 @@ public class Suggestions {
         return mSourceResults.size() >= mExpectedSourceCount;
     }
 
-    public SuggestionCursor getShortcuts() {
-        return mShortcuts;
-    }
-
+    /**
+     * Sets the shortcut suggestions.
+     * Must be called on the UI thread, or before this object is seen by the UI thread.
+     *
+     * @param shortcuts The shortcuts.
+     */
     public void setShortcuts(SuggestionCursor shortcuts) {
         if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
         mShortcuts = shortcuts;
+        if (shortcuts != null) {
+            mShortcuts.registerDataSetObserver(mShortcutsObserver);
+        }
     }
 
     /**
@@ -245,4 +252,12 @@ public class Suggestions {
         }
         return mSourceResults == null ? 0 : mSourceResults.size();
     }
+
+    private class MyShortcutsObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            notifyDataSetChanged();
+        }
+    }
+
 }

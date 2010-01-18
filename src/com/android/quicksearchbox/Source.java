@@ -102,6 +102,16 @@ public interface Source {
     SuggestionCursor getSuggestions(String query, int queryLimit);
 
     /**
+     * Updates a shorcut.
+     *
+     * @param shortcutId The id of the shortcut to update.
+     * @param extraData associated with this shortcut.
+     * @return A SuggestionCursor positioned at the updated shortcut.  If the
+     *         cursor is empty or <code>null</code>, the shortcut will be removed.
+     */
+    SuggestionCursor refreshShortcut(String shortcutId, String extraData);
+
+    /**
      * Checks whether this is a web suggestion source.
      */
     boolean isWebSuggestionSource();

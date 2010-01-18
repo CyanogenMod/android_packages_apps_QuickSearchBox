@@ -27,6 +27,10 @@ public class SuggestionPosition {
 
     private final int mPosition;
 
+    public SuggestionPosition(SuggestionCursor cursor) {
+        this(cursor, cursor.getPosition());
+    }
+
     public SuggestionPosition(SuggestionCursor cursor, int suggestionPos) {
         mCursor = cursor;
         mPosition = suggestionPos;

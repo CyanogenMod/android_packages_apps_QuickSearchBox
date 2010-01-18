@@ -35,6 +35,7 @@ public class QsbApplication extends Application {
     private Config mConfig;
     private Sources mSources;
     private ShortcutRepository mShortcutRepository;
+    private ShortcutRefresher mShortcutRefresher;
     private SourceTaskExecutor mSourceTaskExecutor;
     private SuggestionsProvider mGlobalSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
@@ -107,8 +108,21 @@ public class QsbApplication extends Application {
         return mShortcutRepository;
     }
 
+    public ShortcutRefresher getShortcutRefresher() {
+        if (mShortcutRefresher == null) {
+            mShortcutRefresher = createShortcutRefresher();
+        }
+        return mShortcutRefresher;
+    }
+
+    protected ShortcutRefresher createShortcutRefresher() {
+        // For now, ShortcutRefresher gets its own SourceTaskExecutor
+        return new ShortcutRefresher(createSourceTaskExecutor(), getSources());
+    }
+
     protected ShortcutRepository createShortcutRepository() {
-        return ShortcutRepositoryImplLog.create(this, getConfig(), getSources());
+        return ShortcutRepositoryImplLog.create(this, getConfig(), getSources(),
+            getShortcutRefresher(), getUiThreadHandler());
     }
 
     public SourceTaskExecutor getSourceTaskExecutor() {

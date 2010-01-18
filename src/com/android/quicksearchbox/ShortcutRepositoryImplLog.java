@@ -17,20 +17,19 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchManager;
-import android.content.ComponentName;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -47,7 +46,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 23;
+    private static final int DB_VERSION = 24;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -57,19 +56,26 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String SHORTCUT_BY_ID_WHERE =
             Shortcuts.shortcut_id.name() + "=? AND " + Shortcuts.source.name() + "=?";
 
+    private static final String SHORTCUT_BY_CONFLICTING_INTENT =
+            Shortcuts.intent_key.name() + "=? AND (" + Shortcuts.shortcut_id.name()
+                    + "!=? OR " + Shortcuts.source.name() + "!=?)";
+
     private static final String SOURCE_RANKING_SQL = buildSourceRankingSql();
 
     private final Context mContext;
     private final Config mConfig;
     private final SourceLookup mSources;
+    private final ShortcutRefresher mRefresher;
+    private final Handler mUiThread;
     private final DbOpenHelper mOpenHelper;
 
     /**
      * Create an instance to the repo.
      */
     public static ShortcutRepository create(Context context, Config config,
-            SourceLookup sources) {
-        return new ShortcutRepositoryImplLog(context, config, sources, DB_NAME);
+            SourceLookup sources, ShortcutRefresher refresher, Handler uiThread) {
+        return new ShortcutRepositoryImplLog(context, config, sources, refresher,
+                uiThread, DB_NAME);
     }
 
     /**
@@ -77,10 +83,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
      * @param name The name of the database to create.
      */
     ShortcutRepositoryImplLog(Context context, Config config, SourceLookup sources,
-            String name) {
+            ShortcutRefresher refresher, Handler uiThread, String name) {
         mContext = context;
         mConfig = config;
         mSources = sources;
+        mRefresher = refresher;
+        mUiThread = uiThread;
         mOpenHelper = new DbOpenHelper(context, name, DB_VERSION, config);
         mEmptyQueryShortcutQuery = buildShortcutQuery(true);
         mShortcutQuery = buildShortcutQuery(false);
@@ -103,6 +111,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             Shortcuts.intent_query + " AS " + SearchManager.SUGGEST_COLUMN_QUERY,
             Shortcuts.intent_extradata + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA,
             Shortcuts.shortcut_id + " AS " + SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
+            Shortcuts.spinner_while_refreshing + " AS " + SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING,
         };
         // SQL expression for the time before which no clicks should be counted.
         String cutOffTime_expr = "(" + "?3" + " - " + mConfig.getMaxStatAgeMillis() + ")";
@@ -198,7 +207,11 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     public SuggestionCursor getShortcutsForQuery(String query) {
-        return getShortcutsForQuery(query, System.currentTimeMillis());
+        ShortcutCursor shortcuts = getShortcutsForQuery(query, System.currentTimeMillis());
+        if (shortcuts != null) {
+            startRefresh(shortcuts);
+        }
+        return shortcuts;
     }
 
     public ArrayList<ComponentName> getSourceRanking() {
@@ -206,28 +219,13 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                 mConfig.getMinClicksForSourceRanking());
     }
 
-    public void refreshShortcut(ComponentName source, String shortcutId, SuggestionPosition refreshed) {
-        if (source == null) throw new NullPointerException("source");
-        if (shortcutId == null) throw new NullPointerException("shortcutId");
-
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-        String[] whereArgs = { shortcutId, source.flattenToShortString() };
-        if (refreshed == null) {
-            if (DBG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
-            db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_ID_WHERE, whereArgs);
-        } else {
-            if (DBG) Log.d(TAG, "Updating shortcut: " + shortcutId);
-//            ContentValues shortcut = makeShortcutRow(refreshed);
-            // TODO: updateWithOnConflict() is not exposed
-//            db.updateWithOnConflict(Shortcuts.TABLE_NAME, shortcut,
-//                    SHORTCUT_BY_ID_WHERE, whereArgs, SQLiteDatabase.ConflictAlgorithm.REPLACE);
-        }
-    }
-
 // -------------------------- end ShortcutRepository --------------------------
 
-    SuggestionCursor getShortcutsForQuery(String query, long now) {
+    private boolean shouldRefresh(SuggestionCursor suggestion) {
+        return mRefresher.shouldRefresh(suggestion);
+    }
+
+    private ShortcutCursor getShortcutsForQuery(String query, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
@@ -238,29 +236,93 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery(sql, params);
-        return new ShortcutCursor(mSources, query, cursor);
+        if (cursor.getCount() == 0) {
+            cursor.close();
+            return null;
+        }
+        return new ShortcutCursor(new SuggestionCursorImpl(mSources, query, cursor));
     }
 
-    private static class ShortcutCursor extends CursorBackedSuggestionCursor {
+    private void startRefresh(final ShortcutCursor shortcuts) {
+        mRefresher.refresh(shortcuts, new ShortcutRefresher.Listener() {
+            public void onShortcutRefreshed(final ComponentName componentName,
+                    final String shortcutId, final SuggestionCursor refreshed) {
+                refreshShortcut(componentName, shortcutId, refreshed);
+                mUiThread.post(new Runnable() {
+                    public void run() {
+                        shortcuts.refresh(componentName, shortcutId, refreshed);
+                    }
+                });
+            }
+        });
+    }
+
+    private void refreshShortcut(ComponentName source, String shortcutId, SuggestionCursor refreshed) {
+        if (source == null) throw new NullPointerException("source");
+        if (shortcutId == null) throw new NullPointerException("shortcutId");
+
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+
+        String[] whereArgs = { shortcutId, source.flattenToShortString() };
+        if (refreshed == null || refreshed.getCount() == 0) {
+            if (DBG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
+            db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_ID_WHERE, whereArgs);
+        } else {
+            if (DBG) Log.d(TAG, "Updating shortcut: " + shortcutId);
+            ContentValues shortcut = makeShortcutRow(refreshed);
+            // Remove any conflicting shortcuts that have the same intent key
+            // as the updated shortcut.
+            String[] conflictArgs = { shortcut.getAsString(Shortcuts.intent_key.name()),
+                    shortcutId, source.flattenToShortString() };
+            db.beginTransaction();
+            try {
+                db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_CONFLICTING_INTENT, conflictArgs);
+                db.update(Shortcuts.TABLE_NAME, shortcut, SHORTCUT_BY_ID_WHERE, whereArgs);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        }
+    }
+
+    private class SuggestionCursorImpl extends CursorBackedSuggestionCursor {
+
+        private final String mSearchSpinner = ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://" + mContext.getPackageName() + "/"  + R.drawable.search_spinner;
 
         private final SourceLookup mSources;
+        private final HashMap<String, Source> mSourceCache;
 
-        public ShortcutCursor(SourceLookup sources, String userQuery, Cursor cursor) {
+        public SuggestionCursorImpl(SourceLookup sources, String userQuery, Cursor cursor) {
             super(userQuery, cursor);
             mSources = sources;
+            mSourceCache = new HashMap<String, Source>();
         }
 
         @Override
-        // TODO: getSource() is called a lot, we should cache the Source
-        // object for each position
         protected Source getSource() {
             // TODO: Using ordinal() is hacky, look up the column instead
             String srcStr = mCursor.getString(Shortcuts.source.ordinal());
             if (srcStr == null) {
                 throw new NullPointerException("Missing source for shortcut.");
             }
-            ComponentName srcName = ComponentName.unflattenFromString(srcStr);
-            return mSources.getSourceByComponentName(srcName);
+            Source source = mSourceCache.get(srcStr);
+            if (source == null) {
+                ComponentName srcName = ComponentName.unflattenFromString(srcStr);
+                source = mSources.getSourceByComponentName(srcName);
+                // We cache the source so that it can be found quickly, and so
+                // that it doesn't disappear over the lifetime of this cursor.
+                mSourceCache.put(srcStr, source);
+            }
+            return source;
+        }
+
+        @Override
+        public String getSuggestionIcon2() {
+            if (isSpinnerWhileRefreshing() && shouldRefresh(this)) {
+                return mSearchSpinner;
+            }
+            return super.getSuggestionIcon2();
         }
 
     }
@@ -328,9 +390,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return ComponentName.unflattenFromString(cursor.getString(SourceStats.component.ordinal()));
     }
 
-    private ContentValues makeShortcutRow(SuggestionPosition suggestionPos) {
-        SuggestionCursor suggestion = suggestionPos.getSuggestion();
-
+    private ContentValues makeShortcutRow(SuggestionCursor suggestion) {
         ComponentName source = suggestion.getSourceComponentName();
         Intent intent = suggestion.getSuggestionIntent(mContext, null, KeyEvent.KEYCODE_UNKNOWN, null);
         String intentAction = intent.getAction();
@@ -368,6 +428,10 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         cv.put(Shortcuts.intent_query.name(), intentQuery);
         cv.put(Shortcuts.intent_extradata.name(), intentExtraData);
         cv.put(Shortcuts.shortcut_id.name(), suggestion.getShortcutId());
+        if (suggestion.isSpinnerWhileRefreshing()) {
+            cv.put(Shortcuts.spinner_while_refreshing.name(), "true");
+        }
+
         return cv;
     }
 
@@ -383,13 +447,17 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return;
         }
 
+        // Once the user has clicked on a shortcut, don't bother refreshing
+        // (especially if this is a new shortcut)
+        mRefresher.onShortcutRefreshed(clicked.getSuggestion());
+
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         // Add or update suggestion info
         // Since intent_key is the primary key, any existing
         // suggestion with the same source+data+action will be replaced
         if (DBG) Log.d(TAG, "Adding shortcut: " + suggestion);
-        ContentValues shortcut = makeShortcutRow(clicked);
+        ContentValues shortcut = makeShortcutRow(clicked.getSuggestion());
         String intentKey = shortcut.getAsString(Shortcuts.intent_key.name());
         db.replaceOrThrow(Shortcuts.TABLE_NAME, null, shortcut);
 
@@ -484,7 +552,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         intent_data,
         intent_query,
         intent_extradata,
-        shortcut_id;
+        shortcut_id,
+        spinner_while_refreshing;
 
         static final String TABLE_NAME = "shortcuts";
 
@@ -680,7 +749,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     Shortcuts.intent_data.name() + " TEXT, " +
                     Shortcuts.intent_query.name() + " TEXT, " +
                     Shortcuts.intent_extradata.name() + " TEXT, " +
-                    Shortcuts.shortcut_id.name() + " TEXT" +
+                    Shortcuts.shortcut_id.name() + " TEXT, " +
+                    Shortcuts.spinner_while_refreshing.name() + " TEXT" +
                     ");");
 
             // index for fast lookup of shortcuts by shortcut_id

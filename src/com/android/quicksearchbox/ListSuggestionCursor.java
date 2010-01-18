@@ -57,6 +57,7 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
 
     public void close() {
         mSuggestions.clear();
+        super.close();
     }
 
     public boolean isFailed() {
@@ -69,6 +70,14 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
 
     public void moveTo(int pos) {
         mPos = pos;
+    }
+
+    public void removeRow() {
+        mSuggestions.remove(mPos);
+    }
+
+    public void replaceRow(SuggestionPosition suggestionPos) {
+        mSuggestions.set(mPos, suggestionPos);
     }
 
     public int getCount() {
@@ -127,9 +136,17 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return current().getSuggestionIcon2();
     }
 
+    public boolean isSpinnerWhileRefreshing() {
+        return current().isSpinnerWhileRefreshing();
+    }
+
     public Intent getSuggestionIntent(Context context, Bundle appSearchData, int actionKey,
             String actionMsg) {
         return current().getSuggestionIntent(context, appSearchData, actionKey, actionMsg);
+    }
+
+    public String getSuggestionIntentExtraData() {
+        return current().getSuggestionIntentExtraData();
     }
 
     public String getSuggestionText1() {

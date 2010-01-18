@@ -160,6 +160,8 @@ public class SuggestionsAdapter extends BaseAdapter {
     private void changeCursor(SuggestionCursor newCursor) {
         if (DBG) Log.d(TAG, "changeCursor(" + newCursor + ")");
         if (newCursor == mCursor) {
+            // Shortcuts may have changed without the cursor changing.
+            notifyDataSetChanged();
             return;
         }
         mCursor = newCursor;

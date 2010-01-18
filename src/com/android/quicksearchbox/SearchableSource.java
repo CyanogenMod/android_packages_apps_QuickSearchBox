@@ -154,6 +154,25 @@ public class SearchableSource implements Source {
         }
     }
 
+    public SuggestionCursor refreshShortcut(String shortcutId, String extraData) {
+        Cursor cursor = null;
+        try {
+            cursor = getValidationCursor(mContext, mSearchable, shortcutId, extraData);
+            if (DBG) Log.d(TAG, toString() + "[" + shortcutId + "] returned.");
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+            }
+            return new SourceResult(this, null, cursor);
+        } catch (RuntimeException ex) {
+            Log.e(TAG, toString() + "[" + shortcutId + "] failed", ex);
+            if (cursor != null) {
+                cursor.close();
+            }
+            // TODO: Should we delete the shortcut even if the failure is temporary?
+            return null;
+        }
+    }
+
     /**
      * This is a copy of {@link SearchManager#getSuggestions(SearchableInfo, String)}.
      */
@@ -201,6 +220,36 @@ public class SearchableSource implements Source {
                     + Arrays.toString(selArgs) + ",null)");
         }
         return context.getContentResolver().query(uri, null, selection, selArgs, null);
+    }
+
+    private static Cursor getValidationCursor(Context context, SearchableInfo searchable,
+            String shortcutId, String extraData) {
+        String authority = searchable.getSuggestAuthority();
+        if (authority == null) {
+            return null;
+        }
+
+        Uri.Builder uriBuilder = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority);
+
+        // if content path provided, insert it now
+        final String contentPath = searchable.getSuggestPath();
+        if (contentPath != null) {
+            uriBuilder.appendEncodedPath(contentPath);
+        }
+
+        // append the shortcut path and id
+        uriBuilder.appendPath(SearchManager.SUGGEST_URI_PATH_SHORTCUT);
+        uriBuilder.appendPath(shortcutId);
+
+        Uri uri = uriBuilder
+                .appendQueryParameter(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA, extraData)
+                .build();
+
+        if (DBG) Log.d(TAG, "Requesting refresh " + uri);
+        // finally, make the query
+        return context.getContentResolver().query(uri, null, null, null, null);
     }
 
     public boolean isWebSuggestionSource() {

@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -55,6 +56,11 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     /** Column index of {@link SearchManager.SUGGEST_COLUMN_ICON_1} in @{link mCursor}. */
     private final int mIcon2Col;
 
+    /** Column index of {@link SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING}
+     * in @{link mCursor}.
+     **/
+    private final int mRefreshSpinnerCol;
+
     /** True if this result has been closed. */
     private boolean mClosed = false;
 
@@ -66,6 +72,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
         mText2Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
         mIcon1Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
         mIcon2Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
+        mRefreshSpinnerCol = getColumnIndex(SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING);
     }
 
     protected String getDefaultIntentAction() {
@@ -178,6 +185,10 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
 
     public String getSuggestionIcon2() {
         return getStringOrNull(mIcon2Col);
+    }
+
+    public boolean isSpinnerWhileRefreshing() {
+        return "true".equals(getStringOrNull(mRefreshSpinnerCol));
     }
 
     public Intent getSuggestionIntent(Context context, Bundle appSearchData,
@@ -325,7 +336,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     /**
      * Gets the intent extra data for the current suggestion.
      */
-    protected String getSuggestionIntentExtraData() {
+    public String getSuggestionIntentExtraData() {
         return getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
     }
 

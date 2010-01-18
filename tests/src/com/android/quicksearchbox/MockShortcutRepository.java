@@ -54,10 +54,6 @@ public class MockShortcutRepository implements ShortcutRepository {
         return false;
     }
 
-    public void refreshShortcut(ComponentName source, String shortcutId,
-            SuggestionPosition refreshed) {
-    }
-
     public void reportClick(SuggestionPosition clicked) {
     }
 

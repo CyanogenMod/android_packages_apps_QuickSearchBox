@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.TextUtils;
@@ -29,12 +31,30 @@ public abstract class AbstractSuggestionCursor implements SuggestionCursor {
     /** The user query that returned these suggestions. */
     private final String mUserQuery;
 
+    private final DataSetObservable mDataSetObservable = new DataSetObservable();
+
     public AbstractSuggestionCursor(String userQuery) {
         mUserQuery = userQuery;
     }
 
     public String getUserQuery() {
         return mUserQuery;
+    }
+
+    public void registerDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.registerObserver(observer);
+    }
+
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.unregisterObserver(observer);
+    }
+
+    protected void notifyDataSetChanged() {
+        mDataSetObservable.notifyChanged();
+    }
+
+    public void close() {
+        mDataSetObservable.unregisterAll();
     }
 
     public Drawable getSuggestionDrawableIcon1() {
@@ -72,5 +92,4 @@ public abstract class AbstractSuggestionCursor implements SuggestionCursor {
         }
         return false;
     }
-
 }

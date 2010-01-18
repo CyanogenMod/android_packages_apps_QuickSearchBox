@@ -148,18 +148,37 @@ public class SuggestionView extends RelativeLayout implements View.OnClickListen
      * Sets the left-hand-side icon.
      */
     private void setIcon1(Drawable icon) {
-        mIcon1.setImageDrawable(icon);
+        setViewDrawable(mIcon1, icon);
     }
 
     /**
      * Sets the right-hand-side icon.
      */
     private void setIcon2(Drawable icon) {
-        mIcon2.setImageDrawable(icon);
-        if (icon == null) {
-            mIcon2.setVisibility(GONE);
+        setViewDrawable(mIcon2, icon);
+    }
+
+    /**
+     * Sets the drawable in an image view, makes sure the view is only visible if there
+     * is a drawable.
+     */
+    private static void setViewDrawable(ImageView v, Drawable drawable) {
+        // Set the icon even if the drawable is null, since we need to clear any
+        // previous icon.
+        v.setImageDrawable(drawable);
+
+        if (drawable == null) {
+            v.setVisibility(View.GONE);
         } else {
-            mIcon2.setVisibility(VISIBLE);
+            v.setVisibility(View.VISIBLE);
+
+            // This is a hack to get any animated drawables (like a 'working' spinner)
+            // to animate. You have to setVisible true on an AnimationDrawable to get
+            // it to start animating, but it must first have been false or else the
+            // call to setVisible will be ineffective. We need to clear up the story
+            // about animated drawables in the future, see http://b/1878430.
+            drawable.setVisible(false, false);
+            drawable.setVisible(true, false);
         }
     }
 
