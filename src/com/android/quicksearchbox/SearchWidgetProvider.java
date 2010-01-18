@@ -59,16 +59,9 @@ public class SearchWidgetProvider extends AppWidgetProvider {
      */
     public static void updateSearchWidgets(Context context) {
         Intent intent = new Intent(ACTION_UPDATE_SEARCH_WIDGETS);
-        intent.setComponent(myComponentName(context));
+        intent.setPackage(context.getPackageName());
         if (DBG) Log.d(TAG, "Broadcasting " + intent);
         context.sendBroadcast(intent);
-    }
-
-    /**
-     * Gets the component name for this app widget provider.
-     */
-    private static ComponentName myComponentName(Context context) {
-        return new ComponentName(context, SearchWidgetProvider.class);
     }
 
     @Override
@@ -77,7 +70,8 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         if (ACTION_UPDATE_SEARCH_WIDGETS.equals(action)) {
             // We requested the update. Find the widgets and update them.
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
-            int[] appWidgetIds = manager.getAppWidgetIds(myComponentName(context));
+            ComponentName self = new ComponentName(context, getClass());
+            int[] appWidgetIds = manager.getAppWidgetIds(self);
             onUpdate(context, manager, appWidgetIds);
         } else {
             // Handle actions requested by the widget host.
@@ -105,8 +99,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         bindSourceSelector(context, views, widgetAppData);
 
         // Text field
-        Intent qsbIntent = new Intent(Intent.ACTION_MAIN);
-        qsbIntent.setClass(context, SearchActivity.class);
+        Intent qsbIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         qsbIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         qsbIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
         PendingIntent textPendingIntent = PendingIntent.getActivity(context, 0, qsbIntent, 0);

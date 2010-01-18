@@ -142,7 +142,6 @@ public class SelectSearchSourceActivity extends Activity {
         Bundle appSearchData = selectIntent.getBundleExtra(SearchManager.APP_DATA);
 
         Intent searchIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
-        searchIntent.setClass(this, SearchActivity.class);
         searchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         String sourceName = source == null ? null : source.getFlattenedComponentName();
         searchIntent.putExtra(SearchActivity.EXTRA_KEY_SEARCH_SOURCE, sourceName);
