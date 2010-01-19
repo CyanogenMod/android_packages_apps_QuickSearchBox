@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DelayingSourceTaskExecutor implements SourceTaskExecutor {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.DelayingSourceTaskExecutor";
 
     private final TaskDelayer mDelayer;

@@ -32,7 +32,7 @@ import android.widget.BaseAdapter;
  */
 public class SuggestionsAdapter extends BaseAdapter {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsAdapter";
 
     private DataSetObserver mDataSetObserver;

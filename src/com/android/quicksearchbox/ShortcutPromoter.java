@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class ShortcutPromoter implements Promoter {
 
     private static final String TAG = "QSB.ShortcutPromoter";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /** The promoter to use when there are no more shortcuts. */
     private final Promoter mNextPromoter;

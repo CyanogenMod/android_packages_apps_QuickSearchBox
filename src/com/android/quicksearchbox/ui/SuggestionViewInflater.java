@@ -31,7 +31,7 @@ import android.view.ViewGroup;
  */
 public class SuggestionViewInflater implements SuggestionViewFactory {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionViewInflater";
 
     private final Context mContext;

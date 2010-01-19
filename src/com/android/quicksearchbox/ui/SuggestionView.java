@@ -37,7 +37,7 @@ import android.widget.TextView;
  */
 public class SuggestionView extends RelativeLayout implements View.OnClickListener {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionView";
 
     /**

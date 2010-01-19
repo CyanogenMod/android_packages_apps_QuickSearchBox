@@ -27,7 +27,7 @@ import java.util.ArrayList;
 public class RoundRobinPromoter implements Promoter {
 
     private static final String TAG = "QSB.RoundRobinPromoter";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /**
      * Creates a new RoundRobinPromoter.
