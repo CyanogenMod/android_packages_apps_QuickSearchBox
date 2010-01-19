@@ -163,10 +163,8 @@ public class SearchActivity extends Activity {
             if (DBG) Log.d(TAG, "Setting source from preferences: " + source);
             setSource(source);
         }
-        // TODO: Should this be SearchManager.INITIAL_QUERY?
         setUserQuery(intent.getStringExtra(SearchManager.QUERY));
-        // TODO: Expose SearchManager.SELECT_INITIAL_QUERY
-        mSelectAll = false;
+        mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
         setAppSearchData(intent.getBundleExtra(SearchManager.APP_DATA));
     }
 
