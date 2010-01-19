@@ -43,25 +43,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-// TODO: restore user query when using dpad to move up from top suggestion
-// TODO: nicer progress animation. one per source?
-// TODO: handle long clicks
-// TODO: support action keys
-// TODO: support IME search action
-// TODO: allow typing everywhere in the UI
-
-// TODO: don't show new results until there is at least one, or it's done
-// TODO: add timeout for source queries
-// TODO: group refreshes that happen close to each other.
-// TODO: use queryAfterZeroResults()
-
-// TODO: use permission to get extended Genie suggestions
-// TODO: support intent extras for source (e.g. launcher widget)
-// TODO: support intent extras for initial state, e.g. query, selection
-// TODO: make Config server-side configurable
-// TODO: log impressions
-// TODO: use source ranking
-
 /**
  * The main activity for Quick Search Box. Shows the search UI.
  *
