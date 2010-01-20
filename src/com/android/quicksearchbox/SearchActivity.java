@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.SearchSourceSelector;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
+import com.android.quicksearchbox.ui.SuggestionSelectionListener;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
@@ -93,8 +94,10 @@ public class SearchActivity extends Activity {
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
         mSuggestionsView.setSuggestionClickListener(new ClickHandler());
+        mSuggestionsView.setSuggestionSelectionListener(new SelectionHandler());
         mSuggestionsView.setInteractionListener(new InputMethodCloser());
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
+        mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
@@ -107,7 +110,7 @@ public class SearchActivity extends Activity {
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
-        mQueryTextView.setOnFocusChangeListener(new SuggestListFocusListener());
+        mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
 
         mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
         mSearchGoButton.setOnKeyListener(new ButtonsKeyListener());
@@ -371,6 +374,13 @@ public class SearchActivity extends Activity {
     }
 
     protected void onSuggestionSelected(SuggestionPosition suggestion) {
+        if (suggestion == null) {
+            // This happens when a suggestion has been selected with the
+            // dpad / trackball and then a different UI element is touched.
+            // Do nothing, since we want to keep the query of the selection
+            // in the search box.
+            return;
+        }
         SuggestionCursor sourceResult = suggestion.getSuggestion();
         String displayQuery = sourceResult.getSuggestionDisplayQuery();
         if (DBG) {
@@ -389,6 +399,26 @@ public class SearchActivity extends Activity {
         // Treat enter or search as a click
         if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
             return launchSuggestion(suggestion);
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP
+                && mSuggestionsView.getSelectedItemPosition() == 0) {
+            // Moved up from the top suggestion, restore the user query and focus query box
+            if (DBG) Log.d(TAG, "Up and out");
+            restoreUserQuery();
+            return false;  // let the framework handle the move
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+                || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+            // Moved left / right from a suggestion, keep current query, move
+            // focus to query box, and move cursor to far left / right
+            if (DBG) Log.d(TAG, "Left/right on a suggestion");
+            int cursorPos = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 0 : mQueryTextView.length();
+            mQueryTextView.setSelection(cursorPos);
+            mQueryTextView.requestFocus();
+            // TODO: should we modify the list selection?
+            return true;
         }
 
         // Handle source-specified action keys
@@ -423,17 +453,33 @@ public class SearchActivity extends Activity {
         }
     }
 
+    protected void showInputMethodForQuery() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(mQueryTextView, 0);
+        }
+    }
+
     /**
      * Hides the input method when the suggestions get focus.
      */
     private class SuggestListFocusListener implements OnFocusChangeListener {
         public void onFocusChange(View v, boolean focused) {
-            if (v == mQueryTextView) {
-                if (!focused) {
-                    hideInputMethod();
-                } else {
-                    // TODO: clear list selection?
-                }
+            if (DBG) Log.d(TAG, "Suggestions focus change, now: " + focused);
+            if (focused) {
+                // The suggestions list got focus, hide the input method
+                hideInputMethod();
+            }
+        }
+    }
+
+    private class QueryTextViewFocusListener implements OnFocusChangeListener {
+        public void onFocusChange(View v, boolean focused) {
+            if (DBG) Log.d(TAG, "Query focus change, now: " + focused);
+            if (focused) {
+                // The query box got focus, show the input method if the
+                // query box got focus?
+                showInputMethodForQuery();
             }
         }
     }
@@ -554,13 +600,15 @@ public class SearchActivity extends Activity {
            return SearchActivity.this.onSuggestionLongClicked(suggestion);
        }
 
-       public void onSuggestionSelected(SuggestionPosition suggestion) {
-           SearchActivity.this.onSuggestionSelected(suggestion);
-       }
-
        public void onSuggestionIconClicked(SuggestionPosition suggestion, Rect rect) {
            launchSuggestionSecondary(suggestion, rect);
        }
+    }
+
+    private class SelectionHandler implements SuggestionSelectionListener {
+        public void onSelectionChanged(SuggestionPosition suggestion) {
+            onSuggestionSelected(suggestion);
+        }
     }
 
     /**

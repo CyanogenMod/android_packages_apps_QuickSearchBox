@@ -36,6 +36,8 @@ public class SuggestionsView extends ListView {
 
     private SuggestionClickListener mSuggestionClickListener;
 
+    private SuggestionSelectionListener mSuggestionSelectionListener;
+
     private InteractionListener mInteractionListener;
 
     public SuggestionsView(Context context, AttributeSet attrs) {
@@ -47,14 +49,15 @@ public class SuggestionsView extends ListView {
         super.onFinishInflate();
         setOnItemClickListener(new ItemClickListener());
         setOnItemLongClickListener(new ItemLongClickListener());
-        // TODO: the OnItemSelectedListener gets fired by ListView even when
-        // the selection changes without user interaction, e.g. when changing
-        // the cursor. Disabling until we can figure out a way around that.
-        //setOnItemSelectedListener(new ItemSelectedListener());
+        setOnItemSelectedListener(new ItemSelectedListener());
     }
 
     public void setSuggestionClickListener(SuggestionClickListener listener) {
         mSuggestionClickListener = listener;
+    }
+
+    public void setSuggestionSelectionListener(SuggestionSelectionListener listener) {
+        mSuggestionSelectionListener = listener;
     }
 
     public void setInteractionListener(InteractionListener listener) {
@@ -122,12 +125,16 @@ public class SuggestionsView extends ListView {
             if (DBG) Log.d(TAG, "onItemSelected(" + position + ")");
             SuggestionView suggestionView = (SuggestionView) view;
             SuggestionPosition suggestion = suggestionView.getSuggestionPosition();
-            if (mSuggestionClickListener != null) {
-                mSuggestionClickListener.onSuggestionSelected(suggestion);
+            if (mSuggestionSelectionListener != null) {
+                mSuggestionSelectionListener.onSelectionChanged(suggestion);
             }
         }
 
         public void onNothingSelected(AdapterView<?> parent) {
+            if (DBG) Log.d(TAG, "onNothingSelected()");
+            if (mSuggestionSelectionListener != null) {
+                mSuggestionSelectionListener.onSelectionChanged(null);
+            }
         }
     }
 }

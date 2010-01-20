@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.SuggestionPosition;
 
-import android.graphics.Rect;
-
 /**
- * Listener interface for clicks on suggestions.
+ * Listener interface for suggestion selection.
  */
-public interface SuggestionClickListener {
-    void onSuggestionClicked(SuggestionPosition suggestion);
-    boolean onSuggestionLongClicked(SuggestionPosition suggestion);
-    void onSuggestionIconClicked(SuggestionPosition suggestion, Rect rect);
+public interface SuggestionSelectionListener {
+    /**
+     * Called when the suggestion selection changes.
+     *
+     * @param suggestion The new selected suggestion, or {@code null} if
+     *        no suggestion is now selected.
+     */
+    void onSelectionChanged(SuggestionPosition suggestion);
 }
