@@ -183,4 +183,8 @@ public class SearchSourceSelector implements View.OnClickListener {
         return Util.getOnScreenRect(v);
     }
 
+    public void setOnKeyListener(View.OnKeyListener listener) {
+        mIconView.setOnKeyListener(listener);
+    }
+
 }

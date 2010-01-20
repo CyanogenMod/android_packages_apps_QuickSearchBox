@@ -113,10 +113,13 @@ public class SearchActivity extends Activity {
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
 
         mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
-        mSearchGoButton.setOnKeyListener(new ButtonsKeyListener());
 
         mVoiceSearchButton.setOnClickListener(new VoiceSearchButtonClickListener());
-        mVoiceSearchButton.setOnKeyListener(new ButtonsKeyListener());
+
+        ButtonsKeyListener buttonsKeyListener = new ButtonsKeyListener();
+        mSearchGoButton.setOnKeyListener(buttonsKeyListener);
+        mVoiceSearchButton.setOnKeyListener(buttonsKeyListener);
+        mSourceSelector.setOnKeyListener(buttonsKeyListener);
 
         mUpdateSuggestions = true;
 
@@ -519,6 +522,29 @@ public class SearchActivity extends Activity {
         }
     }
 
+    private boolean forwardKeyToQueryTextView(int keyCode, KeyEvent event) {
+        if (!event.isSystem() && !isDpadKey(keyCode)) {
+            if (DBG) Log.d(TAG, "Forwarding key to query box: " + event);
+            if (mQueryTextView.requestFocus()) {
+                return mQueryTextView.dispatchKeyEvent(event);
+            }
+        }
+        return false;
+    }
+
+    private boolean isDpadKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /**
      * Filters the suggestions list when the search text changes.
      */
@@ -557,16 +583,7 @@ public class SearchActivity extends Activity {
      */
     private class ButtonsKeyListener implements View.OnKeyListener {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
-            if (!event.isSystem() &&
-                    (keyCode != KeyEvent.KEYCODE_DPAD_UP) &&
-                    (keyCode != KeyEvent.KEYCODE_DPAD_LEFT) &&
-                    (keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) &&
-                    (keyCode != KeyEvent.KEYCODE_DPAD_CENTER)) {
-                if (mQueryTextView.requestFocus()) {
-                    return mQueryTextView.dispatchKeyEvent(event);
-                }
-            }
-            return false;
+            return forwardKeyToQueryTextView(keyCode, event);
         }
     }
 
@@ -578,10 +595,12 @@ public class SearchActivity extends Activity {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 SuggestionPosition suggestion = getSelectedSuggestion();
                 if (suggestion != null) {
-                    return onSuggestionKeyDown(suggestion, keyCode, event);
+                    if (onSuggestionKeyDown(suggestion, keyCode, event)) {
+                        return true;
+                    }
                 }
             }
-            return false;
+            return forwardKeyToQueryTextView(keyCode, event);
         }
     }
 
