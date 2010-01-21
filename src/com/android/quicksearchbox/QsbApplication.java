@@ -48,6 +48,10 @@ public class QsbApplication extends Application {
     }
 
     protected void close() {
+        if (mConfig != null) {
+            mConfig.close();
+            mConfig = null;
+        }
         if (mSources != null) {
             mSources.close();
             mSources = null;

@@ -36,6 +36,7 @@ public class Config {
 
     private static final long DAY_MILLIS = 86400000L;
 
+    private static final int NUM_PROMOTED_SOURCES = 4;
     private static final int MAX_PROMOTED_SUGGESTIONS = 8;
     private static final int MAX_RESULTS_PER_SOURCE = 50;
     private static final long SOURCE_TIMEOUT_MILLIS = 10000;
@@ -53,7 +54,7 @@ public class Config {
 
     private static final long THREAD_START_DELAY_MILLIS = 100;
 
-    private Context mContext;
+    private final Context mContext;
     private HashSet<String> mTrustedPackages;
 
     /**
@@ -61,6 +62,18 @@ public class Config {
      */
     public Config(Context context) {
         mContext = context;
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    /**
+     * Releases any resources used by the configuration object.
+     *
+     * Default implementation does nothing.
+     */
+    public void close() {
     }
 
     private HashSet<String> loadTrustedPackages() {
@@ -92,6 +105,13 @@ public class Config {
             mTrustedPackages = loadTrustedPackages();
         }
         return mTrustedPackages.contains(packageName);
+    }
+
+    /**
+     * The number of promoted sources.
+     */
+    public int getNumPromotedSources() {
+        return NUM_PROMOTED_SOURCES;
     }
 
     /**
@@ -138,26 +158,44 @@ public class Config {
         return QUERY_THREAD_PRIORITY;
     }
 
+    /**
+     * The maximum age of log data used for shortcuts.
+     */
     public long getMaxStatAgeMillis(){
         return MAX_STAT_AGE_MILLIS;
     }
 
+    /**
+     * The maximum age of log data used for source ranking.
+     */
     public long getMaxSourceEventAgeMillis(){
         return MAX_SOURCE_EVENT_AGE_MILLIS;
     }
 
+    /**
+     * The minimum number of impressions needed to rank a source.
+     */
     public int getMinImpressionsForSourceRanking(){
         return MIN_IMPRESSIONS_FOR_SOURCE_RANKING;
     }
 
+    /**
+     * The minimum number of clicks needed to rank a source.
+     */
     public int getMinClicksForSourceRanking(){
         return MIN_CLICKS_FOR_SOURCE_RANKING;
     }
 
+    /**
+     * The maximum number of shortcuts shown.
+     */
     public int getMaxShortcutsReturned(){
         return MAX_SHORTCUTS_RETURNED;
     }
 
+    /**
+     * The maximum time to delay starting a search query thread after the user types a character.
+     */
     public long getThreadStartDelayMillis() {
         return THREAD_START_DELAY_MILLIS;
     }
