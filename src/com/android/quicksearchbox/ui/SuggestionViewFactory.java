@@ -18,7 +18,9 @@ package com.android.quicksearchbox.ui;
 
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.view.View;
 import android.view.ViewGroup;
+import com.android.quicksearchbox.SuggestionCursor;
 
 /**
  * Creates suggestion views.
@@ -26,11 +28,23 @@ import android.view.ViewGroup;
 public interface SuggestionViewFactory {
 
     /**
-     * Creates a suggestion view.
+     * Gets the number of distinct suggestion view types created by this factory.
+     */
+    int getSuggestionViewTypeCount();
+
+    /**
+     * Gets the view type associated with a given suggestion.
+     */
+    int getSuggestionViewType(SuggestionCursor suggestion);
+
+    /**
+     * Gets a suggestion view, possibly recycling convertView.
      *
+     * @param viewType The type of view to return.
+     * @param convertView A view which may be re-used, or {@code null}.
      * @param parentViewType Used to create LayoutParams of the right type.
      */
-    SuggestionView createSuggestionView(ViewGroup parentViewType);
+    SuggestionView getSuggestionView(int viewType, View convertView, ViewGroup parentViewType);
 
     SourceView createSourceView(ViewGroup parentViewType);
 

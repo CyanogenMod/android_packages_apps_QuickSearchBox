@@ -364,13 +364,6 @@ public class SearchActivity extends Activity {
         return true;
     }
 
-    protected boolean launchSuggestionSecondary(SuggestionPosition suggestion, Rect target) {
-      if (DBG) Log.d(TAG, "Clicked on suggestion icon " + suggestion);
-      mLauncher.launchSuggestionSecondary(suggestion, target);
-      getShortcutRepository().reportClick(suggestion);
-      return true;
-    }
-
     protected boolean onSuggestionLongClicked(SuggestionPosition suggestion) {
         SuggestionCursor sourceResult = suggestion.getSuggestion();
         if (DBG) Log.d(TAG, "Long clicked on suggestion " + sourceResult.getSuggestionText1());
@@ -618,10 +611,6 @@ public class SearchActivity extends Activity {
 
        public boolean onSuggestionLongClicked(SuggestionPosition suggestion) {
            return SearchActivity.this.onSuggestionLongClicked(suggestion);
-       }
-
-       public void onSuggestionIconClicked(SuggestionPosition suggestion, Rect rect) {
-           launchSuggestionSecondary(suggestion, rect);
        }
     }
 

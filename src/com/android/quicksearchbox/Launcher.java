@@ -138,22 +138,6 @@ public class Launcher {
         }
     }
 
-    /**
-     * Launches the secondary intent associated with a suggestion.
-     *
-     * @param suggestionPos The suggestion to launch.
-     * @param target A Rect indicating the position of the suggestion on screen.
-     */
-    public void launchSuggestionSecondary(SuggestionPosition suggestionPos, Rect target) {
-        SuggestionCursor suggestion = suggestionPos.getSuggestion();
-        Intent intent = suggestion.getSecondarySuggestionIntent(mContext, mAppSearchData, target);
-        if (intent != null) {
-            launchIntent(intent);
-        } else {
-            // TODO: Launch primary intent?
-        }
-    }
-
     private void launchIntent(Intent intent) {
         try {
             mContext.startActivity(intent);

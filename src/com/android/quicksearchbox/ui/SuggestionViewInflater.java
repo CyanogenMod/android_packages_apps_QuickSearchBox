@@ -16,15 +16,17 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.R;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SuggestionCursor;
 
 /**
  * Inflates suggestion views.
@@ -34,9 +36,22 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionViewInflater";
 
-    private final Context mContext;
+    // The suggestion view classes that may be returned by this factory.
+    private static final Class[] SUGGESTION_VIEW_CLASSES = {
+            DefaultSuggestionView.class,
+            ContactSuggestionView.class,
+    };
 
-    private SuggestionClickListener mSuggestionClickListener;
+    // The layout ids associated with each of the above classes.
+    private static final int[] SUGGESTION_VIEW_LAYOUTS = {
+            R.layout.suggestion,
+            R.layout.contact_suggestion,
+    };
+
+    private static final String CONTACT_LOOKUP_URI
+            = ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString();
+
+    private final Context mContext;
 
     public SuggestionViewInflater(Context context) {
         mContext = context;
@@ -46,18 +61,22 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void setSuggestionClickListener(SuggestionClickListener listener) {
-        mSuggestionClickListener = listener;
+    public int getSuggestionViewTypeCount() {
+        return SUGGESTION_VIEW_CLASSES.length;
     }
 
-    public SuggestionView createSuggestionView(ViewGroup parentViewType) {
-        if (DBG) Log.d(TAG, "createSuggestionView()");
-        SuggestionView view = (SuggestionView)
-                getInflater().inflate(R.layout.suggestion, parentViewType, false);
-        if (mSuggestionClickListener != null) {
-            view.setSuggestionClickListener(mSuggestionClickListener);
+    public int getSuggestionViewType(SuggestionCursor suggestion) {
+        return isContactSuggestion(suggestion) ? 1 : 0;
+    }
+
+    public SuggestionView getSuggestionView(int viewType, View convertView,
+            ViewGroup parentViewType) {
+        if (convertView == null || !convertView.getClass().equals(
+                SUGGESTION_VIEW_CLASSES[viewType])) {
+            int layoutId = SUGGESTION_VIEW_LAYOUTS[viewType];
+            convertView = getInflater().inflate(layoutId, parentViewType, false);
         }
-        return view;
+        return (SuggestionView) convertView;
     }
 
     public SourceView createSourceView(ViewGroup parentViewType) {
@@ -81,5 +100,10 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
                 .authority(mContext.getPackageName())
                 .appendEncodedPath(String.valueOf(R.drawable.global_search_source))
                 .build();
+    }
+
+    private boolean isContactSuggestion(SuggestionCursor suggestion) {
+        String intentData = suggestion.getSuggestionIntentDataString();
+        return intentData != null && intentData.startsWith(CONTACT_LOOKUP_URI);
     }
 }

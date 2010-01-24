@@ -133,17 +133,6 @@ public class SuggestionData {
         return mIntent == null ? null : mIntent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
     }
 
-    public boolean hasSecondaryIntent() {
-        return mSecondaryIntent != null;
-    }
-
-    /**
-     * The secondary intent for the suggestion.
-     */
-    public Intent getSecondaryIntent() {
-        return mSecondaryIntent == null ? null : new Intent(mSecondaryIntent);
-    }
-
     /**
      * The query to display when this suggestion is selected.
      */
@@ -238,13 +227,6 @@ public class SuggestionData {
         return mIntent.toUri(Intent.URI_INTENT_SCHEME);
     }
 
-    private String getSecondaryIntentString() {
-        if (mSecondaryIntent == null) {
-            return null;
-        }
-        return mSecondaryIntent.toUri(Intent.URI_INTENT_SCHEME);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -263,7 +245,6 @@ public class SuggestionData {
         if (notEqual(mIcon1, that.mIcon1)) return false;
         if (notEqual(mIcon2, that.mIcon2)) return false;
         if (notEqual(getIntentString(), that.getIntentString())) return false;
-        if (notEqual(getSecondaryIntentString(), that.getSecondaryIntentString())) return false;
         if (notEqual(mShortcutId, that.mShortcutId)) return false;
         if (notEqual(mActionMsgs, that.mActionMsgs)) return false;
         return true;
@@ -288,7 +269,6 @@ public class SuggestionData {
         result = addHashCode(result, mIcon1);
         result = addHashCode(result, mIcon2);
         result = addHashCode(result, getIntentString());
-        result = addHashCode(result, getSecondaryIntentString());
         result = addHashCode(result, mShortcutId);
         result = addHashCode(result, mActionMsgs);
         return result;
@@ -309,9 +289,6 @@ public class SuggestionData {
                 .append(", title=").append(mText1);
         if (mIntent != null) {
             builder.append(", intent=").append(getIntentString());
-        }
-        if (mSecondaryIntent != null) {
-            builder.append(", secondaryIntent=").append(getSecondaryIntentString());
         }
         if (mShortcutId != null) {
             builder.append(", shortcutid=").append(mShortcutId);

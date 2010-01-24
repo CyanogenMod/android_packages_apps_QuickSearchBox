@@ -167,23 +167,15 @@ public interface SuggestionCursor {
     Intent getSuggestionIntent(Context context, Bundle appSearchData,
             int actionKey, String actionMsg);
 
+    /**
+     * Gets the extra data associated with this suggestion's intent.
+     */
     String getSuggestionIntentExtraData();
 
     /**
-     * Gets the secondary intent associated with this suggestion.
-     *
-     * @param context Used for resolving the intent target.
-     * @param appSearchData application specific data passed in the search request
-     * @param target Rect describing the position of this result on the screen
-     * @return the secondary intent, or {@code null} if there is none
+     * Gets the data associated with this suggestion's intent.
      */
-    Intent getSecondarySuggestionIntent(Context context, Bundle appSearchData,
-            Rect target);
-
-    /**
-     * Checks whether the current suggestion has a secondary intent.
-     */
-    boolean hasSecondaryIntent();
+    String getSuggestionIntentDataString();
 
     /**
      * Gets a unique key that identifies this suggestion. This is used to avoid

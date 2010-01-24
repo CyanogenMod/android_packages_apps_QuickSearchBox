@@ -84,10 +84,6 @@ public class DataSuggestionCursor extends AbstractSourceSuggestionCursor {
         return current().getSource();
     }
 
-    public Intent getSecondarySuggestionIntent(Context context, Bundle appSearchData, Rect target) {
-        return current().getSecondaryIntent();
-    }
-
     public String getShortcutId() {
         return current().getShortcutId();
     }
@@ -127,10 +123,6 @@ public class DataSuggestionCursor extends AbstractSourceSuggestionCursor {
 
     public String getSuggestionText2() {
         return current().getText2();
-    }
-
-    public boolean hasSecondaryIntent() {
-        return current().hasSecondaryIntent();
     }
 
     public String getSuggestionKey() {

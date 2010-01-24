@@ -121,19 +121,27 @@ public class SuggestionsAdapter extends BaseAdapter {
         return position;
     }
 
+    public int getViewTypeCount() {
+        return mViewFactory.getSuggestionViewTypeCount();
+    }
+
+    public int getItemViewType(int position) {
+        if (mCursor == null) {
+            return 0;
+        }
+        mCursor.moveTo(position);
+        return mViewFactory.getSuggestionViewType(mCursor);
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
         if (mCursor == null) {
             throw new IllegalStateException("getView() called with null cursor");
         }
-        SuggestionView view;
-        if (convertView == null) {
-            view = mViewFactory.createSuggestionView(parent);
-        } else {
-            view = (SuggestionView) convertView;
-        }
         mCursor.moveTo(position);
+        int viewType = mViewFactory.getSuggestionViewType(mCursor);
+        SuggestionView view = mViewFactory.getSuggestionView(viewType, convertView, parent);
         view.bindAsSuggestion(mCursor);
-        return view;
+        return (View) view;
     }
 
     protected void onSuggestionsChanged() {

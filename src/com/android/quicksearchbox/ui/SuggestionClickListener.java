@@ -18,13 +18,10 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.SuggestionPosition;
 
-import android.graphics.Rect;
-
 /**
  * Listener interface for clicks on suggestions.
  */
 public interface SuggestionClickListener {
     void onSuggestionClicked(SuggestionPosition suggestion);
     boolean onSuggestionLongClicked(SuggestionPosition suggestion);
-    void onSuggestionIconClicked(SuggestionPosition suggestion, Rect rect);
 }

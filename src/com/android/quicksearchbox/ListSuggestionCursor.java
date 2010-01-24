@@ -96,10 +96,6 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return current().getIconUri(iconId);
     }
 
-    public Intent getSecondarySuggestionIntent(Context context, Bundle appSearchData, Rect target) {
-        return current().getSecondarySuggestionIntent(context, appSearchData, target);
-    }
-
     public String getShortcutId() {
         return current().getShortcutId();
     }
@@ -149,16 +145,16 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return current().getSuggestionIntentExtraData();
     }
 
+    public String getSuggestionIntentDataString() {
+        return current().getSuggestionIntentDataString();
+    }
+
     public String getSuggestionText1() {
         return current().getSuggestionText1();
     }
 
     public String getSuggestionText2() {
         return current().getSuggestionText2();
-    }
-
-    public boolean hasSecondaryIntent() {
-        return current().hasSecondaryIntent();
     }
 
     public String getSuggestionKey() {

@@ -32,9 +32,6 @@ import java.net.URISyntaxException;
 
 public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggestionCursor {
 
-    public static final String SUGGEST_COLUMN_SECONDARY_INTENT = "suggestion_secondary_intent";
-    public static final String TARGET_RECT_KEY = "target_rect";
-
     private static final boolean DBG = false;
     protected static final String TAG = "QSB.CursorBackedSuggestionCursor";
 
@@ -226,52 +223,9 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
         // The constants are currently hidden.
         //        intent.putExtra(SearchManager.SEARCH_MODE,
         //                SearchManager.MODE_GLOBAL_SEARCH_SUGGESTION);
-        intent.setComponent(getSuggestionIntentComponent(context, intent));
+        intent.setComponent(getSourceComponentName());
         return intent;
     }
-
-    public Intent getSecondarySuggestionIntent(Context context, Bundle appSearchData, Rect target) {
-        String intentString = getStringOrNull(SUGGEST_COLUMN_SECONDARY_INTENT);
-        if (intentString != null) {
-            try {
-                Intent intent = Intent.parseUri(intentString, Intent.URI_INTENT_SCHEME);
-                if (appSearchData != null) {
-                    intent.putExtra(SearchManager.APP_DATA, appSearchData);
-                }
-                // TODO: Do we need to pass action keys?
-                // TODO: Should we try to use defaults such as getDefaultIntentData?
-                intent.putExtra(TARGET_RECT_KEY, target);
-                intent.setComponent(getSuggestionIntentComponent(context, intent));
-                return intent;
-            }  catch (URISyntaxException e) {
-                Log.w(TAG, "Unable to parse secondary intent " + intentString);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Updates the intent with the component to which intents created
-     * from the current suggestion should be sent.
-     */
-    protected ComponentName getSuggestionIntentComponent(Context context, Intent intent) {
-        ComponentName component = getSourceComponentName();
-        // Limit intent resolution to the source package.
-        intent.setPackage(component.getPackageName());
-        ComponentName resolvedComponent = intent.resolveActivity(context.getPackageManager());
-        if (resolvedComponent != null) {
-            // It's ok if the intent resolves to an activity in the same
-            // package as component.  We set the component explicitly to
-            // avoid having to re-resolve, and to prevent race conditions.
-            return resolvedComponent;
-        } else {
-            return component;
-        }
-    }
-
-    public boolean hasSecondaryIntent() {
-           return getStringOrNull(SUGGEST_COLUMN_SECONDARY_INTENT) != null;
-       }
 
     public String getActionKeyMsg(int keyCode) {
         String result = null;
@@ -309,7 +263,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
         return getStringOrNull(SearchManager.SUGGEST_COLUMN_QUERY);
     }
 
-    private String getSuggestionIntentDataString() {
+    public String getSuggestionIntentDataString() {
          // use specific data if supplied, or default data if supplied
          String data = getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_DATA);
          if (data == null) {
