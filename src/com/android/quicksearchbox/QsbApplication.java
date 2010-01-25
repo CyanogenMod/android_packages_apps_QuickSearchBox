@@ -40,6 +40,7 @@ public class QsbApplication extends Application {
     private SuggestionsProvider mGlobalSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private SourceFactory mSourceFactory;
+    private Logger mLogger;
 
     @Override
     public void onTerminate() {
@@ -210,5 +211,16 @@ public class QsbApplication extends Application {
 
     protected SourceFactory createSourceFactory() {
         return new SearchableSourceFactory(this);
+    }
+
+    public Logger getLogger() {
+        if (mLogger == null) {
+            mLogger = createLogger();
+        }
+        return mLogger;
+    }
+
+    protected Logger createLogger() {
+        return new EventLogLogger(this);
     }
 }

@@ -38,6 +38,11 @@ public interface Source {
     String getFlattenedComponentName();
 
     /**
+     * Gets an identifier for this source that is used for logging.
+     */
+    String getLogName();
+
+    /**
      * Gets the localized, human-readable label for this source.
      */
     CharSequence getLabel();

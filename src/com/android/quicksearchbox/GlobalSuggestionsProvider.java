@@ -47,6 +47,7 @@ public class GlobalSuggestionsProvider extends AbstractSuggestionsProvider {
     }
 
     // TODO: Cache this list?
+    @Override
     public ArrayList<Source> getOrderedSources() {
         // Using a LinkedHashSet to get the sources in the order added while
         // avoiding duplicates.

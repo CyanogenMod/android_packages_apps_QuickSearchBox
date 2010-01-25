@@ -104,6 +104,10 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return current().getSourceComponentName();
     }
 
+    public String getLogName() {
+        return current().getLogName();
+    }
+
     public Drawable getSourceIcon() {
         return current().getSourceIcon();
     }

@@ -40,6 +40,10 @@ public abstract class AbstractSourceSuggestionCursor extends AbstractSuggestionC
         return getSource().getComponentName();
     }
 
+    public String getLogName() {
+        return getSource().getLogName();
+    }
+
     public CharSequence getSourceLabel() {
         return getSource().getLabel();
     }

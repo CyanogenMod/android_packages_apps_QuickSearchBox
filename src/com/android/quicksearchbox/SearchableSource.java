@@ -52,22 +52,14 @@ public class SearchableSource implements Source {
     // Cached icon for the activity
     private Drawable.ConstantState mSourceIcon = null;
 
-    private final boolean mIsWebSuggestionSource;
-
     private final IconLoader mIconLoader;
 
     public SearchableSource(Context context, SearchableInfo searchable)
             throws NameNotFoundException {
-        this(context, searchable, false);
-    }
-
-    public SearchableSource(Context context, SearchableInfo searchable,
-            boolean isWebSuggestionSource) throws NameNotFoundException {
         ComponentName componentName = searchable.getSearchActivity();
         mContext = context;
         mSearchable = searchable;
         mActivityInfo = context.getPackageManager().getActivityInfo(componentName, 0);
-        mIsWebSuggestionSource = isWebSuggestionSource;
 
         mIconLoader = createIconLoader(context, searchable.getSuggestPackage());
     }
@@ -88,6 +80,10 @@ public class SearchableSource implements Source {
 
     public String getFlattenedComponentName() {
         return getComponentName().flattenToShortString();
+    }
+
+    public String getLogName() {
+        return getComponentName().getPackageName();
     }
 
     public Drawable getIcon(String drawableId) {
@@ -253,7 +249,7 @@ public class SearchableSource implements Source {
     }
 
     public boolean isWebSuggestionSource() {
-        return mIsWebSuggestionSource;
+        return false;
     }
 
     public boolean queryAfterZeroResults() {

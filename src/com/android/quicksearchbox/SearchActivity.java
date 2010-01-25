@@ -28,13 +28,14 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.database.DataSetObserver;
-import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -43,6 +44,8 @@ import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
+import java.util.ArrayList;
 
 /**
  * The main activity for Quick Search Box. Shows the search UI.
@@ -64,6 +67,14 @@ public class SearchActivity extends Activity {
     private static final String INSTANCE_KEY_SOURCE = "source";
     private static final String INSTANCE_KEY_USER_QUERY = "query";
 
+    // Timestamp for last onCreate()/onNewIntent() call, as returned by SystemClock.uptimeMillis().
+    private long mStartTime;
+    // Whether QSB is starting. True between the calls to onCreate()/onNewIntent() and onResume().
+    private boolean mStarting;
+    // True if the user has taken some action, e.g. launching a search, voice search,
+    // or suggestions, since QSB was last started.
+    private boolean mTookAction;
+
     protected SuggestionsAdapter mSuggestionsAdapter;
 
     protected EditText mQueryTextView;
@@ -84,6 +95,7 @@ public class SearchActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        recordStartTime();
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
@@ -136,8 +148,15 @@ public class SearchActivity extends Activity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        recordStartTime();
         setIntent(intent);
         setupFromIntent(intent);
+    }
+
+    private void recordStartTime() {
+        mStartTime = SystemClock.uptimeMillis();
+        mStarting = true;
+        mTookAction = false;
     }
 
     protected void restoreInstanceState(Bundle savedInstanceState) {
@@ -220,12 +239,16 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getShortcutRepository();
     }
 
-    private SuggestionsProvider getSuggestionsProvider(Source source) {
-        return getQsbApplication().getSuggestionsProvider(source);
+    private SuggestionsProvider getSuggestionsProvider() {
+        return getQsbApplication().getSuggestionsProvider(mSource);
     }
 
     private SuggestionViewFactory getSuggestionViewFactory() {
         return getQsbApplication().getSuggestionViewFactory();
+    }
+
+    private Logger getLogger() {
+        return getQsbApplication().getLogger();
     }
 
     @Override
@@ -254,6 +277,15 @@ public class SearchActivity extends Activity {
         mSelectAll = false;
         updateSuggestions(mUserQuery);
         mQueryTextView.requestFocus();
+        if (mStarting) {
+            mStarting = false;
+            // Start up latency should not exceed 2^31 ms (~ 25 days). Note that
+            // SystemClock.uptimeMillis() does not advance during deep sleep.
+            int latency = (int) (SystemClock.uptimeMillis() - mStartTime);
+            String source = getIntent().getStringExtra(SearchManager.SOURCE);
+            getLogger().logStart(latency, source, mSource,
+                    getSuggestionsProvider().getOrderedSources());
+        }
     }
 
     @Override
@@ -328,14 +360,19 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected void onSearchClicked() {
+    protected void onSearchClicked(int method) {
         String query = getQuery();
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
+        mTookAction = true;
+        getLogger().logSearch(mSource, method, query.length());
         mLauncher.startSearch(mSource, query);
     }
 
     protected void onVoiceSearchClicked() {
         if (DBG) Log.d(TAG, "Voice Search clicked");
+        mTookAction = true;
+        getLogger().logVoiceSearch(mSource);
+
         // TODO: should this start voice search in the current source?
         mLauncher.startVoiceSearch();
     }
@@ -347,6 +384,13 @@ public class SearchActivity extends Activity {
     protected boolean launchSuggestion(SuggestionPosition suggestion,
             int actionKey, String actionMsg) {
         if (DBG) Log.d(TAG, "Launching suggestion " + suggestion);
+        mTookAction = true;
+        SuggestionCursor suggestions = mSuggestionsAdapter.getCurrentSuggestions();
+        // TODO: This should be just the queried sources, but currently
+        // all sources are queried
+        ArrayList<Source> sources = getSuggestionsProvider().getOrderedSources();
+        getLogger().logSuggestionClick(suggestion.getPosition(), suggestions, sources);
+
         mLauncher.launchSuggestion(suggestion, actionKey, actionMsg);
         getShortcutRepository().reportClick(suggestion);
         return true;
@@ -488,7 +532,7 @@ public class SearchActivity extends Activity {
 
     private void updateSuggestions(String query) {
         LatencyTracker latency = new LatencyTracker(TAG);
-        Suggestions suggestions = getSuggestionsProvider(mSource).getSuggestions(query);
+        Suggestions suggestions = getSuggestionsProvider().getSuggestions(query);
         latency.addEvent("getSuggestions_done");
         if (!suggestions.isDone()) {
             suggestions.registerDataSetObserver(new ProgressUpdater(suggestions));
@@ -553,7 +597,7 @@ public class SearchActivity extends Activity {
         public boolean onKey(View view, int keyCode, KeyEvent event) {
             // Handle IME search action key
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                onSearchClicked();
+                onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
             }
             return false;
         }
@@ -613,7 +657,7 @@ public class SearchActivity extends Activity {
      */
     private class SearchGoButtonClickListener implements View.OnClickListener {
         public void onClick(View view) {
-            onSearchClicked();
+            onSearchClicked(Logger.SEARCH_METHOD_BUTTON);
         }
     }
 

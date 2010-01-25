@@ -151,6 +151,14 @@ public class SuggestionsAdapter extends BaseAdapter {
     }
 
     /**
+     * Gets the cursor containing the currently shown suggestions. The caller should not hold
+     * on to or modify the returned cursor.
+     */
+    public SuggestionCursor getCurrentSuggestions() {
+        return mCursor;
+    }
+
+    /**
      * Gets the cursor for the given source.
      */
     protected SuggestionCursor getSourceCursor(Suggestions suggestions, ComponentName source) {

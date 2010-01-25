@@ -16,36 +16,32 @@
 
 package com.android.quicksearchbox;
 
+import android.app.SearchableInfo;
+import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 /**
- * A pointer to a suggestion in a {@link SuggestionCursor}.
- *
+ * The web search source.
  */
-public class SuggestionPosition {
+public class WebSource extends SearchableSource {
 
-    private final SuggestionCursor mCursor;
+    private static final boolean DBG = true;
+    private static final String TAG = "QSB.WebSource";
 
-    private final int mPosition;
+    private static final String WEB_SOURCE_LOG_NAME = "web";
 
-    public SuggestionPosition(SuggestionCursor cursor) {
-        this(cursor, cursor.getPosition());
+    public WebSource(Context context, SearchableInfo searchable) throws NameNotFoundException {
+        super(context, searchable);
     }
 
-    public SuggestionPosition(SuggestionCursor cursor, int suggestionPos) {
-        mCursor = cursor;
-        mPosition = suggestionPos;
+    @Override
+    public String getLogName() {
+        return WEB_SOURCE_LOG_NAME;
     }
 
-    /**
-     * Gets the suggestion cursor, moved to point to the right suggestion.
-     */
-    public SuggestionCursor getSuggestion() {
-        mCursor.moveTo(mPosition);
-        return mCursor;
-    }
-
-    public int getPosition() {
-        return mPosition;
+    @Override
+    public boolean isWebSuggestionSource() {
+        return true;
     }
 
 }

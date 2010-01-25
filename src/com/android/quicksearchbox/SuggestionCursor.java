@@ -20,7 +20,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,6 +35,12 @@ public interface SuggestionCursor {
      * Gets the component name of the source that produced this result.
      */
     ComponentName getSourceComponentName();
+
+    /**
+     * Gets the string that will be logged for this suggestion when logging
+     * suggestion clicks etc.
+     */
+    String getLogName();
 
     /**
      * Gets the localized, human-readable label for the source that produced this result.

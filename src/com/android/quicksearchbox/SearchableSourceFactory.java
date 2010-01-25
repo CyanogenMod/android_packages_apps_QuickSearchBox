@@ -71,7 +71,7 @@ public class SearchableSourceFactory implements SourceFactory {
             return null;
         }
         try {
-            return new SearchableSource(mContext, searchable, true);
+            return new WebSource(mContext, searchable);
         } catch (NameNotFoundException ex) {
             Log.e(TAG, "Web search source not found: " + sourceName);
             return null;
