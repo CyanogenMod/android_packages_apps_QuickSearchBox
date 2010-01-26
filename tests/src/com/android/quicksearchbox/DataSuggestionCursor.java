@@ -117,6 +117,10 @@ public class DataSuggestionCursor extends AbstractSourceSuggestionCursor {
         return current().getIntentExtraData();
     }
 
+    public String getSuggestionIntentDataString() {
+        return current().getIntent().getDataString();
+    }
+
     public String getSuggestionText1() {
         return current().getText1();
     }
