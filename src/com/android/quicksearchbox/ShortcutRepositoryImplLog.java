@@ -183,11 +183,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     public void clearHistory() {
         SQLiteDatabase db = getOpenHelper().getWritableDatabase();
         getOpenHelper().clearDatabase(db);
-        // TODO: We should probably have a content provider for
-        // the shortcuts instead. Then the SearchWidgetProvider
-        // could register an observer to update the widget
-        // shortcuts whenever they change.
-        SearchWidgetProvider.updateSearchWidgets(mContext);
     }
 
     public void deleteRepository() {

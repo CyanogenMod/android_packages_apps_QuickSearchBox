@@ -43,41 +43,10 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SearchWidgetProvider";
 
-    private static final boolean SHOW_SHORTCUT_IN_WIDGET = false;
-
-    private static final String ACTION_UPDATE_SEARCH_WIDGETS =
-            "com.android.quicksearchbox.UPDATE_SEARCH_WIDGETS";
-
     private static final String WIDGET_SEARCH_SOURCE = "launcher-search";
-    private static final String WIDGET_SEARCH_SHORTCUT_SOURCE = "launcher-search-shortcut";
 
     // TODO: Expose SearchManager.SOURCE instead.
     private static final String SOURCE = "source";
-
-    /**
-     * Updates all search widgets.
-     */
-    public static void updateSearchWidgets(Context context) {
-        Intent intent = new Intent(ACTION_UPDATE_SEARCH_WIDGETS);
-        intent.setPackage(context.getPackageName());
-        if (DBG) Log.d(TAG, "Broadcasting " + intent);
-        context.sendBroadcast(intent);
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        if (ACTION_UPDATE_SEARCH_WIDGETS.equals(action)) {
-            // We requested the update. Find the widgets and update them.
-            AppWidgetManager manager = AppWidgetManager.getInstance(context);
-            ComponentName self = new ComponentName(context, getClass());
-            int[] appWidgetIds = manager.getAppWidgetIds(self);
-            onUpdate(context, manager, appWidgetIds);
-        } else {
-            // Handle actions requested by the widget host.
-            super.onReceive(context, intent);
-        }
-    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -121,34 +90,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.search_widget_voice_btn, View.GONE);
         }
 
-        // Shortcuts
-        if (SHOW_SHORTCUT_IN_WIDGET) {
-            bindShortcuts(context, views);
-        }
-
         appWidgetManager.updateAppWidget(appWidgetIds, views);
-    }
-
-    private void bindShortcuts(Context context, RemoteViews views) {
-        ShortcutRepository shortcutRepo = getShortcutRepository(context);
-        SuggestionCursor shortcuts = shortcutRepo.getShortcutsForQuery("");
-        try {
-            if (shortcuts != null && shortcuts.getCount() > 0) {
-                shortcuts.moveTo(0);
-                RemoteViews shortcutView = new RemoteViews(context.getPackageName(),
-                        R.layout.widget_suggestion);
-                bindRemoteViewSuggestion(context, shortcutView, shortcuts);
-                views.addView(R.id.widget_shortcuts, shortcutView);
-                views.setViewVisibility(R.id.widget_shortcuts, View.VISIBLE);
-            } else {
-                if (DBG) Log.d(TAG, "No shortcuts, hiding drop-down.");
-                views.setViewVisibility(R.id.widget_shortcuts, View.GONE);
-            }
-        } finally {
-            if (shortcuts != null) {
-                shortcuts.close();
-            }
-        }
     }
 
     private void bindSourceSelector(Context context, RemoteViews views, Bundle widgetAppData) {
@@ -167,56 +109,12 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         return source.getSourceIconUri();
     }
 
-    private void bindRemoteViewSuggestion(Context context, RemoteViews views,
-            SuggestionCursor suggestion) {
-        CharSequence text1 = suggestion.getSuggestionFormattedText1();
-        CharSequence text2 = suggestion.getSuggestionFormattedText2();
-        Uri icon1 = suggestion.getIconUri(suggestion.getSuggestionIcon1());
-        if (icon1 == null) {
-            icon1 = suggestion.getSourceIconUri();
-        }
-        Uri icon2 = suggestion.getIconUri(suggestion.getSuggestionIcon2());
-        PendingIntent pendingIntent = getWidgetSuggestionIntent(context, suggestion);
-        if (DBG) {
-            Log.d(TAG, "Adding shortcut to widget: text1=" + text1 + ",text2=" + text2
-                    + ",icon1=" + icon1 + ",icon2=" + icon2);
-            Log.d(TAG, "    intent=" + pendingIntent);
-        }
-        setText1(views, text1);
-        setIcon1(views, icon1);
-        setPendingIntent(views, pendingIntent);
-    }
-
-    private PendingIntent getWidgetSuggestionIntent(Context context, SuggestionCursor suggestion) {
-        Bundle widgetAppData = new Bundle();
-        widgetAppData.putString(SOURCE, WIDGET_SEARCH_SHORTCUT_SOURCE);
-        Intent intent = suggestion.getSuggestionIntent(context, widgetAppData,
-                KeyEvent.KEYCODE_UNKNOWN, null);
-        return PendingIntent.getActivity(context, 0, intent, 0);
-    }
-
-    private void setText1(RemoteViews views, CharSequence text) {
-        views.setCharSequence(R.id.text1, "setText", text);
-    }
-
-    private void setIcon1(RemoteViews views, Uri icon) {
-        views.setImageViewUri(R.id.icon1, icon);
-    }
-
-    private void setPendingIntent(RemoteViews views, PendingIntent pendingIntent) {
-        views.setOnClickPendingIntent(R.id.widget_suggestion, pendingIntent);
-    }
-
     private QsbApplication getQsbApplication(Context context) {
         return (QsbApplication) context.getApplicationContext();
     }
 
     private SourceLookup getSources(Context context) {
         return getQsbApplication(context).getSources();
-    }
-
-    private ShortcutRepository getShortcutRepository(Context context) {
-        return getQsbApplication(context).getShortcutRepository();
     }
 
     private SuggestionViewFactory getSuggestionViewFactory(Context context) {

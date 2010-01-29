@@ -176,8 +176,6 @@ public class SearchActivity extends Activity {
 
     private void setLastSelectedSource(Source source) {
         getSources().setLastSelectedSource(source);
-        // Update search widgets to show the new source.
-        SearchWidgetProvider.updateSearchWidgets(this);
     }
 
     private Source getSourceByName(String sourceNameStr) {
@@ -359,8 +357,6 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "Launching suggestion " + suggestion);
         mLauncher.launchSuggestion(suggestion, actionKey, actionMsg);
         getShortcutRepository().reportClick(suggestion);
-        // Update search widgets, since the top shortcuts can have changed.
-        SearchWidgetProvider.updateSearchWidgets(this);
         return true;
     }
 

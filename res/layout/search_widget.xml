@@ -14,74 +14,47 @@
      limitations under the License.
 -->
 
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_search"
+    android:id="@+id/search_plate"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingLeft="13dip"
+    android:paddingRight="13dip"
+    android:paddingTop="13dip"
+    android:paddingBottom="9dip"
+    android:background="@drawable/search_floater" >
 
-    <!-- Shortcuts come first to give it lower z-index. -->
-    <LinearLayout
-        android:id="@+id/widget_shortcuts"
-        android:layout_width="match_parent"
-        android:layout_height="56dip"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="-10dip"
-        android:layout_marginLeft="10dip"
-        android:layout_marginRight="10dip"
-        android:orientation="horizontal"
-        android:gravity="bottom|left"
-        android:paddingLeft="14dip"
-        android:paddingRight="14dip"
-        android:paddingTop="13dip"
-        android:paddingBottom="12dip"
-        android:background="@drawable/search_floater"
-        android:visibility="invisible"
-        >
-    </LinearLayout>
+    <include android:id="@+id/widget_search_source_selector"
+        layout="@layout/search_source_selector" />
 
-    <LinearLayout
-        android:id="@+id/search_plate"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/search_widget_text"
+        android:layout_width="0dip"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:orientation="horizontal"
-        android:paddingLeft="14dip"
-        android:paddingRight="14dip"
-        android:paddingTop="13dip"
-        android:paddingBottom="12dip"
-        android:background="@drawable/search_floater" >
+        android:layout_weight="1.0"
+        android:layout_marginLeft="4dip"
+        android:layout_marginBottom="0dip"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:editable="false"
+        android:focusable="true"
+        android:inputType="none"
+        android:hint="@string/search_widget_hint"
+        android:background="@android:drawable/edit_text"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse"
+        android:textColor="@android:color/primary_text_light"
+    />
 
-        <include android:id="@+id/widget_search_source_selector"
-            layout="@layout/search_source_selector" />
+    <ImageButton
+        android:id="@+id/search_widget_voice_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="4dip"
+        android:layout_marginBottom="4dip"
+        android:background="@drawable/btn_search_dialog_voice"
+        android:src="@drawable/ic_btn_speak_now"
+    />
 
-        <TextView
-            android:id="@+id/search_widget_text"
-            android:layout_width="0dip"
-            android:layout_height="42dip"
-            android:layout_weight="1.0"
-            android:editable="false"
-            android:focusable="true"
-            android:inputType="none"
-            android:hint="@string/search_widget_hint"
-            android:background="@drawable/textfield_searchwidget"
-            android:textAppearance="?android:attr/textAppearanceMediumInverse"
-            android:textColor="@android:color/primary_text_light"
-        />
-
-        <ImageButton
-            android:id="@+id/search_widget_voice_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="42dip"
-            android:layout_marginLeft="4dip"
-            android:background="@drawable/btn_search_dialog_voice"
-            android:src="@drawable/ic_btn_speak_now"
-        />
-
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>

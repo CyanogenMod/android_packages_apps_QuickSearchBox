@@ -14,13 +14,30 @@
      limitations under the License.
 -->
 
-<GridView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/source_list"
+    android:id="@+id/select_search_source_frame"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/select_search_source_bg"
-    android:numColumns="4"
-    android:horizontalSpacing="8dip"
-    android:verticalSpacing="8dip"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dip"
+        android:text="@string/search_source_list_heading"
     />
+
+    <GridView
+        android:id="@+id/source_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|left"
+        android:numColumns="4"
+        android:horizontalSpacing="8dip"
+        android:verticalSpacing="8dip"
+        />
+
+</LinearLayout>

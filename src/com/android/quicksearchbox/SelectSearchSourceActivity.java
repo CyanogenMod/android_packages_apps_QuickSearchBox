@@ -70,34 +70,29 @@ public class SelectSearchSourceActivity extends Activity {
 
     private void handleIntent(Intent intent) {
         if (DBG) Log.d(TAG, "handleIntent(" + getIntent().toUri(0) + ")");
-        setupWindow(intent.getSourceBounds());
         updateSources();
+        positionWindow(intent.getSourceBounds());
     }
 
-    private void setupWindow(Rect target) {
-        if (target == null) {
-            Log.w(TAG, "No source bounds in intent.");
-            target = new Rect(0,0,0,0);
-        }
-        if (DBG) Log.d(TAG, "Source bounds: " + target);
-
+    private void positionWindow(Rect target) {
+        if (DBG) Log.d(TAG, "target: " + target);
         Window window = getWindow();
-        WindowManager windowManager = window.getWindowManager();
-        int screenWidth = windowManager.getDefaultDisplay().getWidth();
-        int screenHeight = windowManager.getDefaultDisplay().getHeight();
-        if (DBG) Log.d(TAG, "Screen size: " + screenWidth + "x" + screenHeight);
 
         WindowManager.LayoutParams lp = window.getAttributes();
         // TODO: Get these offsets from the position of the bubble arrow
-        int offsetX = 30;
-        int offsetY = 0;
-        lp.x = target.centerX() - offsetX;
-        lp.y = target.centerY() - offsetY;
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        // TODO: These need to be scaled to the device density
+        int offsetX = 0;
+        int offsetY = 10;
+        lp.x = 0;
+        lp.y = target.bottom - offsetY;
         lp.gravity = Gravity.TOP | Gravity.LEFT;
-        lp.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        // Use screen coordinates
+        lp.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        lp.flags |=  WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        // Put window on top of input method
+        lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         window.setAttributes(lp);
         if (DBG) Log.d(TAG, "Window params: " + lp);
     }

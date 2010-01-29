@@ -18,10 +18,11 @@
     <string name="app_name">Quick Search Box</string>
 
     <!-- Search widget -->
-    <string name="search_widget">Quick Search Box</string>
-    <string name="search_widget_hint">Quick Search Box</string>
+    <string name="search_widget">Search</string>
+    <string name="search_widget_hint">Search</string>
 
     <!-- Source selector -->
+    <string name="search_source_list_heading">Search in:</string>
     <string name="global_search_label">Everything</string>
 
     <!-- Search settings stuff -->
