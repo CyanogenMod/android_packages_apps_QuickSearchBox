@@ -17,20 +17,14 @@
 package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.R;
-
 import com.google.android.providers.GoogleSettings.Partner;
 
 import android.app.Activity;
 import android.app.SearchManager;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -51,13 +45,10 @@ public class GoogleSearch extends Activity {
     // "source" parameter for Google search requests from unknown sources (e.g. apps). This will get
     // prefixed with the string 'android-' before being sent on the wire.
     final static String GOOGLE_SEARCH_SOURCE_UNKNOWN = "unknown";
-    
-    private LocationUtils mLocationUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mLocationUtils = LocationUtils.getLocationUtils(this);
         Intent intent = getIntent();
         String action = intent != null ? intent.getAction() : null;
         if (Intent.ACTION_WEB_SEARCH.equals(action) || Intent.ACTION_SEARCH.equals(action)) {
@@ -124,57 +115,11 @@ public class GoogleSearch extends Activity {
                     + "&q=" + URLEncoder.encode(query, "UTF-8");
             Intent launchUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri));
             launchUriIntent.putExtra(Browser.EXTRA_APPLICATION_ID, applicationId);
-            launchUriIntent.putExtra(Browser.EXTRA_POST_DATA, getLocationData());
             launchUriIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(launchUriIntent);
         } catch (UnsupportedEncodingException e) {
             Log.w(TAG, "Error", e);
         }
-    }
-    
-    private byte[] getLocationData() {
-        byte[] postData = null;
-        ContentResolver cr = getContentResolver();
-        
-        // Don't send any location if the system does not have GoogleSettingsProvider.
-        if (!mLocationUtils.systemHasGoogleSettingsProvider()) return postData;
-        
-        if (!mLocationUtils.userRespondedToLocationOptIn()) {
-            // Bring up the consent dialog if it the user has yet responded to it. We
-            // will not send the location info for this query.
-            mLocationUtils.showLocationOptIn();
-        } else if (mLocationUtils.userAcceptedLocationOptIn() &&
-                isLocationProviderEnabled(cr, LocationManager.NETWORK_PROVIDER)) {
-            Location location = ((LocationManager) getSystemService(
-                    Context.LOCATION_SERVICE)).getLastKnownLocation(
-                            LocationManager.NETWORK_PROVIDER);
-            if (location != null) {
-                StringBuilder str = new StringBuilder("action=devloc&sll=");
-                str.append(location.getLatitude()).append(',').append(location.getLongitude());
-                postData = str.toString().getBytes();
-            }
-        }
-        return postData;
-    }
-
-    /**
-     * Utility method copied from android.provider.Settings.Secure.
-     *
-     * Helper method for determining if a location provider is enabled.
-     * @param cr the content resolver to use
-     * @param provider the location provider to query
-     * @return true if the provider is enabled
-     */
-    private static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
-        String allowedProviders = Settings.Secure.getString(cr,
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        if (allowedProviders != null) {
-            return (allowedProviders.equals(provider) ||
-                    allowedProviders.contains("," + provider + ",") ||
-                    allowedProviders.startsWith(provider + ",") ||
-                    allowedProviders.endsWith("," + provider));
-        }
-        return false;
     }
 
 }

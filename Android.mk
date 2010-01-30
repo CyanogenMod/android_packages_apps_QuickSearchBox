@@ -23,7 +23,7 @@ LOCAL_MODULE_TAGS := optional
 # Commented out until the last few uses of hidden stuff have been fixed
 #LOCAL_SDK_VERSION := current
 
-LOCAL_STATIC_JAVA_LIBRARIES := google-framework google-common android-common
+LOCAL_STATIC_JAVA_LIBRARIES := google-framework
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
