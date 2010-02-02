@@ -17,7 +17,6 @@
 package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.R;
-import com.google.android.providers.GoogleSettings.Partner;
 
 import android.app.Activity;
 import android.app.SearchManager;
@@ -88,9 +87,7 @@ public class GoogleSearch extends Activity {
                 }
             }
             googleSearchUrlBase = getResources().getString(
-                    R.string.google_search_base, language, country)
-                    + "client=ms-"
-                    + Partner.getString(this.getContentResolver(), Partner.CLIENT_ID);
+                    R.string.google_search_base, language, country);
         }
 
         // If the caller specified a 'source' url parameter, use that and if not use default.
