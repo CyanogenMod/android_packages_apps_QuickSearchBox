@@ -56,10 +56,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String SHORTCUT_BY_ID_WHERE =
             Shortcuts.shortcut_id.name() + "=? AND " + Shortcuts.source.name() + "=?";
 
-    private static final String SHORTCUT_BY_CONFLICTING_INTENT =
-            Shortcuts.intent_key.name() + "=? AND (" + Shortcuts.shortcut_id.name()
-                    + "!=? OR " + Shortcuts.source.name() + "!=?)";
-
     private static final String SOURCE_RANKING_SQL = buildSourceRankingSql();
 
     private final Context mContext;
@@ -265,18 +261,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         } else {
             if (DBG) Log.d(TAG, "Updating shortcut: " + shortcutId);
             ContentValues shortcut = makeShortcutRow(refreshed);
-            // Remove any conflicting shortcuts that have the same intent key
-            // as the updated shortcut.
-            String[] conflictArgs = { shortcut.getAsString(Shortcuts.intent_key.name()),
-                    shortcutId, source.flattenToShortString() };
-            db.beginTransaction();
-            try {
-                db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_CONFLICTING_INTENT, conflictArgs);
-                db.update(Shortcuts.TABLE_NAME, shortcut, SHORTCUT_BY_ID_WHERE, whereArgs);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
+            db.updateWithOnConflict(Shortcuts.TABLE_NAME, shortcut,
+                    SHORTCUT_BY_ID_WHERE, whereArgs, SQLiteDatabase.ConflictAlgorithm.REPLACE);
         }
     }
 
