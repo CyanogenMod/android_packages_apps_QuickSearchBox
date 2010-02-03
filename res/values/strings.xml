@@ -19,7 +19,6 @@
 
     <!-- Search widget -->
     <string name="search_widget">Search</string>
-    <string name="search_widget_hint">Search</string>
 
     <!-- Source selector -->
     <string name="search_source_list_heading">Search in:</string>
