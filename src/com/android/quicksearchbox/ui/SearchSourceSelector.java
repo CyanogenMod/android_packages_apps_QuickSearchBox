@@ -21,7 +21,6 @@ import com.android.quicksearchbox.R;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -37,10 +36,6 @@ import java.util.List;
 /**
  * Utilities for setting up the search source selector.
  *
- * This class has two copies:
- * android.app.SearchSourceSelector
- * com.android.quicksearchbox.ui.SearchSourceSelector
- *
  * They should keep the same look and feel as much as possible,
  * but only the intent details must absolutely stay in sync.
  *
@@ -50,9 +45,10 @@ public class SearchSourceSelector implements View.OnClickListener {
 
     private static final String TAG = "SearchSourceSelector";
 
-    // TODO: This should be defined in android.provider.Applications,
-    // and have a less made-up value.
-    private static final String APPLICATION_TYPE = "application/vnd.android.application";
+    public static final String INTENT_ACTION_SELECT_SEARCH_SOURCE
+            = "com.android.quicksearchbox.action.SELECT_SEARCH_SOURCE";
+
+    private static final String SCHEME_COMPONENT = "android.component";
 
     public static final int ICON_VIEW_ID = R.id.search_source_selector_icon;
 
@@ -116,14 +112,11 @@ public class SearchSourceSelector implements View.OnClickListener {
      *        activity if the user opens the source selector and chooses a source.
      */
     public static Intent createIntent(ComponentName source, String query, Bundle appSearchData) {
-        Intent intent = new Intent(SearchManager.INTENT_ACTION_SELECT_SEARCH_SOURCE);
+        Intent intent = new Intent(INTENT_ACTION_SELECT_SEARCH_SOURCE);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        Uri sourceUri = componentNameToUri(source);
-        if (sourceUri != null) {
-            intent.setDataAndType(sourceUri, APPLICATION_TYPE);
-        }
+        setSource(intent, source);
         if (query != null) {
             intent.putExtra(SearchManager.QUERY, query);
         }
@@ -133,32 +126,32 @@ public class SearchSourceSelector implements View.OnClickListener {
         return intent;
     }
 
-    /**
-     * Gets the search source from which the given
-     * {@link SearchManager.INTENT_ACTION_SELECT_SEARCH_SOURCE} intent was sent.
-     */
     public static ComponentName getSource(Intent intent) {
         return uriToComponentName(intent.getData());
     }
 
+    public static void setSource(Intent intent, ComponentName source) {
+        if (source != null) {
+            intent.setData(componentNameToUri(source));
+        }
+    }
+
     private static Uri componentNameToUri(ComponentName name) {
         if (name == null) return null;
-        // TODO: This URI format is specificed in android.provider.Applications which is @hidden
         return new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_CONTENT)
-                .authority("applications")
-                .appendEncodedPath("applications")
-                .appendPath(name.getPackageName())
-                .appendPath(name.getClassName())
+                .scheme(SCHEME_COMPONENT)
+                .authority(name.getPackageName())
+                .path(name.getClassName())
                 .build();
     }
 
     private static ComponentName uriToComponentName(Uri uri) {
         if (uri == null) return null;
+        if (!SCHEME_COMPONENT.equals(uri.getScheme())) return null;
+        String pkg = uri.getAuthority();
         List<String> path = uri.getPathSegments();
-        if (path == null || path.size() != 3) return null;
-        String pkg = path.get(1);
-        String cls = path.get(2);
+        if (path == null || path.isEmpty()) return null;
+        String cls = path.get(0);
         if (TextUtils.isEmpty(pkg) || TextUtils.isEmpty(cls)) return null;
         return new ComponentName(pkg, cls);
     }

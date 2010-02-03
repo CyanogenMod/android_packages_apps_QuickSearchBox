@@ -50,31 +50,43 @@ public class SearchWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        updateSearchWidgets(context, appWidgetManager, appWidgetIds);
+        final int count = appWidgetIds.length;
+        for (int i = 0; i < count; i++) {
+            updateSearchWidget(context, appWidgetManager, appWidgetIds[i]);
+        }
     }
 
-    /**
-     * Updates a set of search widgets.
-     */
-    private void updateSearchWidgets(Context context, AppWidgetManager appWidgetManager,
-            int[] appWidgetIds) {
-        if (DBG) Log.d(TAG, "updateSearchWidgets()");
+    private void updateSearchWidget(Context context, AppWidgetManager appWidgetManager,
+				    int appWidgetId) {
+	ComponentName sourceName = SearchWidgetConfigActivity.readWidgetSourcePref(context, appWidgetId);
+	Source source = getSources(context).getSourceByComponentName(sourceName);
+	setupSearchWidget(context, appWidgetManager, appWidgetId, source);
+    }
+
+    public static void setupSearchWidget(Context context, AppWidgetManager appWidgetManager,
+				    int appWidgetId, Source source) {
+        if (DBG) Log.d(TAG, "setupSearchWidget()");
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
+
+        ComponentName sourceName = source == null ? null : source.getComponentName();
 
         Bundle widgetAppData = new Bundle();
         widgetAppData.putString(SOURCE, WIDGET_SEARCH_SOURCE);
 
         // Source selector
-        bindSourceSelector(context, views, widgetAppData);
+        bindSourceSelector(context, views, widgetAppData, source);
 
         // Text field
         Intent qsbIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         qsbIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         qsbIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
+        SearchSourceSelector.setSource(qsbIntent, sourceName);
         PendingIntent textPendingIntent = PendingIntent.getActivity(context, 0, qsbIntent, 0);
         views.setOnClickPendingIntent(R.id.search_widget_text, textPendingIntent);
 
         // Voice search button. Only shown if voice search is available.
+	// TODO: This should be Voice Search for the selected source,
+	// and only show if available for that source
         Intent voiceSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
         voiceSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         voiceSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -90,12 +102,11 @@ public class SearchWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.search_widget_voice_btn, View.GONE);
         }
 
-        appWidgetManager.updateAppWidget(appWidgetIds, views);
+        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
-    private void bindSourceSelector(Context context, RemoteViews views, Bundle widgetAppData) {
-        // TODO: Allow user to select source when adding the widget
-        Source source = null;
+    private static void bindSourceSelector(Context context, RemoteViews views,
+		   Bundle widgetAppData, Source source) {
         Uri sourceIconUri = getSourceIconUri(context, source);
         views.setImageViewUri(SearchSourceSelector.ICON_VIEW_ID, sourceIconUri);
         Intent intent = SearchSourceSelector.createIntent(null, "", widgetAppData);
@@ -103,22 +114,22 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         views.setOnClickPendingIntent(SearchSourceSelector.ICON_VIEW_ID, pendingIntent);
     }
 
-    private Uri getSourceIconUri(Context context, Source source) {
+    private static Uri getSourceIconUri(Context context, Source source) {
         if (source == null) {
             return getSuggestionViewFactory(context).getGlobalSearchIconUri();
         }
         return source.getSourceIconUri();
     }
 
-    private QsbApplication getQsbApplication(Context context) {
+    private static QsbApplication getQsbApplication(Context context) {
         return (QsbApplication) context.getApplicationContext();
     }
 
-    private SourceLookup getSources(Context context) {
+    private static SourceLookup getSources(Context context) {
         return getQsbApplication(context).getSources();
     }
 
-    private SuggestionViewFactory getSuggestionViewFactory(Context context) {
+    private static SuggestionViewFactory getSuggestionViewFactory(Context context) {
         return getQsbApplication(context).getSuggestionViewFactory();
     }
 

@@ -35,7 +35,6 @@ import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -59,9 +58,6 @@ public class SearchActivity extends Activity {
     // TODO: This is hidden in SearchManager
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
-
-    public static final String EXTRA_KEY_SEARCH_SOURCE
-            = "search_source";
 
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_SOURCE = "source";
@@ -178,28 +174,16 @@ public class SearchActivity extends Activity {
 
     private void setupFromIntent(Intent intent) {
         if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
-        if (intent.hasExtra(EXTRA_KEY_SEARCH_SOURCE)) {
-            Source source = getSourceByName(intent.getStringExtra(EXTRA_KEY_SEARCH_SOURCE));
-            setSource(source);
-        } else {
-            setSource(null);
-        }
+        ComponentName sourceName = SearchSourceSelector.getSource(intent);
+        Source source = getSourceByComponentName(sourceName);
+        setSource(source);
         setUserQuery(intent.getStringExtra(SearchManager.QUERY));
         mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
         setAppSearchData(intent.getBundleExtra(SearchManager.APP_DATA));
     }
 
-    private Source getSourceByName(String sourceNameStr) {
-        if (sourceNameStr == null) return null;
-        ComponentName sourceName = ComponentName.unflattenFromString(sourceNameStr);
-        if (sourceName == null) {
-            Log.w(TAG, "Malformed source name: " + sourceName);
-            return null;
-        }
-        return getSourceByComponentName(sourceName);
-    }
-
     private Source getSourceByComponentName(ComponentName sourceName) {
+        if (sourceName == null) return null;
         Source source = getSources().getSourceByComponentName(sourceName);
         if (source == null) {
             Log.w(TAG, "Unknown source " + sourceName);

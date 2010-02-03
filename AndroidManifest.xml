@@ -48,6 +48,11 @@
                 <action android:name="android.search.action.GLOBAL_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.search.action.GLOBAL_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="android.component" />
+            </intent-filter>
         </activity>
 
         <activity android:name=".SelectSearchSourceActivity"
@@ -58,13 +63,13 @@
                   android:windowSoftInputMode="stateUnchanged|adjustResize"
                   >
             <intent-filter>
-                <action android:name="android.intent.action.SELECT_SEARCH_SOURCE" />
+                <action android:name="com.android.quicksearchbox.action.SELECT_SEARCH_SOURCE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SELECT_SEARCH_SOURCE" />
+                <action android:name="com.android.quicksearchbox.action.SELECT_SEARCH_SOURCE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="content" android:mimeType="application/vnd.android.application" />
+                <data android:scheme="android.component" />
             </intent-filter>
         </activity>
 
@@ -87,6 +92,14 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/search_widget_info" />
         </receiver>
+
+        <!-- This class name is referenced in res/xml/search_widget_info.xml -->
+        <activity android:name="com.android.quicksearchbox.SearchWidgetConfigActivity"
+                android:theme="@style/Theme.QuickSearchBox">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
 
         <activity android:name=".google.GoogleSearch"
                 android:label="@string/google_search_label"
@@ -119,4 +132,4 @@
             android:authorities="com.android.quicksearchbox.google" />
 
     </application>
-</manifest> 
+</manifest>

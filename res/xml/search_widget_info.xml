@@ -18,5 +18,6 @@
     android:minWidth="294dip"
     android:minHeight="72dip"
     android:updatePeriodMillis="0"
-    android:initialLayout="@layout/search_widget">
+    android:initialLayout="@layout/search_widget"
+    android:configure="com.android.quicksearchbox.SearchWidgetConfigActivity">
 </appwidget-provider>

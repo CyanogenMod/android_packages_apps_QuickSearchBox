@@ -20,6 +20,9 @@
     <!-- Search widget -->
     <string name="search_widget">Search</string>
 
+    <!-- Search widget config -->
+    <string name="search_widget_config_ok">OK</string>
+
     <!-- Source selector -->
     <string name="search_source_list_heading">Search in:</string>
     <string name="global_search_label">Everything</string>
