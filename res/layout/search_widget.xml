@@ -41,8 +41,8 @@
         android:editable="false"
         android:focusable="true"
         android:inputType="none"
-        android:hint="@string/search_widget_hint"
         android:background="@android:drawable/edit_text"
+        android:drawableLeft="@drawable/placeholder_google"
         android:textAppearance="?android:attr/textAppearanceMediumInverse"
         android:textColor="@android:color/primary_text_light"
     />
