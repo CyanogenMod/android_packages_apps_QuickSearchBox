@@ -94,7 +94,8 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     }
 
     private void bindSourceSelector(Context context, RemoteViews views, Bundle widgetAppData) {
-        Source source = getSources(context).getLastSelectedSource();
+        // TODO: Allow user to select source when adding the widget
+        Source source = null;
         Uri sourceIconUri = getSourceIconUri(context, source);
         views.setImageViewUri(SearchSourceSelector.ICON_VIEW_ID, sourceIconUri);
         Intent intent = SearchSourceSelector.createIntent(null, "", widgetAppData);

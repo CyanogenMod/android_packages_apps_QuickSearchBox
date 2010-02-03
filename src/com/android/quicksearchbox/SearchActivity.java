@@ -162,20 +162,12 @@ public class SearchActivity extends Activity {
         if (intent.hasExtra(EXTRA_KEY_SEARCH_SOURCE)) {
             Source source = getSourceByName(intent.getStringExtra(EXTRA_KEY_SEARCH_SOURCE));
             setSource(source);
-            // The source was selected by the user, save it.
-            setLastSelectedSource(source);
         } else {
-            Source source = getSources().getLastSelectedSource();
-            if (DBG) Log.d(TAG, "Setting source from preferences: " + source);
-            setSource(source);
+            setSource(null);
         }
         setUserQuery(intent.getStringExtra(SearchManager.QUERY));
         mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
         setAppSearchData(intent.getBundleExtra(SearchManager.APP_DATA));
-    }
-
-    private void setLastSelectedSource(Source source) {
-        getSources().setLastSelectedSource(source);
     }
 
     private Source getSourceByName(String sourceNameStr) {
