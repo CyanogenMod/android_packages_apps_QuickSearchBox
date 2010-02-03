@@ -57,7 +57,7 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         mContext = context;
     }
 
-    private LayoutInflater getInflater() {
+    protected LayoutInflater getInflater() {
         return (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
