@@ -256,6 +256,7 @@ public class Suggestions {
     private class MyShortcutsObserver extends DataSetObserver {
         @Override
         public void onChanged() {
+            mPromoted = null;
             notifyDataSetChanged();
         }
     }
