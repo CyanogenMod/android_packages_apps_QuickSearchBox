@@ -66,19 +66,4 @@ public interface SourceLookup {
 
     ArrayList<Source> getEnabledSources();
 
-    /**
-     * Gets the last source selected by the user. This is saved across application invocations.
-     *
-     * @return A source, or {@code null} if no source has been selected, or if the last selected
-     *         source was global search.
-     */
-    Source getLastSelectedSource();
-
-    /**
-     * Sets the source selected by the user. This is saved across application invocations.
-     *
-     * @param source A source, or {@code null} if the last selected source was global search.
-     */
-    void setLastSelectedSource(Source source);
-
 }
