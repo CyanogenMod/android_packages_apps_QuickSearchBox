@@ -40,6 +40,8 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
 
     private final Promoter mPromoter;
 
+    private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
+
     public AbstractSuggestionsProvider(Config config,
             SourceTaskExecutor queryExecutor,
             Handler publishThread,
@@ -84,7 +86,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
     }
 
     protected boolean shouldQuerySource(Source source, String query) {
-        return query.length() >= source.getQueryThreshold();
+        return mShouldQueryStrategy.shouldQuerySource(source, query);
     }
 
     public Suggestions getSuggestions(String query) {
@@ -109,6 +111,10 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
             public void receiveSuggestionCursor(final SuggestionCursor cursor) {
                 mPublishThread.post(new Runnable() {
                     public void run() {
+                        if (cursor.getCount() == 0) {
+                            mShouldQueryStrategy.onZeroResults(
+                                    cursor.getSourceComponentName(), cursor.getUserQuery());
+                        }
                         suggestions.addSourceResult(cursor);
                     }
                 });
