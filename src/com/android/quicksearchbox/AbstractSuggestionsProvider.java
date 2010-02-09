@@ -42,6 +42,8 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
 
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
 
+    private BatchingSourceTaskExecutor mBatchingExecutor;
+
     public AbstractSuggestionsProvider(Config config,
             SourceTaskExecutor queryExecutor,
             Handler publishThread,
@@ -60,7 +62,10 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
      * Cancels all pending query tasks.
      */
     private void cancelPendingTasks() {
-        mQueryExecutor.cancelPendingTasks();
+        if (mBatchingExecutor != null) {
+            mBatchingExecutor.cancelPendingTasks();
+            mBatchingExecutor = null;
+        }
     }
 
     public abstract ArrayList<Source> getOrderedSources();
@@ -89,6 +94,13 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         return mShouldQueryStrategy.shouldQuerySource(source, query);
     }
 
+    private void updateShouldQueryStrategy(SuggestionCursor cursor) {
+        if (cursor.getCount() == 0) {
+            mShouldQueryStrategy.onZeroResults(cursor.getSourceComponentName(),
+                    cursor.getUserQuery());
+        }
+    }
+
     public Suggestions getSuggestions(String query) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
@@ -107,31 +119,52 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
             return suggestions;
         }
 
-        SuggestionCursorReceiver receiver = new SuggestionCursorReceiver() {
-            public void receiveSuggestionCursor(final SuggestionCursor cursor) {
-                mPublishThread.post(new Runnable() {
-                    public void run() {
-                        if (cursor.getCount() == 0) {
-                            mShouldQueryStrategy.onZeroResults(
-                                    cursor.getSourceComponentName(), cursor.getUserQuery());
-                        }
-                        suggestions.addSourceResult(cursor);
-                    }
-                });
-            }
-        };
+        mBatchingExecutor = new BatchingSourceTaskExecutor(mQueryExecutor,
+                mConfig.getNumPromotedSources());
+
+        SuggestionCursorReceiver receiver = new SuggestionCursorReceiver(
+                mBatchingExecutor, suggestions);
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
         for (Source source : sourcesToQuery) {
             QueryTask task = new QueryTask(query, source, maxResultsPerSource, receiver);
-            mQueryExecutor.execute(task);
+            mBatchingExecutor.execute(task);
         }
 
         return suggestions;
     }
 
-    private interface SuggestionCursorReceiver {
-        void receiveSuggestionCursor(SuggestionCursor cursor);
+    private class SuggestionCursorReceiver {
+        private final BatchingSourceTaskExecutor mExecutor;
+        private final Suggestions mSuggestions;
+
+        public SuggestionCursorReceiver(BatchingSourceTaskExecutor executor,
+                Suggestions suggestions) {
+            mExecutor = executor;
+            mSuggestions = suggestions;
+        }
+
+        public void receiveSuggestionCursor(final SuggestionCursor cursor) {
+            updateShouldQueryStrategy(cursor);
+            mPublishThread.post(new Runnable() {
+                public void run() {
+                    mSuggestions.addSourceResult(cursor);
+                    if (!mSuggestions.isClosed()) {
+                        executeNextBatchIfNeeded();
+                    }
+                }
+            });
+        }
+
+        private void executeNextBatchIfNeeded() {
+            if (mSuggestions.getSourceCount() % mConfig.getNumPromotedSources() == 0) {
+                // We've just finished one batch
+                if (mSuggestions.getPromoted().getCount() < mConfig.getMaxPromotedSuggestions()) {
+                    // But we still don't have enough results, ask for more
+                    mExecutor.executeNextBatch();
+                }
+            }
+        }
     }
 
     /**

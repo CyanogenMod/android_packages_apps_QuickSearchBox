@@ -30,7 +30,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * A shortcut repository implementation that uses a log of every click.
@@ -46,7 +45,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 24;
+    private static final int DB_VERSION = 25;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -140,17 +139,14 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     /**
-     * @return sql that ranks sources by click through rate, filtering out sources without enough
-     *         impressions.
+     * @return sql that ranks sources by total clicks, filtering out sources
+     *         without enough clicks.
      */
     private static String buildSourceRankingSql() {
-        final String orderingExpr = "1000*" + SourceStats.total_clicks.name() +
-                "/" + SourceStats.total_impressions.name();
-
+        final String orderingExpr = SourceStats.total_clicks.name();
         final String tables = SourceStats.TABLE_NAME;
         final String[] columns = SourceStats.COLUMNS;
-        final String where = SourceStats.total_impressions + " >= $1 AND "
-                + SourceStats.total_clicks + " >= $2";
+        final String where = SourceStats.total_clicks + " >= $1";
         final String groupBy = null;
         final String having = null;
         final String orderBy = orderingExpr + " DESC";
@@ -193,10 +189,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         logClick(clicked, System.currentTimeMillis());
     }
 
-    public void reportImpressions(List<SuggestionPosition> impressions) {
-        logImpressions(impressions, System.currentTimeMillis());
-    }
-
     public SuggestionCursor getShortcutsForQuery(String query) {
         ShortcutCursor shortcuts = getShortcutsForQuery(query, System.currentTimeMillis());
         if (shortcuts != null) {
@@ -206,8 +198,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     public ArrayList<ComponentName> getSourceRanking() {
-        return getSourceRanking(mConfig.getMinImpressionsForSourceRanking(),
-                mConfig.getMinClicksForSourceRanking());
+        return getSourceRanking(mConfig.getMinClicksForSourceRanking());
     }
 
 // -------------------------- end ShortcutRepository --------------------------
@@ -344,17 +335,15 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     /**
-     * Returns the source ranking for sources with a minimum number of impressions.
+     * Returns the source ranking for sources with a minimum number of clicks.
      *
-     * @param minImpressions The minimum number of impressions a source must have.
      * @param minClicks The minimum number of clicks a source must have.
-     * @return The list of sources, ranked by click through rate.
+     * @return The list of sources, ranked by total clicks.
      */
-    ArrayList<ComponentName> getSourceRanking(int minImpressions, int minClicks) {
+    ArrayList<ComponentName> getSourceRanking(int minClicks) {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         final Cursor cursor = db.rawQuery(
-                SOURCE_RANKING_SQL,
-                new String[] { String.valueOf(minImpressions), String.valueOf(minClicks) });
+                SOURCE_RANKING_SQL, new String[] { String.valueOf(minClicks) });
         try {
             final ArrayList<ComponentName> sources =
                     new ArrayList<ComponentName>(cursor.getCount());
@@ -458,33 +447,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             cv.put(SourceLog.component.name(), name.flattenToString());
             cv.put(SourceLog.time.name(), now);
             cv.put(SourceLog.click_count.name(), 1);
-            cv.put(SourceLog.impression_count.name(), 0);
             db.insertOrThrow(SourceLog.TABLE_NAME, null, cv);
-        }
-    }
-
-    private void logImpressions(List<SuggestionPosition> impressions, long now) {
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-        db.beginTransaction();
-        final ContentValues cv = new ContentValues();
-        try {
-            // TODO: aggregate the impressions and insert one row per source
-            for (SuggestionPosition suggestionPos : impressions) {
-                SuggestionCursor suggestion = suggestionPos.getSuggestion();
-                ComponentName name = suggestion.getSourceComponentName();
-
-                cv.put(SourceLog.component.name(), name.flattenToString());
-                cv.put(SourceLog.time.name(), now);
-                cv.put(SourceLog.click_count.name(), 0);
-                cv.put(SourceLog.impression_count.name(), 1);
-                db.insertOrThrow(SourceLog.TABLE_NAME, null, cv);
-
-                cv.clear();
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
         }
 
         postSourceEventCleanup(now);
@@ -493,8 +456,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     /**
      * Execute queries necessary to keep things up to date after inserting into {@link SourceLog}.
      *
-     * Note: we aren't using a TRIGGER because there are usually several writes to the log at a
-     * time, and triggers execute on each individual row insert.
+     * TODO: Switch back to using a trigger?
      *
      * @param now Millis since epoch of "now".
      */
@@ -508,8 +470,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         // update the source stats
         final String columns = SourceLog.component + "," +
-                "SUM(" + SourceLog.click_count.fullName + ")" + "," +
-                "SUM(" + SourceLog.impression_count.fullName + ")";
+                "SUM(" + SourceLog.click_count.fullName + ")";
         db.execSQL("DELETE FROM " + SourceStats.TABLE_NAME);
         db.execSQL("INSERT INTO " + SourceStats.TABLE_NAME  + " "
                 + "SELECT " + columns + " FROM " + SourceLog.TABLE_NAME + " GROUP BY "
@@ -607,14 +568,13 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
     /**
      * This is an aggregate table of {@link SourceLog} that stays up to date with the total
-     * clicks and impressions for each source.  This makes computing the source ranking more
-     * more efficient, at the expense of some extra work when the source clicks and impressions
-     * are reported at the end of the session.
+     * clicks for each source.  This makes computing the source ranking more
+     * more efficient, at the expense of some extra work when the source clicks
+     * are reported.
      */
     enum SourceStats {
         component,
-        total_clicks,
-        total_impressions;
+        total_clicks;
 
         static final String TABLE_NAME = "sourcetotals";
 
@@ -795,14 +755,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     SourceLog._id.name() + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
                     SourceLog.component.name() + " TEXT NOT NULL COLLATE UNICODE, " +
                     SourceLog.time.name() + " INTEGER, " +
-                    SourceLog.click_count + " INTEGER, " +
-                    SourceLog.impression_count + " INTEGER);"
+                    SourceLog.click_count + " INTEGER);"
             );
 
             db.execSQL("CREATE TABLE " + SourceStats.TABLE_NAME + " ( " +
                     SourceStats.component.name() + " TEXT NOT NULL COLLATE UNICODE PRIMARY KEY, " +
-                    SourceStats.total_clicks + " INTEGER, " +
-                    SourceStats.total_impressions + " INTEGER);"
+                    SourceStats.total_clicks + " INTEGER);"
                     );
         }
     }

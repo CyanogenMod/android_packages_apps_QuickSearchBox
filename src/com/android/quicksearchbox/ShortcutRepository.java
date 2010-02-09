@@ -48,11 +48,6 @@ public interface ShortcutRepository {
     void reportClick(SuggestionPosition clicked);
 
     /**
-     * Reports suggestion impressions.
-     */
-    void reportImpressions(List<SuggestionPosition> impressions);
-
-    /**
      * @param query The query.
      * @return A cursor containing shortcutted results for the query.
      */

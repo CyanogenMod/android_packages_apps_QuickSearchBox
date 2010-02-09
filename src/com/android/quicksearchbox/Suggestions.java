@@ -150,6 +150,10 @@ public class Suggestions {
         mSourceResultsBySource.clear();
     }
 
+    public boolean isClosed() {
+        return mClosed;
+    }
+
     @Override
     protected void finalize() {
         if (!mClosed) {
@@ -163,6 +167,7 @@ public class Suggestions {
      * Must be called on the UI thread, or before this object is seen by the UI thread.
      */
     public boolean isDone() {
+        // TODO: Handle early completion because we have all the results we want.
         return mSourceResults.size() >= mExpectedSourceCount;
     }
 
