@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import com.android.common.Search;
 import com.android.quicksearchbox.ui.SearchSourceSelector;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionSelectionListener;
@@ -266,7 +267,7 @@ public class SearchActivity extends Activity {
             // Start up latency should not exceed 2^31 ms (~ 25 days). Note that
             // SystemClock.uptimeMillis() does not advance during deep sleep.
             int latency = (int) (SystemClock.uptimeMillis() - mStartTime);
-            String source = getIntent().getStringExtra(SearchManager.SOURCE);
+            String source = getIntent().getStringExtra(Search.SOURCE);
             getLogger().logStart(latency, source, mSource,
                     getSuggestionsProvider().getOrderedSources());
         }

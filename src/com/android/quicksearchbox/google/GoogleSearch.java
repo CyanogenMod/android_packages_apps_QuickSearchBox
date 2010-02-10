@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox.google;
 
+import com.android.common.Search;
 import com.android.quicksearchbox.R;
 
 import android.app.Activity;
@@ -94,7 +95,7 @@ public class GoogleSearch extends Activity {
         Bundle appSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
         String source = GOOGLE_SEARCH_SOURCE_UNKNOWN;
         if (appSearchData != null) {
-            source = appSearchData.getString(SearchManager.SOURCE);
+            source = appSearchData.getString(Search.SOURCE);
         }
         
         // The browser can pass along an application id which it uses to figure out which

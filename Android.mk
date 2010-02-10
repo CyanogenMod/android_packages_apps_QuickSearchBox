@@ -23,6 +23,8 @@ LOCAL_MODULE_TAGS := optional
 # Commented out until the last few uses of hidden stuff have been fixed
 #LOCAL_SDK_VERSION := current
 
+LOCAL_STATIC_JAVA_LIBRARIES := android-common
+
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src) \
     $(call all-logtags-files-under, src)
