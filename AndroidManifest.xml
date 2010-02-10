@@ -52,21 +52,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="android.component" />
             </intent-filter>
-        </activity>
-
-        <activity android:name=".SelectSearchSourceActivity"
-                  android:theme="@style/Theme.SelectSearchSource"
-                  android:launchMode="singleTop"
-                  android:excludeFromRecents="true"
-                  android:taskAffinity="com.android.quicksearchbox.task.selectsearchsource"
-                  android:windowSoftInputMode="stateUnchanged|adjustResize"
-                  >
+            <!-- Intent sent by source selector in search widget. Opens QSB with
+                 corpus drop-down on top. -->
             <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.SELECT_SEARCH_SOURCE" />
+                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_SEARCH_SOURCE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.SELECT_SEARCH_SOURCE" />
+                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_SEARCH_SOURCE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="android.component" />
             </intent-filter>

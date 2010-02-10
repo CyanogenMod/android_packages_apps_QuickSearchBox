@@ -30,7 +30,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -57,14 +56,15 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     }
 
     private void updateSearchWidget(Context context, AppWidgetManager appWidgetManager,
-				    int appWidgetId) {
-	ComponentName sourceName = SearchWidgetConfigActivity.readWidgetSourcePref(context, appWidgetId);
-	Source source = getSources(context).getSourceByComponentName(sourceName);
-	setupSearchWidget(context, appWidgetManager, appWidgetId, source);
+            int appWidgetId) {
+        ComponentName sourceName =
+                SearchWidgetConfigActivity.readWidgetSourcePref(context, appWidgetId);
+        Source source = getSources(context).getSourceByComponentName(sourceName);
+        setupSearchWidget(context, appWidgetManager, appWidgetId, source);
     }
 
     public static void setupSearchWidget(Context context, AppWidgetManager appWidgetManager,
-				    int appWidgetId, Source source) {
+            int appWidgetId, Source source) {
         if (DBG) Log.d(TAG, "setupSearchWidget()");
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
 
@@ -78,25 +78,26 @@ public class SearchWidgetProvider extends AppWidgetProvider {
 
         // Text field
         Intent qsbIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
-        qsbIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        qsbIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         qsbIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
         SearchSourceSelector.setSource(qsbIntent, sourceName);
-        PendingIntent textPendingIntent = PendingIntent.getActivity(context, 0, qsbIntent, 0);
-        views.setOnClickPendingIntent(R.id.search_widget_text, textPendingIntent);
+        setOnClickIntent(context, views, R.id.search_widget_text, qsbIntent);
 
         // Voice search button. Only shown if voice search is available.
-	// TODO: This should be Voice Search for the selected source,
-	// and only show if available for that source
+        // TODO: This should be Voice Search for the selected source,
+        // and only show if available for that source
         Intent voiceSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        voiceSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        voiceSearchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         voiceSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         // TODO: Does VoiceSearch actually look at APP_DATA?
         voiceSearchIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
         if (voiceSearchIntent.resolveActivity(context.getPackageManager()) != null) {
-            PendingIntent voicePendingIntent =
-                PendingIntent.getActivity(context, 0, voiceSearchIntent, 0);
-            views.setOnClickPendingIntent(R.id.search_widget_voice_btn, voicePendingIntent);
+            setOnClickIntent(context, views, R.id.search_widget_voice_btn, voiceSearchIntent);
             views.setViewVisibility(R.id.search_widget_voice_btn, View.VISIBLE);
         } else {
             views.setViewVisibility(R.id.search_widget_voice_btn, View.GONE);
@@ -106,12 +107,24 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     }
 
     private static void bindSourceSelector(Context context, RemoteViews views,
-		   Bundle widgetAppData, Source source) {
+            Bundle widgetAppData, Source source) {
         Uri sourceIconUri = getSourceIconUri(context, source);
         views.setImageViewUri(SearchSourceSelector.ICON_VIEW_ID, sourceIconUri);
-        Intent intent = SearchSourceSelector.createIntent(null, "", widgetAppData);
+        ComponentName sourceName = source == null ? null : source.getComponentName();
+
+        Intent intent = new Intent(SearchActivity.INTENT_ACTION_QSB_AND_SELECT_SEARCH_SOURCE);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        intent.putExtra(SearchManager.APP_DATA, widgetAppData);
+        SearchSourceSelector.setSource(intent, sourceName);
+        setOnClickIntent(context, views, SearchSourceSelector.ICON_VIEW_ID, intent);
+    }
+
+    private static void setOnClickIntent(Context context, RemoteViews views,
+            int viewId, Intent intent) {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        views.setOnClickPendingIntent(SearchSourceSelector.ICON_VIEW_ID, pendingIntent);
+        views.setOnClickPendingIntent(viewId, pendingIntent);
     }
 
     private static Uri getSourceIconUri(Context context, Source source) {

@@ -20,18 +20,17 @@ import com.android.quicksearchbox.ui.SearchSourceSelector;
 import com.android.quicksearchbox.ui.SourcesAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 
-import android.app.Activity;
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -39,52 +38,57 @@ import android.widget.GridView;
 
 
 /**
- * Search source selection activity.
+ * Search source selection dialog.
  */
-public class SelectSearchSourceActivity extends Activity {
+public class SelectSearchSourceDialog extends Dialog {
 
     private static final boolean DBG = true;
-    private static final String TAG = "QSB.SelectSearchSourceActivity";
+    private static final String TAG = "QSB.SelectSearchSourceDialog";
 
     private GridView mSourceList;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private ComponentName mSource;
 
+    private String mQuery;
+
+    private Bundle mAppData;
+
+    public SelectSearchSourceDialog(Context context) {
+        super(context, R.style.Theme_SelectSearchSource);
         setContentView(R.layout.select_search_source);
         mSourceList = (GridView) findViewById(R.id.source_list);
         mSourceList.setOnItemClickListener(new SourceClickListener());
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
         mSourceList.setFocusable(true);
-
-        handleIntent(getIntent());
+        setCanceledOnTouchOutside(true);
+        positionWindow();
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        setIntent(intent);
-        handleIntent(intent);
+    public void setSource(ComponentName source) {
+        mSource = source;
     }
 
-    private void handleIntent(Intent intent) {
-        if (DBG) Log.d(TAG, "handleIntent(" + getIntent().toUri(0) + ")");
-        updateSources();
-        positionWindow(intent.getSourceBounds());
+    public void setQuery(String query) {
+        mQuery = query;
     }
 
-    private void positionWindow(Rect target) {
-        if (DBG) Log.d(TAG, "target: " + target);
+    public void setAppData(Bundle appData) {
+        mAppData = appData;
+    }
+
+    private void positionWindow() {
+        Resources resources = getContext().getResources();
+        int x = resources.getDimensionPixelSize(R.dimen.select_source_x);
+        int y = resources.getDimensionPixelSize(R.dimen.select_source_y);
+        positionArrowAt(x, y);
+    }
+
+    private void positionArrowAt(int x, int y) {
         Window window = getWindow();
-
         WindowManager.LayoutParams lp = window.getAttributes();
-        // TODO: Get these offsets from the position of the bubble arrow
-        // TODO: These need to be scaled to the device density
-        int offsetX = 0;
-        int offsetY = 10;
-        lp.x = 0;
-        lp.y = target.bottom - offsetY;
+        lp.x = x;
+        lp.y = y;
         lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
@@ -97,12 +101,18 @@ public class SelectSearchSourceActivity extends Activity {
         if (DBG) Log.d(TAG, "Window params: " + lp);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        updateSources();
+    }
+
     private void updateSources() {
         mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getGlobalSuggestionsProvider()));
     }
 
     private QsbApplication getQsbApplication() {
-        return (QsbApplication) getApplication();
+        return (QsbApplication) getContext().getApplicationContext();
     }
 
     private SuggestionsProvider getGlobalSuggestionsProvider() {
@@ -114,62 +124,35 @@ public class SelectSearchSourceActivity extends Activity {
     }
 
     protected void selectSource(Source source) {
+        dismiss();
         // If a new source was selected, start QSB with that source.
-        // Also, always start QSB if no source (= global search) is selected.
         // If the old source was selected, just finish.
-        if (source == null || !isPreviousSource(source)) {
+        if (!isCurrentSource(source)) {
             switchSource(source);
         }
-        finish();
     }
 
-    private boolean isPreviousSource(Source source) {
-        Intent intent = getIntent();
-        ComponentName previousSource = SearchSourceSelector.getSource(intent);
-        if (source == null) return previousSource == null;
-        return source.getComponentName().equals(previousSource);
+    private boolean isCurrentSource(Source source) {
+        if (source == null) return mSource == null;
+        return source.getComponentName().equals(mSource);
     }
 
     private void switchSource(Source source) {
         if (DBG) Log.d(TAG, "switchSource(" + source + ")");
-        Intent selectIntent = getIntent();
-        String query = selectIntent.getStringExtra(SearchManager.QUERY);
-        Bundle appSearchData = selectIntent.getBundleExtra(SearchManager.APP_DATA);
 
         Intent searchIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         searchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ComponentName sourceName = source == null ? null : source.getComponentName();
         SearchSourceSelector.setSource(searchIntent, sourceName);
-        searchIntent.putExtra(SearchManager.QUERY, query);
-        searchIntent.putExtra(SearchManager.APP_DATA, appSearchData);
+        searchIntent.putExtra(SearchManager.QUERY, mQuery);
+        searchIntent.putExtra(SearchManager.APP_DATA, mAppData);
 
         try {
             if (DBG) Log.d(TAG, "startActivity(" + searchIntent.toUri(0) + ")");
-            startActivity(searchIntent);
+            getOwnerActivity().startActivity(searchIntent);
         } catch (ActivityNotFoundException ex) {
             Log.e(TAG, "Couldn't start QSB: " + ex);
         }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // Dismiss source selector on touch outside.
-        if (event.getAction() == MotionEvent.ACTION_DOWN && isOutOfBounds(event)) {
-            finish();
-            return true;
-        }
-        // TODO: select source on ACTION_UP, to allow press and drag on source selector.
-        return super.onTouchEvent(event);
-    }
-
-    private boolean isOutOfBounds(MotionEvent event) {
-        final int x = (int) event.getX();
-        final int y = (int) event.getY();
-        final int slop = ViewConfiguration.get(this).getScaledWindowTouchSlop();
-        final View decorView = getWindow().getDecorView();
-        return (x < -slop) || (y < -slop)
-                || (x > (decorView.getWidth() + slop))
-                || (y > (decorView.getHeight() + slop));
     }
 
     private class SourceClickListener implements AdapterView.OnItemClickListener {

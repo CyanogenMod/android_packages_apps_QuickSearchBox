@@ -25,6 +25,7 @@ import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -56,13 +57,15 @@ public class SearchActivity extends Activity {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SearchActivity";
 
-    // TODO: This is hidden in SearchManager
-    public final static String INTENT_ACTION_SEARCH_SETTINGS 
-            = "android.search.action.SEARCH_SETTINGS";
+    public static final String INTENT_ACTION_QSB_AND_SELECT_SEARCH_SOURCE
+            = "com.android.quicksearchbox.action.QSB_AND_SELECT_SEARCH_SOURCE";
 
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_SOURCE = "source";
     private static final String INSTANCE_KEY_USER_QUERY = "query";
+
+    // Dialog IDs
+    private static final int DIALOG_SOURCE_SELECTOR = 0;
 
     // Timestamp for last onCreate()/onNewIntent() call, as returned by SystemClock.uptimeMillis().
     private long mStartTime;
@@ -85,6 +88,7 @@ public class SearchActivity extends Activity {
     private Launcher mLauncher;
 
     private Source mSource;
+    private Bundle mAppSearchData;
     private boolean mUpdateSuggestions;
     private String mUserQuery;
     private boolean mSelectAll;
@@ -120,6 +124,8 @@ public class SearchActivity extends Activity {
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
+
+        mSourceSelector.setOnClickListener(new SourceSelectorClickListener());
 
         mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
 
@@ -176,11 +182,18 @@ public class SearchActivity extends Activity {
     private void setupFromIntent(Intent intent) {
         if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
         ComponentName sourceName = SearchSourceSelector.getSource(intent);
+        String query = intent.getStringExtra(SearchManager.QUERY);
+        Bundle appSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
+
         Source source = getSourceByComponentName(sourceName);
         setSource(source);
-        setUserQuery(intent.getStringExtra(SearchManager.QUERY));
+        setUserQuery(query);
         mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
-        setAppSearchData(intent.getBundleExtra(SearchManager.APP_DATA));
+        setAppSearchData(appSearchData);
+
+        if (INTENT_ACTION_QSB_AND_SELECT_SEARCH_SOURCE.equals(intent.getAction())) {
+            showSourceSelectorDialog();
+        }
     }
 
     private Source getSourceByComponentName(ComponentName sourceName) {
@@ -204,7 +217,6 @@ public class SearchActivity extends Activity {
         }
         ComponentName sourceName = getSourceName();
         mSuggestionsAdapter.setSource(sourceName);
-        mSourceSelector.setSource(sourceName);
         mSourceSelector.setSourceIcon(sourceIcon);
     }
 
@@ -277,7 +289,7 @@ public class SearchActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        Intent settings = new Intent(INTENT_ACTION_SEARCH_SETTINGS);
+        Intent settings = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
         settings.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         // Don't show activity chooser if there are multiple search settings activities,
         // e.g. from different QSB implementations.
@@ -296,12 +308,11 @@ public class SearchActivity extends Activity {
     protected void setUserQuery(String userQuery) {
         if (userQuery == null) userQuery = "";
         mUserQuery = userQuery;
-        mSourceSelector.setQuery(mUserQuery);
     }
 
     protected void setAppSearchData(Bundle appSearchData) {
+        mAppSearchData = appSearchData;
         mLauncher.setAppSearchData(appSearchData);
-        mSourceSelector.setAppSearchData(appSearchData);
     }
 
     protected String getQuery() {
@@ -343,6 +354,44 @@ public class SearchActivity extends Activity {
         } else {
             mQueryTextView.setSelection(mQueryTextView.length());
         }
+    }
+
+    protected void showSourceSelectorDialog() {
+        showDialog(DIALOG_SOURCE_SELECTOR);
+    }
+
+
+    @Override
+    protected Dialog onCreateDialog(int id, Bundle args) {
+        switch (id) {
+            case DIALOG_SOURCE_SELECTOR:
+                return createSourceSelectorDialog();
+            default:
+                throw new IllegalArgumentException("Unknown dialog: " + id);
+        }
+    }
+
+    @Override
+    protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
+        switch (id) {
+            case DIALOG_SOURCE_SELECTOR:
+                prepareSourceSelectorDialog((SelectSearchSourceDialog) dialog);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown dialog: " + id);
+        }
+    }
+
+    protected SelectSearchSourceDialog createSourceSelectorDialog() {
+        SelectSearchSourceDialog dialog = new SelectSearchSourceDialog(this);
+        dialog.setOwnerActivity(this);
+        return dialog;
+    }
+
+    protected void prepareSourceSelectorDialog(SelectSearchSourceDialog dialog) {
+        dialog.setSource(getSourceName());
+        dialog.setQuery(getQuery());
+        dialog.setAppData(mAppSearchData);
     }
 
     protected void onSearchClicked(int method) {
@@ -638,11 +687,20 @@ public class SearchActivity extends Activity {
     }
 
     /**
-     * Listens for clicks on the search button.
+     * Listens for clicks on the source selector.
      */
     private class SearchGoButtonClickListener implements View.OnClickListener {
         public void onClick(View view) {
             onSearchClicked(Logger.SEARCH_METHOD_BUTTON);
+        }
+    }
+
+    /**
+     * Listens for clicks on the search button.
+     */
+    private class SourceSelectorClickListener implements View.OnClickListener {
+        public void onClick(View view) {
+            showSourceSelectorDialog();
         }
     }
 
