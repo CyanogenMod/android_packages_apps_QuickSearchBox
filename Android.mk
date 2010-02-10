@@ -19,9 +19,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-# Build against the SDK
-# Commented out until the last few uses of hidden stuff have been fixed
-#LOCAL_SDK_VERSION := current
+LOCAL_SDK_VERSION := current
 
 LOCAL_STATIC_JAVA_LIBRARIES := android-common
 
