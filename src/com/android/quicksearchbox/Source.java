@@ -74,7 +74,7 @@ public interface Source {
     /**
      * Gets the description to use for this source in system search settings.
      */
-    String getSettingsDescription();
+    CharSequence getSettingsDescription();
 
     /**
      *

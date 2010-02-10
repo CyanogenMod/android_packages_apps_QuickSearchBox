@@ -106,8 +106,10 @@ public class SearchableSource implements Source {
         return mSearchable.getSuggestThreshold();
     }
 
-    public String getSettingsDescription() {
-        return mSearchable.getSettingsDescription();
+    public CharSequence getSettingsDescription() {
+        int res = mSearchable.getSettingsDescriptionId();
+        return mContext.getPackageManager().getText(mActivityInfo.packageName, res,
+                mActivityInfo.applicationInfo);
     }
 
     public Drawable getSourceIcon() {
