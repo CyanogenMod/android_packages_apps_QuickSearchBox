@@ -83,7 +83,7 @@ public class GoogleSuggestionProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mHttpClient = AndroidHttpClient.newInstance(USER_AGENT);
+        mHttpClient = AndroidHttpClient.newInstance(USER_AGENT, getContext());
         HttpParams params = mHttpClient.getParams();
         params.setLongParameter(HTTP_TIMEOUT, HTTP_TIMEOUT_MS);
 
