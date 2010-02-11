@@ -27,6 +27,11 @@
     <string name="search_source_list_heading">Search in:</string>
     <string name="global_search_label">Everything</string>
 
+    <!-- Name of the combined Web source shown in QSB -->
+    <string name="corpus_label_web">Web</string>
+    <!-- Description of the combined Web source shown in QSB -->
+    <string name="corpus_description_web">Web search, bookmarks and browser history</string>
+
     <!-- Search settings stuff -->
 
     <!-- Search settings menu item -->
