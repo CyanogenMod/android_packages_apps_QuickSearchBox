@@ -20,10 +20,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
+import android.webkit.URLUtil;
+import com.android.common.Patterns;
 
 /**
  * Launches suggestions and searches.
@@ -75,7 +77,9 @@ public class Launcher {
      * Launches a web search.
      */
     public void startWebSearch(String query)  {
-        Intent intent = createWebSearchIntent(query);
+        Intent intent = Patterns.WEB_URL.matcher(query).matches()
+                ? createBrowseIntent(query)
+                : createWebSearchIntent(query);
         if (intent != null) {
             launchIntent(intent);
         }
@@ -122,6 +126,16 @@ public class Launcher {
         // TODO: Include something like this, to let the web search activity
         // know how this query was started.
         //intent.putExtra(SearchManager.SEARCH_MODE, SearchManager.MODE_GLOBAL_SEARCH_TYPED_QUERY);
+        return intent;
+    }
+
+    private Intent createBrowseIntent(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        url = URLUtil.guessUrl(url);
+        intent.setData(Uri.parse(url));
         return intent;
     }
 
