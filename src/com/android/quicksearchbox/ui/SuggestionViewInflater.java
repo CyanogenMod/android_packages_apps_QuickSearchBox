@@ -37,7 +37,7 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
     private static final String TAG = "QSB.SuggestionViewInflater";
 
     // The suggestion view classes that may be returned by this factory.
-    private static final Class[] SUGGESTION_VIEW_CLASSES = {
+    private static final Class<?>[] SUGGESTION_VIEW_CLASSES = {
             DefaultSuggestionView.class,
             ContactSuggestionView.class,
     };
@@ -79,26 +79,26 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return (SuggestionView) convertView;
     }
 
-    public SourceView createSourceView(ViewGroup parentViewType) {
+    public CorpusView createSourceView(ViewGroup parentViewType) {
         if (DBG) Log.d(TAG, "createSourceView()");
-        SourceView view = (SourceView)
-                getInflater().inflate(R.layout.source_list_item, parentViewType, false);
+        CorpusView view = (CorpusView)
+                getInflater().inflate(R.layout.corpus_grid_item, parentViewType, false);
         return view;
     }
 
     public String getGlobalSearchLabel() {
-        return mContext.getString(R.string.global_search_label);
+        return mContext.getString(R.string.corpus_label_global);
     }
 
     public Drawable getGlobalSearchIcon() {
-        return mContext.getResources().getDrawable(R.drawable.global_search_source);
+        return mContext.getResources().getDrawable(R.drawable.corpus_icon_global);
     }
 
     public Uri getGlobalSearchIconUri() {
         return new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
                 .authority(mContext.getPackageName())
-                .appendEncodedPath(String.valueOf(R.drawable.global_search_source))
+                .appendEncodedPath(String.valueOf(R.drawable.corpus_icon_global))
                 .build();
     }
 

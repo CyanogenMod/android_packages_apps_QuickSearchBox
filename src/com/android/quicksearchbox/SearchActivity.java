@@ -17,7 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.common.Search;
-import com.android.quicksearchbox.ui.SearchSourceSelector;
+import com.android.quicksearchbox.ui.CorpusIndicator;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionSelectionListener;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
@@ -27,11 +27,11 @@ import com.android.quicksearchbox.ui.SuggestionsView;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Editable;
@@ -57,15 +57,17 @@ public class SearchActivity extends Activity {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SearchActivity";
 
-    public static final String INTENT_ACTION_QSB_AND_SELECT_SEARCH_SOURCE
-            = "com.android.quicksearchbox.action.QSB_AND_SELECT_SEARCH_SOURCE";
+    private static final String SCHEME_CORPUS = "qsb.corpus";
+
+    public static final String INTENT_ACTION_QSB_AND_SELECT_CORPUS
+            = "com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS";
 
     // Keys for the saved instance state.
-    private static final String INSTANCE_KEY_SOURCE = "source";
+    private static final String INSTANCE_KEY_CORPUS = "corpus";
     private static final String INSTANCE_KEY_USER_QUERY = "query";
 
     // Dialog IDs
-    private static final int DIALOG_SOURCE_SELECTOR = 0;
+    private static final int CORPUS_SELECTION_DIALOG = 0;
 
     // Timestamp for last onCreate()/onNewIntent() call, as returned by SystemClock.uptimeMillis().
     private long mStartTime;
@@ -83,11 +85,11 @@ public class SearchActivity extends Activity {
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
-    protected SearchSourceSelector mSourceSelector;
+    protected CorpusIndicator mCorpusIndicator;
 
     private Launcher mLauncher;
 
-    private Source mSource;
+    private Corpus mCorpus;
     private Bundle mAppSearchData;
     private boolean mUpdateSuggestions;
     private String mUserQuery;
@@ -114,18 +116,15 @@ public class SearchActivity extends Activity {
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-        mSourceSelector = new SearchSourceSelector(findViewById(R.id.search_source_selector));
+        mCorpusIndicator = new CorpusIndicator(findViewById(R.id.corpus_indicator));
 
         mLauncher = new Launcher(this);
-        // TODO: should this check for voice search in the current source?
-        mVoiceSearchButton.setVisibility(
-                mLauncher.isVoiceSearchAvailable() ? View.VISIBLE : View.GONE);
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
 
-        mSourceSelector.setOnClickListener(new SourceSelectorClickListener());
+        mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
 
         mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
 
@@ -134,7 +133,7 @@ public class SearchActivity extends Activity {
         ButtonsKeyListener buttonsKeyListener = new ButtonsKeyListener();
         mSearchGoButton.setOnKeyListener(buttonsKeyListener);
         mVoiceSearchButton.setOnKeyListener(buttonsKeyListener);
-        mSourceSelector.setOnKeyListener(buttonsKeyListener);
+        mCorpusIndicator.setOnKeyListener(buttonsKeyListener);
 
         mUpdateSuggestions = true;
 
@@ -164,9 +163,9 @@ public class SearchActivity extends Activity {
 
     protected void restoreInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState == null) return;
-        ComponentName sourceName = savedInstanceState.getParcelable(INSTANCE_KEY_SOURCE);
+        String corpusName = savedInstanceState.getString(INSTANCE_KEY_CORPUS);
         String query = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
-        setSource(getSourceByComponentName(sourceName));
+        setCorpus(getCorpus(corpusName));
         setUserQuery(query);
     }
 
@@ -175,61 +174,79 @@ public class SearchActivity extends Activity {
         super.onSaveInstanceState(outState);
         // We don't save appSearchData, since we always get the value
         // from the intent and the user can't change it.
-        outState.putParcelable(INSTANCE_KEY_SOURCE, getSourceName());
+
+        String corpusName = mCorpus == null ? null : mCorpus.getName();
+        outState.putString(INSTANCE_KEY_CORPUS, corpusName);
         outState.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
     }
 
     private void setupFromIntent(Intent intent) {
         if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
-        ComponentName sourceName = SearchSourceSelector.getSource(intent);
+        Corpus corpus = getCorpusFromUri(intent.getData());
         String query = intent.getStringExtra(SearchManager.QUERY);
         Bundle appSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
 
-        Source source = getSourceByComponentName(sourceName);
-        setSource(source);
+        setCorpus(corpus);
         setUserQuery(query);
         mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
         setAppSearchData(appSearchData);
 
-        if (INTENT_ACTION_QSB_AND_SELECT_SEARCH_SOURCE.equals(intent.getAction())) {
+        if (INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(intent.getAction())) {
             showSourceSelectorDialog();
         }
     }
 
-    private Source getSourceByComponentName(ComponentName sourceName) {
+    public static Uri getCorpusUri(Corpus corpus) {
+        if (corpus == null) return null;
+        return new Uri.Builder()
+                .scheme(SCHEME_CORPUS)
+                .authority(corpus.getName())
+                .build();
+    }
+
+    private Corpus getCorpusFromUri(Uri uri) {
+        if (uri == null) return null;
+        if (!SCHEME_CORPUS.equals(uri.getScheme())) return null;
+        String name = uri.getAuthority();
+        return getCorpus(name);
+    }
+
+    private Corpus getCorpus(String sourceName) {
         if (sourceName == null) return null;
-        Source source = getSources().getSourceByComponentName(sourceName);
-        if (source == null) {
-            Log.w(TAG, "Unknown source " + sourceName);
+        Corpus corpus = getCorpora().getCorpus(sourceName);
+        if (corpus == null) {
+            Log.w(TAG, "Unknown corpus " + sourceName);
             return null;
         }
-        return source;
+        return corpus;
     }
 
-    private void setSource(Source source) {
-        if (DBG) Log.d(TAG, "setSource(" + source + ")");
-        mSource = source;
+    private void setCorpus(Corpus corpus) {
+        if (DBG) Log.d(TAG, "setCorpus(" + corpus + ")");
+        mCorpus = corpus;
         Drawable sourceIcon;
-        if (source == null) {
+        if (corpus == null) {
             sourceIcon = getSuggestionViewFactory().getGlobalSearchIcon();
         } else {
-            sourceIcon = source.getSourceIcon();
+            sourceIcon = corpus.getCorpusIcon();
         }
-        ComponentName sourceName = getSourceName();
-        mSuggestionsAdapter.setSource(sourceName);
-        mSourceSelector.setSourceIcon(sourceIcon);
-    }
+        mSuggestionsAdapter.setCorpus(corpus);
+        mCorpusIndicator.setSourceIcon(sourceIcon);
 
-    private ComponentName getSourceName() {
-        return mSource == null ? null : mSource.getComponentName();
+        boolean enableVoiceSearch = Launcher.shouldShowVoiceSearch(this, mCorpus);
+        mVoiceSearchButton.setVisibility(enableVoiceSearch ? View.VISIBLE : View.GONE);
     }
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getApplication();
     }
 
-    private SourceLookup getSources() {
-        return getQsbApplication().getSources();
+    private Corpora getCorpora() {
+        return getQsbApplication().getCorpora();
+    }
+
+    private CorpusRanker getCorpusRanker() {
+        return getQsbApplication().getCorpusRanker();
     }
 
     private ShortcutRepository getShortcutRepository() {
@@ -237,7 +254,7 @@ public class SearchActivity extends Activity {
     }
 
     private SuggestionsProvider getSuggestionsProvider() {
-        return getQsbApplication().getSuggestionsProvider(mSource);
+        return getQsbApplication().getSuggestionsProvider(mCorpus);
     }
 
     private SuggestionViewFactory getSuggestionViewFactory() {
@@ -280,8 +297,8 @@ public class SearchActivity extends Activity {
             // SystemClock.uptimeMillis() does not advance during deep sleep.
             int latency = (int) (SystemClock.uptimeMillis() - mStartTime);
             String source = getIntent().getStringExtra(Search.SOURCE);
-            getLogger().logStart(latency, source, mSource,
-                    getSuggestionsProvider().getOrderedSources());
+            getLogger().logStart(latency, source, mCorpus,
+                    getSuggestionsProvider().getOrderedCorpora());
         }
     }
 
@@ -357,15 +374,15 @@ public class SearchActivity extends Activity {
     }
 
     protected void showSourceSelectorDialog() {
-        showDialog(DIALOG_SOURCE_SELECTOR);
+        showDialog(CORPUS_SELECTION_DIALOG);
     }
 
 
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
         switch (id) {
-            case DIALOG_SOURCE_SELECTOR:
-                return createSourceSelectorDialog();
+            case CORPUS_SELECTION_DIALOG:
+                return createCorpusSelectionDialog();
             default:
                 throw new IllegalArgumentException("Unknown dialog: " + id);
         }
@@ -374,22 +391,22 @@ public class SearchActivity extends Activity {
     @Override
     protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
         switch (id) {
-            case DIALOG_SOURCE_SELECTOR:
-                prepareSourceSelectorDialog((SelectSearchSourceDialog) dialog);
+            case CORPUS_SELECTION_DIALOG:
+                prepareCorpusSelectionDialog((CorpusSelectionDialog) dialog);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown dialog: " + id);
         }
     }
 
-    protected SelectSearchSourceDialog createSourceSelectorDialog() {
-        SelectSearchSourceDialog dialog = new SelectSearchSourceDialog(this);
+    protected CorpusSelectionDialog createCorpusSelectionDialog() {
+        CorpusSelectionDialog dialog = new CorpusSelectionDialog(this);
         dialog.setOwnerActivity(this);
         return dialog;
     }
 
-    protected void prepareSourceSelectorDialog(SelectSearchSourceDialog dialog) {
-        dialog.setSource(getSourceName());
+    protected void prepareCorpusSelectionDialog(CorpusSelectionDialog dialog) {
+        dialog.setCorpus(mCorpus);
         dialog.setQuery(getQuery());
         dialog.setAppData(mAppSearchData);
     }
@@ -398,70 +415,46 @@ public class SearchActivity extends Activity {
         String query = getQuery();
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
         mTookAction = true;
-        getLogger().logSearch(mSource, method, query.length());
-        mLauncher.startSearch(mSource, query);
+        getLogger().logSearch(mCorpus, method, query.length());
+        mLauncher.startSearch(mCorpus, query);
     }
 
     protected void onVoiceSearchClicked() {
         if (DBG) Log.d(TAG, "Voice Search clicked");
         mTookAction = true;
-        getLogger().logVoiceSearch(mSource);
+        getLogger().logVoiceSearch(mCorpus);
 
         // TODO: should this start voice search in the current source?
-        mLauncher.startVoiceSearch();
+        mLauncher.startVoiceSearch(mCorpus);
     }
 
-    protected boolean launchSuggestion(SuggestionPosition suggestion) {
-        return launchSuggestion(suggestion, KeyEvent.KEYCODE_UNKNOWN, null);
+    protected SuggestionCursor getSuggestions() {
+        return mSuggestionsAdapter.getCurrentSuggestions();
     }
 
-    protected boolean launchSuggestion(SuggestionPosition suggestion,
-            int actionKey, String actionMsg) {
-        if (DBG) Log.d(TAG, "Launching suggestion " + suggestion);
+    protected boolean launchSuggestion(int position) {
+        if (DBG) Log.d(TAG, "Launching suggestion " + position);
         mTookAction = true;
-        SuggestionCursor suggestions = mSuggestionsAdapter.getCurrentSuggestions();
+        SuggestionCursor suggestions = getSuggestions();
         // TODO: This should be just the queried sources, but currently
         // all sources are queried
-        ArrayList<Source> sources = getSuggestionsProvider().getOrderedSources();
-        getLogger().logSuggestionClick(suggestion.getPosition(), suggestions, sources);
+        ArrayList<Corpus> corpora = getCorpusRanker().rankCorpora(getCorpora().getEnabledCorpora());
+        getLogger().logSuggestionClick(position, suggestions, corpora);
 
-        mLauncher.launchSuggestion(suggestion, actionKey, actionMsg);
-        getShortcutRepository().reportClick(suggestion);
+        mLauncher.launchSuggestion(suggestions, position);
+        getShortcutRepository().reportClick(suggestions, position);
         return true;
     }
 
-    protected boolean onSuggestionLongClicked(SuggestionPosition suggestion) {
-        SuggestionCursor sourceResult = suggestion.getSuggestion();
-        if (DBG) Log.d(TAG, "Long clicked on suggestion " + sourceResult.getSuggestionText1());
+    protected boolean onSuggestionLongClicked(int position) {
+        if (DBG) Log.d(TAG, "Long clicked on suggestion " + position);
         return false;
     }
 
-    protected void onSuggestionSelected(SuggestionPosition suggestion) {
-        if (suggestion == null) {
-            // This happens when a suggestion has been selected with the
-            // dpad / trackball and then a different UI element is touched.
-            // Do nothing, since we want to keep the query of the selection
-            // in the search box.
-            return;
-        }
-        SuggestionCursor sourceResult = suggestion.getSuggestion();
-        String displayQuery = sourceResult.getSuggestionDisplayQuery();
-        if (DBG) {
-            Log.d(TAG, "Selected suggestion " + sourceResult.getSuggestionText1()
-                    + ",displayQuery="+ displayQuery);
-        }
-        if (TextUtils.isEmpty(displayQuery)) {
-            restoreUserQuery();
-        } else {
-            setQuery(displayQuery, false);
-        }
-    }
-
-    protected boolean onSuggestionKeyDown(SuggestionPosition suggestion,
-            int keyCode, KeyEvent event) {
+    protected boolean onSuggestionKeyDown(int position, int keyCode, KeyEvent event) {
         // Treat enter or search as a click
         if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
-            return launchSuggestion(suggestion);
+            return launchSuggestion(position);
         }
 
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP
@@ -484,12 +477,6 @@ public class SearchActivity extends Activity {
             return true;
         }
 
-        // Handle source-specified action keys
-        String actionMsg = suggestion.getSuggestion().getActionKeyMsg(keyCode);
-        if (actionMsg != null) {
-            return launchSuggestion(suggestion, keyCode, actionMsg);
-        }
-
         return false;
     }
 
@@ -500,10 +487,6 @@ public class SearchActivity extends Activity {
 
     protected int getSelectedPosition() {
         return mSuggestionsView.getSelectedPosition();
-    }
-
-    protected SuggestionPosition getSelectedSuggestion() {
-        return mSuggestionsView.getSelectedSuggestion();
     }
 
     /**
@@ -654,11 +637,9 @@ public class SearchActivity extends Activity {
     private class SuggestionsViewKeyListener implements View.OnKeyListener {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                SuggestionPosition suggestion = getSelectedSuggestion();
-                if (suggestion != null) {
-                    if (onSuggestionKeyDown(suggestion, keyCode, event)) {
+                int position = getSelectedPosition();
+                if (onSuggestionKeyDown(position, keyCode, event)) {
                         return true;
-                    }
                 }
             }
             return forwardKeyToQueryTextView(keyCode, event);
@@ -672,18 +653,32 @@ public class SearchActivity extends Activity {
     }
 
     private class ClickHandler implements SuggestionClickListener {
-       public void onSuggestionClicked(SuggestionPosition suggestion) {
-           launchSuggestion(suggestion);
+       public void onSuggestionClicked(int position) {
+           launchSuggestion(position);
        }
 
-       public boolean onSuggestionLongClicked(SuggestionPosition suggestion) {
-           return SearchActivity.this.onSuggestionLongClicked(suggestion);
+       public boolean onSuggestionLongClicked(int position) {
+           return SearchActivity.this.onSuggestionLongClicked(position);
        }
     }
 
     private class SelectionHandler implements SuggestionSelectionListener {
-        public void onSelectionChanged(SuggestionPosition suggestion) {
-            onSuggestionSelected(suggestion);
+        public void onSuggestionSelected(int position) {
+            SuggestionCursor suggestions = getSuggestions();
+            suggestions.moveTo(position);
+            String displayQuery = suggestions.getSuggestionDisplayQuery();
+            if (TextUtils.isEmpty(displayQuery)) {
+                restoreUserQuery();
+            } else {
+                setQuery(displayQuery, false);
+            }
+        }
+
+        public void onNothingSelected() {
+                // This happens when a suggestion has been selected with the
+                // dpad / trackball and then a different UI element is touched.
+                // Do nothing, since we want to keep the query of the selection
+                // in the search box.
         }
     }
 
@@ -699,7 +694,7 @@ public class SearchActivity extends Activity {
     /**
      * Listens for clicks on the search button.
      */
-    private class SourceSelectorClickListener implements View.OnClickListener {
+    private class CorpusIndicatorClickListener implements View.OnClickListener {
         public void onClick(View view) {
             showSourceSelectorDialog();
         }

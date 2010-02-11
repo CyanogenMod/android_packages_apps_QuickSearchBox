@@ -16,7 +16,7 @@
 
 <view
     xmlns:android="http://schemas.android.com/apk/res/android"
-    class="com.android.quicksearchbox.ui.SourceView"
+    class="com.android.quicksearchbox.ui.CorpusView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     >

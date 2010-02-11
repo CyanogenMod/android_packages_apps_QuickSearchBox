@@ -16,11 +16,20 @@
 
 package com.android.quicksearchbox;
 
-/**
- * The result of getting suggestions from a single source.
- */
-public interface SourceResult extends SuggestionCursor {
 
-    Source getSource();
+/**
+ * A sequence of suggestions from a single corpus.
+ */
+public interface CorpusResult extends SuggestionCursor {
+
+    /**
+     * Gets the corpus that produced these suggestions.
+     */
+    Corpus getCorpus();
+
+    /**
+     * The user query that returned these suggestions.
+     */
+    String getUserQuery();
 
 }

@@ -67,7 +67,7 @@ public class DelayingSourceTaskExecutor implements SourceTaskExecutor {
     }
 
     /**
-     * Thread that moves tasks from {@link #mDelayedTasks} to {@link mExecutor}
+     * Thread that moves tasks from {@link #mDelayedTasks} to {@link #mExecutor}
      * then the executor is running no tasks, or after a fixed delay.
      */
     private static class TaskDelayer extends Thread implements SourceTaskExecutor {
@@ -210,7 +210,7 @@ public class DelayingSourceTaskExecutor implements SourceTaskExecutor {
 
         /**
          * Blocks until {@code mRunningTaskCount <= 0}, waiting for at most
-         * {@link timeoutNanos}.
+         * {@code timeoutNanos}.
          *
          * @param timeoutNanos The maximum time to wait, in nanoseconds.
          * @return {@code false} if the timeout has expired upon return, else {@code true}.

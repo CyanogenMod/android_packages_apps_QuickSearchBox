@@ -16,39 +16,36 @@
 
 package com.android.quicksearchbox;
 
+import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import java.util.Collection;
 
 /**
- * Tests for {@link Sources}.
+ * Tests for {@link SearchableCorpora}.
  *
  */
 @MediumTest
-public class SourcesTest extends AndroidTestCase {
+public class CorporaTest extends AndroidTestCase {
 
-    protected Sources mSources;
+    protected SearchableCorpora mCorpora;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
         Config config = new Config(mContext);
-        mSources = new Sources(mContext, config, new MockSourceFactory(mContext));
-        mSources.load();
+        mCorpora = new SearchableCorpora(mContext, config, new Handler());
+        mCorpora.load();
     }
 
     public void testHasSuggestionSources() {
-        assertNotEmpty(mSources.getSources());
+        assertNotEmpty(mCorpora.getAllCorpora());
     }
 
     public void testEnabledSuggestionSources() {
-        assertNotEmpty(mSources.getEnabledSources());
-    }
-
-    public void testHasSelectedWebSearchSource() {
-        assertNotNull(mSources.getWebSearchSource());
+        assertNotEmpty(mCorpora.getEnabledCorpora());
     }
 
     static void assertEmpty(Collection<?> collection) {

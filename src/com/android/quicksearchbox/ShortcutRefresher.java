@@ -16,8 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,17 +30,16 @@ class ShortcutRefresher {
         /**
          * Called by the ShortcutRefresher when a shortcut has been refreshed.
          *
-         * @param componentName of the source of this shortcut.
+         * @param source source of this shortcut.
          * @param shortcutId the id of the shortcut.
          * @param refreshed the updated shortcut, or {@code null} if the shortcut
          *        is no longer valid and should be deleted.
          */
-        void onShortcutRefreshed(ComponentName componentName, String shortcutId,
+        void onShortcutRefreshed(Source source, String shortcutId,
                 SuggestionCursor refreshed);
     }
 
     private final SourceTaskExecutor mExecutor;
-    private final SourceLookup mSourceLookup;
 
     private final Set<String> mRefreshed = Collections.synchronizedSet(new HashSet<String>());
 
@@ -50,11 +47,9 @@ class ShortcutRefresher {
      * Create a ShortcutRefresher that will refresh shortcuts using the given executor.
      *
      * @param executor Used to execute the tasks.
-     * @param sourceLookup Used to lookup suggestion sources by component name.
      */
-    public ShortcutRefresher(SourceTaskExecutor executor, SourceLookup sourceLookup) {
+    public ShortcutRefresher(SourceTaskExecutor executor) {
         mExecutor = executor;
-        mSourceLookup = sourceLookup;
     }
 
     /**
@@ -69,13 +64,12 @@ class ShortcutRefresher {
             shortcuts.moveTo(i);
             if (shouldRefresh(shortcuts)) {
                 String shortcutId = shortcuts.getShortcutId();
-                ComponentName componentName = shortcuts.getSourceComponentName();
-                Source source = mSourceLookup.getSourceByComponentName(componentName);
+                Source source = shortcuts.getSuggestionSource();
 
                 // If we can't find the source then invalidate the shortcut.
                 // Otherwise, send off the refresh task.
                 if (source == null) {
-                    listener.onShortcutRefreshed(componentName, shortcutId, null);
+                    listener.onShortcutRefreshed(source, shortcutId, null);
                 } else {
                     String extraData = shortcuts.getSuggestionIntentExtraData();
                     ShortcutRefreshTask refreshTask = new ShortcutRefreshTask(
@@ -116,7 +110,7 @@ class ShortcutRefresher {
     }
 
     private static String makeKey(SuggestionCursor shortcut) {
-        return shortcut.getSourceComponentName().flattenToShortString() + "#"
+        return shortcut.getSuggestionSource().getFlattenedComponentName() + "#"
                 + shortcut.getShortcutId();
     }
 
@@ -146,11 +140,8 @@ class ShortcutRefresher {
             // TODO: Add latency tracking and logging.
             SuggestionCursor refreshed = mSource.refreshShortcut(mShortcutId, mExtraData);
             onShortcutRefreshed(refreshed);
-            mListener.onShortcutRefreshed(mSource.getComponentName(), mShortcutId, refreshed);
+            mListener.onShortcutRefreshed(mSource, mShortcutId, refreshed);
         }
 
-        public Source getSource() {
-            return mSource;
-        }
     }
 }

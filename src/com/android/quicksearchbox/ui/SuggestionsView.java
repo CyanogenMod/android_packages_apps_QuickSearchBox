@@ -101,9 +101,8 @@ public class SuggestionsView extends ListView {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemClick(" + position + ")");
             SuggestionView suggestionView = (SuggestionView) view;
-            SuggestionPosition suggestion = suggestionView.getSuggestionPosition();
             if (mSuggestionClickListener != null) {
-                mSuggestionClickListener.onSuggestionClicked(suggestion);
+                mSuggestionClickListener.onSuggestionClicked(position);
             }
         }
     }
@@ -112,9 +111,8 @@ public class SuggestionsView extends ListView {
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemLongClick(" + position + ")");
             SuggestionView suggestionView = (SuggestionView) view;
-            SuggestionPosition suggestion = suggestionView.getSuggestionPosition();
             if (mSuggestionClickListener != null) {
-                return mSuggestionClickListener.onSuggestionLongClicked(suggestion);
+                return mSuggestionClickListener.onSuggestionLongClicked(position);
             }
             return false;
         }
@@ -124,16 +122,15 @@ public class SuggestionsView extends ListView {
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemSelected(" + position + ")");
             SuggestionView suggestionView = (SuggestionView) view;
-            SuggestionPosition suggestion = suggestionView.getSuggestionPosition();
             if (mSuggestionSelectionListener != null) {
-                mSuggestionSelectionListener.onSelectionChanged(suggestion);
+                mSuggestionSelectionListener.onSuggestionSelected(position);
             }
         }
 
         public void onNothingSelected(AdapterView<?> parent) {
             if (DBG) Log.d(TAG, "onNothingSelected()");
             if (mSuggestionSelectionListener != null) {
-                mSuggestionSelectionListener.onSelectionChanged(null);
+                mSuggestionSelectionListener.onNothingSelected();
             }
         }
     }

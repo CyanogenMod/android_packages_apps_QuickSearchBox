@@ -49,8 +49,8 @@
         android:layout_alignParentRight="true"
         >
 
-        <include android:id="@+id/search_source_selector"
-            layout="@layout/search_source_selector" />
+        <include android:id="@+id/corpus_indicator"
+            layout="@layout/corpus_indicator" />
 
         <EditText
             android:id="@+id/search_src_text"

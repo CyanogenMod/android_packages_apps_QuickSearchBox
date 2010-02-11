@@ -44,7 +44,7 @@ public class ShortcutPromoter implements Promoter {
     }
 
     public void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<SuggestionCursor> suggestions, int maxPromoted,
+            ArrayList<CorpusResult> suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
         int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
         int promotedShortcutCount = Math.min(shortcutCount, maxPromoted);

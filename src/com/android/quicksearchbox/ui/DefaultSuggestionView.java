@@ -17,11 +17,12 @@
 package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SuggestionCursor;
-import com.android.quicksearchbox.SuggestionPosition;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -39,15 +40,6 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionView";
-
-    /**
-     * The cursor that contains the current suggestion.
-     */
-    private SuggestionCursor mCursor;
-    /**
-     * The position within the cursor of the current suggestion.
-     */
-    private int mPos;
 
     private TextView mText1;
     private TextView mText2;
@@ -75,23 +67,12 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         mIcon2 = (ImageView) findViewById(R.id.icon2);
     }
 
-    /**
-     * Gets the suggestion that this view is showing.
-     */
-    public SuggestionPosition getSuggestionPosition() {
-        if (mCursor == null) {
-            throw new IllegalStateException("No cursor in SuggestionView");
-        }
-        return new SuggestionPosition(mCursor, mPos);
-    }
-
     public void bindAsSuggestion(SuggestionCursor suggestion) {
-        mCursor = suggestion;
-        mPos = suggestion.getPosition();
-        CharSequence text1 = suggestion.getSuggestionFormattedText1();
-        CharSequence text2 = suggestion.getSuggestionFormattedText2();
-        Drawable icon1 = suggestion.getSuggestionDrawableIcon1();
-        Drawable icon2 = suggestion.getSuggestionDrawableIcon2();
+        String format = suggestion.getSuggestionFormat();
+        CharSequence text1 = formatText(suggestion.getSuggestionText1(), format);
+        CharSequence text2 = formatText(suggestion.getSuggestionText2(), format);
+        Drawable icon1 = getSuggestionDrawableIcon1(suggestion);
+        Drawable icon2 = getSuggestionDrawableIcon2(suggestion);
         if (DBG) {
             Log.d(TAG, "bindAsSuggestion(), text1=" + text1 + ",text2=" + text2
                     + ",icon1=" + icon1 + ",icon2=" + icon2);
@@ -100,6 +81,36 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         setText2(text2);
         setIcon1(icon1);
         setIcon2(icon2);
+    }
+
+    public Drawable getSuggestionDrawableIcon1(SuggestionCursor suggestion) {
+        Source source = suggestion.getSuggestionSource();
+        String icon1Id = suggestion.getSuggestionIcon1();
+        Drawable icon1 = source.getIcon(icon1Id);
+        return icon1 == null ? source.getSourceIcon() : icon1;
+    }
+
+    public Drawable getSuggestionDrawableIcon2(SuggestionCursor suggestion) {
+        Source source = suggestion.getSuggestionSource();
+        return source.getIcon(suggestion.getSuggestionIcon2());
+    }
+
+    private CharSequence formatText(String str, String format) {
+        boolean isHtml = "html".equals(format);
+        if (isHtml && looksLikeHtml(str)) {
+            return Html.fromHtml(str);
+        } else {
+            return str;
+        }
+    }
+
+    private boolean looksLikeHtml(String str) {
+        if (TextUtils.isEmpty(str)) return false;
+        for (int i = str.length() - 1; i >= 0; i--) {
+            char c = str.charAt(i);
+            if (c == '>' || c == '&') return true;
+        }
+        return false;
     }
 
     /**

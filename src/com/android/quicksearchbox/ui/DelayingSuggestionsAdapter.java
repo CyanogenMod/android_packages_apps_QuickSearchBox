@@ -39,11 +39,13 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
         super(viewFactory);
     }
 
+    @Override
     public void close() {
         setPendingSuggestions(null);
         super.close();
     }
 
+    @Override
     public void setSuggestions(Suggestions suggestions) {
         if (suggestions == null) {
             super.setSuggestions(null);
@@ -66,7 +68,7 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
      */
     private boolean shouldPublish(Suggestions suggestions) {
         if (suggestions.isDone()) return true;
-        SuggestionCursor cursor = getSourceCursor(suggestions, getSource());
+        SuggestionCursor cursor = getCorpusCursor(suggestions, getCorpus());
         return cursor != null && cursor.getCount() > 0;
     }
 

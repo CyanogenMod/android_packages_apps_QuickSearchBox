@@ -16,8 +16,9 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Source;
-import com.android.quicksearchbox.SuggestionsProvider;
+import com.android.quicksearchbox.Corpora;
+import com.android.quicksearchbox.Corpus;
+import com.android.quicksearchbox.CorpusRanker;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,33 +29,27 @@ import java.util.ArrayList;
 /**
  * Adapter for showing a list of sources in the source selection activity.
  */
-public class SourcesAdapter extends BaseAdapter {
+public class CorporaAdapter extends BaseAdapter {
 
     private final SuggestionViewFactory mViewFactory;
 
-    private final SuggestionsProvider mProvider;
+    private ArrayList<Corpus> mRankedEnabledCorpora;
 
-    private ArrayList<Source> mEnabledSources;
-
-    public SourcesAdapter(SuggestionViewFactory viewFactory, SuggestionsProvider provider) {
+    public CorporaAdapter(SuggestionViewFactory viewFactory, Corpora corpora,
+            CorpusRanker ranker) {
         mViewFactory = viewFactory;
-        mProvider = provider;
-        updateSources();
-    }
-
-    private void updateSources() {
-        mEnabledSources = mProvider.getOrderedSources();
+        mRankedEnabledCorpora = ranker.rankCorpora(corpora.getEnabledCorpora());
     }
 
     public int getCount() {
-        return 1 + mEnabledSources.size();
+        return 1 + mRankedEnabledCorpora.size();
     }
 
-    public Source getItem(int position) {
+    public Corpus getItem(int position) {
         if (position == 0) {
             return null;
         } else {
-            return mEnabledSources.get(position - 1);
+            return mRankedEnabledCorpora.get(position - 1);
         }
     }
 
@@ -63,17 +58,17 @@ public class SourcesAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        SourceView view = (SourceView) convertView;
+        CorpusView view = (CorpusView) convertView;
         if (view == null) {
             view = mViewFactory.createSourceView(parent);
         }
-        Source source = getItem(position);
-        if (source == null) {
+        Corpus corpus = getItem(position);
+        if (corpus == null) {
             view.setIcon(mViewFactory.getGlobalSearchIcon());
             view.setLabel(mViewFactory.getGlobalSearchLabel());
         } else {
-            view.setIcon(source.getSourceIcon());
-            view.setLabel(source.getLabel());
+            view.setIcon(corpus.getCorpusIcon());
+            view.setLabel(corpus.getLabel());
         }
         return view;
     }

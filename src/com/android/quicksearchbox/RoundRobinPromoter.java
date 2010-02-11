@@ -36,7 +36,7 @@ public class RoundRobinPromoter implements Promoter {
     }
 
     public void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<SuggestionCursor> suggestions, int maxPromoted,
+            ArrayList<CorpusResult> suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
         if (DBG) Log.d(TAG, "pickPromoted(maxPromoted = " + maxPromoted + ")");
         final int sourceCount = suggestions.size();

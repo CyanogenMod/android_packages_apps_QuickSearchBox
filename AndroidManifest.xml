@@ -52,18 +52,18 @@
             <intent-filter>
                 <action android:name="android.search.action.GLOBAL_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="android.component" />
+                <data android:scheme="qsb.corpus" />
             </intent-filter>
-            <!-- Intent sent by source selector in search widget. Opens QSB with
+            <!-- Intent sent by corpus indicator in search widget. Opens QSB with
                  corpus drop-down on top. -->
             <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_SEARCH_SOURCE" />
+                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_SEARCH_SOURCE" />
+                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="android.component" />
+                <data android:scheme="qsb.corpus" />
             </intent-filter>
         </activity>
 

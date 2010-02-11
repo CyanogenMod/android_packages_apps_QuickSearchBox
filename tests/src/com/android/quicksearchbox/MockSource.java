@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 
 /**
  * Mock implementation of {@link Source}.
@@ -87,7 +88,7 @@ public class MockSource implements Source {
         return null;
     }
 
-    public SuggestionCursor getSuggestions(String query, int queryLimit) {
+    public SourceResult getSuggestions(String query, int queryLimit) {
         if (query.length() == 0) {
             return null;
         }
@@ -106,7 +107,19 @@ public class MockSource implements Source {
         s2.setIntent(i2);
         cursor.add(s1);
         cursor.add(s2);
-        return cursor;
+        return new Result(query, cursor);
+    }
+
+    private class Result extends SuggestionCursorWrapper implements SourceResult {
+
+        public Result(String userQuery, SuggestionCursor cursor) {
+            super(userQuery, cursor);
+        }
+
+        public Source getSource() {
+            return MockSource.this;
+        }
+
     }
 
     public SuggestionCursor refreshShortcut(String shortcutId, String extraData) {
@@ -135,6 +148,18 @@ public class MockSource implements Source {
 
     public String getSuggestActionMsgColumn(int keyCode) {
         return null;
+    }
+
+    public Intent createSearchIntent(String query, Bundle appData) {
+        return null;
+    }
+
+    public Intent createVoiceSearchIntent(Bundle appData) {
+        return null;
+    }
+
+    public boolean voiceSearchEnabled() {
+        return false;
     }
 
 }

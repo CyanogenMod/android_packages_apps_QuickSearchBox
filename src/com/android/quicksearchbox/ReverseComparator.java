@@ -16,14 +16,12 @@
 
 package com.android.quicksearchbox;
 
-import android.app.SearchableInfo;
+import java.util.Comparator;
 
-public interface SourceFactory {
+public class ReverseComparator<T extends Comparable<T>> implements Comparator<T> {
 
-    // TODO: perhaps SearchManager.getSearchablesInGlobalSearch()
-    // should return List<ComponentName>, so we could use ComponentName here?
-    Source createSource(SearchableInfo searchable);
-
-    Source createWebSearchSource();
+    public int compare(T o1, T o2) {
+        return o2.compareTo(o1);
+    }
 
 }

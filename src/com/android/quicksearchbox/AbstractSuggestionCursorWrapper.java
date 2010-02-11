@@ -16,83 +16,20 @@
 
 package com.android.quicksearchbox;
 
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
-
-import java.util.ArrayList;
-
 /**
- * A SuggestionCursor that is backed by a list of SuggestionData objects.
- *
+ * A SuggestionCursor that delegates all suggestions-specific calls to one or more
+ * other suggestion cursors.
  */
-public class DataSuggestionCursor extends AbstractSuggestionCursor {
+public abstract class AbstractSuggestionCursorWrapper extends AbstractSuggestionCursor {
 
-    private final DataSetObservable mDataSetObservable = new DataSetObservable();
-
-    private final ArrayList<SuggestionData> mSuggestions;
-
-    private int mPos;
-
-    public DataSuggestionCursor(String userQuery) {
+    public AbstractSuggestionCursorWrapper(String userQuery) {
         super(userQuery);
-        mSuggestions = new ArrayList<SuggestionData>();
-        mPos = 0;
     }
 
     /**
-     * Adds a suggestion.
-     *
-     * @param suggestion
-     * @return {@code true}
+     * Gets the SuggestionCursor to use for the current suggestion.
      */
-    public boolean add(SuggestionData suggestion) {
-        mSuggestions.add(suggestion);
-        notifyDataSetChanged();
-        return true;
-    }
-
-    private SuggestionData current() {
-        return mSuggestions.get(mPos);
-    }
-
-    public void close() {
-        mSuggestions.clear();
-    }
-
-    public int getPosition() {
-        return mPos;
-    }
-
-    public void moveTo(int pos) {
-        mPos = pos;
-    }
-
-    public int getCount() {
-        return mSuggestions.size();
-    }
-
-    /**
-     * Register an observer that is called when changes happen to this data set.
-     *
-     * @param observer gets notified when the data set changes.
-     */
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.registerObserver(observer);
-    }
-
-    /**
-     * Unregister an observer that has previously been registered with 
-     * {@link #registerDataSetObserver(DataSetObserver)}
-     *
-     * @param observer the observer to unregister.
-     */
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.unregisterObserver(observer);
-    }
-
-    protected void notifyDataSetChanged() {
-        mDataSetObservable.notifyChanged();
-    }
+    protected abstract SuggestionCursor current();
 
     public String getShortcutId() {
         return current().getShortcutId();

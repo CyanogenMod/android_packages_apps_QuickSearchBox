@@ -24,8 +24,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
-import android.webkit.URLUtil;
-import com.android.common.Patterns;
 
 /**
  * Launches suggestions and searches.
@@ -42,8 +40,6 @@ public class Launcher {
 
     /**
      * Data sent by the app that launched QSB.
-     *
-     * @param appSearchData
      */
     public Launcher(Context context) {
         mContext = context;
@@ -53,106 +49,75 @@ public class Launcher {
         mAppSearchData = appSearchData;
     }
 
-    public boolean isVoiceSearchAvailable() {
-        Intent intent = createVoiceSearchIntent();
-        ResolveInfo ri = mContext.getPackageManager().
+    public static boolean shouldShowVoiceSearch(Context context, Corpus corpus) {
+        if (corpus != null && !corpus.voiceSearchEnabled()) {
+            return false;
+        }
+        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        ResolveInfo ri = context.getPackageManager().
                 resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
         return ri != null;
     }
 
-    public void startVoiceSearch() {
-        launchIntent(createVoiceSearchIntent());
-    }
-
-    public void startSearch(Source source, String query) {
-        if (source == null) {
-            startWebSearch(query);
+    public void startVoiceSearch(Corpus corpus) {
+        if (corpus == null) {
+            launchIntent(WebCorpus.createVoiceWebSearchIntent(mAppSearchData));
         } else {
-            Intent intent = createSourceSearchIntent(source, query);
-            launchIntent(intent);
+            launchIntent(corpus.createVoiceSearchIntent(mAppSearchData));
         }
     }
 
-    /**
-     * Launches a web search.
-     */
-    public void startWebSearch(String query)  {
-        Intent intent = Patterns.WEB_URL.matcher(query).matches()
-                ? createBrowseIntent(query)
-                : createWebSearchIntent(query);
-        if (intent != null) {
-            launchIntent(intent);
+    public void startSearch(Corpus corpus, String query) {
+        if (corpus == null) {
+            launchIntent(WebCorpus.createWebIntent(query, mAppSearchData));
+        } else {
+            launchIntent(corpus.createSearchIntent(query, mAppSearchData));
         }
-    }
-
-    private Intent createVoiceSearchIntent() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        // TODO: Should we include SearchManager.APP_DATA in the voice search intent?
-        // SearchDialog doesn't seem to, but it would make sense.
-        return intent;
-    }
-
-    // TODO: not all apps handle ACTION_SEARCH properly, e.g. ApplicationsProvider.
-    // Maybe we should add a flag to searchable, so that QSB can hide the search button?
-    private Intent createSourceSearchIntent(Source source, String query) {
-        Intent intent = new Intent(Intent.ACTION_SEARCH);
-        intent.setComponent(source.getComponentName());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // We need CLEAR_TOP to avoid reusing an old task that has other activities
-        // on top of the one we want.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(SearchManager.USER_QUERY, query);
-        intent.putExtra(SearchManager.QUERY, query);
-        if (mAppSearchData != null) {
-            intent.putExtra(SearchManager.APP_DATA, mAppSearchData);
-        }
-        return intent;
-    }
-
-    private Intent createWebSearchIntent(String query) {
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // We need CLEAR_TOP to avoid reusing an old task that has other activities
-        // on top of the one we want.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(SearchManager.USER_QUERY, query);
-        intent.putExtra(SearchManager.QUERY, query);
-        if (mAppSearchData != null) {
-            intent.putExtra(SearchManager.APP_DATA, mAppSearchData);
-        }
-        // TODO: Include something like this, to let the web search activity
-        // know how this query was started.
-        //intent.putExtra(SearchManager.SEARCH_MODE, SearchManager.MODE_GLOBAL_SEARCH_TYPED_QUERY);
-        return intent;
-    }
-
-    private Intent createBrowseIntent(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        url = URLUtil.guessUrl(url);
-        intent.setData(Uri.parse(url));
-        return intent;
     }
 
     /**
      * Launches a suggestion.
      */
-    public void launchSuggestion(SuggestionPosition suggestionPos,
-            int actionKey, String actionMsg) {
-        SuggestionCursor suggestion = suggestionPos.getSuggestion();
-        Intent intent = suggestion.getSuggestionIntent(mContext, mAppSearchData,
-                actionKey, actionMsg);
-        if (intent != null) {
-            launchIntent(intent);
+    public void launchSuggestion(SuggestionCursor cursor, int position) {
+        launchIntent(getSuggestionIntent(cursor, position));
+    }
+
+    public Intent getSuggestionIntent(SuggestionCursor cursor, int position) {
+        cursor.moveTo(position);
+        String action = cursor.getSuggestionIntentAction();
+        String data = cursor.getSuggestionIntentDataString();
+        String query = cursor.getSuggestionQuery();
+        String userQuery = cursor.getUserQuery();
+        String extraData = cursor.getSuggestionIntentExtraData();
+
+        // Now build the Intent
+        Intent intent = new Intent(action);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // We need CLEAR_TOP to avoid reusing an old task that has other activities
+        // on top of the one we want.
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (data != null) {
+            intent.setData(Uri.parse(data));
         }
+        intent.putExtra(SearchManager.USER_QUERY, userQuery);
+        if (query != null) {
+            intent.putExtra(SearchManager.QUERY, query);
+        }
+        if (extraData != null) {
+            intent.putExtra(SearchManager.EXTRA_DATA_KEY, extraData);
+        }
+        if (mAppSearchData != null) {
+            intent.putExtra(SearchManager.APP_DATA, mAppSearchData);
+        }
+
+        intent.setComponent(cursor.getSuggestionSource().getComponentName());
+        return intent;
     }
 
     private void launchIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
         try {
             mContext.startActivity(intent);
         } catch (RuntimeException ex) {

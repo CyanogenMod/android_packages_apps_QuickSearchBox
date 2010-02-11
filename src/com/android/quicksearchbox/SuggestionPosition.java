@@ -39,7 +39,7 @@ public class SuggestionPosition {
     /**
      * Gets the suggestion cursor, moved to point to the right suggestion.
      */
-    public SuggestionCursor getSuggestion() {
+    protected SuggestionCursor current() {
         mCursor.moveTo(mPosition);
         return mCursor;
     }

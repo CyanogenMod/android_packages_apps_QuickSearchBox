@@ -21,30 +21,28 @@ import android.os.Handler;
 import java.util.ArrayList;
 
 /**
- * A suggestions provider that gets suggestions from a single source.
+ * A suggestions provider that gets suggestions from a single corpus.
  */
-public class SingleSourceSuggestionsProvider extends AbstractSuggestionsProvider {
+public class SingleCorpusSuggestionsProvider extends AbstractSuggestionsProvider {
 
-    private final Source mSource;
-
-    private final ArrayList<Source> mSources;
+    private final ArrayList<Corpus> mCorpora;
 
     private final ShortcutRepository mShortcutRepo;
 
-    public SingleSourceSuggestionsProvider(Config config, Source source,
+    public SingleCorpusSuggestionsProvider(Config config, Corpus corpus,
             SourceTaskExecutor queryExecutor,
             Handler publishThread,
             Promoter promoter,
             ShortcutRepository shortcutRepo) {
         super(config, queryExecutor, publishThread, promoter);
-        mSource = source;
-        mSources = new ArrayList<Source>(1);
-        mSources.add(source);
+        mCorpora = new ArrayList<Corpus>(1);
+        mCorpora.add(corpus);
         mShortcutRepo = shortcutRepo;
     }
 
-    public ArrayList<Source> getOrderedSources() {
-        return mSources;
+    @Override
+    public ArrayList<Corpus> getOrderedCorpora() {
+        return mCorpora;
     }
 
     @Override

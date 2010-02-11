@@ -16,12 +16,11 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.ui.SourcesAdapter;
+import com.android.quicksearchbox.ui.CorporaAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,11 +36,11 @@ public class SearchWidgetConfigActivity extends Activity {
     static final String TAG = "QSB.SearchWidgetConfigActivity";
 
     private static final String PREFS_NAME = "SearchWidgetConfig";
-    private static final String WIDGET_SOURCE_PREF_PREFIX = "widget_source_";
+    private static final String WIDGET_CORPUS_PREF_PREFIX = "widget_corpus_";
 
     private int mAppWidgetId;
 
-    private GridView mSourceList;
+    private GridView mCorpusList;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -49,13 +48,13 @@ public class SearchWidgetConfigActivity extends Activity {
 
         setContentView(R.layout.widget_config);
 
-        mSourceList = (GridView) findViewById(R.id.widget_source_list);
-        mSourceList.setOnItemClickListener(new SourceClickListener());
+        mCorpusList = (GridView) findViewById(R.id.widget_corpus_list);
+        mCorpusList.setOnItemClickListener(new SourceClickListener());
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
-        mSourceList.setFocusable(true);
-        mSourceList.setAdapter(
-                new SourcesAdapter(getViewFactory(), getGlobalSuggestionsProvider()));
+        mCorpusList.setFocusable(true);
+        mCorpusList.setAdapter(new CorporaAdapter(getViewFactory(), getCorpora(),
+                getCorpusRanker()));
 
         Intent intent = getIntent();
         mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -65,9 +64,9 @@ public class SearchWidgetConfigActivity extends Activity {
         }
     }
 
-    protected void selectSource(Source source) {
-        writeWidgetSourcePref(mAppWidgetId, source);
-        updateWidget(source);
+    protected void selectCorpus(Corpus corpus) {
+        writeWidgetCorpusPref(mAppWidgetId, corpus);
+        updateWidget(corpus);
 
         Intent result = new Intent();
         result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
@@ -75,39 +74,42 @@ public class SearchWidgetConfigActivity extends Activity {
         finish();
     }
 
-    private void updateWidget(Source source) {
+    private void updateWidget(Corpus corpus) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         SearchWidgetProvider.setupSearchWidget(this, appWidgetManager,
-                mAppWidgetId, source);
+                mAppWidgetId, corpus);
     }
 
     private static SharedPreferences getWidgetPreferences(Context context) {
         return context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     }
 
-    private static String getSourcePrefKey(int appWidgetId) {
-        return WIDGET_SOURCE_PREF_PREFIX + appWidgetId;
+    private static String getCorpusPrefKey(int appWidgetId) {
+        return WIDGET_CORPUS_PREF_PREFIX + appWidgetId;
     }
 
-    private void writeWidgetSourcePref(int appWidgetId, Source source) {
-        String sourceName = source == null ? null : source.getFlattenedComponentName();
+    private void writeWidgetCorpusPref(int appWidgetId, Corpus corpus) {
+        String corpusName = corpus == null ? null : corpus.getName();
         SharedPreferences.Editor prefs = getWidgetPreferences(this).edit();
-        prefs.putString(getSourcePrefKey(appWidgetId), sourceName);
+        prefs.putString(getCorpusPrefKey(appWidgetId), corpusName);
         prefs.commit();
     }
 
-    public static ComponentName readWidgetSourcePref(Context context, int appWidgetId) {
+    public static String readWidgetCorpusPref(Context context, int appWidgetId) {
         SharedPreferences prefs = getWidgetPreferences(context);
-        String sourceName = prefs.getString(getSourcePrefKey(appWidgetId), null);
-        return sourceName == null ? null : ComponentName.unflattenFromString(sourceName);
+        return prefs.getString(getCorpusPrefKey(appWidgetId), null);
     }
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getApplication();
     }
 
-    private SuggestionsProvider getGlobalSuggestionsProvider() {
-        return getQsbApplication().getGlobalSuggestionsProvider();
+    private Corpora getCorpora() {
+        return getQsbApplication().getCorpora();
+    }
+
+    private CorpusRanker getCorpusRanker() {
+        return getQsbApplication().getCorpusRanker();
     }
 
     private SuggestionViewFactory getViewFactory() {
@@ -116,11 +118,8 @@ public class SearchWidgetConfigActivity extends Activity {
 
     private class SourceClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Source source = (Source) parent.getItemAtPosition(position);
-            selectSource(source);
+            Corpus corpus = (Corpus) parent.getItemAtPosition(position);
+            selectCorpus(corpus);
         }
     }
 }
-
-
-

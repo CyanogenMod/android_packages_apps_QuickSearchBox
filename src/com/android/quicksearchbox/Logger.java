@@ -32,42 +32,40 @@ public interface Logger {
      *
      * @param latency User-visible start-up latency in milliseconds.
      */
-    void logStart(int latency, String intentSource, Source currentSearchSource,
-            ArrayList<Source> orderedSources);
+    void logStart(int latency, String intentSource, Corpus corpus,
+            ArrayList<Corpus> orderedCorpora);
 
     /**
      * Called when a suggestion is clicked.
      *
      * @param position 0-based position of the suggestion in the UI.
      * @param suggestionCursor all the suggestions shown in the UI.
-     * @param queriedSources all sources that were queried to produce the suggestions in
+     * @param queriedCorpora all corpora that were queried to produce the suggestions in
      *        {@code suggestionCursor}, ordered by rank.
      */
     void logSuggestionClick(int position, SuggestionCursor suggestionCursor,
-            ArrayList<Source> queriedSources);
+            ArrayList<Corpus> queriedCorpora);
 
     /**
      * The user launched a search.
      *
-     * @param searchSource The search source. {@code null} means web search.
      * @param startMethod One of {@link #SEARCH_METHOD_BUTTON} or {@link #SEARCH_METHOD_KEYBOARD}.
      * @param numChars The number of characters in the query.
      */
-    void logSearch(Source searchSource, int startMethod, int numChars);
+    void logSearch(Corpus corpus, int startMethod, int numChars);
 
     /**
      * The user launched a voice search.
-     *
-     * @param searchSource The search source. {@code null} means web search.
      */
-    void logVoiceSearch(Source searchSource);
+    void logVoiceSearch(Corpus corpus);
 
     /**
      * The user left QSB without performing any action (click suggestions, search or voice search).
      *
      * @param suggestionCursor all the suggestions shown in the UI when the user left
+     * @param numChars The number of characters in the query typed when the user left.
      */
-    void logExit(SuggestionCursor suggestionCursor);
+    void logExit(SuggestionCursor suggestionCursor, int numChars);
 
     void logWebLatency();
 

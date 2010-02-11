@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.util.Log;
 
 import java.util.HashSet;
@@ -44,7 +43,7 @@ class ShortcutCursor extends ListSuggestionCursor {
         int count = shortcuts.getCount();
         for (int i = 0; i < count; i++) {
             shortcuts.moveTo(i);
-            if (shortcuts.getSource() != null) {
+            if (shortcuts.getSuggestionSource() != null) {
                 add(new SuggestionPosition(shortcuts));
             }
         }
@@ -55,7 +54,7 @@ class ShortcutCursor extends ListSuggestionCursor {
      * Since this modifies the cursor, it should be called on the UI thread.
      * This class assumes responsibility for closing refreshed.
      */
-    public void refresh(ComponentName source, String shortcutId, SuggestionCursor refreshed) {
+    public void refresh(Source source, String shortcutId, SuggestionCursor refreshed) {
         if (DBG) Log.d(TAG, "refresh " + shortcutId);
         if (mClosed) {
             if (refreshed != null) {
@@ -69,7 +68,7 @@ class ShortcutCursor extends ListSuggestionCursor {
         int count = getCount();
         for (int i = 0; i < count; i++) {
             moveTo(i);
-            if (shortcutId.equals(getShortcutId()) && source.equals(getSourceComponentName())) {
+            if (shortcutId.equals(getShortcutId()) && source.equals(getSuggestionSource())) {
               if (refreshed != null && refreshed.getCount() > 0) {
                   replaceRow(new SuggestionPosition(refreshed));
               } else {

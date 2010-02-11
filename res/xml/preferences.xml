@@ -30,7 +30,7 @@
             
         <PreferenceScreen
                 android:title="@string/search_sources"
-                android:key="search_sources"
+                android:key="search_corpora"
                 android:summary="@string/search_sources_summary">
 
             <!-- CheckBoxPreferences added here dynamically -->

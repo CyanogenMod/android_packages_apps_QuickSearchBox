@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -61,52 +60,52 @@ public class EventLogLogger implements Logger {
         return mVersionCode;
     }
 
-    public void logStart(int latency, String intentSource, Source currentSearchSource,
-            ArrayList<Source> orderedSources) {
+    public void logStart(int latency, String intentSource, Corpus corpus,
+            ArrayList<Corpus> orderedCorpora) {
         String packageName = mContext.getPackageName();
         int version = mVersionCode;
         // TODO: Add more info to startMethod
         String startMethod = intentSource;
-        String currentSource = getSourceLogName(currentSearchSource);
-        String enabledSources = getSourceLogNames(orderedSources);
+        String currentCorpus = getCorpusLogName(corpus);
+        String enabledCorpora = getCorpusLogNames(orderedCorpora);
         if (DBG){
             debug("qsb_start", packageName, version, startMethod, latency,
-                    currentSource, enabledSources);
+                    currentCorpus, enabledCorpora);
         }
         EventLogTags.writeQsbStart(packageName, version, startMethod,
-                latency, currentSource, enabledSources);
+                latency, currentCorpus, enabledCorpora);
     }
 
     public void logSuggestionClick(int position,
-            SuggestionCursor suggestionCursor, ArrayList<Source> queriedSources) {
+            SuggestionCursor suggestionCursor, ArrayList<Corpus> queriedCorpora) {
         String suggestions = getSuggestions(suggestionCursor);
-        String sources = getSourceLogNames(queriedSources);
+        String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
-        EventLogTags.writeQsbClick(position, suggestions, sources, numChars);
+        EventLogTags.writeQsbClick(position, suggestions, corpora, numChars);
     }
 
-    public void logSearch(Source searchSource, int startMethod, int numChars) {
-        String sourceName = getSourceLogName(searchSource);
-        EventLogTags.writeQsbSearch(sourceName, startMethod, numChars);
+    public void logSearch(Corpus corpus, int startMethod, int numChars) {
+        String corpusName = getCorpusLogName(corpus);
+        EventLogTags.writeQsbSearch(corpusName, startMethod, numChars);
     }
 
-    public void logVoiceSearch(Source searchSource) {
-        String sourceName = getSourceLogName(searchSource);
-        EventLogTags.writeQsbVoiceSearch(sourceName);
+    public void logVoiceSearch(Corpus corpus) {
+        String corpusName = getCorpusLogName(corpus);
+        EventLogTags.writeQsbVoiceSearch(corpusName);
     }
 
-    public void logExit(SuggestionCursor suggestionCursor) {
+    public void logExit(SuggestionCursor suggestionCursor, int numChars) {
         String suggestions = getSuggestions(suggestionCursor);
-        EventLogTags.writeQsbExit(suggestions);
+        EventLogTags.writeQsbExit(suggestions, numChars);
     }
 
     public void logWebLatency() {
         
     }
 
-    private String getSourceLogName(Source source) {
-        if (source == null) return null;
-        return source.getLogName();
+    private String getCorpusLogName(Corpus corpus) {
+        if (corpus == null) return null;
+        return corpus.getName();
     }
 
     private String getSuggestions(SuggestionCursor suggestionCursor) {
@@ -115,17 +114,17 @@ public class EventLogLogger implements Logger {
         for (int i = 0; i < count; i++) {
             if (i > 0) sb.append(LIST_SEPARATOR);
             suggestionCursor.moveTo(i);
-            sb.append(suggestionCursor.getLogName());
+            sb.append(suggestionCursor.getSuggestionLogType());
         }
         return sb.toString();
     }
 
-    private String getSourceLogNames(ArrayList<Source> sources) {
+    private String getCorpusLogNames(ArrayList<Corpus> corpora) {
         StringBuilder sb = new StringBuilder();
-        final int count = sources.size();
+        final int count = corpora.size();
         for (int i = 0; i < count; i++) {
             if (i > 0) sb.append(LIST_SEPARATOR);
-            sb.append(getSourceLogName(sources.get(i)));
+            sb.append(getCorpusLogName(corpora.get(i)));
         }
         return sb.toString();
     }

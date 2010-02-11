@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.util.Log;
@@ -37,7 +36,7 @@ public class Suggestions {
     private final String mQuery;
 
     /** The number of sources that are expected to report. */
-    private final int mExpectedSourceCount;
+    private final int mExpectedCorpusCount;
 
     /**
      * The observers that want notifications of changes to the published suggestions.
@@ -50,13 +49,13 @@ public class Suggestions {
      * in the order that they were published.
      * This object may only be accessed on the UI thread.
      * */
-    private final ArrayList<SuggestionCursor> mSourceResults;
+    private final ArrayList<CorpusResult> mCorpusResults;
 
     /**
      * All {@link SuggestionCursor} objects that have been published so far.
      * This object may only be accessed on the UI thread.
      * */
-    private final HashMap<ComponentName,SuggestionCursor> mSourceResultsBySource;
+    private final HashMap<Corpus,CorpusResult> mResultsByCorpus;
 
     private SuggestionCursor mShortcuts;
 
@@ -72,16 +71,16 @@ public class Suggestions {
     /**
      * Creates a new empty Suggestions.
      *
-     * @param expectedSourceCount The number of sources that are expected to report.
+     * @param expectedCorpusCount The number of sources that are expected to report.
      */
     public Suggestions(Promoter promoter, int maxPromoted,
-            String query, int expectedSourceCount) {
+            String query, int expectedCorpusCount) {
         mPromoter = promoter;
         mMaxPromoted = maxPromoted;
         mQuery = query;
-        mExpectedSourceCount = expectedSourceCount;
-        mSourceResults = new ArrayList<SuggestionCursor>(mExpectedSourceCount);
-        mSourceResultsBySource = new HashMap<ComponentName,SuggestionCursor>(mExpectedSourceCount);
+        mExpectedCorpusCount = expectedCorpusCount;
+        mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpusCount);
+        mResultsByCorpus = new HashMap<Corpus,CorpusResult>(mExpectedCorpusCount);
         mPromoted = null;  // will be set by updatePromoted()
     }
 
@@ -93,7 +92,7 @@ public class Suggestions {
      * Gets the number of sources that are expected to report.
      */
     public int getExpectedSourceCount() {
-        return mExpectedSourceCount;
+        return mExpectedCorpusCount;
     }
 
     /**
@@ -143,11 +142,11 @@ public class Suggestions {
             mShortcuts.close();
             mShortcuts = null;
         }
-        for (SuggestionCursor result : mSourceResults) {
+        for (CorpusResult result : mCorpusResults) {
             result.close();
         }
-        mSourceResults.clear();
-        mSourceResultsBySource.clear();
+        mCorpusResults.clear();
+        mResultsByCorpus.clear();
     }
 
     public boolean isClosed() {
@@ -168,7 +167,7 @@ public class Suggestions {
      */
     public boolean isDone() {
         // TODO: Handle early completion because we have all the results we want.
-        return mSourceResults.size() >= mExpectedSourceCount;
+        return mCorpusResults.size() >= mExpectedCorpusCount;
     }
 
     /**
@@ -186,22 +185,20 @@ public class Suggestions {
     }
 
     /**
-     * Adds a source result. Must be called on the UI thread, or before this
+     * Adds a corpus result. Must be called on the UI thread, or before this
      * object is seen by the UI thread.
-     *
-     * @param sourceResult The source result.
      */
-    public void addSourceResult(SuggestionCursor sourceResult) {
+    public void addCorpusResult(CorpusResult corpusResult) {
         if (mClosed) {
-            sourceResult.close();
+            corpusResult.close();
             return;
         }
-        if (!mQuery.equals(sourceResult.getUserQuery())) {
+        if (!mQuery.equals(corpusResult.getUserQuery())) {
           throw new IllegalArgumentException("Got result for wrong query: "
-                + mQuery + " != " + sourceResult.getUserQuery());
+                + mQuery + " != " + corpusResult.getUserQuery());
         }
-        mSourceResults.add(sourceResult);
-        mSourceResultsBySource.put(sourceResult.getSourceComponentName(), sourceResult);
+        mCorpusResults.add(corpusResult);
+        mResultsByCorpus.put(corpusResult.getCorpus(), corpusResult);
         mPromoted = null;
         notifyDataSetChanged();
     }
@@ -211,40 +208,22 @@ public class Suggestions {
         if (mPromoter == null) {
             return;
         }
-        mPromoter.pickPromoted(mShortcuts, mSourceResults, mMaxPromoted, mPromoted);
+        mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted);
     }
 
     /**
-     * Gets a given source result.
+     * Gets a given corpus result.
      * Must be called on the UI thread, or before this object is seen by the UI thread.
      *
-     * @param sourcePos 
-     * @return The source result at the given position.
-     * @throws IndexOutOfBoundsException If {@code sourcePos < 0} or
-     *         {@code sourcePos >= getSourceCount()}.
-     */
-    public SuggestionCursor getSourceResult(int sourcePos) {
-        if (mClosed) {
-            throw new IllegalStateException("Called getSourceResult(" + sourcePos
-                + ") when closed.");
-        }
-        return mSourceResults.get(sourcePos);
-    }
-
-    /**
-     * Gets a given source result.
-     * Must be called on the UI thread, or before this object is seen by the UI thread.
-     *
-     * @param source Source name.
+     * @param corpus corpus
      * @return The source result for the given source. {@code null} if the source has not
      *         yet returned.
      */
-    public SuggestionCursor getSourceResult(ComponentName source) {
+    public CorpusResult getCorpusResult(Corpus corpus) {
         if (mClosed) {
-            throw new IllegalStateException("Called getSourceResult(" + source
-                + ") when closed.");
+            throw new IllegalStateException("getCorpusResult(" + corpus + ") when closed.");
         }
-        return mSourceResultsBySource.get(source);
+        return mResultsByCorpus.get(corpus);
     }
 
     /**
@@ -255,7 +234,7 @@ public class Suggestions {
         if (mClosed) {
             throw new IllegalStateException("Called getSourceCount() when closed.");
         }
-        return mSourceResults == null ? 0 : mSourceResults.size();
+        return mCorpusResults == null ? 0 : mCorpusResults.size();
     }
 
     private class MyShortcutsObserver extends DataSetObserver {

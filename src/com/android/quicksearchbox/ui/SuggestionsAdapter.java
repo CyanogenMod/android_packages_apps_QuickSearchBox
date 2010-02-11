@@ -16,11 +16,11 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
 
-import android.content.ComponentName;
 import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.View;
@@ -41,7 +41,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private SuggestionCursor mCursor;
 
-    private ComponentName mSource = null;
+    private Corpus mCorpus = null;
 
     private Suggestions mSuggestions;
 
@@ -57,7 +57,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     public void close() {
         setSuggestions(null);
-        mSource = null;
+        mCorpus = null;
         mClosed = true;
     }
 
@@ -93,18 +93,15 @@ public class SuggestionsAdapter extends BaseAdapter {
     /**
      * Gets the source whose results are displayed.
      */
-    public ComponentName getSource() {
-        return mSource;
+    public Corpus getCorpus() {
+        return mCorpus;
     }
 
     /**
      * Sets the source whose results are displayed.
-     *
-     * @param source The name of a source, or {@code null} to show
-     *        the promoted results.
      */
-    public void setSource(ComponentName source) {
-        mSource = source;
+    public void setCorpus(Corpus corpus) {
+        mCorpus = corpus;
         onSuggestionsChanged();
     }
 
@@ -121,10 +118,12 @@ public class SuggestionsAdapter extends BaseAdapter {
         return position;
     }
 
+    @Override
     public int getViewTypeCount() {
         return mViewFactory.getSuggestionViewTypeCount();
     }
 
+    @Override
     public int getItemViewType(int position) {
         if (mCursor == null) {
             return 0;
@@ -146,7 +145,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     protected void onSuggestionsChanged() {
         if (DBG) Log.d(TAG, "onSuggestionsChanged(), mSuggestions=" + mSuggestions);
-        SuggestionCursor cursor = getSourceCursor(mSuggestions, mSource);
+        SuggestionCursor cursor = getCorpusCursor(mSuggestions, mCorpus);
         changeCursor(cursor);
     }
 
@@ -161,10 +160,10 @@ public class SuggestionsAdapter extends BaseAdapter {
     /**
      * Gets the cursor for the given source.
      */
-    protected SuggestionCursor getSourceCursor(Suggestions suggestions, ComponentName source) {
+    protected SuggestionCursor getCorpusCursor(Suggestions suggestions, Corpus corpus) {
         if (suggestions == null) return null;
-        if (source == null) return suggestions.getPromoted();
-        return suggestions.getSourceResult(source);
+        if (corpus == null) return suggestions.getPromoted();
+        return suggestions.getCorpusResult(corpus);
     }
 
     /**

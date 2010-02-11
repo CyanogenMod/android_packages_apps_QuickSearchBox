@@ -31,7 +31,7 @@ public class ShouldQueryStrategyTest extends AndroidTestCase {
         mShouldQuery = new ShouldQueryStrategy();
     }
 
-    public static final Source SOURCE_1 = new MockSource("SOURCE_1") {
+    public static final Corpus CORPUS_1 = new MockCorpus("CORPUS_1", MockSource.SOURCE_1) {
         @Override
         public int getQueryThreshold() {
             return 3;
@@ -39,7 +39,7 @@ public class ShouldQueryStrategyTest extends AndroidTestCase {
 
     };
 
-    public static final Source SOURCE_2 = new MockSource("SOURCE_1") {
+    public static final Corpus CORPUS_2 = new MockCorpus("CORPUS_2", MockSource.SOURCE_2) {
         @Override
         public boolean queryAfterZeroResults() {
             return true;
@@ -47,25 +47,25 @@ public class ShouldQueryStrategyTest extends AndroidTestCase {
     };
 
     public void testRespectsQueryThreshold() {
-        assertFalse(mShouldQuery.shouldQuerySource(SOURCE_1, "aa"));
-        assertTrue(mShouldQuery.shouldQuerySource(SOURCE_1, "aaa"));
-        assertTrue(mShouldQuery.shouldQuerySource(SOURCE_2, ""));
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "aa"));
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "aaa"));
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_2, ""));
     }
 
     public void testQueriesAfterNoResultsWhenQueryAfterZeroIsTrue() {
-        assertTrue(mShouldQuery.shouldQuerySource(SOURCE_2, "query"));
-        mShouldQuery.onZeroResults(SOURCE_2.getComponentName(), "query");
-        assertTrue(mShouldQuery.shouldQuerySource(SOURCE_2, "query"));
-        assertTrue(mShouldQuery.shouldQuerySource(SOURCE_2, "query123"));
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_2, "query"));
+        mShouldQuery.onZeroResults(CORPUS_2, "query");
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_2, "query"));
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_2, "query123"));
     }
 
     public void testDoesntQueryAfterNoResultsWhenQueryAfterZeroIsFalse() {
-        assertTrue(mShouldQuery.shouldQuerySource(SOURCE_1, "query"));
-        mShouldQuery.onZeroResults(SOURCE_1.getComponentName(), "query");
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
+        mShouldQuery.onZeroResults(CORPUS_1, "query");
         // Now we don't query for queries starting with "query"
-        assertFalse(mShouldQuery.shouldQuerySource(SOURCE_1, "query"));
-        assertFalse(mShouldQuery.shouldQuerySource(SOURCE_1, "query123"));
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query123"));
         // But we do query for something shorter
-        assertTrue(mShouldQuery.shouldQuerySource(SOURCE_1, "quer"));
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "quer"));
     }
 }

@@ -16,17 +16,21 @@
 
 package com.android.quicksearchbox;
 
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -39,6 +43,10 @@ public class SearchableSource implements Source {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SearchableSource";
+
+    // TODO: This should be exposed or moved to android-common, see http://b/issue?id=2440614
+    // The extra key used in an intent to the speech recognizer for in-app voice search.
+    private static final String EXTRA_CALLING_PACKAGE = "calling_package";
 
     private final Context mContext;
 
@@ -62,6 +70,14 @@ public class SearchableSource implements Source {
         mActivityInfo = context.getPackageManager().getActivityInfo(componentName, 0);
 
         mIconLoader = createIconLoader(context, searchable.getSuggestPackage());
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    protected SearchableInfo getSearchableInfo() {
+        return mSearchable;
     }
 
     private IconLoader createIconLoader(Context context, String providerPackage) {
@@ -107,12 +123,7 @@ public class SearchableSource implements Source {
     }
 
     public CharSequence getSettingsDescription() {
-        int res = mSearchable.getSettingsDescriptionId();
-        if (res == 0) {
-            return null;
-        }
-        return mContext.getPackageManager().getText(mActivityInfo.packageName, res,
-                mActivityInfo.applicationInfo);
+        return getText(mSearchable.getSettingsDescriptionId());
     }
 
     public Drawable getSourceIcon() {
@@ -144,14 +155,104 @@ public class SearchableSource implements Source {
         return (icon != 0) ? icon : android.R.drawable.sym_def_app_icon;
     }
 
-    public SuggestionCursor getSuggestions(String query, int queryLimit) {
+    public boolean voiceSearchEnabled() {
+        return mSearchable.getVoiceSearchEnabled();
+    }
+
+    // TODO: not all apps handle ACTION_SEARCH properly, e.g. ApplicationsProvider.
+    // Maybe we should add a flag to searchable, so that QSB can hide the search button?
+    public Intent createSearchIntent(String query, Bundle appData) {
+        Intent intent = new Intent(Intent.ACTION_SEARCH);
+        intent.setComponent(getComponentName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // We need CLEAR_TOP to avoid reusing an old task that has other activities
+        // on top of the one we want.
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(SearchManager.USER_QUERY, query);
+        intent.putExtra(SearchManager.QUERY, query);
+        if (appData != null) {
+            intent.putExtra(SearchManager.APP_DATA, appData);
+        }
+        return intent;
+    }
+
+    public Intent createVoiceSearchIntent(Bundle appData) {
+        if (mSearchable.getVoiceSearchLaunchWebSearch()) {
+            return WebCorpus.createVoiceWebSearchIntent(appData);
+        } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
+            return createVoiceAppSearchIntent(appData);
+        }
+        return null;
+    }
+
+    /**
+     * Create and return an Intent that can launch the voice search activity, perform a specific
+     * voice transcription, and forward the results to the searchable activity.
+     *
+     * This code is copied from SearchDialog
+     *
+     * @return A completely-configured intent ready to send to the voice search activity
+     */
+    private Intent createVoiceAppSearchIntent(Bundle appData) {
+        ComponentName searchActivity = mSearchable.getSearchActivity();
+
+        // create the necessary intent to set up a search-and-forward operation
+        // in the voice search system.   We have to keep the bundle separate,
+        // because it becomes immutable once it enters the PendingIntent
+        Intent queryIntent = new Intent(Intent.ACTION_SEARCH);
+        queryIntent.setComponent(searchActivity);
+        PendingIntent pending = PendingIntent.getActivity(
+                getContext(), 0, queryIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        // Now set up the bundle that will be inserted into the pending intent
+        // when it's time to do the search.  We always build it here (even if empty)
+        // because the voice search activity will always need to insert "QUERY" into
+        // it anyway.
+        Bundle queryExtras = new Bundle();
+        if (appData != null) {
+            queryExtras.putBundle(SearchManager.APP_DATA, appData);
+        }
+
+        // Now build the intent to launch the voice search.  Add all necessary
+        // extras to launch the voice recognizer, and then all the necessary extras
+        // to forward the results to the searchable activity
+        Intent voiceIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        voiceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // Add all of the configuration options supplied by the searchable's metadata
+        String languageModel = getString(mSearchable.getVoiceLanguageModeId());
+        if (languageModel == null) {
+            languageModel = RecognizerIntent.LANGUAGE_MODEL_FREE_FORM;
+        }
+        String prompt = getString(mSearchable.getVoicePromptTextId());
+        String language = getString(mSearchable.getVoiceLanguageId());
+        int maxResults = mSearchable.getVoiceMaxResults();
+        if (maxResults <= 0) {
+            maxResults = 1;
+        }
+
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, languageModel);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
+        voiceIntent.putExtra(EXTRA_CALLING_PACKAGE,
+                searchActivity == null ? null : searchActivity.toShortString());
+
+        // Add the values that configure forwarding the results
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT, pending);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT_BUNDLE, queryExtras);
+
+        return voiceIntent;
+    }
+
+    public SourceResult getSuggestions(String query, int queryLimit) {
         try {
             Cursor cursor = getSuggestions(mContext, mSearchable, query, queryLimit);
             if (DBG) Log.d(TAG, toString() + "[" + query + "] returned.");
-            return new SourceResult(this, query, cursor);
+            return new CursorBackedSourceResult(query, cursor);
         } catch (RuntimeException ex) {
             Log.e(TAG, toString() + "[" + query + "] failed", ex);
-            return new SourceResult(this, query);
+            return new CursorBackedSourceResult(query);
         }
     }
 
@@ -163,7 +264,7 @@ public class SearchableSource implements Source {
             if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
             }
-            return new SourceResult(this, null, cursor);
+            return new CursorBackedSourceResult(null, cursor);
         } catch (RuntimeException ex) {
             Log.e(TAG, toString() + "[" + shortcutId + "] failed", ex);
             if (cursor != null) {
@@ -172,6 +273,28 @@ public class SearchableSource implements Source {
             // TODO: Should we delete the shortcut even if the failure is temporary?
             return null;
         }
+    }
+
+    private class CursorBackedSourceResult extends CursorBackedSuggestionCursor
+            implements SourceResult {
+
+        public CursorBackedSourceResult(String userQuery) {
+            this(userQuery, null);
+        }
+
+        public CursorBackedSourceResult(String userQuery, Cursor cursor) {
+            super(userQuery, cursor);
+        }
+
+        public Source getSource() {
+            return SearchableSource.this;
+        }
+
+        @Override
+        public Source getSuggestionSource() {
+            return SearchableSource.this;
+        }
+
     }
 
     /**
@@ -273,14 +396,14 @@ public class SearchableSource implements Source {
     public boolean equals(Object o) {
         if (o != null && o.getClass().equals(this.getClass())) {
             SearchableSource s = (SearchableSource) o;
-            return s.mSearchable.getSearchActivity().equals(mSearchable.getSearchActivity());
+            return s.getComponentName().equals(getComponentName());
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return mSearchable.getSearchActivity().hashCode();
+        return getComponentName().hashCode();
     }
 
     @Override
@@ -308,4 +431,14 @@ public class SearchableSource implements Source {
         return actionKey.getSuggestActionMsgColumn();
     }
 
+    private CharSequence getText(int id) {
+        if (id == 0) return null;
+        return mContext.getPackageManager().getText(mActivityInfo.packageName, id,
+                mActivityInfo.applicationInfo);
+    }
+
+    private String getString(int id) {
+        CharSequence text = getText(id);
+        return text == null ? null : text.toString();
+    }
 }

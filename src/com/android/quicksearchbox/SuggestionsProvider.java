@@ -28,7 +28,7 @@ public interface SuggestionsProvider {
      */
     Suggestions getSuggestions(String query);
 
-    ArrayList<Source> getOrderedSources();
+    ArrayList<Corpus> getOrderedCorpora();
 
     void close();
 }

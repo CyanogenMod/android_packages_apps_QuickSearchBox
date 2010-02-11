@@ -23,14 +23,13 @@ import java.util.HashSet;
 /**
  * A SuggestionCursor that is backed by a list of SuggestionPosition objects
  * and doesn't allow duplicate suggestions.
- *
  */
 public class ListSuggestionCursorNoDuplicates extends ListSuggestionCursor {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.ListSuggestionCursorNoDuplicates";
 
-    private HashSet<String> mSuggestionKeys;
+    private final HashSet<String> mSuggestionKeys;
 
     public ListSuggestionCursorNoDuplicates(String userQuery) {
         super(userQuery);
@@ -39,8 +38,7 @@ public class ListSuggestionCursorNoDuplicates extends ListSuggestionCursor {
 
     @Override
     public boolean add(SuggestionPosition suggestionPos) {
-        SuggestionCursor suggestion = suggestionPos.getSuggestion();
-        String key = suggestion.getSuggestionKey();
+        String key = suggestionPos.current().getSuggestionKey();
         if (mSuggestionKeys.add(key)) {
             return super.add(suggestionPos);
         } else {

@@ -16,10 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Holds information about shortcuts (results the user has clicked on before), and returns
@@ -45,7 +42,7 @@ public interface ShortcutRepository {
     /**
      * Reports a click on a suggestion.
      */
-    void reportClick(SuggestionPosition clicked);
+    void reportClick(SuggestionCursor suggestions, int position);
 
     /**
      * @param query The query.
@@ -54,7 +51,8 @@ public interface ShortcutRepository {
     SuggestionCursor getShortcutsForQuery(String query);
 
     /**
-     * @return A ranking of suggestion sources based on clicks and impressions.
+     * @return A map for corpus name to score. A higher score means that the corpus
+     *         is more important.
      */
-    ArrayList<ComponentName> getSourceRanking();
+    Map<String,Integer> getCorpusScores();
 }

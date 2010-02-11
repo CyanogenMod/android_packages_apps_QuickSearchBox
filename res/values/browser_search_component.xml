@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,17 +14,7 @@
      limitations under the License.
 -->
 
-<!--
-The string array below lists package names which we trust by default as
-'promoted' search providers in global search. Packages in this list will
-be capable of being promoted to the top list of results, even before the
-user has interacted with them.
--->
 <resources>
-  <string-array name="trusted_search_providers" translatable="false">
-    <item>com.android.contacts</item>
-    <item>com.android.browser</item>
-    <item>com.android.providers.applications</item>
-    <item>com.google.android.youtube</item>
-  </string-array>
+    <!-- The component name of the browser bookmarks and history source used in QSB  -->
+    <string name="browser_search_component" translatable="false">com.android.browser/.BookmarkSearch</string>
 </resources>

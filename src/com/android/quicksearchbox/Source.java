@@ -17,8 +17,10 @@
 package com.android.quicksearchbox;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 
 /**
  * Interface for suggestion sources.
@@ -97,6 +99,12 @@ public interface Source {
      */
     boolean queryAfterZeroResults();
 
+    boolean voiceSearchEnabled();
+
+    Intent createSearchIntent(String query, Bundle appData);
+
+    Intent createVoiceSearchIntent(Bundle appData);
+
     /**
      * Gets suggestions from this source.
      *
@@ -104,7 +112,7 @@ public interface Source {
      * @param queryLimit An advisory maximum number of results that the source should return.
      * @return The suggestion results.
      */
-    SuggestionCursor getSuggestions(String query, int queryLimit);
+    SourceResult getSuggestions(String query, int queryLimit);
 
     /**
      * Updates a shorcut.

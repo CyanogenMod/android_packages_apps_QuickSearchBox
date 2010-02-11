@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package com.android.quicksearchbox;
 
-/**
- * The result of getting suggestions from a single source.
- */
-public interface SourceResult extends SuggestionCursor {
+import java.util.ArrayList;
+import java.util.Collection;
 
-    Source getSource();
+/**
+ * Orders corpora by importance.
+ */
+public interface CorpusRanker {
+
+    ArrayList<Corpus> rankCorpora(Collection<Corpus> corpora);
 
 }

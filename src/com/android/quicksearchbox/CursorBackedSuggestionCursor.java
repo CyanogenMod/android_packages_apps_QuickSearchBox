@@ -17,20 +17,13 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchManager;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Rect;
+import android.database.DataSetObserver;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
-import android.view.KeyEvent;
 
-import java.net.URISyntaxException;
-
-public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggestionCursor {
+public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCursor {
 
     private static final boolean DBG = false;
     protected static final String TAG = "QSB.CursorBackedSuggestionCursor";
@@ -38,22 +31,22 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     /** The suggestions, or {@code null} if the suggestions query failed. */
     protected final Cursor mCursor;
 
-    /** Column index of {@link SearchManager.SUGGEST_COLUMN_FORMAT} in @{link mCursor}. */
+    /** Column index of {@link SearchManager#SUGGEST_COLUMN_FORMAT} in @{link mCursor}. */
     private final int mFormatCol;
 
-    /** Column index of {@link SearchManager.SUGGEST_COLUMN_TEXT_1} in @{link mCursor}. */
+    /** Column index of {@link SearchManager#SUGGEST_COLUMN_TEXT_1} in @{link mCursor}. */
     private final int mText1Col;
 
-    /** Column index of {@link SearchManager.SUGGEST_COLUMN_TEXT_2} in @{link mCursor}. */
+    /** Column index of {@link SearchManager#SUGGEST_COLUMN_TEXT_2} in @{link mCursor}. */
     private final int mText2Col;
 
-    /** Column index of {@link SearchManager.SUGGEST_COLUMN_ICON_1} in @{link mCursor}. */
+    /** Column index of {@link SearchManager#SUGGEST_COLUMN_ICON_1} in @{link mCursor}. */
     private final int mIcon1Col;
 
-    /** Column index of {@link SearchManager.SUGGEST_COLUMN_ICON_1} in @{link mCursor}. */
+    /** Column index of {@link SearchManager#SUGGEST_COLUMN_ICON_1} in @{link mCursor}. */
     private final int mIcon2Col;
 
-    /** Column index of {@link SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING}
+    /** Column index of {@link SearchManager#SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING}
      * in @{link mCursor}.
      **/
     private final int mRefreshSpinnerCol;
@@ -72,24 +65,10 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
         mRefreshSpinnerCol = getColumnIndex(SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING);
     }
 
-    protected String getDefaultIntentAction() {
-        return getSource().getDefaultIntentAction();
-    }
+    public abstract Source getSuggestionSource();
 
-    protected String getDefaultIntentData() {
-        return getSource().getDefaultIntentData();
-    }
-
-    protected boolean shouldRewriteQueryFromData() {
-        return getSource().shouldRewriteQueryFromData();
-    }
-
-    protected boolean shouldRewriteQueryFromText() {
-        return getSource().shouldRewriteQueryFromText();
-    }
-
-    public boolean isFailed() {
-        return mCursor == null;
+    public String getSuggestionLogType() {
+        return getSuggestionSource().getLogName();
     }
 
     public void close() {
@@ -126,11 +105,9 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
             throw new IllegalStateException("moveTo(" + pos + ") after close()");
         }
         // TODO: all operations on cross-process cursors can throw random exceptions
-        if (mCursor == null || pos < 0 || pos >= mCursor.getCount()) {
-            throw new IndexOutOfBoundsException(pos + ", count=" + getCount());
+        if (!mCursor.moveToPosition(pos)) {
+            throw new IllegalArgumentException("Move to " + pos + ", count=" + getCount());
         }
-        // TODO: all operations on cross-process cursors can throw random exceptions
-        mCursor.moveToPosition(pos);
     }
 
     public int getPosition() {
@@ -138,26 +115,6 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
             throw new IllegalStateException("getPosition after close()");
         }
         return mCursor.getPosition();
-    }
-
-    public String getSuggestionDisplayQuery() {
-        String query = getSuggestionQuery();
-        if (query != null) {
-            return query;
-        }
-        if (shouldRewriteQueryFromData()) {
-            String data = getSuggestionIntentDataString();
-            if (data != null) {
-                return data;
-            }
-        }
-        if (shouldRewriteQueryFromText()) {
-            String text1 = getSuggestionText1();
-            if (text1 != null) {
-                return text1;
-            }
-        }
-        return null;
     }
 
     public String getShortcutId() {
@@ -188,67 +145,14 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
         return "true".equals(getStringOrNull(mRefreshSpinnerCol));
     }
 
-    public Intent getSuggestionIntent(Context context, Bundle appSearchData,
-            int actionKey, String actionMsg) {
-        String action = getSuggestionIntentAction();
-        Uri data = getSuggestionIntentData();
-        String query = getSuggestionQuery();
-        String userQuery = getUserQuery();
-        String extraData = getSuggestionIntentExtraData();
-
-        // Now build the Intent
-        Intent intent = new Intent(action);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // We need CLEAR_TOP to avoid reusing an old task that has other activities
-        // on top of the one we want.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (data != null) {
-            intent.setData(data);
-        }
-        intent.putExtra(SearchManager.USER_QUERY, userQuery);
-        if (query != null) {
-            intent.putExtra(SearchManager.QUERY, query);
-        }
-        if (extraData != null) {
-            intent.putExtra(SearchManager.EXTRA_DATA_KEY, extraData);
-        }
-        if (appSearchData != null) {
-            intent.putExtra(SearchManager.APP_DATA, appSearchData);
-        }
-        if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
-            intent.putExtra(SearchManager.ACTION_KEY, actionKey);
-            intent.putExtra(SearchManager.ACTION_MSG, actionMsg);
-        }
-        // TODO: Use this to tell sources this comes form global search
-        // The constants are currently hidden.
-        //        intent.putExtra(SearchManager.SEARCH_MODE,
-        //                SearchManager.MODE_GLOBAL_SEARCH_SUGGESTION);
-        intent.setComponent(getSourceComponentName());
-        return intent;
-    }
-
-    public String getActionKeyMsg(int keyCode) {
-        String result = null;
-        String column = getSource().getSuggestActionMsgColumn(keyCode);
-        if (column != null) {
-            result = getStringOrNull(column);
-        }
-        // If the cursor didn't give us a message, see if there's a single message defined
-        // for the actionkey (for all suggestions)
-        if (result == null) {
-            result = getSource().getSuggestActionMsg(keyCode);
-        }
-        return result;
-    }
-
     /**
      * Gets the intent action for the current suggestion.
      */
-    protected String getSuggestionIntentAction() {
+    public String getSuggestionIntentAction() {
         // use specific action if supplied, or default action if supplied, or fixed default
         String action = getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
         if (action == null) {
-            action = getDefaultIntentAction();
+            action = getSuggestionSource().getDefaultIntentAction();
             if (action == null) {
                 action = Intent.ACTION_SEARCH;
             }
@@ -259,7 +163,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     /**
      * Gets the query for the current suggestion.
      */
-    protected String getSuggestionQuery() {
+    public String getSuggestionQuery() {
         return getStringOrNull(SearchManager.SUGGEST_COLUMN_QUERY);
     }
 
@@ -267,7 +171,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
          // use specific data if supplied, or default data if supplied
          String data = getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_DATA);
          if (data == null) {
-             data = getDefaultIntentData();
+             data = getSuggestionSource().getDefaultIntentData();
          }
          // then, if an ID was provided, append it.
          if (data != null) {
@@ -280,22 +184,35 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
      }
 
     /**
-     * Gets the intent data for the current suggestion.
-     */
-    protected Uri getSuggestionIntentData() {
-        String data = getSuggestionIntentDataString();
-        return (data == null) ? null : Uri.parse(data);
-    }
-
-    /**
      * Gets the intent extra data for the current suggestion.
      */
     public String getSuggestionIntentExtraData() {
         return getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
     }
 
+    public String getSuggestionDisplayQuery() {
+        String query = getSuggestionQuery();
+        if (query != null) {
+            return query;
+        }
+        Source source = getSuggestionSource();
+        if (source.shouldRewriteQueryFromData()) {
+            String data = getSuggestionIntentDataString();
+            if (data != null) {
+                return data;
+            }
+        }
+        if (source.shouldRewriteQueryFromText()) {
+            String text1 = getSuggestionText1();
+            if (text1 != null) {
+                return text1;
+            }
+        }
+        return null;
+    }
+
     /**
-     * Gets the index of a column in {@link mCursor} by name.
+     * Gets the index of a column in {@link #mCursor} by name.
      *
      * @return The index, or {@code -1} if the column was not found.
      */
@@ -306,7 +223,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     }
 
     /**
-     * Gets the string value of a column in {@link mCursor} by column index.
+     * Gets the string value of a column in {@link #mCursor} by column index.
      *
      * @param col Column index.
      * @return The string value, or {@code null}.
@@ -328,7 +245,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
     }
 
     /**
-     * Gets the string value of a column in {@link mCursor} by column name.
+     * Gets the string value of a column in {@link #mCursor} by column name.
      *
      * @param colName Column name.
      * @return The string value, or {@code null}.
@@ -356,5 +273,13 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSourceSuggest
                 .append('#')
                 .append(query)
                 .toString();
+    }
+
+    public void registerDataSetObserver(DataSetObserver observer) {
+        // We don't watch Cursor-backed SuggestionCursors for changes
+    }
+
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        // We don't watch Cursor-backed SuggestionCursors for changes
     }
 }

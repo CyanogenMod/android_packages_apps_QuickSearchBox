@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -36,24 +35,23 @@ class ShouldQueryStrategy {
     // The last query we've seen
     private String mLastQuery = "";
 
-    // The current implementation keeps a record of those sources that have
-    // returned zero results for some prefix of the current query. mEmptySources
-    // maps from source component name to the length of the query which returned
+    // The current implementation keeps a record of those corpora that have
+    // returned zero results for some prefix of the current query. mEmptyCorpora
+    // maps from corpus to the length of the query which returned
     // zero results.  When a query is shortened (e.g., by deleting characters)
-    // or changed entirely, mEmptySources is pruned (in updateQuery)
-    private final HashMap<ComponentName, Integer> mEmptySources
-            = new HashMap<ComponentName, Integer>();
+    // or changed entirely, mEmptyCorpora is pruned (in updateQuery)
+    private final HashMap<Corpus, Integer> mEmptyCorpora
+            = new HashMap<Corpus, Integer>();
 
     /**
      * Returns whether we should query the given source for the given query.
      */
-    public synchronized boolean shouldQuerySource(Source source, String query) {
+    public synchronized boolean shouldQueryCorpus(Corpus corpus, String query) {
         updateQuery(query);
-        if (query.length() >= source.getQueryThreshold()) {
-            ComponentName sourceName = source.getComponentName();
-            if (!source.queryAfterZeroResults() && mEmptySources.containsKey(sourceName)) {
-                if (DBG) Log.i(TAG, "Not querying " + sourceName + ", returned 0 after "
-                        + mEmptySources.get(sourceName));
+        if (query.length() >= corpus.getQueryThreshold()) {
+            if (!corpus.queryAfterZeroResults() && mEmptyCorpora.containsKey(corpus)) {
+                if (DBG) Log.i(TAG, "Not querying " + corpus + ", returned 0 after "
+                        + mEmptyCorpora.get(corpus));
                 return false;
             }
             return true;
@@ -64,12 +62,12 @@ class ShouldQueryStrategy {
     /**
      * Called to notify ShouldQueryStrategy when a source reports no results for a query.
      */
-    public synchronized void onZeroResults(ComponentName source, String query) {
-        if (DBG) Log.i(TAG, source + " returned 0 results for " + query);
+    public synchronized void onZeroResults(Corpus corpus, String query) {
+        if (DBG) Log.i(TAG, corpus + " returned 0 results for " + query);
         // Make sure this result is actually for a prefix of the current query.
         if (mLastQuery.startsWith(query)) {
             // TODO: Don't bother if queryAfterZeroResults is true
-            mEmptySources.put(source, query.length());
+            mEmptyCorpora.put(corpus, query.length());
         }
     }
 
@@ -80,7 +78,7 @@ class ShouldQueryStrategy {
         } else if (mLastQuery.startsWith(query)) {
             // This is a widening of the last query: clear out any sources
             // that reported zero results after this query.
-            Iterator<Map.Entry<ComponentName, Integer>> iter = mEmptySources.entrySet().iterator();
+            Iterator<Map.Entry<Corpus, Integer>> iter = mEmptyCorpora.entrySet().iterator();
             while (iter.hasNext()) {
                 if (iter.next().getValue() > query.length()) {
                     iter.remove();
@@ -88,7 +86,7 @@ class ShouldQueryStrategy {
             }
         } else {
             // This is a completely different query, clear everything.
-            mEmptySources.clear();
+            mEmptyCorpora.clear();
         }
     }
 }

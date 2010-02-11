@@ -16,83 +16,13 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
 import android.database.DataSetObserver;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Bundle;
 
+
+/**
+ * A sequence of suggestions, with a current position.
+ */
 public interface SuggestionCursor {
-
-    /**
-     * The user query that returned these suggestions.
-     */
-    String getUserQuery();
-
-    /**
-     * Gets the component name of the source that produced this result.
-     */
-    ComponentName getSourceComponentName();
-
-    /**
-     * Gets the string that will be logged for this suggestion when logging
-     * suggestion clicks etc.
-     */
-    String getLogName();
-
-    /**
-     * Gets the localized, human-readable label for the source that produced this result.
-     */
-    CharSequence getSourceLabel();
-
-    /**
-     * Gets the icon for the source that produced this result.
-     */
-    Drawable getSourceIcon();
-
-    /**
-     * Gets the icon URI for the source that produced this result.
-     */
-    Uri getSourceIconUri();
-
-    /**
-     * Gets an icon by ID. Used for getting the icons returned by {@link #getSuggestionIcon1()}
-     * and {@link #getSuggestionIcon2()}.
-     */
-    Drawable getIcon(String iconId);
-
-    /**
-     * Gets the URI for an icon.
-     */
-    Uri getIconUri(String iconId);
-
-    /**
-     * Checks whether this result represents a failed suggestion query.
-     */
-    boolean isFailed();
-
-    /**
-     * Closes this suggestion result. 
-     */
-    void close();
-
-    /**
-     * Register an observer that is called when changes happen to the contents
-     * of this cursor's data set.
-     *
-     * @param observer the object that gets notified when the data set changes.
-     */
-    public void registerDataSetObserver(DataSetObserver observer);
-
-    /**
-     * Unregister an observer that has previously been registered with this cursor
-     * via {@link #registerDataSetObserver(DataSetObserver)}
-     *
-     * @param observer the object to unregister.
-     */
-    public void unregisterDataSetObserver(DataSetObserver observer);
 
     /**
      * Gets the number of suggestions in this result.
@@ -115,9 +45,34 @@ public interface SuggestionCursor {
     int getPosition();
 
     /**
-     * Gets the text to put in the search box when the current suggestion is selected.
+     * Frees any resources used by this cursor.
      */
-    String getSuggestionDisplayQuery();
+    void close();
+
+    /**
+     * Register an observer that is called when changes happen to this data set.
+     *
+     * @param observer gets notified when the data set changes.
+     */
+    void registerDataSetObserver(DataSetObserver observer);
+
+    /**
+     * Unregister an observer that has previously been registered with 
+     * {@link #registerDataSetObserver(DataSetObserver)}
+     *
+     * @param observer the observer to unregister.
+     */
+    void unregisterDataSetObserver(DataSetObserver observer);
+
+    /**
+     * Gets the source that produced the current suggestion.
+     */
+    Source getSuggestionSource();
+
+    /**
+     * Gets the query that the user typed to get this suggestion.
+     */
+    String getUserQuery();
 
     /**
      * Gets the shortcut ID of the current suggestion.
@@ -150,27 +105,21 @@ public interface SuggestionCursor {
     /**
      * Gets the left-hand-side icon for the current suggestion.
      *
-     * @return A string that can be passed to {@link #getIcon()}.
+     * @return A string that can be passed to {@link Source#getIcon(String)}.
      */
     String getSuggestionIcon1();
 
     /**
      * Gets the right-hand-side icon for the current suggestion.
      *
-     * @return A string that can be passed to {@link #getIcon()}.
+     * @return A string that can be passed to {@link Source#getIcon(String)}.
      */
     String getSuggestionIcon2();
 
     /**
-     * Gets the intent that this suggestion launches.
-     *
-     * @param context Used for resolving the intent target.
-     * @param actionKey
-     * @param actionMsg
-     * @return
+     * Gets the intent action for the current suggestion.
      */
-    Intent getSuggestionIntent(Context context, Bundle appSearchData,
-            int actionKey, String actionMsg);
+    String getSuggestionIntentAction();
 
     /**
      * Gets the extra data associated with this suggestion's intent.
@@ -183,6 +132,13 @@ public interface SuggestionCursor {
     String getSuggestionIntentDataString();
 
     /**
+     * Gets the data associated with this suggestion's intent.
+     */
+    String getSuggestionQuery();
+
+    String getSuggestionDisplayQuery();
+
+    /**
      * Gets a unique key that identifies this suggestion. This is used to avoid
      * duplicate suggestions in the promoted list. This key should be based on
      * the intent of the suggestion.
@@ -190,30 +146,7 @@ public interface SuggestionCursor {
     String getSuggestionKey();
 
     /**
-     * Gets the first suggestion text line as styled text.
+     * Gets the suggestion log type for the current suggestion.
      */
-    CharSequence getSuggestionFormattedText1();
-
-    /**
-     * Gets the second suggestion text line as styled text.
-     */
-    CharSequence getSuggestionFormattedText2();
-
-    /**
-     * Gets the first suggestion icon.
-     */
-    Drawable getSuggestionDrawableIcon1();
-
-    /**
-     * Gets the second suggestion icon.
-     */
-    Drawable getSuggestionDrawableIcon2();
-
-    /**
-     * Gets the action message for a key code for the current suggestion.
-     *
-     * @param keyCode Key code, see {@link android.view.KeyEvent}.
-     * @return The action message for the key, or {@code null} if there is none.
-     */
-    String getActionKeyMsg(int keyCode);
+    String getSuggestionLogType();
 }

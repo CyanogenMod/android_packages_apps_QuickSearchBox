@@ -22,6 +22,4 @@ package com.android.quicksearchbox;
  */
 public interface SourceTask extends Runnable {
 
-    Source getSource();
-
 }

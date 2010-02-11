@@ -16,10 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Mock implementation of {@link ShortcutRepository}.
@@ -46,7 +43,7 @@ public class MockShortcutRepository implements ShortcutRepository {
         return cursor;
     }
 
-    public ArrayList<ComponentName> getSourceRanking() {
+    public Map<String, Integer> getCorpusScores() {
         return null;
     }
 
@@ -54,10 +51,7 @@ public class MockShortcutRepository implements ShortcutRepository {
         return false;
     }
 
-    public void reportClick(SuggestionPosition clicked) {
-    }
-
-    public void reportImpressions(List<SuggestionPosition> impressions) {
+    public void reportClick(SuggestionCursor suggestions, int position) {
     }
 
 }

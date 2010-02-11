@@ -17,19 +17,21 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchManager;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Handler;
 import android.util.Log;
-import android.view.KeyEvent;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A shortcut repository implementation that uses a log of every click.
@@ -45,7 +47,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 25;
+    private static final int DB_VERSION = 26;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -59,7 +61,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
     private final Context mContext;
     private final Config mConfig;
-    private final SourceLookup mSources;
+    private final Corpora mCorpora;
     private final ShortcutRefresher mRefresher;
     private final Handler mUiThread;
     private final DbOpenHelper mOpenHelper;
@@ -68,7 +70,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
      * Create an instance to the repo.
      */
     public static ShortcutRepository create(Context context, Config config,
-            SourceLookup sources, ShortcutRefresher refresher, Handler uiThread) {
+            Corpora sources, ShortcutRefresher refresher, Handler uiThread) {
         return new ShortcutRepositoryImplLog(context, config, sources, refresher,
                 uiThread, DB_NAME);
     }
@@ -77,11 +79,11 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
      * @param context Used to create / open db
      * @param name The name of the database to create.
      */
-    ShortcutRepositoryImplLog(Context context, Config config, SourceLookup sources,
+    ShortcutRepositoryImplLog(Context context, Config config, Corpora corpora,
             ShortcutRefresher refresher, Handler uiThread, String name) {
         mContext = context;
         mConfig = config;
-        mSources = sources;
+        mCorpora = corpora;
         mRefresher = refresher;
         mUiThread = uiThread;
         mOpenHelper = new DbOpenHelper(context, name, DB_VERSION, config);
@@ -185,8 +187,9 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         getOpenHelper().close();
     }
 
-    public void reportClick(SuggestionPosition clicked) {
-        logClick(clicked, System.currentTimeMillis());
+    public void reportClick(SuggestionCursor suggestions, int position) {
+        suggestions.moveTo(position);
+        logClick(suggestions, System.currentTimeMillis());
     }
 
     public SuggestionCursor getShortcutsForQuery(String query) {
@@ -197,8 +200,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return shortcuts;
     }
 
-    public ArrayList<ComponentName> getSourceRanking() {
-        return getSourceRanking(mConfig.getMinClicksForSourceRanking());
+    public Map<String,Integer> getCorpusScores() {
+        return getCorpusScores(mConfig.getMinClicksForSourceRanking());
     }
 
 // -------------------------- end ShortcutRepository --------------------------
@@ -222,30 +225,30 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             cursor.close();
             return null;
         }
-        return new ShortcutCursor(new SuggestionCursorImpl(mSources, query, cursor));
+        return new ShortcutCursor(new SuggestionCursorImpl(query, cursor));
     }
 
     private void startRefresh(final ShortcutCursor shortcuts) {
         mRefresher.refresh(shortcuts, new ShortcutRefresher.Listener() {
-            public void onShortcutRefreshed(final ComponentName componentName,
+            public void onShortcutRefreshed(final Source source,
                     final String shortcutId, final SuggestionCursor refreshed) {
-                refreshShortcut(componentName, shortcutId, refreshed);
+                refreshShortcut(source, shortcutId, refreshed);
                 mUiThread.post(new Runnable() {
                     public void run() {
-                        shortcuts.refresh(componentName, shortcutId, refreshed);
+                        shortcuts.refresh(source, shortcutId, refreshed);
                     }
                 });
             }
         });
     }
 
-    private void refreshShortcut(ComponentName source, String shortcutId, SuggestionCursor refreshed) {
+    private void refreshShortcut(Source source, String shortcutId, SuggestionCursor refreshed) {
         if (source == null) throw new NullPointerException("source");
         if (shortcutId == null) throw new NullPointerException("shortcutId");
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
-        String[] whereArgs = { shortcutId, source.flattenToShortString() };
+        String[] whereArgs = { shortcutId, source.getFlattenedComponentName() };
         if (refreshed == null || refreshed.getCount() == 0) {
             if (DBG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
             db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_ID_WHERE, whereArgs);
@@ -262,17 +265,15 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         private final String mSearchSpinner = ContentResolver.SCHEME_ANDROID_RESOURCE
                     + "://" + mContext.getPackageName() + "/"  + R.drawable.search_spinner;
 
-        private final SourceLookup mSources;
         private final HashMap<String, Source> mSourceCache;
 
-        public SuggestionCursorImpl(SourceLookup sources, String userQuery, Cursor cursor) {
+        public SuggestionCursorImpl(String userQuery, Cursor cursor) {
             super(userQuery, cursor);
-            mSources = sources;
             mSourceCache = new HashMap<String, Source>();
         }
 
         @Override
-        protected Source getSource() {
+        public Source getSuggestionSource() {
             // TODO: Using ordinal() is hacky, look up the column instead
             String srcStr = mCursor.getString(Shortcuts.source.ordinal());
             if (srcStr == null) {
@@ -281,7 +282,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             Source source = mSourceCache.get(srcStr);
             if (source == null) {
                 ComponentName srcName = ComponentName.unflattenFromString(srcStr);
-                source = mSources.getSourceByComponentName(srcName);
+                source = mCorpora.getSource(srcName);
                 // We cache the source so that it can be found quickly, and so
                 // that it doesn't disappear over the lifetime of this cursor.
                 mSourceCache.put(srcStr, source);
@@ -340,34 +341,30 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
      * @param minClicks The minimum number of clicks a source must have.
      * @return The list of sources, ranked by total clicks.
      */
-    ArrayList<ComponentName> getSourceRanking(int minClicks) {
+    Map<String,Integer> getCorpusScores(int minClicks) {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         final Cursor cursor = db.rawQuery(
                 SOURCE_RANKING_SQL, new String[] { String.valueOf(minClicks) });
         try {
-            final ArrayList<ComponentName> sources =
-                    new ArrayList<ComponentName>(cursor.getCount());
+            Map<String,Integer> corpora = new HashMap<String,Integer>(cursor.getCount());
             while (cursor.moveToNext()) {
-                sources.add(sourceFromCursor(cursor));
+                String name = cursor.getString(SourceStats.corpus.ordinal());
+                int clicks = cursor.getInt(SourceStats.total_clicks.ordinal());
+                corpora.put(name, clicks);
             }
-            return sources;
+            return corpora;
         } finally {
             cursor.close();
         }
     }
 
-    private ComponentName sourceFromCursor(Cursor cursor) {
-        return ComponentName.unflattenFromString(cursor.getString(SourceStats.component.ordinal()));
-    }
-
     private ContentValues makeShortcutRow(SuggestionCursor suggestion) {
-        ComponentName source = suggestion.getSourceComponentName();
-        Intent intent = suggestion.getSuggestionIntent(mContext, null, KeyEvent.KEYCODE_UNKNOWN, null);
-        String intentAction = intent.getAction();
-        String intentData = intent.getDataString();
-        String intentQuery = intent.getStringExtra(SearchManager.QUERY);
-        String intentExtraData = intent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
+        String intentAction = suggestion.getSuggestionIntentAction();
+        String intentData = suggestion.getSuggestionIntentDataString();
+        String intentQuery = suggestion.getSuggestionQuery();
+        String intentExtraData = suggestion.getSuggestionIntentExtraData();
 
+        ComponentName source = suggestion.getSuggestionSource().getComponentName();
         StringBuilder key = new StringBuilder(source.flattenToShortString());
         key.append("#");
         if (intentData != null) {
@@ -405,9 +402,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return cv;
     }
 
-    private void logClick(SuggestionPosition clicked, long now) {
-        SuggestionCursor suggestion = clicked.getSuggestion();
-
+    private void logClick(SuggestionCursor suggestion, long now) {
         if (DBG) {
             Log.d(TAG, "logClicked(" + suggestion + ")");
         }
@@ -419,7 +414,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         // Once the user has clicked on a shortcut, don't bother refreshing
         // (especially if this is a new shortcut)
-        mRefresher.onShortcutRefreshed(clicked.getSuggestion());
+        mRefresher.onShortcutRefreshed(suggestion);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
@@ -427,7 +422,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         // Since intent_key is the primary key, any existing
         // suggestion with the same source+data+action will be replaced
         if (DBG) Log.d(TAG, "Adding shortcut: " + suggestion);
-        ContentValues shortcut = makeShortcutRow(clicked.getSuggestion());
+        ContentValues shortcut = makeShortcutRow(suggestion);
         String intentKey = shortcut.getAsString(Shortcuts.intent_key.name());
         db.replaceOrThrow(Shortcuts.TABLE_NAME, null, shortcut);
 
@@ -440,17 +435,20 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             db.insertOrThrow(ClickLog.TABLE_NAME, null, cv);
         }
 
-        // Log click for source
-        {
-            final ContentValues cv = new ContentValues();
-            ComponentName name = suggestion.getSourceComponentName();
-            cv.put(SourceLog.component.name(), name.flattenToString());
-            cv.put(SourceLog.time.name(), now);
-            cv.put(SourceLog.click_count.name(), 1);
-            db.insertOrThrow(SourceLog.TABLE_NAME, null, cv);
-        }
+        // Log click for corpus
+        Corpus corpus = mCorpora.getCorpusForSource(suggestion.getSuggestionSource());
+        logCorpusClick(db, corpus, now);
 
         postSourceEventCleanup(now);
+    }
+
+    private void logCorpusClick(SQLiteDatabase db, Corpus corpus, long now) {
+        if (corpus == null) return;
+        ContentValues cv = new ContentValues();
+        cv.put(SourceLog.corpus.name(), corpus.getName());
+        cv.put(SourceLog.time.name(), now);
+        cv.put(SourceLog.click_count.name(), 1);
+        db.insertOrThrow(SourceLog.TABLE_NAME, null, cv);
     }
 
     /**
@@ -469,12 +467,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                 + now + " - " + mConfig.getMaxSourceEventAgeMillis() + ";");
 
         // update the source stats
-        final String columns = SourceLog.component + "," +
+        final String columns = SourceLog.corpus + "," +
                 "SUM(" + SourceLog.click_count.fullName + ")";
         db.execSQL("DELETE FROM " + SourceStats.TABLE_NAME);
         db.execSQL("INSERT INTO " + SourceStats.TABLE_NAME  + " "
                 + "SELECT " + columns + " FROM " + SourceLog.TABLE_NAME + " GROUP BY "
-                + SourceLog.component.name());
+                + SourceLog.corpus.name());
     }
 
 // -------------------------- TABLES --------------------------
@@ -541,7 +539,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
      */
     enum SourceLog {
         _id,
-        component,
+        corpus,
         time,
         click_count,
         impression_count;
@@ -573,7 +571,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
      * are reported.
      */
     enum SourceStats {
-        component,
+        corpus,
         total_clicks;
 
         static final String TABLE_NAME = "sourcetotals";
@@ -753,13 +751,13 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
             db.execSQL("CREATE TABLE " + SourceLog.TABLE_NAME + " ( " +
                     SourceLog._id.name() + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                    SourceLog.component.name() + " TEXT NOT NULL COLLATE UNICODE, " +
+                    SourceLog.corpus.name() + " TEXT NOT NULL COLLATE UNICODE, " +
                     SourceLog.time.name() + " INTEGER, " +
                     SourceLog.click_count + " INTEGER);"
             );
 
             db.execSQL("CREATE TABLE " + SourceStats.TABLE_NAME + " ( " +
-                    SourceStats.component.name() + " TEXT NOT NULL COLLATE UNICODE PRIMARY KEY, " +
+                    SourceStats.corpus.name() + " TEXT NOT NULL COLLATE UNICODE PRIMARY KEY, " +
                     SourceStats.total_clicks + " INTEGER);"
                     );
         }

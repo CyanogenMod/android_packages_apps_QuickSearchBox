@@ -16,13 +16,8 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Bundle;
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
 
 import java.util.ArrayList;
 
@@ -33,6 +28,8 @@ import java.util.ArrayList;
  *
  */
 public class ListSuggestionCursor extends AbstractSuggestionCursor {
+
+    private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private final ArrayList<SuggestionPosition> mSuggestions;
 
@@ -57,11 +54,6 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
 
     public void close() {
         mSuggestions.clear();
-        super.close();
-    }
-
-    public boolean isFailed() {
-        return false;
     }
 
     public int getPosition() {
@@ -84,40 +76,35 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return mSuggestions.size();
     }
 
-    private SuggestionCursor current() {
-        return mSuggestions.get(mPos).getSuggestion();
+    protected SuggestionCursor current() {
+        return mSuggestions.get(mPos).current();
     }
 
-    public Drawable getIcon(String iconId) {
-        return current().getIcon(iconId);
+    /**
+     * Register an observer that is called when changes happen to this data set.
+     *
+     * @param observer gets notified when the data set changes.
+     */
+    public void registerDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.registerObserver(observer);
     }
 
-    public Uri getIconUri(String iconId) {
-        return current().getIconUri(iconId);
+    /**
+     * Unregister an observer that has previously been registered with 
+     * {@link #registerDataSetObserver(DataSetObserver)}
+     *
+     * @param observer the observer to unregister.
+     */
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.unregisterObserver(observer);
+    }
+
+    protected void notifyDataSetChanged() {
+        mDataSetObservable.notifyChanged();
     }
 
     public String getShortcutId() {
         return current().getShortcutId();
-    }
-
-    public ComponentName getSourceComponentName() {
-        return current().getSourceComponentName();
-    }
-
-    public String getLogName() {
-        return current().getLogName();
-    }
-
-    public Drawable getSourceIcon() {
-        return current().getSourceIcon();
-    }
-
-    public Uri getSourceIconUri() {
-        return current().getSourceIconUri();
-    }
-
-    public CharSequence getSourceLabel() {
-        return current().getSourceLabel();
     }
 
     public String getSuggestionDisplayQuery() {
@@ -136,21 +123,32 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return current().getSuggestionIcon2();
     }
 
-    public boolean isSpinnerWhileRefreshing() {
-        return current().isSpinnerWhileRefreshing();
+    public String getSuggestionIntentAction() {
+        return current().getSuggestionIntentAction();
     }
 
-    public Intent getSuggestionIntent(Context context, Bundle appSearchData, int actionKey,
-            String actionMsg) {
-        return current().getSuggestionIntent(context, appSearchData, actionKey, actionMsg);
+    public String getSuggestionIntentDataString() {
+        return current().getSuggestionIntentDataString();
     }
 
     public String getSuggestionIntentExtraData() {
         return current().getSuggestionIntentExtraData();
     }
 
-    public String getSuggestionIntentDataString() {
-        return current().getSuggestionIntentDataString();
+    public String getSuggestionKey() {
+        return current().getSuggestionKey();
+    }
+
+    public String getSuggestionLogType() {
+        return current().getSuggestionLogType();
+    }
+
+    public String getSuggestionQuery() {
+        return current().getSuggestionQuery();
+    }
+
+    public Source getSuggestionSource() {
+        return current().getSuggestionSource();
     }
 
     public String getSuggestionText1() {
@@ -161,12 +159,7 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return current().getSuggestionText2();
     }
 
-    public String getSuggestionKey() {
-        return current().getSuggestionKey();
+    public boolean isSpinnerWhileRefreshing() {
+        return current().isSpinnerWhileRefreshing();
     }
-
-    public String getActionKeyMsg(int keyCode) {
-        return current().getActionKeyMsg(keyCode);
-    }
-
 }

@@ -21,7 +21,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
 /**
- * Tests for {@link QueryThreadFacory}.
+ * Tests for {@link QueryThreadFactory}.
  *
  */
 @MediumTest

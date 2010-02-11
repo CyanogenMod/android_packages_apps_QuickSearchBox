@@ -34,9 +34,8 @@ import java.util.List;
 /**
  * Loads icons from other packages.
  *
- * Code partly stolen from {@link ContentResolver} and {@link android.app.SuggestionsAdapter}.
- *
- */
+ * Code partly stolen from {@link ContentResolver} and android.app.SuggestionsAdapter.
+  */
 public class PackageIconLoader implements IconLoader {
 
     private static final boolean DBG = false;

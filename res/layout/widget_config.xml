@@ -25,11 +25,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="4dip"
-        android:text="@string/search_source_list_heading"
+        android:text="@string/corpus_selection_heading"
     />
 
     <GridView
-        android:id="@+id/widget_source_list"
+        android:id="@+id/widget_corpus_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|left"

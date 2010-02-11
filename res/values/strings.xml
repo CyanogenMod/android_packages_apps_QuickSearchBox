@@ -24,8 +24,8 @@
     <string name="search_widget_config_ok">OK</string>
 
     <!-- Source selector -->
-    <string name="search_source_list_heading">Search in:</string>
-    <string name="global_search_label">Everything</string>
+    <string name="corpus_selection_heading">Search in:</string>
+    <string name="corpus_label_global">Everything</string>
 
     <!-- Name of the combined Web source shown in QSB -->
     <string name="corpus_label_web">Web</string>

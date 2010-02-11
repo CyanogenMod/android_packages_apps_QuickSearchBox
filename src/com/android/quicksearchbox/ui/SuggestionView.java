@@ -17,7 +17,6 @@
 package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.SuggestionCursor;
-import com.android.quicksearchbox.SuggestionPosition;
 
 /**
  * Interface to be implemented by any view appearing in the list of suggestions.
@@ -28,8 +27,4 @@ public interface SuggestionView {
      */
     void bindAsSuggestion(SuggestionCursor suggestion);
 
-    /**
-     * Gets the SuggestionPosition associated with this view.
-     */
-    SuggestionPosition getSuggestionPosition();
 }

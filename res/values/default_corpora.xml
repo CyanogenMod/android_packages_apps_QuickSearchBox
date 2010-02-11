@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 The Android Open Source Project
+<!-- Copyright (C) 2009 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,7 +16,14 @@
 
 <resources>
 
-    <dimen name="corpus_selection_dialog_x">0dip</dimen>
-    <dimen name="corpus_selection_dialog_y">58dip</dimen>
-
+  <!-- Name of corpora that are enabled by default in QSB.
+       For external single-source corpora, the corpus name is the component name of the
+       searchable activity. -->
+  <string-array name="default_corpora" translatable="false">
+    <item>web</item>
+    <item>com.android.contacts/.ContactsListActivity</item>
+    <item>com.android.providers.applications/.ApplicationLauncher</item>
+    <item>com.google.android.youtube/.VideoListActivity</item>
+    <item>com.android.mms/.ui.SearchActivity</item>
+  </string-array>
 </resources>

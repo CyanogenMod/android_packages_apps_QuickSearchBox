@@ -16,14 +16,12 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.ui.SearchSourceSelector;
-import com.android.quicksearchbox.ui.SourcesAdapter;
+import com.android.quicksearchbox.ui.CorporaAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -38,35 +36,35 @@ import android.widget.GridView;
 
 
 /**
- * Search source selection dialog.
+ * Corpus selection dialog.
  */
-public class SelectSearchSourceDialog extends Dialog {
+public class CorpusSelectionDialog extends Dialog {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SelectSearchSourceDialog";
 
-    private GridView mSourceList;
+    private GridView mCorpusGrid;
 
-    private ComponentName mSource;
+    private Corpus mCorpus;
 
     private String mQuery;
 
     private Bundle mAppData;
 
-    public SelectSearchSourceDialog(Context context) {
+    public CorpusSelectionDialog(Context context) {
         super(context, R.style.Theme_SelectSearchSource);
-        setContentView(R.layout.select_search_source);
-        mSourceList = (GridView) findViewById(R.id.source_list);
-        mSourceList.setOnItemClickListener(new SourceClickListener());
+        setContentView(R.layout.corpus_selection_dialog);
+        mCorpusGrid = (GridView) findViewById(R.id.corpus_grid);
+        mCorpusGrid.setOnItemClickListener(new CorpusClickListener());
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
-        mSourceList.setFocusable(true);
+        mCorpusGrid.setFocusable(true);
         setCanceledOnTouchOutside(true);
         positionWindow();
     }
 
-    public void setSource(ComponentName source) {
-        mSource = source;
+    public void setCorpus(Corpus corpus) {
+        mCorpus = corpus;
     }
 
     public void setQuery(String query) {
@@ -79,8 +77,8 @@ public class SelectSearchSourceDialog extends Dialog {
 
     private void positionWindow() {
         Resources resources = getContext().getResources();
-        int x = resources.getDimensionPixelSize(R.dimen.select_source_x);
-        int y = resources.getDimensionPixelSize(R.dimen.select_source_y);
+        int x = resources.getDimensionPixelSize(R.dimen.corpus_selection_dialog_x);
+        int y = resources.getDimensionPixelSize(R.dimen.corpus_selection_dialog_y);
         positionArrowAt(x, y);
     }
 
@@ -104,46 +102,50 @@ public class SelectSearchSourceDialog extends Dialog {
     @Override
     protected void onStart() {
         super.onStart();
-        updateSources();
+        updateCorpora();
     }
 
-    private void updateSources() {
-        mSourceList.setAdapter(new SourcesAdapter(getViewFactory(), getGlobalSuggestionsProvider()));
+    private void updateCorpora() {
+        mCorpusGrid.setAdapter(
+                new CorporaAdapter(getViewFactory(), getCorpora(), getCorpusRanker()));
     }
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getContext().getApplicationContext();
     }
 
-    private SuggestionsProvider getGlobalSuggestionsProvider() {
-        return getQsbApplication().getGlobalSuggestionsProvider();
+    private Corpora getCorpora() {
+        return getQsbApplication().getCorpora();
+    }
+
+    private CorpusRanker getCorpusRanker() {
+        return getQsbApplication().getCorpusRanker();
     }
 
     private SuggestionViewFactory getViewFactory() {
         return getQsbApplication().getSuggestionViewFactory();
     }
 
-    protected void selectSource(Source source) {
+    protected void selectCorpus(Corpus corpus) {
         dismiss();
         // If a new source was selected, start QSB with that source.
         // If the old source was selected, just finish.
-        if (!isCurrentSource(source)) {
-            switchSource(source);
+        if (!isCurrentCorpus(corpus)) {
+            switchCorpus(corpus);
         }
     }
 
-    private boolean isCurrentSource(Source source) {
-        if (source == null) return mSource == null;
-        return source.getComponentName().equals(mSource);
+    private boolean isCurrentCorpus(Corpus corpus) {
+        if (corpus == null) return mCorpus == null;
+        return corpus.equals(mCorpus);
     }
 
-    private void switchSource(Source source) {
-        if (DBG) Log.d(TAG, "switchSource(" + source + ")");
+    private void switchCorpus(Corpus corpus) {
+        if (DBG) Log.d(TAG, "switchSource(" + corpus + ")");
 
         Intent searchIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         searchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ComponentName sourceName = source == null ? null : source.getComponentName();
-        SearchSourceSelector.setSource(searchIntent, sourceName);
+        searchIntent.setData(SearchActivity.getCorpusUri(corpus));
         searchIntent.putExtra(SearchManager.QUERY, mQuery);
         searchIntent.putExtra(SearchManager.APP_DATA, mAppData);
 
@@ -155,10 +157,10 @@ public class SelectSearchSourceDialog extends Dialog {
         }
     }
 
-    private class SourceClickListener implements AdapterView.OnItemClickListener {
+    private class CorpusClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Source source = (Source) parent.getItemAtPosition(position);
-            selectSource(source);
+            Corpus corpus = (Corpus) parent.getItemAtPosition(position);
+            selectCorpus(corpus);
         }
     }
 }

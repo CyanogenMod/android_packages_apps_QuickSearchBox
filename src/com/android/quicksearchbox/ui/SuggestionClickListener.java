@@ -16,12 +16,20 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.SuggestionPosition;
-
 /**
  * Listener interface for clicks on suggestions.
  */
 public interface SuggestionClickListener {
-    void onSuggestionClicked(SuggestionPosition suggestion);
-    boolean onSuggestionLongClicked(SuggestionPosition suggestion);
+    /**
+     * Called when a suggestion is clicked.
+     *
+     * @param position Position of the clicked suggestion.
+     */
+    void onSuggestionClicked(int position);
+    /**
+     * Called when a suggestion is long clicked.
+     *
+     * @param position Position of the long clicked suggestion.
+     */
+    boolean onSuggestionLongClicked(int position);
 }

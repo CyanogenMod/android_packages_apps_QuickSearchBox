@@ -19,10 +19,13 @@ package com.android.quicksearchbox;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.ContentObserver;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
@@ -31,6 +34,7 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.util.List;
@@ -45,13 +49,16 @@ public class SearchSettings extends PreferenceActivity
     private static final boolean DBG = false;
     private static final String TAG = "SearchSettings";
 
+    // Name of the preferences file used to store search preference
+    public static final String PREFERENCES_NAME = "SearchSettings";
+
     // Only used to find the preferences after inflating
     private static final String CLEAR_SHORTCUTS_PREF = "clear_shortcuts";
     private static final String SEARCH_ENGINE_SETTINGS_PREF = "search_engine_settings";
-    private static final String SEARCH_SOURCES_PREF = "search_sources";
+    private static final String SEARCH_CORPORA_PREF = "search_corpora";
 
-    private SourceLookup mSources;
-    private ShortcutRepository mShortcuts;
+    // Preifx of per-corpus enable preference
+    private static final String CORPUS_ENABLED_PREF_PREFIX = "enable_corpus_";
 
     // References to the top-level preference objects
     private Preference mClearShortcutsPreference;
@@ -65,9 +72,7 @@ public class SearchSettings extends PreferenceActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSources = getSources();
-        mShortcuts = getQSBApplication().getShortcutRepository();
-        getPreferenceManager().setSharedPreferencesName(Sources.PREFERENCES_NAME);
+        getPreferenceManager().setSharedPreferencesName(PREFERENCES_NAME);
 
         addPreferencesFromResource(R.xml.preferences);
 
@@ -76,7 +81,7 @@ public class SearchSettings extends PreferenceActivity
         mSearchEngineSettingsPreference = (PreferenceScreen) preferenceScreen.findPreference(
                 SEARCH_ENGINE_SETTINGS_PREF);
         mSourcePreferences = (PreferenceGroup) getPreferenceScreen().findPreference(
-                SEARCH_SOURCES_PREF);
+                SEARCH_CORPORA_PREF);
 
         mClearShortcutsPreference.setOnPreferenceClickListener(this);
 
@@ -85,22 +90,35 @@ public class SearchSettings extends PreferenceActivity
         populateSearchEnginePreference();
     }
 
-    @Override
-    protected void onDestroy() {
-        mShortcuts.close();
-        super.onDestroy();
+    public static boolean areWebSuggestionsEnabled(Context context) {
+        return (Settings.System.getInt(context.getContentResolver(),
+                Settings.System.SHOW_WEB_SUGGESTIONS,
+                1 /* default on until user actually changes it */) == 1);
     }
 
-    private QsbApplication getQSBApplication() {
+    /**
+     * Gets the preference key of the preference for whether the given corpus
+     * is enabled. The preference is stored in the {@link #PREFERENCES_NAME}
+     * preferences file.
+     */
+    public static String getCorpusEnabledPreference(Corpus corpus) {
+        return CORPUS_ENABLED_PREF_PREFIX + corpus.getName();
+    }
+
+    public static SharedPreferences getSearchPreferences(Context context) {
+        return context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+    }
+
+    private QsbApplication getQsbApplication() {
         return (QsbApplication) getApplication();
     }
 
-    private Config getConfig() {
-        return getQSBApplication().getConfig();
+    private Corpora getCorpora() {
+        return getQsbApplication().getCorpora();
     }
 
-    private SourceLookup getSources() {
-        return getQSBApplication().getSources();
+    private ShortcutRepository getShortcuts() {
+        return getQsbApplication().getShortcutRepository();
     }
 
     /**
@@ -108,7 +126,7 @@ public class SearchSettings extends PreferenceActivity
      * on whether there is any search history.
      */
     private void updateClearShortcutsPreference() {
-        boolean hasHistory = mShortcuts.hasHistory();
+        boolean hasHistory = getShortcuts().hasHistory();
         if (DBG) Log.d(TAG, "hasHistory()=" + hasHistory);
         mClearShortcutsPreference.setEnabled(hasHistory);
     }
@@ -144,10 +162,10 @@ public class SearchSettings extends PreferenceActivity
      * Fills the suggestion source list.
      */
     private void populateSourcePreference() {
-        for (Source source : mSources.getSources()) {
-            Preference pref = createSourcePreference(source);
+        for (Corpus corpus : getCorpora().getAllCorpora()) {
+            Preference pref = createCorpusPreference(corpus);
             if (pref != null) {
-                if (DBG) Log.d(TAG, "Adding search source: " + source);
+                if (DBG) Log.d(TAG, "Adding corpus: " + corpus);
                 mSourcePreferences.addPreference(pref);
             }
         }
@@ -156,14 +174,14 @@ public class SearchSettings extends PreferenceActivity
     /**
      * Adds a suggestion source to the list of suggestion source checkbox preferences.
      */
-    private Preference createSourcePreference(Source source) {
+    private Preference createCorpusPreference(Corpus corpus) {
         CheckBoxPreference sourcePref = new CheckBoxPreference(this);
-        sourcePref.setKey(Sources.getSourceEnabledPreference(source));
-        sourcePref.setDefaultValue(mSources.isTrustedSource(source));
+        sourcePref.setKey(getCorpusEnabledPreference(corpus));
+        sourcePref.setDefaultValue(getCorpora().isCorpusDefaultEnabled(corpus));
         sourcePref.setOnPreferenceChangeListener(this);
-        CharSequence label = source.getLabel();
+        CharSequence label = corpus.getLabel();
         sourcePref.setTitle(label);
-        CharSequence description = source.getSettingsDescription();
+        CharSequence description = corpus.getSettingsDescription();
         sourcePref.setSummaryOn(description);
         sourcePref.setSummaryOff(description);
         return sourcePref;
@@ -181,7 +199,7 @@ public class SearchSettings extends PreferenceActivity
     }
 
     @Override
-    protected Dialog onCreateDialog(int id) {
+    protected Dialog onCreateDialog(int id, Bundle args) {
         switch (id) {
             case CLEAR_SHORTCUTS_CONFIRM_DIALOG:
                 return new AlertDialog.Builder(this)
@@ -190,7 +208,7 @@ public class SearchSettings extends PreferenceActivity
                         .setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (DBG) Log.d(TAG, "Clearing history...");
-                                mShortcuts.clearHistory();
+                                getShortcuts().clearHistory();
                                 updateClearShortcutsPreference();
                             }
                         })
@@ -200,9 +218,9 @@ public class SearchSettings extends PreferenceActivity
                 return null;
         }
     }
-    
+
     /**
-     * Informs our listeners (SuggestionSources objects) about the updated settings data.
+     * Informs our listeners about the updated settings data.
      */
     private void broadcastSettingsChanged() {
         // We use a message broadcast since the listeners could be in multiple processes.
@@ -216,4 +234,15 @@ public class SearchSettings extends PreferenceActivity
         return true;
     }
 
+    public static void registerShowWebSuggestionsSettingObserver(
+            Context context, ContentObserver observer) {
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.SHOW_WEB_SUGGESTIONS),
+                false, observer);
+    }
+
+    public static void unregisterShowWebSuggestionsSettingObserver(
+            Context context, ContentObserver observer) {
+        context.getContentResolver().unregisterContentObserver(observer);
+    }
 }

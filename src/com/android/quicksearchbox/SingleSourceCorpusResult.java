@@ -16,32 +16,21 @@
 
 package com.android.quicksearchbox;
 
-import android.app.SearchableInfo;
-import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
 
 /**
- * The web search source.
+ * A CorpusResult backed by a single SourceResult.
  */
-public class WebSource extends SearchableSource {
+public class SingleSourceCorpusResult extends SuggestionCursorWrapper implements CorpusResult {
 
-    private static final boolean DBG = true;
-    private static final String TAG = "QSB.WebSource";
+    private final Corpus mCorpus;
 
-    private static final String WEB_SOURCE_LOG_NAME = "web";
-
-    public WebSource(Context context, SearchableInfo searchable) throws NameNotFoundException {
-        super(context, searchable);
+    public SingleSourceCorpusResult(Corpus corpus, String userQuery, SuggestionCursor cursor) {
+        super(userQuery, cursor);
+        mCorpus = corpus;
     }
 
-    @Override
-    public String getLogName() {
-        return WEB_SOURCE_LOG_NAME;
-    }
-
-    @Override
-    public boolean isWebSuggestionSource() {
-        return true;
+    public Corpus getCorpus() {
+        return mCorpus;
     }
 
 }

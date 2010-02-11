@@ -24,7 +24,6 @@ import java.util.Map;
 /**
  * Holds data for each suggest item including the display data and how to launch the result.
  * Used for passing from the provider to the suggest cursor.
- * Use {@link Builder} to create new instances.
  *
  */
 public class SuggestionData {
@@ -36,113 +35,55 @@ public class SuggestionData {
     private String mIcon1;
     private String mIcon2;
     private Intent mIntent;
-    private Intent mSecondaryIntent;
     private String mDisplayQuery;
     private String mShortcutId;
     private boolean mIsSpinnerWhileRefreshing;
     private Map<Integer,String> mActionMsgs;
+    private String mIntentAction;
+    private String mIntentData;
+    private String mIntentExtraData;
+    private String mSuggestionQuery;
 
     public SuggestionData(Source source) {
         mSource = source;
     }
 
-    public SuggestionData(
-            Source source,
-            String format,
-            String text1,
-            String text2,
-            String icon1,
-            String icon2,
-            Intent intent,
-            Intent secondaryIntent,
-            String displayQuery,
-            String shortcutId,
-            boolean isSpinnerWhileRefreshing,
-            Map<Integer,String> actionMsgs) {
-        mSource = source;
-        mFormat = format;
-        mText1 = text1;
-        mText2 = text2;
-        mIcon1 = icon1;
-        mIcon2 = icon2;
-        mIntent = intent == null ? null : new Intent(intent);
-        mSecondaryIntent = secondaryIntent == null ? null : new Intent(intent);
-        mDisplayQuery = displayQuery;
-        mShortcutId = shortcutId;
-        mIsSpinnerWhileRefreshing = isSpinnerWhileRefreshing;
-        mActionMsgs = actionMsgs;
-    }
-
-    /**
-     * Gets the suggestion source that created this suggestion.
-     */
-    public Source getSource() {
+    public Source getSuggestionSource() {
         return mSource;
     }
 
-    /**
-     * Gets the format of the text in the title and description.
-     */
-    public String getFormat() {
+    public String getSuggestionFormat() {
         return mFormat;
     }
 
-    /**
-     * Gets the display title (typically shown as the first line).
-     */
-    public String getText1() {
+    public String getSuggestionText1() {
         return mText1;
     }
 
-    /**
-     * Gets the display description (typically shown as the second line).
-     */
-    public String getText2() {
+    public String getSuggestionText2() {
         return mText2;
     }
 
-    /**
-     * Resource ID or URI for the first icon (typically shown on the left).
-     */
-    public String getIcon1() {
+    public String getSuggestionIcon1() {
         return mIcon1;
     }
 
-    /**
-     * Resource ID or URI for the second icon (typically shown on the right).
-     */
-    public String getIcon2() {
+    public String getSuggestionIcon2() {
         return mIcon2;
     }
 
-    /**
-     * Whether to show a spinner while refreshing.
-     */
     public boolean isSpinnerWhileRefreshing() {
         return mIsSpinnerWhileRefreshing;
-    }
-
-    /**
-     * The intent to launch.
-     */
-    public Intent getIntent() {
-        return mIntent == null ? null : new Intent(mIntent);
     }
 
     public String getIntentExtraData() {
         return mIntent == null ? null : mIntent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
     }
 
-    /**
-     * The query to display when this suggestion is selected.
-     */
-    public String getDisplayQuery() {
+    public String getSuggestionDisplayQuery() {
         return mDisplayQuery;
     }
 
-    /**
-     * The shortcut id.
-     */
     public String getShortcutId() {
         return mShortcutId;
     }
@@ -153,6 +94,22 @@ public class SuggestionData {
 
     public Map<Integer, String> getActionMsgs() {
         return mActionMsgs;
+    }
+
+    public String getSuggestionIntentAction() {
+        return mIntentAction;
+    }
+
+    public String getSuggestionIntentDataString() {
+        return mIntentData;
+    }
+
+    public String getSuggestionIntentExtraData() {
+        return mIntentExtraData;
+    }
+
+    public String getSuggestionQuery() {
+        return mSuggestionQuery;
     }
 
     public void setActionMsgs(Map<Integer, String> actionMsgs) {
@@ -181,10 +138,6 @@ public class SuggestionData {
 
     public void setIntent(Intent intent) {
         mIntent = intent == null ? null : new Intent(intent);
-    }
-
-    public void setSecondaryIntent(Intent intent) {
-        mSecondaryIntent = intent == null ? null : new Intent(intent);
     }
 
     public void setDisplayQuery(String displayQuery) {
@@ -225,6 +178,10 @@ public class SuggestionData {
             return null;
         }
         return mIntent.toUri(Intent.URI_INTENT_SCHEME);
+    }
+
+    public String getSuggestionLogType() {
+        return getSuggestionSource().getLogName();
     }
 
     @Override

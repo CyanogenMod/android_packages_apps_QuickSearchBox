@@ -26,8 +26,7 @@
     android:paddingBottom="9dip"
     android:background="@drawable/search_floater" >
 
-    <include android:id="@+id/widget_search_source_selector"
-        layout="@layout/search_source_selector" />
+    <include layout="@layout/corpus_indicator" />
 
     <TextView
         android:id="@+id/search_widget_text"

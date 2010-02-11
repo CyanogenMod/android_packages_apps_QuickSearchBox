@@ -27,21 +27,18 @@ import android.widget.TextView;
 
 
 /**
- * A source in the source selection list.
+ * A corpus in the corpus selection list.
  */
-public class SourceView extends RelativeLayout {
-
-    private static final boolean DBG = true;
-    private static final String TAG = "QSB.SourceView";
+public class CorpusView extends RelativeLayout {
 
     private ImageView mIcon;
     private TextView mLabel;
 
-    public SourceView(Context context, AttributeSet attrs) {
+    public CorpusView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public SourceView(Context context) {
+    public CorpusView(Context context) {
         super(context);
     }
 

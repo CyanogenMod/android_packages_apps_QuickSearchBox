@@ -32,7 +32,7 @@ public class ShortcutPromoterTest extends AndroidTestCase {
 
     private SuggestionCursor mShortcuts;
 
-    private ArrayList<SuggestionCursor> mSuggestions;
+    private ArrayList<CorpusResult> mSuggestions;
 
     private int mSuggestionCount;
 
@@ -40,9 +40,9 @@ public class ShortcutPromoterTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         mQuery = "foo";
         mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery);
-        mSuggestions = new ArrayList<SuggestionCursor>();
-        mSuggestions.add(MockSource.SOURCE_1.getSuggestions(mQuery, 10));
-        mSuggestions.add(MockSource.SOURCE_2.getSuggestions(mQuery, 10));
+        mSuggestions = new ArrayList<CorpusResult>();
+        mSuggestions.add(MockCorpus.CORPUS_1.getSuggestions(mQuery, 10));
+        mSuggestions.add(MockCorpus.CORPUS_2.getSuggestions(mQuery, 10));
         mSuggestionCount = countSuggestions(mSuggestions);
     }
 
@@ -99,7 +99,7 @@ public class ShortcutPromoterTest extends AndroidTestCase {
         }
     }
 
-    private static int countSuggestions(ArrayList<SuggestionCursor> suggestions) {
+    private static int countSuggestions(ArrayList<CorpusResult> suggestions) {
         int count = 0;
         for (SuggestionCursor c : suggestions) {
             count += c.getCount();
@@ -108,9 +108,8 @@ public class ShortcutPromoterTest extends AndroidTestCase {
     }
 
     private static void assertSuggestionEquals(SuggestionPosition x, SuggestionPosition y) {
-        SuggestionCursor a = x.getSuggestion();
-        SuggestionCursor b = y.getSuggestion();
-        assertEquals(a.getSuggestionKey(), b.getSuggestionKey());
-        assertEquals(a.getSuggestionDisplayQuery(), b.getSuggestionDisplayQuery());
+        assertEquals(x.current().getSuggestionKey(), y.current().getSuggestionKey());
+        assertEquals(x.current().getSuggestionDisplayQuery(),
+                y.current().getSuggestionDisplayQuery());
     }
 }

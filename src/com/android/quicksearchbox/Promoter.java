@@ -33,7 +33,7 @@ public interface Promoter {
      * @param promoted List to add the promoted suggestions to.
      */
     void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<SuggestionCursor> suggestions, int maxPromoted,
+            ArrayList<CorpusResult> suggestions, int maxPromoted,
             ListSuggestionCursor promoted);
 
 }

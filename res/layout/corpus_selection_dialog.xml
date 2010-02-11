@@ -16,10 +16,9 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/select_search_source_frame"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/select_search_source_bg"
+    android:background="@drawable/corpus_selection_dialog_bg"
     android:orientation="vertical"
     >
 
@@ -27,11 +26,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="4dip"
-        android:text="@string/search_source_list_heading"
+        android:text="@string/corpus_selection_heading"
     />
 
     <GridView
-        android:id="@+id/source_list"
+        android:id="@+id/corpus_grid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|left"

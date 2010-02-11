@@ -29,17 +29,15 @@ import java.util.concurrent.ThreadFactory;
 
 public class QsbApplication extends Application {
 
-    private static final String TAG ="QSB.QsbApplication";
-
     private Handler mUiThreadHandler;
     private Config mConfig;
-    private Sources mSources;
+    private SearchableCorpora mCorpora;
+    private CorpusRanker mCorpusRanker;
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
     private SourceTaskExecutor mSourceTaskExecutor;
     private SuggestionsProvider mGlobalSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
-    private SourceFactory mSourceFactory;
     private Logger mLogger;
 
     @Override
@@ -48,14 +46,22 @@ public class QsbApplication extends Application {
         super.onTerminate();
     }
 
+    protected void checkThread() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException("Accessed Application object from thread "
+                    + Thread.currentThread().getName());
+        }
+    }
+
     protected void close() {
+        checkThread();
         if (mConfig != null) {
             mConfig.close();
             mConfig = null;
         }
-        if (mSources != null) {
-            mSources.close();
-            mSources = null;
+        if (mCorpora != null) {
+            mCorpora.close();
+            mCorpora = null;
         }
         if (mShortcutRepository != null) {
             mShortcutRepository.close();
@@ -71,18 +77,18 @@ public class QsbApplication extends Application {
         }
     }
 
-    public Handler getUiThreadHandler() {
+    public synchronized Handler getMainThreadHandler() {
         if (mUiThreadHandler == null) {
-            mUiThreadHandler = createUiThreadHandler();
+            mUiThreadHandler = new Handler(Looper.getMainLooper());
         }
         return mUiThreadHandler;
     }
 
-    protected Handler createUiThreadHandler() {
-        return new Handler(Looper.myLooper());
-    }
-
-    public Config getConfig() {
+    /**
+     * Gets the QSB configuration object.
+     * May be called from any thread.
+     */
+    public synchronized Config getConfig() {
         if (mConfig == null) {
             mConfig = createConfig();
         }
@@ -93,27 +99,63 @@ public class QsbApplication extends Application {
         return new Config(this);
     }
 
-    public SourceLookup getSources() {
-        if (mSources == null) {
-            mSources = createSources();
+    /**
+     * Gets the corpora.
+     * May only be called from the main thread.
+     */
+    public Corpora getCorpora() {
+        checkThread();
+        if (mCorpora == null) {
+            mCorpora = createCorpora();
         }
-        return mSources;
+        return mCorpora;
     }
 
-    protected Sources createSources() {
-        Sources sources = new Sources(this, getConfig(), getSourceFactory());
-        sources.load();
-        return sources;
+    protected SearchableCorpora createCorpora() {
+        SearchableCorpora corpora = new SearchableCorpora(this, getConfig(), getMainThreadHandler());
+        corpora.load();
+        return corpora;
     }
 
+    /**
+     * Gets the corpus ranker.
+     * May only be called from the main thread.
+     */
+    public CorpusRanker getCorpusRanker() {
+        checkThread();
+        if (mCorpusRanker == null) {
+            mCorpusRanker = createCorpusRanker();
+        }
+        return mCorpusRanker;
+    }
+
+    protected CorpusRanker createCorpusRanker() {
+        return new DefaultCorpusRanker(getShortcutRepository());
+    }
+
+    /**
+     * Gets the shortcut repository.
+     * May only be called from the main thread.
+     */
     public ShortcutRepository getShortcutRepository() {
+        checkThread();
         if (mShortcutRepository == null) {
             mShortcutRepository = createShortcutRepository();
         }
         return mShortcutRepository;
     }
 
+    protected ShortcutRepository createShortcutRepository() {
+        return ShortcutRepositoryImplLog.create(this, getConfig(), getCorpora(),
+            getShortcutRefresher(), getMainThreadHandler());
+    }
+
+    /**
+     * Gets the shortcut refresher.
+     * May only be called from the main thread.
+     */
     public ShortcutRefresher getShortcutRefresher() {
+        checkThread();
         if (mShortcutRefresher == null) {
             mShortcutRefresher = createShortcutRefresher();
         }
@@ -122,15 +164,15 @@ public class QsbApplication extends Application {
 
     protected ShortcutRefresher createShortcutRefresher() {
         // For now, ShortcutRefresher gets its own SourceTaskExecutor
-        return new ShortcutRefresher(createSourceTaskExecutor(), getSources());
+        return new ShortcutRefresher(createSourceTaskExecutor());
     }
 
-    protected ShortcutRepository createShortcutRepository() {
-        return ShortcutRepositoryImplLog.create(this, getConfig(), getSources(),
-            getShortcutRefresher(), getUiThreadHandler());
-    }
-
+    /**
+     * Gets the source task executor.
+     * May only be called from the main thread.
+     */
     public SourceTaskExecutor getSourceTaskExecutor() {
+        checkThread();
         if (mSourceTaskExecutor == null) {
             mSourceTaskExecutor = createSourceTaskExecutor();
         }
@@ -144,28 +186,33 @@ public class QsbApplication extends Application {
         return new DelayingSourceTaskExecutor(config, queryThreadFactory);
     }
 
-
-    public SuggestionsProvider getSuggestionsProvider(Source source) {
-        if (source == null) {
+    /**
+     * Gets the suggestion provider for a corpus.
+     * May only be called from the main thread.
+     */
+    public SuggestionsProvider getSuggestionsProvider(Corpus corpus) {
+        checkThread();
+        if (corpus == null) {
             return getGlobalSuggestionsProvider();
         }
         // TODO: Cache this to avoid creating a new one for each key press
-        return createSuggestionsProvider(source);
+        return createSuggestionsProvider(corpus);
     }
 
-    protected SuggestionsProvider createSuggestionsProvider(Source source) {
+    protected SuggestionsProvider createSuggestionsProvider(Corpus corpus) {
         // TODO: We could use simpler promoter here
         Promoter promoter =  new ShortcutPromoter(new RoundRobinPromoter());
-        SingleSourceSuggestionsProvider provider = new SingleSourceSuggestionsProvider(getConfig(),
-                source,
+        SingleCorpusSuggestionsProvider provider = new SingleCorpusSuggestionsProvider(getConfig(),
+                corpus,
                 getSourceTaskExecutor(),
-                getUiThreadHandler(),
+                getMainThreadHandler(),
                 promoter,
                 getShortcutRepository());
         return provider;
     }
 
-    public SuggestionsProvider getGlobalSuggestionsProvider() {
+    protected SuggestionsProvider getGlobalSuggestionsProvider() {
+        checkThread();
         if (mGlobalSuggestionsProvider == null) {
             mGlobalSuggestionsProvider = createGlobalSuggestionsProvider();
         }
@@ -173,18 +220,23 @@ public class QsbApplication extends Application {
     }
 
     protected SuggestionsProvider createGlobalSuggestionsProvider() {
-        Handler uiThread = new Handler(Looper.myLooper());
         Promoter promoter =  new ShortcutPromoter(new RoundRobinPromoter());
         GlobalSuggestionsProvider provider = new GlobalSuggestionsProvider(getConfig(),
-                getSources(),
+                getCorpora(),
                 getSourceTaskExecutor(),
-                uiThread,
+                getMainThreadHandler(),
                 promoter,
+                getCorpusRanker(),
                 getShortcutRepository());
         return provider;
     }
 
+    /**
+     * Gets the suggestion view factory.
+     * May only be called from the main thread.
+     */
     public SuggestionViewFactory getSuggestionViewFactory() {
+        checkThread();
         if (mSuggestionViewFactory == null) {
             mSuggestionViewFactory = createSuggestionViewFactory();
         }
@@ -195,6 +247,10 @@ public class QsbApplication extends Application {
         return new SuggestionViewInflater(this);
     }
 
+    /**
+     * Creates a suggestions adapter.
+     * May only be called from the main thread.
+     */
     public SuggestionsAdapter createSuggestionsAdapter() {
         Config config = getConfig();
         SuggestionViewFactory viewFactory = getSuggestionViewFactory();
@@ -202,18 +258,12 @@ public class QsbApplication extends Application {
         return adapter;
     }
 
-    public SourceFactory getSourceFactory() {
-        if (mSourceFactory == null) {
-            mSourceFactory = createSourceFactory();
-        }
-        return mSourceFactory;
-    }
-
-    protected SourceFactory createSourceFactory() {
-        return new SearchableSourceFactory(this);
-    }
-
+    /**
+     * Gets the event logger.
+     * May only be called from the main thread.
+     */
     public Logger getLogger() {
+        checkThread();
         if (mLogger == null) {
             mLogger = createLogger();
         }

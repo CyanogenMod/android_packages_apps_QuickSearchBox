@@ -16,17 +16,20 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.SuggestionPosition;
 
 /**
  * Listener interface for suggestion selection.
  */
 public interface SuggestionSelectionListener {
     /**
-     * Called when the suggestion selection changes.
+     * Called when a suggestion is selected
      *
-     * @param suggestion The new selected suggestion, or {@code null} if
-     *        no suggestion is now selected.
+     * @param position Position of the new selected suggestion.
      */
-    void onSelectionChanged(SuggestionPosition suggestion);
+    void onSuggestionSelected(int position);
+
+    /**
+     * Called when the selection changed so that no suggestion is selected.
+     */
+    void onNothingSelected();
 }

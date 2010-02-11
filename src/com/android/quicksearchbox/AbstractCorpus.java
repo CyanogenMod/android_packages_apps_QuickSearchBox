@@ -16,31 +16,32 @@
 
 package com.android.quicksearchbox;
 
-import android.app.SearchableInfo;
-import android.content.Context;
 
 /**
- * Mock implementation of {@link SourceFactory}.
- *
+ * Base class for corpus implementations.
  */
-public class MockSourceFactory implements SourceFactory {
+public abstract class AbstractCorpus implements Corpus {
 
-    private Context mContext;
-
-    public MockSourceFactory(Context context) {
-        mContext = context;
+    public AbstractCorpus() {
     }
 
-    public Source createSource(SearchableInfo searchable) {
-        try {
-            return new SearchableSource(mContext, searchable);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o != null && getClass().equals(o.getClass())) {
+            return getName().equals(((Corpus) o).getName());
+        } else {
+            return false;
         }
     }
 
-    public Source createWebSearchSource() {
-        return new MockSource("WEB");
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
     }
 
 }

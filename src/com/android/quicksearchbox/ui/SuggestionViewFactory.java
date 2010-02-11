@@ -46,7 +46,7 @@ public interface SuggestionViewFactory {
      */
     SuggestionView getSuggestionView(int viewType, View convertView, ViewGroup parentViewType);
 
-    SourceView createSourceView(ViewGroup parentViewType);
+    CorpusView createSourceView(ViewGroup parentViewType);
 
     String getGlobalSearchLabel();
 

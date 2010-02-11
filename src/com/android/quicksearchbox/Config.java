@@ -36,7 +36,7 @@ public class Config {
 
     private static final long DAY_MILLIS = 86400000L;
 
-    private static final int NUM_PROMOTED_SOURCES = 4;
+    private static final int NUM_PROMOTED_SOURCES = 3;
     private static final int MAX_PROMOTED_SUGGESTIONS = 8;
     private static final int MAX_RESULTS_PER_SOURCE = 50;
     private static final long SOURCE_TIMEOUT_MILLIS = 10000;
@@ -55,7 +55,7 @@ public class Config {
     private static final long THREAD_START_DELAY_MILLIS = 100;
 
     private final Context mContext;
-    private HashSet<String> mTrustedPackages;
+    private HashSet<String> mDefaultCorpora;
 
     /**
      * Creates a new config that uses hard-coded default values.
@@ -76,35 +76,29 @@ public class Config {
     public void close() {
     }
 
-    private HashSet<String> loadTrustedPackages() {
-        HashSet<String> trusted = new HashSet<String>();
-
+    private HashSet<String> loadDefaultCorpora() {
+        HashSet<String> defaultCorpora = new HashSet<String>();
         try {
-            // Get the list of trusted packages from a resource, which allows vendor overlays.
-            String[] trustedPackages = mContext.getResources().getStringArray(
-                    R.array.trusted_search_providers);
-            if (trustedPackages == null) {
-                Log.w(TAG, "Could not load list of trusted search providers, trusting none");
-                return trusted;
+            // Get the list of default corpora from a resource, which allows vendor overlays.
+            String[] corpora = mContext.getResources().getStringArray(R.array.default_corpora);
+            for (String corpus : corpora) {
+                defaultCorpora.add(corpus);
             }
-            for (String trustedPackage : trustedPackages) {
-                trusted.add(trustedPackage);
-            }
-            return trusted;
+            return defaultCorpora;
         } catch (Resources.NotFoundException ex) {
-            Log.w(TAG, "Could not load list of trusted search providers, trusting none");
-            return trusted;
+            Log.e(TAG, "Could not load default corpora", ex);
+            return defaultCorpora;
         }
     }
 
     /**
      * Checks if we trust the given source not to be spammy.
      */
-    public synchronized boolean isTrustedSource(String packageName) {
-        if (mTrustedPackages == null) {
-            mTrustedPackages = loadTrustedPackages();
+    public synchronized boolean isCorpusEnabledByDefault(String corpusName) {
+        if (mDefaultCorpora == null) {
+            mDefaultCorpora = loadDefaultCorpora();
         }
-        return mTrustedPackages.contains(packageName);
+        return mDefaultCorpora.contains(corpusName);
     }
 
     /**

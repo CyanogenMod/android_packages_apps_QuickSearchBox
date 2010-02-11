@@ -68,7 +68,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         }
     }
 
-    public abstract ArrayList<Source> getOrderedSources();
+    public abstract ArrayList<Corpus> getOrderedCorpora();
 
     protected abstract SuggestionCursor getShortcutsForQuery(String query);
 
@@ -76,27 +76,27 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
      * Gets the sources that should be queried for the given query.
      *
      */
-    private ArrayList<Source> getSourcesToQuery(String query) {
+    private ArrayList<Corpus> getCorporaToQuery(String query) {
         if (query.length() == 0) {
-            return new ArrayList<Source>();
+            return new ArrayList<Corpus>(0);
         }
-        ArrayList<Source> orderedSources = getOrderedSources();
-        ArrayList<Source> sourcesToQuery = new ArrayList<Source>(orderedSources.size());
-        for (Source source : orderedSources) {
-            if (shouldQuerySource(source, query)) {
-                sourcesToQuery.add(source);
+        ArrayList<Corpus> orderedCorpora = getOrderedCorpora();
+        ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(orderedCorpora.size());
+        for (Corpus corpus : orderedCorpora) {
+            if (shouldQueryCorpus(corpus, query)) {
+                corporaToQuery.add(corpus);
             }
         }
-        return sourcesToQuery;
+        return corporaToQuery;
     }
 
-    protected boolean shouldQuerySource(Source source, String query) {
-        return mShouldQueryStrategy.shouldQuerySource(source, query);
+    protected boolean shouldQueryCorpus(Corpus corpus, String query) {
+        return mShouldQueryStrategy.shouldQueryCorpus(corpus, query);
     }
 
-    private void updateShouldQueryStrategy(SuggestionCursor cursor) {
+    private void updateShouldQueryStrategy(CorpusResult cursor) {
         if (cursor.getCount() == 0) {
-            mShouldQueryStrategy.onZeroResults(cursor.getSourceComponentName(),
+            mShouldQueryStrategy.onZeroResults(cursor.getCorpus(),
                     cursor.getUserQuery());
         }
     }
@@ -104,18 +104,18 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
     public Suggestions getSuggestions(String query) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
-        ArrayList<Source> sourcesToQuery = getSourcesToQuery(query);
+        ArrayList<Corpus> corporaToQuery = getCorporaToQuery(query);
         final Suggestions suggestions = new Suggestions(mPromoter,
                 mConfig.getMaxPromotedSuggestions(),
                 query,
-                sourcesToQuery.size());
+                corporaToQuery.size());
         SuggestionCursor shortcuts = getShortcutsForQuery(query);
         if (shortcuts != null) {
             suggestions.setShortcuts(shortcuts);
         }
 
         // Fast path for the zero sources case
-        if (sourcesToQuery.size() == 0) {
+        if (corporaToQuery.size() == 0) {
             return suggestions;
         }
 
@@ -126,8 +126,8 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
                 mBatchingExecutor, suggestions);
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
-        for (Source source : sourcesToQuery) {
-            QueryTask task = new QueryTask(query, source, maxResultsPerSource, receiver);
+        for (Corpus corpus : corporaToQuery) {
+            QueryTask task = new QueryTask(query, corpus, maxResultsPerSource, receiver);
             mBatchingExecutor.execute(task);
         }
 
@@ -144,11 +144,11 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
             mSuggestions = suggestions;
         }
 
-        public void receiveSuggestionCursor(final SuggestionCursor cursor) {
+        public void receiveSuggestionCursor(final CorpusResult cursor) {
             updateShouldQueryStrategy(cursor);
             mPublishThread.post(new Runnable() {
                 public void run() {
-                    mSuggestions.addSourceResult(cursor);
+                    mSuggestions.addCorpusResult(cursor);
                     if (!mSuggestions.isClosed()) {
                         executeNextBatchIfNeeded();
                     }
@@ -172,30 +172,26 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
      */
     private static class QueryTask implements SourceTask {
         private final String mQuery;
-        private final Source mSource;
+        private final Corpus mCorpus;
         private final int mQueryLimit;
         private final SuggestionCursorReceiver mReceiver;
 
-        public QueryTask(String query, Source source, int queryLimit,
+        public QueryTask(String query, Corpus corpus, int queryLimit,
                 SuggestionCursorReceiver receiver) {
             mQuery = query;
-            mSource = source;
+            mCorpus = corpus;
             mQueryLimit = queryLimit;
             mReceiver = receiver;
         }
 
-        public Source getSource() {
-            return mSource;
-        }
-
         public void run() {
-            SuggestionCursor cursor = mSource.getSuggestions(mQuery, mQueryLimit);
+            CorpusResult cursor = mCorpus.getSuggestions(mQuery, mQueryLimit);
             mReceiver.receiveSuggestionCursor(cursor);
         }
 
         @Override
         public String toString() {
-            return mSource + "[" + mQuery + "]";
+            return mCorpus + "[" + mQuery + "]";
         }
     }
 }
