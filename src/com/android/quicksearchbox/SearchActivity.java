@@ -565,6 +565,7 @@ public class SearchActivity extends Activity {
     }
 
     private void updateSuggestions(String query) {
+        query = ltrim(query);
         LatencyTracker latency = new LatencyTracker(TAG);
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(query);
         latency.addEvent("getSuggestions_done");
@@ -729,6 +730,15 @@ public class SearchActivity extends Activity {
                 stopSearchProgress();
             }
         }
+    }
+
+    private static String ltrim(String text) {
+        int start = 0;
+        int length = text.length();
+        while (start < length && Character.isWhitespace(text.charAt(start))) {
+            start++;
+        }
+        return start > 0 ? text.substring(start, length) : text;
     }
 
 }
