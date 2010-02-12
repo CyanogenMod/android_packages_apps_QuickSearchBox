@@ -25,5 +25,6 @@ user has interacted with them.
     <item>com.android.contacts</item>
     <item>com.android.browser</item>
     <item>com.android.providers.applications</item>
+    <item>com.google.android.youtube</item>
   </string-array>
 </resources>
