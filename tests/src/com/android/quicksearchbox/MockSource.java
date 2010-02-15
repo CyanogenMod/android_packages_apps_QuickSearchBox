@@ -39,7 +39,7 @@ public class MockSource implements Source {
 
     public ComponentName getComponentName() {
         // Not an activity, but no code should treat it as one.
-        return new ComponentName(TestUtil.getTargetPackage(),
+        return new ComponentName("com.android.quicksearchbox",
                 getClass().getName() + "." + mName);
     }
 

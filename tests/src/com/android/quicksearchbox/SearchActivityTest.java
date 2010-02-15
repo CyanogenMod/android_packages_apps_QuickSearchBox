@@ -32,7 +32,7 @@ import android.test.ActivityInstrumentationTestCase2;
 public class SearchActivityTest extends ActivityInstrumentationTestCase2<SearchActivity> {
 
     public SearchActivityTest() {
-        super(TestUtil.getTargetPackage(), SearchActivity.class);
+        super(SearchActivity.class);
     }
 
 }
