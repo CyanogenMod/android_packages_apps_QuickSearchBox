@@ -108,6 +108,9 @@ public class SearchableSource implements Source {
 
     public CharSequence getSettingsDescription() {
         int res = mSearchable.getSettingsDescriptionId();
+        if (res == 0) {
+            return null;
+        }
         return mContext.getPackageManager().getText(mActivityInfo.packageName, res,
                 mActivityInfo.applicationInfo);
     }
