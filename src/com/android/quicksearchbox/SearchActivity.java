@@ -290,7 +290,6 @@ public class SearchActivity extends Activity {
         // if we come back to this activity.
         mSuggestionsAdapter.setSuggestions(null);
         getQsbApplication().getShortcutRefresher().reset();
-        dismissCorpusSelectionDialog();
         super.onStop();
     }
 
