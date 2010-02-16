@@ -16,11 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.app.SearchManager;
-import android.content.Intent;
-
-import java.util.Map;
-
 /**
  * Holds data for each suggest item including the display data and how to launch the result.
  * Used for passing from the provider to the suggest cursor.
@@ -34,11 +29,8 @@ public class SuggestionData {
     private String mText2;
     private String mIcon1;
     private String mIcon2;
-    private Intent mIntent;
-    private String mDisplayQuery;
     private String mShortcutId;
-    private boolean mIsSpinnerWhileRefreshing;
-    private Map<Integer,String> mActionMsgs;
+    private boolean mSpinnerWhileRefreshing;
     private String mIntentAction;
     private String mIntentData;
     private String mIntentExtraData;
@@ -73,27 +65,15 @@ public class SuggestionData {
     }
 
     public boolean isSpinnerWhileRefreshing() {
-        return mIsSpinnerWhileRefreshing;
+        return mSpinnerWhileRefreshing;
     }
 
     public String getIntentExtraData() {
-        return mIntent == null ? null : mIntent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
-    }
-
-    public String getSuggestionDisplayQuery() {
-        return mDisplayQuery;
+        return mIntentExtraData;
     }
 
     public String getShortcutId() {
         return mShortcutId;
-    }
-
-    public String getActionMsg(int keyCode) {
-        return mActionMsgs == null ? null : mActionMsgs.get(keyCode);
-    }
-
-    public Map<Integer, String> getActionMsgs() {
-        return mActionMsgs;
     }
 
     public String getSuggestionIntentAction() {
@@ -112,40 +92,59 @@ public class SuggestionData {
         return mSuggestionQuery;
     }
 
-    public void setActionMsgs(Map<Integer, String> actionMsgs) {
-        mActionMsgs = actionMsgs;
-    }
-
-    public void setFormat(String format) {
+    public SuggestionData setFormat(String format) {
         mFormat = format;
+        return this;
     }
 
-    public void setText1(String text1) {
+    public SuggestionData setText1(String text1) {
         mText1 = text1;
+        return this;
     }
 
-    public void setText2(String text2) {
+    public SuggestionData setText2(String text2) {
         mText2 = text2;
+        return this;
     }
 
-    public void setIcon1(String icon1) {
+    public SuggestionData setIcon1(String icon1) {
         mIcon1 = icon1;
+        return this;
     }
 
-    public void setIcon2(String icon2) {
+    public SuggestionData setIcon2(String icon2) {
         mIcon2 = icon2;
+        return this;
     }
 
-    public void setIntent(Intent intent) {
-        mIntent = intent == null ? null : new Intent(intent);
+    public SuggestionData setIntentAction(String intentAction) {
+        mIntentAction = intentAction;
+        return this;
     }
 
-    public void setDisplayQuery(String displayQuery) {
-        mDisplayQuery = displayQuery;
+    public SuggestionData setIntentData(String intentData) {
+        mIntentData = intentData;
+        return this;
     }
 
-    public void setShortcutId(String shortcutId) {
+    public SuggestionData setIntentExtraData(String intentExtraData) {
+        mIntentExtraData = intentExtraData;
+        return this;
+    }
+
+    public SuggestionData setSuggestionQuery(String suggestionQuery) {
+        mSuggestionQuery = suggestionQuery;
+        return this;
+    }
+
+    public SuggestionData setShortcutId(String shortcutId) {
         mShortcutId = shortcutId;
+        return this;
+    }
+
+    public SuggestionData setSpinnerWhileRefreshing(boolean spinnerWhileRefreshing) {
+        mSpinnerWhileRefreshing = spinnerWhileRefreshing;
+        return this;
     }
 
     private String makeKeyComponent(String str) {
@@ -153,14 +152,9 @@ public class SuggestionData {
     }
 
     public String getSuggestionKey() {
-        String action = "";
-        String data = "";
-        String query = "";
-        if (mIntent != null) {
-            action = makeKeyComponent(mIntent.getAction());
-            data = makeKeyComponent(mIntent.getDataString());
-            query = makeKeyComponent(mIntent.getStringExtra(SearchManager.QUERY));
-        }
+        String action = makeKeyComponent(mIntentAction);
+        String data = makeKeyComponent(mIntentData);
+        String query = makeKeyComponent(mSuggestionQuery);
         // calculating accurate size of string builder avoids an allocation vs starting with
         // the default size and having to expand.
         int size = action.length() + 2 + data.length() + query.length();
@@ -173,66 +167,96 @@ public class SuggestionData {
                 .toString();
     }
 
-    private String getIntentString() {
-        if (mIntent == null) {
-            return null;
-        }
-        return mIntent.toUri(Intent.URI_INTENT_SCHEME);
-    }
-
     public String getSuggestionLogType() {
         return getSuggestionSource().getLogName();
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        SuggestionData that = (SuggestionData) o;
-
-        if (notEqual(mSource, that.mSource)) return false;
-        if (notEqual(mFormat, that.mFormat)) return false;
-        if (notEqual(mText1, that.mText1)) return false;
-        if (notEqual(mText2, that.mText2)) return false;
-        if (notEqual(mIcon1, that.mIcon1)) return false;
-        if (notEqual(mIcon2, that.mIcon2)) return false;
-        if (notEqual(getIntentString(), that.getIntentString())) return false;
-        if (notEqual(mShortcutId, that.mShortcutId)) return false;
-        if (notEqual(mActionMsgs, that.mActionMsgs)) return false;
-        return true;
-    }
-
-    private static boolean notEqual(Object x, Object y) {
-        if (x == null) {
-            return y != null;
-        }
-        if (x == y) {
-            return false;
-        }
-        return !x.equals(y);
-    }
-
-    @Override
     public int hashCode() {
-        int result = mSource.hashCode();
-        result = addHashCode(result, mFormat);
-        result = addHashCode(result, mText1);
-        result = addHashCode(result, mText2);
-        result = addHashCode(result, mIcon1);
-        result = addHashCode(result, mIcon2);
-        result = addHashCode(result, getIntentString());
-        result = addHashCode(result, mShortcutId);
-        result = addHashCode(result, mActionMsgs);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((mFormat == null) ? 0 : mFormat.hashCode());
+        result = prime * result + ((mIcon1 == null) ? 0 : mIcon1.hashCode());
+        result = prime * result + ((mIcon2 == null) ? 0 : mIcon2.hashCode());
+        result = prime * result + ((mIntentAction == null) ? 0 : mIntentAction.hashCode());
+        result = prime * result + ((mIntentData == null) ? 0 : mIntentData.hashCode());
+        result = prime * result + ((mIntentExtraData == null) ? 0 : mIntentExtraData.hashCode());
+        result = prime * result + ((mShortcutId == null) ? 0 : mShortcutId.hashCode());
+        result = prime * result + ((mSource == null) ? 0 : mSource.hashCode());
+        result = prime * result + (mSpinnerWhileRefreshing ? 1231 : 1237);
+        result = prime * result + ((mSuggestionQuery == null) ? 0 : mSuggestionQuery.hashCode());
+        result = prime * result + ((mText1 == null) ? 0 : mText1.hashCode());
+        result = prime * result + ((mText2 == null) ? 0 : mText2.hashCode());
         return result;
     }
 
-    private static int addHashCode(int old, Object obj) {
-        return 31 * old + (obj != null ? obj.hashCode() : 0);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SuggestionData other = (SuggestionData)obj;
+        if (mFormat == null) {
+            if (other.mFormat != null)
+                return false;
+        } else if (!mFormat.equals(other.mFormat))
+            return false;
+        if (mIcon1 == null) {
+            if (other.mIcon1 != null)
+                return false;
+        } else if (!mIcon1.equals(other.mIcon1))
+            return false;
+        if (mIcon2 == null) {
+            if (other.mIcon2 != null)
+                return false;
+        } else if (!mIcon2.equals(other.mIcon2))
+            return false;
+        if (mIntentAction == null) {
+            if (other.mIntentAction != null)
+                return false;
+        } else if (!mIntentAction.equals(other.mIntentAction))
+            return false;
+        if (mIntentData == null) {
+            if (other.mIntentData != null)
+                return false;
+        } else if (!mIntentData.equals(other.mIntentData))
+            return false;
+        if (mIntentExtraData == null) {
+            if (other.mIntentExtraData != null)
+                return false;
+        } else if (!mIntentExtraData.equals(other.mIntentExtraData))
+            return false;
+        if (mShortcutId == null) {
+            if (other.mShortcutId != null)
+                return false;
+        } else if (!mShortcutId.equals(other.mShortcutId))
+            return false;
+        if (mSource == null) {
+            if (other.mSource != null)
+                return false;
+        } else if (!mSource.equals(other.mSource))
+            return false;
+        if (mSpinnerWhileRefreshing != other.mSpinnerWhileRefreshing)
+            return false;
+        if (mSuggestionQuery == null) {
+            if (other.mSuggestionQuery != null)
+                return false;
+        } else if (!mSuggestionQuery.equals(other.mSuggestionQuery))
+            return false;
+        if (mText1 == null) {
+            if (other.mText1 != null)
+                return false;
+        } else if (!mText1.equals(other.mText1))
+            return false;
+        if (mText2 == null) {
+            if (other.mText2 != null)
+                return false;
+        } else if (!mText2.equals(other.mText2))
+            return false;
+        return true;
     }
 
     /**
@@ -242,17 +266,19 @@ public class SuggestionData {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("SuggestionData(");
-        builder.append("source=").append(mSource.getFlattenedComponentName())
-                .append(", title=").append(mText1);
-        if (mIntent != null) {
-            builder.append(", intent=").append(getIntentString());
-        }
-        if (mShortcutId != null) {
-            builder.append(", shortcutid=").append(mShortcutId);
-        }
-
-        builder.append(")");
+        appendField(builder, "source", mSource.getFlattenedComponentName());
+        appendField(builder, "text1", mText1);
+        appendField(builder, "intentAction", mIntentAction);
+        appendField(builder, "intentData", mIntentData);
+        appendField(builder, "query", mSuggestionQuery);
+        appendField(builder, "shortcutid", mShortcutId);
         return builder.toString();
+    }
+
+    private void appendField(StringBuilder builder, String name, String value) {
+        if (value != null) {
+            builder.append(",").append(name).append("=").append(value);
+        }
     }
 
 }

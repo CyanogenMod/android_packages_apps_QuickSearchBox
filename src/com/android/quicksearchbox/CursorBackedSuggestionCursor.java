@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchManager;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
@@ -149,15 +148,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
      * Gets the intent action for the current suggestion.
      */
     public String getSuggestionIntentAction() {
-        // use specific action if supplied, or default action if supplied, or fixed default
-        String action = getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
-        if (action == null) {
-            action = getSuggestionSource().getDefaultIntentAction();
-            if (action == null) {
-                action = Intent.ACTION_SEARCH;
-            }
-        }
-        return action;
+        return getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
     }
 
     /**
@@ -188,27 +179,6 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
      */
     public String getSuggestionIntentExtraData() {
         return getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
-    }
-
-    public String getSuggestionDisplayQuery() {
-        String query = getSuggestionQuery();
-        if (query != null) {
-            return query;
-        }
-        Source source = getSuggestionSource();
-        if (source.shouldRewriteQueryFromData()) {
-            String data = getSuggestionIntentDataString();
-            if (data != null) {
-                return data;
-            }
-        }
-        if (source.shouldRewriteQueryFromText()) {
-            String text1 = getSuggestionText1();
-            if (text1 != null) {
-                return text1;
-            }
-        }
-        return null;
     }
 
     /**

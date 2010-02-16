@@ -94,17 +94,14 @@ public class MockSource implements Source {
         }
         DataSuggestionCursor cursor = new DataSuggestionCursor(query);
         Intent i1 = new Intent(Intent.ACTION_VIEW);
-        i1.setData(Uri.parse("content://" + getClass().getName() + "/1"));
-        SuggestionData s1 = new SuggestionData(this);
-        s1.setText1(query + "_1");
-        s1.setDisplayQuery(query + "_1");
-        s1.setIntent(i1);
-        Intent i2 = new Intent(Intent.ACTION_VIEW);
-        i1.setData(Uri.parse("content://" + getClass().getName() + "/1"));
-        SuggestionData s2 = new SuggestionData(this);
-        s2.setText1(query + "_2");
-        s2.setDisplayQuery(query + "_2");
-        s2.setIntent(i2);
+        SuggestionData s1 = new SuggestionData(this)
+                .setText1(query + "_1")
+                .setIntentAction(Intent.ACTION_VIEW)
+                .setIntentData("content://" + getClass().getName() + "/1");
+        SuggestionData s2 = new SuggestionData(this)
+                .setText1(query + "_2")
+                .setIntentAction(Intent.ACTION_VIEW)
+                .setIntentData("content://" + getClass().getName() + "/2");
         cursor.add(s1);
         cursor.add(s2);
         return new Result(query, cursor);

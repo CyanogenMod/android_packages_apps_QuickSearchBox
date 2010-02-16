@@ -16,15 +16,11 @@
 
 package com.android.quicksearchbox;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Fires off tasks to validate shortcuts, and reports the results back to a
  * {@link Listener}.
  */
-class ShortcutRefresher {
+public interface ShortcutRefresher {
 
     public interface Listener {
         /**
@@ -39,109 +35,32 @@ class ShortcutRefresher {
                 SuggestionCursor refreshed);
     }
 
-    private final SourceTaskExecutor mExecutor;
-
-    private final Set<String> mRefreshed = Collections.synchronizedSet(new HashSet<String>());
-
-    /**
-     * Create a ShortcutRefresher that will refresh shortcuts using the given executor.
-     *
-     * @param executor Used to execute the tasks.
-     */
-    public ShortcutRefresher(SourceTaskExecutor executor) {
-        mExecutor = executor;
-    }
-
     /**
      * Sends off the refresher tasks.
      *
      * @param shortcuts The shortcuts to refresh.
      * @param listener Who to report back to.
      */
-    public void refresh(SuggestionCursor shortcuts, final Listener listener) {
-        int count = shortcuts.getCount();
-        for (int i = 0; i < count; i++) {
-            shortcuts.moveTo(i);
-            if (shouldRefresh(shortcuts)) {
-                String shortcutId = shortcuts.getShortcutId();
-                Source source = shortcuts.getSuggestionSource();
-
-                // If we can't find the source then invalidate the shortcut.
-                // Otherwise, send off the refresh task.
-                if (source == null) {
-                    listener.onShortcutRefreshed(source, shortcutId, null);
-                } else {
-                    String extraData = shortcuts.getSuggestionIntentExtraData();
-                    ShortcutRefreshTask refreshTask = new ShortcutRefreshTask(
-                            source, shortcutId, extraData, listener);
-                    mExecutor.execute(refreshTask);
-                }
-            }
-        }
-    }
+    void refresh(SuggestionCursor shortcuts, final Listener listener);
 
     /**
      * Returns true if the given shortcut requires refreshing.
      */
-    public boolean shouldRefresh(SuggestionCursor shortcut) {
-        return shortcut.getShortcutId() != null
-                && ! mRefreshed.contains(makeKey(shortcut));
-    }
+    boolean shouldRefresh(SuggestionCursor shortcut);
 
     /**
-     * Indicate that the shortcut no longer requires refreshing.
+     * Indicates that the shortcut no longer requires refreshing.
      */
-    public void onShortcutRefreshed(SuggestionCursor shortcut) {
-        mRefreshed.add(makeKey(shortcut));
-    }
+    public void onShortcutRefreshed(SuggestionCursor shortcut);
 
     /**
-     * Reset internal state.  This results in all shortcuts requiring refreshing.
+     * Resets internal state. This results in all shortcuts requiring refreshing.
      */
-    public void reset() {
-        mRefreshed.clear();
-    }
+    public void reset();
 
     /**
-     * Cancel any pending shortcut refresh requests.
+     * Cancels any pending shortcut refresh requests.
      */
-    public void cancelPendingTasks() {
-        mExecutor.cancelPendingTasks();
-    }
+    public void cancelPendingTasks();
 
-    private static String makeKey(SuggestionCursor shortcut) {
-        return shortcut.getSuggestionSource().getFlattenedComponentName() + "#"
-                + shortcut.getShortcutId();
-    }
-
-    /**
-     * Refreshes a shortcut with a source and reports the result to a {@link Listener}.
-     */
-    private class ShortcutRefreshTask implements SourceTask {
-        private final Source mSource;
-        private final String mShortcutId;
-        private final String mExtraData;
-        private final Listener mListener;
-
-        /**
-         * @param source The source that should validate the shortcut.
-         * @param shortcutId The shortcut to be refreshed.
-         * @param listener Who to report back to when the result is in.
-         */
-        ShortcutRefreshTask(Source source, String shortcutId, String extraData,
-                Listener listener) {
-            mSource = source;
-            mShortcutId = shortcutId;
-            mExtraData = extraData;
-            mListener = listener;
-        }
-
-        public void run() {
-            // TODO: Add latency tracking and logging.
-            SuggestionCursor refreshed = mSource.refreshShortcut(mShortcutId, mExtraData);
-            onShortcutRefreshed(refreshed);
-            mListener.onShortcutRefreshed(mSource, mShortcutId, refreshed);
-        }
-
-    }
 }

@@ -27,7 +27,7 @@ import java.util.ArrayList;
  * objects refer to.
  *
  */
-public class ListSuggestionCursor extends AbstractSuggestionCursor {
+public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
 
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
@@ -76,6 +76,7 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
         return mSuggestions.size();
     }
 
+    @Override
     protected SuggestionCursor current() {
         return mSuggestions.get(mPos).current();
     }
@@ -101,65 +102,5 @@ public class ListSuggestionCursor extends AbstractSuggestionCursor {
 
     protected void notifyDataSetChanged() {
         mDataSetObservable.notifyChanged();
-    }
-
-    public String getShortcutId() {
-        return current().getShortcutId();
-    }
-
-    public String getSuggestionDisplayQuery() {
-        return current().getSuggestionDisplayQuery();
-    }
-
-    public String getSuggestionFormat() {
-        return current().getSuggestionFormat();
-    }
-
-    public String getSuggestionIcon1() {
-        return current().getSuggestionIcon1();
-    }
-
-    public String getSuggestionIcon2() {
-        return current().getSuggestionIcon2();
-    }
-
-    public String getSuggestionIntentAction() {
-        return current().getSuggestionIntentAction();
-    }
-
-    public String getSuggestionIntentDataString() {
-        return current().getSuggestionIntentDataString();
-    }
-
-    public String getSuggestionIntentExtraData() {
-        return current().getSuggestionIntentExtraData();
-    }
-
-    public String getSuggestionKey() {
-        return current().getSuggestionKey();
-    }
-
-    public String getSuggestionLogType() {
-        return current().getSuggestionLogType();
-    }
-
-    public String getSuggestionQuery() {
-        return current().getSuggestionQuery();
-    }
-
-    public Source getSuggestionSource() {
-        return current().getSuggestionSource();
-    }
-
-    public String getSuggestionText1() {
-        return current().getSuggestionText1();
-    }
-
-    public String getSuggestionText2() {
-        return current().getSuggestionText2();
-    }
-
-    public boolean isSpinnerWhileRefreshing() {
-        return current().isSpinnerWhileRefreshing();
     }
 }

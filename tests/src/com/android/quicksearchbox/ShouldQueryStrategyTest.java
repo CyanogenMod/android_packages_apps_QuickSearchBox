@@ -31,15 +31,14 @@ public class ShouldQueryStrategyTest extends AndroidTestCase {
         mShouldQuery = new ShouldQueryStrategy();
     }
 
-    public static final Corpus CORPUS_1 = new MockCorpus("CORPUS_1", MockSource.SOURCE_1) {
+    public static final Corpus CORPUS_1 = new MockCorpus(MockSource.SOURCE_1) {
         @Override
         public int getQueryThreshold() {
             return 3;
         }
-
     };
 
-    public static final Corpus CORPUS_2 = new MockCorpus("CORPUS_2", MockSource.SOURCE_2) {
+    public static final Corpus CORPUS_2 = new MockCorpus(MockSource.SOURCE_2) {
         @Override
         public boolean queryAfterZeroResults() {
             return true;

@@ -65,6 +65,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private final ShortcutRefresher mRefresher;
     private final Handler mUiThread;
     private final DbOpenHelper mOpenHelper;
+    private final String mSearchSpinner;
 
     /**
      * Create an instance to the repo.
@@ -89,6 +90,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         mOpenHelper = new DbOpenHelper(context, name, DB_VERSION, config);
         mEmptyQueryShortcutQuery = buildShortcutQuery(true);
         mShortcutQuery = buildShortcutQuery(false);
+        mSearchSpinner = ContentResolver.SCHEME_ANDROID_RESOURCE
+                + "://" + mContext.getPackageName() + "/"  + R.drawable.search_spinner;
     }
 
     private String buildShortcutQuery(boolean emptyQuery) {
@@ -188,8 +191,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     public void reportClick(SuggestionCursor suggestions, int position) {
-        suggestions.moveTo(position);
-        logClick(suggestions, System.currentTimeMillis());
+        reportClickAtTime(suggestions, 0, System.currentTimeMillis());
     }
 
     public SuggestionCursor getShortcutsForQuery(String query) {
@@ -210,7 +212,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return mRefresher.shouldRefresh(suggestion);
     }
 
-    private ShortcutCursor getShortcutsForQuery(String query, long now) {
+    /* package for testing */ ShortcutCursor getShortcutsForQuery(String query, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
@@ -242,7 +244,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         });
     }
 
-    private void refreshShortcut(Source source, String shortcutId, SuggestionCursor refreshed) {
+    /* package for testing */ void refreshShortcut(Source source, String shortcutId,
+            SuggestionCursor refreshed) {
         if (source == null) throw new NullPointerException("source");
         if (shortcutId == null) throw new NullPointerException("shortcutId");
 
@@ -253,17 +256,14 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             if (DBG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
             db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_ID_WHERE, whereArgs);
         } else {
-            if (DBG) Log.d(TAG, "Updating shortcut: " + shortcutId);
             ContentValues shortcut = makeShortcutRow(refreshed);
+            if (DBG) Log.d(TAG, "Updating shortcut: " + shortcut);
             db.updateWithOnConflict(Shortcuts.TABLE_NAME, shortcut,
                     SHORTCUT_BY_ID_WHERE, whereArgs, SQLiteDatabase.CONFLICT_REPLACE);
         }
     }
 
     private class SuggestionCursorImpl extends CursorBackedSuggestionCursor {
-
-        private final String mSearchSpinner = ContentResolver.SCHEME_ANDROID_RESOURCE
-                    + "://" + mContext.getPackageName() + "/"  + R.drawable.search_spinner;
 
         private final HashMap<String, Source> mSourceCache;
 
@@ -402,7 +402,9 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return cv;
     }
 
-    private void logClick(SuggestionCursor suggestion, long now) {
+    /* package for testing */ void reportClickAtTime(SuggestionCursor suggestion,
+            int position, long now) {
+        suggestion.moveTo(position);
         if (DBG) {
             Log.d(TAG, "logClicked(" + suggestion + ")");
         }
@@ -421,9 +423,9 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         // Add or update suggestion info
         // Since intent_key is the primary key, any existing
         // suggestion with the same source+data+action will be replaced
-        if (DBG) Log.d(TAG, "Adding shortcut: " + suggestion);
         ContentValues shortcut = makeShortcutRow(suggestion);
         String intentKey = shortcut.getAsString(Shortcuts.intent_key.name());
+        if (DBG) Log.d(TAG, "Adding shortcut: " + shortcut);
         db.replaceOrThrow(Shortcuts.TABLE_NAME, null, shortcut);
 
         // Log click for shortcut

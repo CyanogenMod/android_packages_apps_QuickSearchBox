@@ -27,16 +27,16 @@ import android.os.Bundle;
  */
 public class MockCorpus extends AbstractCorpus {
 
-    public static final Corpus CORPUS_1 = new MockCorpus("CORPUS_1", MockSource.SOURCE_1);
+    public static final Corpus CORPUS_1 = new MockCorpus(MockSource.SOURCE_1);
 
-    public static final Corpus CORPUS_2 = new MockCorpus("CORPUS_2", MockSource.SOURCE_2);
+    public static final Corpus CORPUS_2 = new MockCorpus(MockSource.SOURCE_2);
 
     private final String mName;
 
     private final Source mSource;
 
-    public MockCorpus(String name, Source source) {
-        mName = name;
+    public MockCorpus(Source source) {
+        mName = "corpus_" + source.getFlattenedComponentName();
         mSource = source;
     }
 
