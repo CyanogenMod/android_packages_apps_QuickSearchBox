@@ -84,7 +84,16 @@ public class Launcher {
 
     public Intent getSuggestionIntent(SuggestionCursor cursor, int position) {
         cursor.moveTo(position);
+        Source source = cursor.getSuggestionSource();
         String action = cursor.getSuggestionIntentAction();
+        // use specific action if supplied, or default action if supplied, or fixed default
+        if (action == null) {
+            action = source.getDefaultIntentAction();
+            if (action == null) {
+                action = Intent.ACTION_SEARCH;
+            }
+        }
+
         String data = cursor.getSuggestionIntentDataString();
         String query = cursor.getSuggestionQuery();
         String userQuery = cursor.getUserQuery();

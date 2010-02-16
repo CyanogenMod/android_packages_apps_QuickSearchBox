@@ -164,7 +164,7 @@ public class QsbApplication extends Application {
 
     protected ShortcutRefresher createShortcutRefresher() {
         // For now, ShortcutRefresher gets its own SourceTaskExecutor
-        return new ShortcutRefresher(createSourceTaskExecutor());
+        return new SourceShortcutRefresher(createSourceTaskExecutor());
     }
 
     /**

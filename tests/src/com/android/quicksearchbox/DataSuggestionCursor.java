@@ -39,6 +39,13 @@ public class DataSuggestionCursor extends AbstractSuggestionCursor {
         mPos = 0;
     }
 
+    public DataSuggestionCursor(String userQuery, SuggestionData... suggestions) {
+        this(userQuery);
+        for (SuggestionData suggestion : suggestions) {
+            mSuggestions.add(suggestion);
+        }
+    }
+
     /**
      * Adds a suggestion.
      *
@@ -96,10 +103,6 @@ public class DataSuggestionCursor extends AbstractSuggestionCursor {
 
     public String getShortcutId() {
         return current().getShortcutId();
-    }
-
-    public String getSuggestionDisplayQuery() {
-        return current().getSuggestionDisplayQuery();
     }
 
     public String getSuggestionFormat() {

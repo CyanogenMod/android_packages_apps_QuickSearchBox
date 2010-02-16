@@ -32,4 +32,25 @@ public abstract class AbstractSuggestionCursor implements SuggestionCursor {
         return mUserQuery;
     }
 
+    public String getSuggestionDisplayQuery() {
+        String query = getSuggestionQuery();
+        if (query != null) {
+            return query;
+        }
+        Source source = getSuggestionSource();
+        if (source.shouldRewriteQueryFromData()) {
+            String data = getSuggestionIntentDataString();
+            if (data != null) {
+                return data;
+            }
+        }
+        if (source.shouldRewriteQueryFromText()) {
+            String text1 = getSuggestionText1();
+            if (text1 != null) {
+                return text1;
+            }
+        }
+        return null;
+    }
+
 }
