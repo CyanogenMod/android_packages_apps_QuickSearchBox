@@ -62,6 +62,11 @@ public class SearchActivity extends Activity {
     public static final String INTENT_ACTION_QSB_AND_SELECT_CORPUS
             = "com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS";
 
+    // The string used for privateImeOptions to identify to the IME that it should not show
+    // a microphone button since one already exists in the search dialog.
+    // TODO: This should move to android-common or something.
+    private static final String IME_OPTION_NO_MICROPHONE = "nm";
+
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_CORPUS = "corpus";
     private static final String INSTANCE_KEY_USER_QUERY = "query";
@@ -234,7 +239,13 @@ public class SearchActivity extends Activity {
         mCorpusIndicator.setSourceIcon(sourceIcon);
 
         boolean enableVoiceSearch = Launcher.shouldShowVoiceSearch(this, mCorpus);
-        mVoiceSearchButton.setVisibility(enableVoiceSearch ? View.VISIBLE : View.GONE);
+        if (enableVoiceSearch) {
+            mVoiceSearchButton.setVisibility(View.VISIBLE);
+            mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
+        } else {
+            mVoiceSearchButton.setVisibility(View.GONE);
+            mQueryTextView.setPrivateImeOptions(null);
+        }
     }
 
     private QsbApplication getQsbApplication() {
