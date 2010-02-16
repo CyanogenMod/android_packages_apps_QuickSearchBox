@@ -85,6 +85,8 @@ public class SearchActivity extends Activity {
     protected SuggestionsAdapter mSuggestionsAdapter;
 
     protected EditText mQueryTextView;
+    // True if the query was empty on the previous call to updateQuery()
+    protected boolean mQueryWasEmpty = true;
 
     protected SuggestionsView mSuggestionsView;
 
@@ -107,7 +109,7 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.search_bar);
+        setContentView(R.layout.search_activity);
 
         mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
 
@@ -238,14 +240,7 @@ public class SearchActivity extends Activity {
         mSuggestionsAdapter.setCorpus(corpus);
         mCorpusIndicator.setSourceIcon(sourceIcon);
 
-        boolean enableVoiceSearch = Launcher.shouldShowVoiceSearch(this, mCorpus);
-        if (enableVoiceSearch) {
-            mVoiceSearchButton.setVisibility(View.VISIBLE);
-            mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
-        } else {
-            mVoiceSearchButton.setVisibility(View.GONE);
-            mQueryTextView.setPrivateImeOptions(null);
-        }
+        updateVoiceSearchButton(getQuery().length() == 0);
     }
 
     private QsbApplication getQsbApplication() {
@@ -381,6 +376,37 @@ public class SearchActivity extends Activity {
             mQueryTextView.setSelection(0, mQueryTextView.length());
         } else {
             mQueryTextView.setSelection(mQueryTextView.length());
+        }
+    }
+
+    private void updateQueryTextView(boolean queryEmpty) {
+        if (queryEmpty) {
+            mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty);
+            mQueryTextView.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.placeholder_google, 0, 0, 0);
+            mQueryTextView.setCursorVisible(false);
+        } else {
+            mQueryTextView.setBackgroundResource(R.drawable.textfield_search);
+            mQueryTextView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            mQueryTextView.setCursorVisible(true);
+        }
+    }
+
+    private void updateSearchGoButton(boolean queryEmpty) {
+        if (queryEmpty) {
+            mSearchGoButton.setVisibility(View.GONE);
+        } else {
+            mSearchGoButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    protected void updateVoiceSearchButton(boolean queryEmpty) {
+        if (queryEmpty && Launcher.shouldShowVoiceSearch(this, mCorpus)) {
+            mVoiceSearchButton.setVisibility(View.VISIBLE);
+            mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
+        } else {
+            mVoiceSearchButton.setVisibility(View.GONE);
+            mQueryTextView.setPrivateImeOptions(null);
         }
     }
 
@@ -545,10 +571,7 @@ public class SearchActivity extends Activity {
     }
 
     private void startSearchProgress() {
-        // TODO: Cache animation between calls?
-        mSearchGoButton.setImageResource(R.drawable.searching);
-        Animatable animation = (Animatable) mSearchGoButton.getDrawable();
-        animation.start();
+        // TODO: Do we need a progress indicator?
     }
 
     private void stopSearchProgress() {
@@ -608,6 +631,13 @@ public class SearchActivity extends Activity {
      */
     private class SearchTextWatcher implements TextWatcher {
         public void afterTextChanged(Editable s) {
+            boolean empty = s.length() == 0;
+            if (empty != mQueryWasEmpty) {
+                mQueryWasEmpty = empty;
+                updateQueryTextView(empty);
+                updateSearchGoButton(empty);
+                updateVoiceSearchButton(empty);
+            }
             if (mUpdateSuggestions) {
                 String query = s == null ? "" : s.toString();
                 setUserQuery(query);

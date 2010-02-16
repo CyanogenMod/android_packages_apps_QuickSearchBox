@@ -16,7 +16,6 @@
 
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/search_bar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -58,10 +57,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:layout_marginLeft="4dip"
-            android:layout_marginBottom="0dip"
+            android:layout_marginBottom="4dip"
             android:singleLine="true"
             android:ellipsize="end"
             android:inputType="text|textAutoComplete"
+            android:cursorVisible="false"
+            android:drawableLeft="@drawable/placeholder_google"
+            android:background="@drawable/textfield_search_empty"
             android:imeOptions="actionGo"
         />
 
