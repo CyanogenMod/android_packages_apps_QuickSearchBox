@@ -77,8 +77,12 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
         }
         mClosed = true;
         if (mCursor != null) {
-            // TODO: all operations on cross-process cursors can throw random exceptions
-            mCursor.close();
+            try {
+                mCursor.close();
+            } catch (RuntimeException ex) {
+                // all operations on cross-process cursors can throw random exceptions
+                Log.e(TAG, "close() failed, ", ex);
+            }
         }
     }
 
@@ -95,17 +99,26 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
             throw new IllegalStateException("getCount() after close()");
         }
         if (mCursor == null) return 0;
-        // TODO: all operations on cross-process cursors can throw random exceptions
-        return mCursor.getCount();
+        try {
+            return mCursor.getCount();
+        } catch (RuntimeException ex) {
+            // all operations on cross-process cursors can throw random exceptions
+            Log.e(TAG, "getCount() failed, ", ex);
+            return 0;
+        }
     }
 
     public void moveTo(int pos) {
         if (mClosed) {
             throw new IllegalStateException("moveTo(" + pos + ") after close()");
         }
-        // TODO: all operations on cross-process cursors can throw random exceptions
-        if (!mCursor.moveToPosition(pos)) {
-            throw new IllegalArgumentException("Move to " + pos + ", count=" + getCount());
+        try {
+            if (!mCursor.moveToPosition(pos)) {
+                Log.e(TAG, "moveToPosition(" + pos + ") failed, count=" + getCount());
+            }
+        } catch (RuntimeException ex) {
+            // all operations on cross-process cursors can throw random exceptions
+            Log.e(TAG, "moveToPosition() failed, ", ex);
         }
     }
 
@@ -113,7 +126,13 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
         if (mClosed) {
             throw new IllegalStateException("getPosition after close()");
         }
-        return mCursor.getPosition();
+        try {
+            return mCursor.getPosition();
+        } catch (RuntimeException ex) {
+            // all operations on cross-process cursors can throw random exceptions
+            Log.e(TAG, "getPosition() failed, ", ex);
+            return -1;
+        }
     }
 
     public String getShortcutId() {
@@ -188,8 +207,13 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
      */
     protected int getColumnIndex(String colName) {
         if (mCursor == null) return -1;
-        // TODO: all operations on cross-process cursors can throw random exceptions
-        return mCursor.getColumnIndex(colName);
+        try {
+            return mCursor.getColumnIndex(colName);
+        } catch (RuntimeException ex) {
+            // all operations on cross-process cursors can throw random exceptions
+            Log.e(TAG, "getColumnIndex() failed, ", ex);
+            return -1;
+        }
     }
 
     /**
@@ -204,12 +228,10 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
             return null;
         }
         try {
-            // TODO: all operations on cross-process cursors can throw random exceptions
             return mCursor.getString(col);
-        } catch (Exception e) {
-            Log.e(TAG,
-                    "unexpected error retrieving valid column from cursor, "
-                            + "did the remote process die?", e);
+        } catch (RuntimeException ex) {
+            // all operations on cross-process cursors can throw random exceptions
+            Log.e(TAG, "getString() failed, ", ex);
             return null;
         }
     }
