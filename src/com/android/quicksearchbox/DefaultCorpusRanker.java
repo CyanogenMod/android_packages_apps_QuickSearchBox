@@ -20,8 +20,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
-import java.util.PriorityQueue;
 
 public class DefaultCorpusRanker implements CorpusRanker {
 
@@ -34,69 +35,41 @@ public class DefaultCorpusRanker implements CorpusRanker {
         mShortcuts = shortcuts;
     }
 
-    private static class ScoredCorpus implements Comparable<ScoredCorpus> {
-        public final Corpus mCorpus;
-        public final int mScore;
-        public ScoredCorpus(Corpus corpus, int score) {
-            mCorpus = corpus;
-            mScore = score;
+    private static class CorpusComparator implements Comparator<Corpus> {
+        private final Map<String,Integer> mClickScores;
+
+        public CorpusComparator(Map<String,Integer> clickScores) {
+            mClickScores = clickScores;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (! (o instanceof ScoredCorpus)) return false;
-            ScoredCorpus sc = (ScoredCorpus) o;
-            return mCorpus.equals(sc.mCorpus) && mScore == sc.mScore;
+        public int compare(Corpus corpus1, Corpus corpus2) {
+            // Note that this is reversed from the usual order
+            return getCorpusScore(corpus2) - getCorpusScore(corpus1);
         }
 
-        public int compareTo(ScoredCorpus another) {
-            int scoreDiff = mScore - another.mScore;
-            if (scoreDiff != 0) {
-                return scoreDiff;
-            } else {
-                return mCorpus.getName().compareTo(another.mCorpus.getName());
+        /**
+         * Scores a corpus. Higher score is better.
+         */
+        private int getCorpusScore(Corpus corpus) {
+            if (corpus.isWebCorpus()) {
+                return Integer.MAX_VALUE;
             }
+            Integer clickScore = mClickScores.get(corpus.getName());
+            if (clickScore != null) {
+                return clickScore;
+            }
+            return 0;
         }
-
-        @Override
-        public String toString() {
-            return mCorpus + ":" + mScore;
-        }
-    }
-
-    /**
-     * Scores a corpus. Higher score is better.
-     */
-    private int getCorpusScore(Corpus corpus, Map<String,Integer> clickScores) {
-        if (corpus.isWebCorpus()) {
-            return Integer.MAX_VALUE;
-        }
-        Integer clickScore = clickScores.get(clickScores);
-        if (clickScore != null) {
-            return clickScore;
-        }
-        return 0;
     }
 
     public ArrayList<Corpus> rankCorpora(Collection<Corpus> corpora) {
         if (DBG) Log.d(TAG, "Ranking: " + corpora);
-        // For some reason, PriorityQueue throws IllegalArgumentException if given
-        // an initial capacity < 1.
-        int capacity = 1 + corpora.size();
-        // PriorityQueue returns smallest element first, so we need a reverse comparator
-        PriorityQueue<ScoredCorpus> queue =
-                new PriorityQueue<ScoredCorpus>(capacity,
-                        new ReverseComparator<ScoredCorpus>());
+
         Map<String,Integer> clickScores = mShortcuts.getCorpusScores();
-        for (Corpus corpus : corpora) {
-            int score = getCorpusScore(corpus, clickScores);
-            queue.add(new ScoredCorpus(corpus, score));
-        }
-        if (DBG) Log.d(TAG, "Corpus scores: " + queue);
-        ArrayList<Corpus> ordered = new ArrayList<Corpus>(queue.size());
-        for (ScoredCorpus scoredCorpus : queue) {
-            ordered.add(scoredCorpus.mCorpus);
-        }
+        ArrayList<Corpus> ordered = new ArrayList<Corpus>(corpora);
+        Collections.sort(ordered, new CorpusComparator(clickScores));
+
+        if (DBG) Log.d(TAG, "Ordered: " + ordered);
         return ordered;
     }
 
