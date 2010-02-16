@@ -192,7 +192,7 @@ public class SearchActivity extends Activity {
         setAppSearchData(appSearchData);
 
         if (INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(intent.getAction())) {
-            showSourceSelectorDialog();
+            showCorpusSelectionDialog();
         }
     }
 
@@ -279,6 +279,7 @@ public class SearchActivity extends Activity {
         // if we come back to this activity.
         mSuggestionsAdapter.setSuggestions(null);
         getQsbApplication().getShortcutRefresher().reset();
+        dismissCorpusSelectionDialog();
         super.onStop();
     }
 
@@ -373,10 +374,13 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected void showSourceSelectorDialog() {
+    protected void showCorpusSelectionDialog() {
         showDialog(CORPUS_SELECTION_DIALOG);
     }
 
+    protected void dismissCorpusSelectionDialog() {
+        dismissDialog(CORPUS_SELECTION_DIALOG);
+    }
 
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
@@ -696,7 +700,7 @@ public class SearchActivity extends Activity {
      */
     private class CorpusIndicatorClickListener implements View.OnClickListener {
         public void onClick(View view) {
-            showSourceSelectorDialog();
+            showCorpusSelectionDialog();
         }
     }
 
