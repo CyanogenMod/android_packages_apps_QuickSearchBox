@@ -20,7 +20,7 @@ option java_package com.android.quicksearchbox
 # @param search_source name of the initially selected search source
 # @param enabled_sources A pipe-separated list of source names, ordered by source ranking.
 #                TODO: Which are promoted?
-80000 qsb_start (name|3),(version|1),(start_method|3),(latency|1|3),(search_source|3),(enabled_sources|3)
+? qsb_start (name|3),(version|1),(start_method|3),(latency|1|3),(search_source|3),(enabled_sources|3)
 
 # User clicked on a suggestion
 # @param position 0-based index of the clicked suggestion
@@ -31,7 +31,7 @@ option java_package com.android.quicksearchbox
 # @param Number of characters in the query typed by the user
 # TODO: action key?
 # TODO: latency?
-80100 qsb_click (position|1),(suggestions|3),(queried_sources|3),(num_chars|1)
+? qsb_click (position|1),(suggestions|3),(queried_sources|3),(num_chars|1)
 
 # User launched a typed search
 # @param search_source Name of the selected search source
@@ -39,19 +39,19 @@ option java_package com.android.quicksearchbox
 #     SEARCH_METHOD_BUTTON = 0
 #     SEARCH_METHOD_KEYBOARD = 1
 # @param num_chars The number of characters in the search query
-80102 qsb_search (search_source|3),(method|1),(num_chars|1)
+? qsb_search (search_source|3),(method|1),(num_chars|1)
 
 # User launched a Voice Search
 # @param search_source Name of the selected search source
-80103 qsb_voice_search (search_source|3)
+? qsb_voice_search (search_source|3)
 
 # User left QSB without clicking / searching
 # @param suggestions The suggestions shown when the user left QSB. See qsb_click above.
 # @param num_chars The number of characters in the query text field when the user left
-80104 qsb_exit (suggestions|3),(num_chars|1)
+? qsb_exit (suggestions|3),(num_chars|1)
 
 # Suggestion latency of the web suggestion source
 # This is total latency from typing a character to having all results.
 # Log only for N% of queries?
 # TODO: blended vs single-app
-80200 qsb_web_latency (latency|1|3)
+? qsb_web_latency (latency|1|3)
