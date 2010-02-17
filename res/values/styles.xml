@@ -19,6 +19,10 @@
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
+    <style name="Theme.SearchWidgetConfig" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
     <style name="Theme.SelectSearchSource" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowSoftInputMode">stateUnchanged|adjustResize</item>
         <item name="android:colorBackgroundCacheHint">@null</item>

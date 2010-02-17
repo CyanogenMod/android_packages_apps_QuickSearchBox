@@ -16,25 +16,19 @@
 
 package com.android.quicksearchbox.ui;
 
-import android.content.ContentResolver;
+import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SuggestionCursor;
+
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.SuggestionCursor;
 
 /**
  * Inflates suggestion views.
  */
 public class SuggestionViewInflater implements SuggestionViewFactory {
-
-    private static final boolean DBG = false;
-    private static final String TAG = "QSB.SuggestionViewInflater";
 
     // The suggestion view classes that may be returned by this factory.
     private static final Class<?>[] SUGGESTION_VIEW_CLASSES = {
@@ -77,29 +71,6 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
             convertView = getInflater().inflate(layoutId, parentViewType, false);
         }
         return (SuggestionView) convertView;
-    }
-
-    public CorpusView createSourceView(ViewGroup parentViewType) {
-        if (DBG) Log.d(TAG, "createSourceView()");
-        CorpusView view = (CorpusView)
-                getInflater().inflate(R.layout.corpus_grid_item, parentViewType, false);
-        return view;
-    }
-
-    public String getGlobalSearchLabel() {
-        return mContext.getString(R.string.corpus_label_global);
-    }
-
-    public Drawable getGlobalSearchIcon() {
-        return mContext.getResources().getDrawable(R.drawable.corpus_icon_global);
-    }
-
-    public Uri getGlobalSearchIconUri() {
-        return new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(mContext.getPackageName())
-                .appendEncodedPath(String.valueOf(R.drawable.corpus_icon_global))
-                .build();
     }
 
     private boolean isContactSuggestion(SuggestionCursor suggestion) {

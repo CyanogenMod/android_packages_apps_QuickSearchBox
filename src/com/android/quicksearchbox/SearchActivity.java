@@ -18,9 +18,9 @@ package com.android.quicksearchbox;
 
 import com.android.common.Search;
 import com.android.quicksearchbox.ui.CorpusIndicator;
+import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionSelectionListener;
-import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
 
@@ -233,7 +233,7 @@ public class SearchActivity extends Activity {
         mCorpus = corpus;
         Drawable sourceIcon;
         if (corpus == null) {
-            sourceIcon = getSuggestionViewFactory().getGlobalSearchIcon();
+            sourceIcon = getCorpusViewFactory().getGlobalSearchIcon();
         } else {
             sourceIcon = corpus.getCorpusIcon();
         }
@@ -263,8 +263,8 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getSuggestionsProvider(mCorpus);
     }
 
-    private SuggestionViewFactory getSuggestionViewFactory() {
-        return getQsbApplication().getSuggestionViewFactory();
+    private CorpusViewFactory getCorpusViewFactory() {
+        return getQsbApplication().getCorpusViewFactory();
     }
 
     private Logger getLogger() {

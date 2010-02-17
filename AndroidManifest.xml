@@ -89,7 +89,7 @@
 
         <!-- This class name is referenced in res/xml/search_widget_info.xml -->
         <activity android:name="com.android.quicksearchbox.SearchWidgetConfigActivity"
-                android:theme="@style/Theme.QuickSearchBox">
+                android:theme="@style/Theme.SearchWidgetConfig">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

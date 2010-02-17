@@ -17,7 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.CorpusIndicator;
-import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.app.PendingIntent;
 import android.app.SearchManager;
@@ -124,7 +124,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
 
     private static Uri getCorpusIconUri(Context context, Corpus corpus) {
         if (corpus == null) {
-            return getSuggestionViewFactory(context).getGlobalSearchIconUri();
+            return getCorpusViewFactory(context).getGlobalSearchIconUri();
         }
         return corpus.getCorpusIconUri();
     }
@@ -137,8 +137,8 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         return getQsbApplication(context).getCorpora();
     }
 
-    private static SuggestionViewFactory getSuggestionViewFactory(Context context) {
-        return getQsbApplication(context).getSuggestionViewFactory();
+    private static CorpusViewFactory getCorpusViewFactory(Context context) {
+        return getQsbApplication(context).getCorpusViewFactory();
     }
 
 }

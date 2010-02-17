@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.CorpusViewFactory;
+import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
@@ -38,6 +40,7 @@ public class QsbApplication extends Application {
     private SourceTaskExecutor mSourceTaskExecutor;
     private SuggestionsProvider mGlobalSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
+    private CorpusViewFactory mCorpusViewFactory;
     private Logger mLogger;
 
     @Override
@@ -245,6 +248,22 @@ public class QsbApplication extends Application {
 
     protected SuggestionViewFactory createSuggestionViewFactory() {
         return new SuggestionViewInflater(this);
+    }
+
+    /**
+     * Gets the corpus view factory.
+     * May only be called from the main thread.
+     */
+    public CorpusViewFactory getCorpusViewFactory() {
+        checkThread();
+        if (mCorpusViewFactory == null) {
+            mCorpusViewFactory = createCorpusViewFactory();
+        }
+        return mCorpusViewFactory;
+    }
+
+    protected CorpusViewFactory createCorpusViewFactory() {
+        return new CorpusViewInflater(this);
     }
 
     /**

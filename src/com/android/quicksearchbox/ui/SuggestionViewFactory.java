@@ -16,11 +16,10 @@
 
 package com.android.quicksearchbox.ui;
 
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
+import com.android.quicksearchbox.SuggestionCursor;
+
 import android.view.View;
 import android.view.ViewGroup;
-import com.android.quicksearchbox.SuggestionCursor;
 
 /**
  * Creates suggestion views.
@@ -46,11 +45,4 @@ public interface SuggestionViewFactory {
      */
     SuggestionView getSuggestionView(int viewType, View convertView, ViewGroup parentViewType);
 
-    CorpusView createSourceView(ViewGroup parentViewType);
-
-    String getGlobalSearchLabel();
-
-    Drawable getGlobalSearchIcon();
-
-    Uri getGlobalSearchIconUri();
 }

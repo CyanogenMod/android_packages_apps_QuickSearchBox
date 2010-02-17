@@ -31,14 +31,27 @@ import java.util.ArrayList;
  */
 public class CorporaAdapter extends BaseAdapter {
 
-    private final SuggestionViewFactory mViewFactory;
+    private final CorpusViewFactory mViewFactory;
 
     private ArrayList<Corpus> mRankedEnabledCorpora;
 
-    public CorporaAdapter(SuggestionViewFactory viewFactory, Corpora corpora,
-            CorpusRanker ranker) {
+    private boolean mGridView;
+
+    private CorporaAdapter(CorpusViewFactory viewFactory, Corpora corpora,
+            CorpusRanker ranker, boolean gridView) {
         mViewFactory = viewFactory;
         mRankedEnabledCorpora = ranker.rankCorpora(corpora.getEnabledCorpora());
+        mGridView = gridView;
+    }
+
+    public static CorporaAdapter createListAdapter(CorpusViewFactory viewFactory, Corpora corpora,
+            CorpusRanker ranker) {
+        return new CorporaAdapter(viewFactory, corpora, ranker, false);
+    }
+
+    public static CorporaAdapter createGridAdapter(CorpusViewFactory viewFactory, Corpora corpora,
+            CorpusRanker ranker) {
+        return new CorporaAdapter(viewFactory, corpora, ranker, true);
     }
 
     public int getCount() {
@@ -60,7 +73,7 @@ public class CorporaAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         CorpusView view = (CorpusView) convertView;
         if (view == null) {
-            view = mViewFactory.createSourceView(parent);
+            view = createView(parent);
         }
         Corpus corpus = getItem(position);
         if (corpus == null) {
@@ -72,4 +85,13 @@ public class CorporaAdapter extends BaseAdapter {
         }
         return view;
     }
+
+    protected CorpusView createView(ViewGroup parent) {
+        if (mGridView) {
+            return mViewFactory.createGridCorpusView(parent);
+        } else {
+            return mViewFactory.createListCorpusView(parent);
+        }
+    }
+
 }

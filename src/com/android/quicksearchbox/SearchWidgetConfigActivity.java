@@ -17,9 +17,8 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.CorporaAdapter;
-import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.ui.CorpusViewFactory;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -27,12 +26,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.GridView;
 
 /**
  * The configuration screen for search widgets.
  */
-public class SearchWidgetConfigActivity extends Activity {
+public class SearchWidgetConfigActivity extends ChoiceActivity {
     static final String TAG = "QSB.SearchWidgetConfigActivity";
 
     private static final String PREFS_NAME = "SearchWidgetConfig";
@@ -40,21 +38,15 @@ public class SearchWidgetConfigActivity extends Activity {
 
     private int mAppWidgetId;
 
-    private GridView mCorpusList;
-
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        setContentView(R.layout.widget_config);
-
-        mCorpusList = (GridView) findViewById(R.id.widget_corpus_list);
-        mCorpusList.setOnItemClickListener(new SourceClickListener());
-        // TODO: for some reason, putting this in the XML layout instead makes
-        // the list items unclickable.
-        mCorpusList.setFocusable(true);
-        mCorpusList.setAdapter(new CorporaAdapter(getViewFactory(), getCorpora(),
-                getCorpusRanker()));
+        setHeading(R.string.search_widget);
+        setOnItemClickListener(new SourceClickListener());
+        CorporaAdapter adapter = CorporaAdapter.createListAdapter(getViewFactory(), getCorpora(),
+                getCorpusRanker());
+        setAdapter(adapter);
 
         Intent intent = getIntent();
         mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -112,8 +104,8 @@ public class SearchWidgetConfigActivity extends Activity {
         return getQsbApplication().getCorpusRanker();
     }
 
-    private SuggestionViewFactory getViewFactory() {
-        return getQsbApplication().getSuggestionViewFactory();
+    private CorpusViewFactory getViewFactory() {
+        return getQsbApplication().getCorpusViewFactory();
     }
 
     private class SourceClickListener implements AdapterView.OnItemClickListener {

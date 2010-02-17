@@ -17,7 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.CorporaAdapter;
-import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.app.Dialog;
 import android.app.SearchManager;
@@ -106,8 +106,9 @@ public class CorpusSelectionDialog extends Dialog {
     }
 
     private void updateCorpora() {
-        mCorpusGrid.setAdapter(
-                new CorporaAdapter(getViewFactory(), getCorpora(), getCorpusRanker()));
+        CorporaAdapter adapter = CorporaAdapter.createGridAdapter(getViewFactory(), getCorpora(),
+                getCorpusRanker());
+        mCorpusGrid.setAdapter(adapter);
     }
 
     private QsbApplication getQsbApplication() {
@@ -122,8 +123,8 @@ public class CorpusSelectionDialog extends Dialog {
         return getQsbApplication().getCorpusRanker();
     }
 
-    private SuggestionViewFactory getViewFactory() {
-        return getQsbApplication().getSuggestionViewFactory();
+    private CorpusViewFactory getViewFactory() {
+        return getQsbApplication().getCorpusViewFactory();
     }
 
     protected void selectCorpus(Corpus corpus) {
