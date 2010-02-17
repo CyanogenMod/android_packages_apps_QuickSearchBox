@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
@@ -36,7 +35,7 @@ public class CorporaTest extends AndroidTestCase {
         super.setUp();
 
         Config config = new Config(mContext);
-        mCorpora = new SearchableCorpora(mContext, config, new Handler());
+        mCorpora = new SearchableCorpora(mContext, config, new MockHandler());
         mCorpora.load();
     }
 

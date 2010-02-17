@@ -16,6 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NamedTask;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +28,7 @@ import java.util.Set;
  */
 class SourceShortcutRefresher implements ShortcutRefresher {
 
-    private final SourceTaskExecutor mExecutor;
+    private final NamedTaskExecutor mExecutor;
 
     private final Set<String> mRefreshed = Collections.synchronizedSet(new HashSet<String>());
 
@@ -34,7 +37,7 @@ class SourceShortcutRefresher implements ShortcutRefresher {
      *
      * @param executor Used to execute the tasks.
      */
-    public SourceShortcutRefresher(SourceTaskExecutor executor) {
+    public SourceShortcutRefresher(NamedTaskExecutor executor) {
         mExecutor = executor;
     }
 
@@ -104,7 +107,7 @@ class SourceShortcutRefresher implements ShortcutRefresher {
      * Refreshes a shortcut with a source and reports the result to a
      * {@link ShortcutRefresher.Listener}.
      */
-    private class ShortcutRefreshTask implements SourceTask {
+    private class ShortcutRefreshTask implements NamedTask {
         private final Source mSource;
         private final String mShortcutId;
         private final String mExtraData;
@@ -121,6 +124,10 @@ class SourceShortcutRefresher implements ShortcutRefresher {
             mShortcutId = shortcutId;
             mExtraData = extraData;
             mListener = listener;
+        }
+
+        public String getName() {
+            return mSource.getFlattenedComponentName();
         }
 
         public void run() {

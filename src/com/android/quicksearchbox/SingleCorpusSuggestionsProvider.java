@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public class SingleCorpusSuggestionsProvider extends AbstractSuggestionsProvider
     private final ShortcutRepository mShortcutRepo;
 
     public SingleCorpusSuggestionsProvider(Config config, Corpus corpus,
-            SourceTaskExecutor queryExecutor,
+            NamedTaskExecutor queryExecutor,
             Handler publishThread,
             Promoter promoter,
             ShortcutRepository shortcutRepo) {

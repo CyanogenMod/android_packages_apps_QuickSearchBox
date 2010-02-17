@@ -16,6 +16,10 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.BatchingNamedTaskExecutor;
+import com.android.quicksearchbox.util.NamedTask;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import android.os.Handler;
 import android.util.Log;
 
@@ -34,7 +38,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
 
     private final Config mConfig;
 
-    private final SourceTaskExecutor mQueryExecutor;
+    private final NamedTaskExecutor mQueryExecutor;
 
     private final Handler mPublishThread;
 
@@ -42,10 +46,10 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
 
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
 
-    private BatchingSourceTaskExecutor mBatchingExecutor;
+    private BatchingNamedTaskExecutor mBatchingExecutor;
 
     public AbstractSuggestionsProvider(Config config,
-            SourceTaskExecutor queryExecutor,
+            NamedTaskExecutor queryExecutor,
             Handler publishThread,
             Promoter promoter) {
         mConfig = config;
@@ -119,7 +123,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
             return suggestions;
         }
 
-        mBatchingExecutor = new BatchingSourceTaskExecutor(mQueryExecutor,
+        mBatchingExecutor = new BatchingNamedTaskExecutor(mQueryExecutor,
                 mConfig.getNumPromotedSources());
 
         SuggestionCursorReceiver receiver = new SuggestionCursorReceiver(
@@ -135,10 +139,10 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
     }
 
     private class SuggestionCursorReceiver {
-        private final BatchingSourceTaskExecutor mExecutor;
+        private final BatchingNamedTaskExecutor mExecutor;
         private final Suggestions mSuggestions;
 
-        public SuggestionCursorReceiver(BatchingSourceTaskExecutor executor,
+        public SuggestionCursorReceiver(BatchingNamedTaskExecutor executor,
                 Suggestions suggestions) {
             mExecutor = executor;
             mSuggestions = suggestions;
@@ -170,7 +174,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
     /**
      * Gets suggestions from a given source.
      */
-    private static class QueryTask implements SourceTask {
+    private static class QueryTask implements NamedTask {
         private final String mQuery;
         private final Corpus mCorpus;
         private final int mQueryLimit;
@@ -182,6 +186,10 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
             mCorpus = corpus;
             mQueryLimit = queryLimit;
             mReceiver = receiver;
+        }
+
+        public String getName() {
+            return mCorpus.getName();
         }
 
         public void run() {

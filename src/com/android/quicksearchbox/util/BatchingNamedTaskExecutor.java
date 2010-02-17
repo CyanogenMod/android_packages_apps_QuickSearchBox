@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.util;
+
 
 import android.util.Log;
 
@@ -22,21 +23,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Executes SourceTasks in batches of a predefined size.  Tasks in excess of
+ * Executes NamedTasks in batches of a predefined size.  Tasks in excess of
  * the batch size are queued until the caller indicates that more results
  * are required.
  */
-class BatchingSourceTaskExecutor implements SourceTaskExecutor {
+public class BatchingNamedTaskExecutor implements NamedTaskExecutor {
 
     private static final boolean DBG = true;
-    private static final String TAG = "QSB.BatchingSourceTaskExecutor";
+    private static final String TAG = "QSB.BatchingNamedTaskExecutor";
 
-    private final SourceTaskExecutor mExecutor;
+    private final NamedTaskExecutor mExecutor;
 
     private final int mBatchSize;
 
     /** Queue of tasks waiting to be dispatched to mExecutor **/
-    private final ArrayList<SourceTask> mQueuedTasks = new ArrayList<SourceTask>();
+    private final ArrayList<NamedTask> mQueuedTasks = new ArrayList<NamedTask>();
 
     /** Count of tasks already dispatched to mExecutor in this batch **/
     private int mDispatchedCount;
@@ -47,12 +48,12 @@ class BatchingSourceTaskExecutor implements SourceTaskExecutor {
      * @param executor A SourceTaskExecutor for actually executing the tasks.
      * @param batchSize The number of tasks to submit in each batch.
      */
-    public BatchingSourceTaskExecutor(SourceTaskExecutor executor, int batchSize) {
+    public BatchingNamedTaskExecutor(NamedTaskExecutor executor, int batchSize) {
         mExecutor = executor;
         mBatchSize = batchSize;
     }
 
-    public void execute(SourceTask task) {
+    public void execute(NamedTask task) {
         synchronized (mQueuedTasks) {
             if (mDispatchedCount == mBatchSize) {
                 if (DBG) Log.d(TAG, "Queueing " + task);
@@ -65,7 +66,7 @@ class BatchingSourceTaskExecutor implements SourceTaskExecutor {
         dispatch(task);
     }
 
-    private void dispatch(SourceTask task) {
+    private void dispatch(NamedTask task) {
         if (DBG) Log.d(TAG, "Dispatching " + task);
         mExecutor.execute(task);
     }
@@ -74,17 +75,17 @@ class BatchingSourceTaskExecutor implements SourceTaskExecutor {
      * Instructs the executor to submit the next batch of results.
      */
     public void executeNextBatch() {
-        SourceTask[] batch = new SourceTask[0];
+        NamedTask[] batch = new NamedTask[0];
         synchronized (mQueuedTasks) {
             int count = Math.min(mQueuedTasks.size(), mBatchSize);
-            List<SourceTask> nextTasks = mQueuedTasks.subList(0, count);
+            List<NamedTask> nextTasks = mQueuedTasks.subList(0, count);
             batch = nextTasks.toArray(batch);
             nextTasks.clear();
             mDispatchedCount = count;
             if (DBG) Log.d(TAG, "Dispatching batch of " + count);
         }
 
-        for (SourceTask task : batch) {
+        for (NamedTask task : batch) {
             dispatch(task);
         }
     }

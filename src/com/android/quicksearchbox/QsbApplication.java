@@ -22,6 +22,9 @@ import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+import com.android.quicksearchbox.util.PerNameExecutor;
+import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
 
 import android.app.Application;
 import android.os.Handler;
@@ -37,7 +40,7 @@ public class QsbApplication extends Application {
     private CorpusRanker mCorpusRanker;
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
-    private SourceTaskExecutor mSourceTaskExecutor;
+    private NamedTaskExecutor mSourceTaskExecutor;
     private SuggestionsProvider mGlobalSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
@@ -174,7 +177,7 @@ public class QsbApplication extends Application {
      * Gets the source task executor.
      * May only be called from the main thread.
      */
-    public SourceTaskExecutor getSourceTaskExecutor() {
+    public NamedTaskExecutor getSourceTaskExecutor() {
         checkThread();
         if (mSourceTaskExecutor == null) {
             mSourceTaskExecutor = createSourceTaskExecutor();
@@ -182,11 +185,11 @@ public class QsbApplication extends Application {
         return mSourceTaskExecutor;
     }
 
-    protected SourceTaskExecutor createSourceTaskExecutor() {
+    protected NamedTaskExecutor createSourceTaskExecutor() {
         Config config = getConfig();
         ThreadFactory queryThreadFactory =
             new QueryThreadFactory(config.getQueryThreadPriority());
-        return new DelayingSourceTaskExecutor(config, queryThreadFactory);
+        return new PerNameExecutor(SingleThreadNamedTaskExecutor.factory(queryThreadFactory));
     }
 
     /**

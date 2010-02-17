@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public class GlobalSuggestionsProvider extends AbstractSuggestionsProvider {
     private final ShortcutRepository mShortcutRepo;
 
     public GlobalSuggestionsProvider(Config config, Corpora corpora,
-            SourceTaskExecutor queryExecutor,
+            NamedTaskExecutor queryExecutor,
             Handler publishThread,
             Promoter promoter,
             CorpusRanker corpusRanker,

@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import android.os.Process;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,10 +33,17 @@ public class QueryThreadFactory implements ThreadFactory {
     private final int mPriority;
 
     /**
+     * Creates a new thread factory, with priority {@link Process#THREAD_PRIORITY_DEFAULT}.
+     */
+    public QueryThreadFactory() {
+        this(Process.THREAD_PRIORITY_DEFAULT);
+    }
+
+    /**
      * Creates a new thread factory.
      *
      * @param priority The thread priority of the threads created by this factory.
-     *        For values, see {@link android.os.Process}.
+     *        For values, see {@link Process}.
      */
     public QueryThreadFactory(int priority) {
         mPriority = priority;

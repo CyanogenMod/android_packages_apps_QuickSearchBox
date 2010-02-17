@@ -34,8 +34,8 @@ import android.webkit.URLUtil;
  */
 public class WebCorpus extends AbstractCorpus {
 
-    private static final boolean DBG = true;
-    private static final String TAG = "QSB.WebSource";
+    private static final boolean DBG = false;
+    private static final String TAG = "QSB.WebCorpus";
 
     private static final String WEB_CORPUS_NAME = "web";
 

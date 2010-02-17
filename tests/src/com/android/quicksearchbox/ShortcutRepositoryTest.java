@@ -18,7 +18,6 @@ package com.android.quicksearchbox;
 
 import android.app.SearchManager;
 import android.content.ContentResolver;
-import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -83,7 +82,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected ShortcutRepositoryImplLog createShortcutRepository() {
         return new ShortcutRepositoryImplLog(getContext(), mConfig, mCorpora,
-                mRefresher, new Handler(), "test-shortcuts-log.db");
+                mRefresher, new MockHandler(), "test-shortcuts-log.db");
     }
 
     @Override

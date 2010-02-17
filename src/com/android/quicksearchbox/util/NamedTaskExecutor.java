@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.util;
 
 /**
- * Executes source tasks, such as querying a source for suggestions.
- *
+ * Runs tasks that have a name tag.
  */
-public interface SourceTaskExecutor {
+public interface NamedTaskExecutor {
 
     /**
-     * Schedules a source task for execution.
+     * Schedules a task for execution. Implementations should not throw
+     * {@link java.util.concurrent.RejectedExecutionException} if the task
+     * cannot be run. They should drop it silently instead.
      */
-    void execute(SourceTask task);
+    void execute(NamedTask task);
 
     /**
-     * Stops any unstarted tasks from running.
+     * Stops any unstarted tasks from running. Implementations of this method must be
+     * idempotent.
      */
     void cancelPendingTasks();
 
     /**
      * Shuts down this executor, freeing any resources that it owns. The executor
-     * may not be used after calling this method.
+     * may not be used after calling this method. Implementations of this method must be
+     * idempotent.
      */
     void close();
 
