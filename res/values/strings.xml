@@ -15,7 +15,7 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Quick Search Box</string>
+    <string name="app_name">Search</string>
 
     <!-- Search widget -->
     <string name="search_widget">Search</string>
@@ -24,8 +24,8 @@
     <string name="search_widget_config_ok">OK</string>
 
     <!-- Source selector -->
-    <string name="corpus_selection_heading">Search in:</string>
-    <string name="corpus_label_global">Everything</string>
+    <string name="corpus_selection_heading">Search</string>
+    <string name="corpus_label_global">All</string>
 
     <!-- Name of the combined Web source shown in QSB -->
     <string name="corpus_label_web">Web</string>
