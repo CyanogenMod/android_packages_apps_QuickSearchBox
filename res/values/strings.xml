@@ -41,20 +41,10 @@
     <string name="search_settings">Search settings</string>
 
     <!-- Title for 'web search' category of search settings -->
-    <string name="web_search_category_title">Web search</string>
-
-    <!-- Title and summary for 'search engine' setting -->
-    <string name="web_search_source">Web search engine</string>
-    <string name="web_search_source_summary"><xliff:g id="source" example="Google">%1$s</xliff:g></string>
-
-    <!-- Title and summaries for 'search engine settings' link (if available for the chosen
-         web search source) -->
-    <string name="search_engine_settings">Search engine settings</string>
-    <string name="search_engine_settings_summary_enabled">Settings for <xliff:g id="provider" example="Google">%1$s</xliff:g></string>
-    <string name="search_engine_settings_summary_disabled">No settings for <xliff:g id="provider" example="Google">%1$s</xliff:g></string>
+    <string name="web_search_category_title">Web</string>
 
     <!-- Title for 'system search' category of search settings -->
-    <string name="system_search_category_title">Quick Search Box</string>
+    <string name="system_search_category_title">Phone</string>
 
     <!-- Title and summary for 'search sources' link for system search -->
     <string name="search_sources">Searchable items</string>
@@ -62,11 +52,11 @@
 
     <!-- Title and summary used for the option to clear search shortcuts from the system
          search history -->
-    <string name="clear_shortcuts">Clear search shortcuts</string>
-    <string name="clear_shortcuts_summary">Clear shortcuts to recently chosen search results</string>
+    <string name="clear_shortcuts">Clear shortcuts</string>
+    <string name="clear_shortcuts_summary">Clear shortcuts to recently chosen search suggestions</string>
 
     <!-- Strings used in the dialog shown after choosing the 'clear search shortcuts' setting. -->
-    <string name="clear_shortcuts_prompt">"This will clear all shortcuts to recently chosen search results."\n\n"(To clear your Browser history, use the Browser's settings.)"</string>
+    <string name="clear_shortcuts_prompt">"This will clear all shortcuts to recently chosen search suggestions."\n\n"(To clear your Browser history, use the Browser's settings.)"</string>
     <string name="agree">OK</string>
     <string name="disagree">Cancel</string>
 
@@ -83,7 +73,7 @@
     <string name="google_search_hint">Google Search</string>
 
     <!-- Settings category title for 'Google search settings' settings activity -->
-    <string name="google_search_settings">Google search settings</string>
+    <string name="google_search_settings">Google search</string>
 
     <!-- Title and summaries for 'show web suggestions' check box setting -->
     <string name="google_show_web_suggestions">Show web suggestions</string>
