@@ -20,6 +20,8 @@ import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.CorpusRanker;
 
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -30,6 +32,9 @@ import java.util.ArrayList;
  * Adapter for showing a list of sources in the source selection activity.
  */
 public class CorporaAdapter extends BaseAdapter {
+
+    private static final String TAG = "CorporaAdapter";
+    private static final boolean DBG = true;
 
     private final CorpusViewFactory mViewFactory;
 
@@ -76,13 +81,18 @@ public class CorporaAdapter extends BaseAdapter {
             view = createView(parent);
         }
         Corpus corpus = getItem(position);
+        Drawable icon;
+        CharSequence label;
         if (corpus == null) {
-            view.setIcon(mViewFactory.getGlobalSearchIcon());
-            view.setLabel(mViewFactory.getGlobalSearchLabel());
+            icon = mViewFactory.getGlobalSearchIcon();
+            label = mViewFactory.getGlobalSearchLabel();
         } else {
-            view.setIcon(corpus.getCorpusIcon());
-            view.setLabel(corpus.getLabel());
+            icon = corpus.getCorpusIcon();
+            label = corpus.getLabel();
         }
+        if (DBG) Log.d(TAG, "Binding " + position + ", label=" + label);
+        view.setIcon(icon);
+        view.setLabel(label);
         return view;
     }
 

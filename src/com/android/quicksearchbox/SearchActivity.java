@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import com.android.common.Search;
-import com.android.quicksearchbox.ui.CorpusIndicator;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionSelectionListener;
@@ -92,7 +91,7 @@ public class SearchActivity extends Activity {
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
-    protected CorpusIndicator mCorpusIndicator;
+    protected ImageButton mCorpusIndicator;
 
     private Launcher mLauncher;
 
@@ -123,7 +122,7 @@ public class SearchActivity extends Activity {
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-        mCorpusIndicator = new CorpusIndicator(findViewById(R.id.corpus_indicator));
+        mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
 
         mLauncher = new Launcher(this);
 
@@ -238,7 +237,7 @@ public class SearchActivity extends Activity {
             sourceIcon = corpus.getCorpusIcon();
         }
         mSuggestionsAdapter.setCorpus(corpus);
-        mCorpusIndicator.setSourceIcon(sourceIcon);
+        mCorpusIndicator.setImageDrawable(sourceIcon);
 
         updateVoiceSearchButton(getQuery().length() == 0);
     }

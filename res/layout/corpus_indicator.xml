@@ -14,24 +14,18 @@
      limitations under the License.
 -->
 
-<FrameLayout
+<ImageButton
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="42dip"
+    android:id="@+id/corpus_indicator"
+    android:layout_width="40dip"
     android:layout_height="match_parent"
     android:layout_marginBottom="2dip"
-    android:foreground="@drawable/search_source_selector_indicator"
-    android:foregroundGravity="bottom|center_horizontal"
-    >
-
-    <ImageButton
-        android:id="@+id/search_source_selector_icon"
-        android:background="@drawable/search_source_selector_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="6dip"
-        android:scaleType="centerInside"
-        android:focusable="true"
-        android:clickable="true"
+    android:paddingTop="2dip"
+    android:paddingLeft="2dip"
+    android:paddingRight="2dip"
+    android:paddingBottom="8dip"
+    android:scaleType="centerInside"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@drawable/corpus_indicator_bg"
     />
-
-</FrameLayout>

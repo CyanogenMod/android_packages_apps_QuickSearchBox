@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.ui.CorpusIndicator;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.app.PendingIntent;
@@ -105,7 +104,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     private static void bindCorpusIndicator(Context context, RemoteViews views,
             Bundle widgetAppData, Corpus corpus) {
         Uri sourceIconUri = getCorpusIconUri(context, corpus);
-        views.setImageViewUri(CorpusIndicator.ICON_VIEW_ID, sourceIconUri);
+        views.setImageViewUri(R.id.corpus_indicator, sourceIconUri);
 
         Intent intent = new Intent(SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -113,7 +112,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         intent.putExtra(SearchManager.APP_DATA, widgetAppData);
         intent.setData(SearchActivity.getCorpusUri(corpus));
-        setOnClickIntent(context, views, CorpusIndicator.ICON_VIEW_ID, intent);
+        setOnClickIntent(context, views, R.id.corpus_indicator, intent);
     }
 
     private static void setOnClickIntent(Context context, RemoteViews views,
