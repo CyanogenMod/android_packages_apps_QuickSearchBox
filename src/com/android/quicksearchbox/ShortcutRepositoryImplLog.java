@@ -191,7 +191,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     public void reportClick(SuggestionCursor suggestions, int position) {
-        reportClickAtTime(suggestions, 0, System.currentTimeMillis());
+        reportClickAtTime(suggestions, position, System.currentTimeMillis());
     }
 
     public SuggestionCursor getShortcutsForQuery(String query) {
