@@ -54,4 +54,6 @@ public interface Corpora {
      * Gets the corpus that contains the given source.
      */
     Corpus getCorpusForSource(Source source);
+
+    void close();
 }

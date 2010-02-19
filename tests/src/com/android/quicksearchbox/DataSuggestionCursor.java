@@ -156,4 +156,8 @@ public class DataSuggestionCursor extends AbstractSuggestionCursor {
     public boolean isSpinnerWhileRefreshing() {
         return current().isSpinnerWhileRefreshing();
     }
+
+    public boolean isSuggestionShortcut() {
+        return false;
+    }
 }

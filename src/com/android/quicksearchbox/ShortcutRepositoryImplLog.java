@@ -298,6 +298,9 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return super.getSuggestionIcon2();
         }
 
+        public boolean isSuggestionShortcut() {
+            return true;
+        }
     }
 
     /**

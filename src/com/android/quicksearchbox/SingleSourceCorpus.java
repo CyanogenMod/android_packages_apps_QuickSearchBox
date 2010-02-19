@@ -21,6 +21,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * A corpus that uses a single source.
  */
@@ -79,6 +82,10 @@ public class SingleSourceCorpus extends AbstractCorpus {
 
     public boolean isWebCorpus() {
         return false;
+    }
+
+    public Collection<Source> getSources() {
+        return Collections.singletonList(mSource);
     }
 
 }

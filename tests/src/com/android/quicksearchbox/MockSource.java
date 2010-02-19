@@ -32,6 +32,8 @@ public class MockSource implements Source {
 
     public static final Source SOURCE_2 = new MockSource("SOURCE_2");
 
+    public static final Source SOURCE_3 = new MockSource("SOURCE_3");
+
     private final String mName;
 
     public MockSource(String name) {

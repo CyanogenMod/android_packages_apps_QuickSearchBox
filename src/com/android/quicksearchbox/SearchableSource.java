@@ -99,7 +99,7 @@ public class SearchableSource implements Source {
     }
 
     public String getLogName() {
-        return getComponentName().getPackageName();
+        return getFlattenedComponentName();
     }
 
     public Drawable getIcon(String drawableId) {
@@ -293,6 +293,10 @@ public class SearchableSource implements Source {
         @Override
         public Source getSuggestionSource() {
             return SearchableSource.this;
+        }
+
+        public boolean isSuggestionShortcut() {
+            return false;
         }
 
     }

@@ -21,6 +21,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Mock implementation of {@link Corpus}.
  *
@@ -66,6 +69,10 @@ public class MockCorpus extends AbstractCorpus {
 
     public int getQueryThreshold() {
         return 0;
+    }
+
+    public Collection<Source> getSources() {
+        return Collections.singletonList(mSource);
     }
 
     public CharSequence getSettingsDescription() {

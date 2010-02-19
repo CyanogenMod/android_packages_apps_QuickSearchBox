@@ -21,6 +21,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.util.Collection;
+
 /**
  * A corpus is a user-visible set of suggestions. A corpus gets suggestions from one
  * or more sources.
@@ -75,4 +77,9 @@ public interface Corpus {
     Intent createVoiceSearchIntent(Bundle appData);
 
     boolean isWebCorpus();
+
+    /**
+     * Gets the sources that this corpus uses.
+     */
+    Collection<Source> getSources();
 }

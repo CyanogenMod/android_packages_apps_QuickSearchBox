@@ -68,4 +68,7 @@ public class MockCorpora implements Corpora {
         return true;
     }
 
+    public void close() {
+    }
+
 }

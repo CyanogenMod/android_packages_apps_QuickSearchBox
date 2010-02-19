@@ -149,4 +149,9 @@ public interface SuggestionCursor {
      * Gets the suggestion log type for the current suggestion.
      */
     String getSuggestionLogType();
+
+    /**
+     * Checks if this suggestion is a shortcut.
+     */
+    boolean isSuggestionShortcut();
 }

@@ -36,7 +36,7 @@ import java.util.HashMap;
 /**
  * Maintains a list of search sources.
  */
-public class SearchableSources {
+public class SearchableSources implements Sources {
 
     // set to true to enable the more verbose debug logging for this file
     private static final boolean DBG = false;
@@ -114,9 +114,6 @@ public class SearchableSources {
         }
     };
 
-    /**
-     * After calling, clients must call {@link #close()} when done with this object.
-     */
     public void load() {
         if (mLoaded) {
             throw new IllegalStateException("load(): Already loaded.");
@@ -136,15 +133,7 @@ public class SearchableSources {
         notifyDataSetChanged();
     }
 
-    /**
-     * Releases all resources used by this object. It is possible to call
-     * {@link #load()} again after calling this method.
-     */
     public void close() {
-        if (!mLoaded) {
-            throw new IllegalStateException("close(): Not loaded.");
-        }
-
         mContext.unregisterReceiver(mBroadcastReceiver);
 
         mDataSetObservable.unregisterAll();
@@ -205,21 +194,10 @@ public class SearchableSources {
         }
     }
 
-    /**
-     * Register an observer that is called when changes happen to this data set.
-     *
-     * @param observer gets notified when the data set changes.
-     */
     public void registerDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.registerObserver(observer);
     }
 
-    /**
-     * Unregister an observer that has previously been registered with
-     * {@link #registerDataSetObserver(DataSetObserver)}
-     *
-     * @param observer the observer to unregister.
-     */
     public void unregisterDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.unregisterObserver(observer);
     }

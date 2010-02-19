@@ -26,7 +26,7 @@ import java.util.Collection;
  *
  */
 @MediumTest
-public class CorporaTest extends AndroidTestCase {
+public class SearchableCorporaTest extends AndroidTestCase {
 
     protected SearchableCorpora mCorpora;
 
@@ -35,16 +35,26 @@ public class CorporaTest extends AndroidTestCase {
         super.setUp();
 
         Config config = new Config(mContext);
-        mCorpora = new SearchableCorpora(mContext, config, new MockHandler());
+        MockSources sources = new MockSources();
+        sources.addSource(MockSource.SOURCE_1);
+        sources.addSource(MockSource.SOURCE_2);
+        mCorpora = new SearchableCorpora(mContext, config, new MockHandler(),
+                sources, new MockCorpusFactory());
         mCorpora.load();
     }
 
-    public void testHasSuggestionSources() {
+    public void testGetAllCorpora() {
         assertNotEmpty(mCorpora.getAllCorpora());
     }
 
     public void testEnabledSuggestionSources() {
-        assertNotEmpty(mCorpora.getEnabledCorpora());
+        assertNotNull(mCorpora.getEnabledCorpora());
+    }
+
+    public void testGetCorpusForSource() {
+        assertNotNull(mCorpora.getCorpusForSource(MockSource.SOURCE_1));
+        assertNotNull(mCorpora.getCorpusForSource(MockSource.SOURCE_2));
+        assertNull(mCorpora.getCorpusForSource(MockSource.SOURCE_3));
     }
 
     static void assertEmpty(Collection<?> collection) {

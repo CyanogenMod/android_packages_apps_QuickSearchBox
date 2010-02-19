@@ -18,6 +18,8 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.SuggestionCursor;
 
+import android.graphics.drawable.Drawable;
+
 /**
  * Interface to be implemented by any view appearing in the list of suggestions.
  */
@@ -26,5 +28,25 @@ public interface SuggestionView {
      * Set the view's contents based on the given suggestion.
      */
     void bindAsSuggestion(SuggestionCursor suggestion);
+
+    /**
+     * Sets the first text line.
+     */
+    public void setText1(CharSequence text);
+
+    /**
+     * Sets the second text line.
+     */
+    public void setText2(CharSequence text);
+
+    /**
+     * Sets the left-hand-side icon.
+     */
+    public void setIcon1(Drawable icon);
+
+    /**
+     * Sets the right-hand-side icon.
+     */
+    public void setIcon2(Drawable icon);
 
 }

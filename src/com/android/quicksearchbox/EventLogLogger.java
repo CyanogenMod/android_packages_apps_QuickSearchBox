@@ -68,7 +68,7 @@ public class EventLogLogger implements Logger {
         String startMethod = intentSource;
         String currentCorpus = getCorpusLogName(corpus);
         String enabledCorpora = getCorpusLogNames(orderedCorpora);
-        if (DBG){
+        if (DBG) {
             debug("qsb_start", packageName, version, startMethod, latency,
                     currentCorpus, enabledCorpora);
         }
@@ -81,6 +81,9 @@ public class EventLogLogger implements Logger {
         String suggestions = getSuggestions(suggestionCursor);
         String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
+        if (DBG) {
+            debug("qsb_click", position, suggestions, corpora, numChars);
+        }
         EventLogTags.writeQsbClick(position, suggestions, corpora, numChars);
     }
 
@@ -108,13 +111,17 @@ public class EventLogLogger implements Logger {
         return corpus.getName();
     }
 
-    private String getSuggestions(SuggestionCursor suggestionCursor) {
+    private String getSuggestions(SuggestionCursor cursor) {
         StringBuilder sb = new StringBuilder();
-        final int count = suggestionCursor.getCount();
+        final int count = cursor.getCount();
         for (int i = 0; i < count; i++) {
             if (i > 0) sb.append(LIST_SEPARATOR);
-            suggestionCursor.moveTo(i);
-            sb.append(suggestionCursor.getSuggestionLogType());
+            cursor.moveTo(i);
+            String source = cursor.getSuggestionSource().getLogName();
+            String type = cursor.getSuggestionLogType();
+            if (type == null) type = "";
+            String shortcut = cursor.isSuggestionShortcut() ? "shortcut" : "";
+            sb.append(source).append(':').append(type).append(':').append(shortcut);
         }
         return sb.toString();
     }

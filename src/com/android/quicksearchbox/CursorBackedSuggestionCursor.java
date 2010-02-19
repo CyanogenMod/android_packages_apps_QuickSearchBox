@@ -27,6 +27,8 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
     private static final boolean DBG = false;
     protected static final String TAG = "QSB.CursorBackedSuggestionCursor";
 
+    public static final String SUGGEST_COLUMN_LOG_TYPE = "suggest_log_type";
+
     /** The suggestions, or {@code null} if the suggestions query failed. */
     protected final Cursor mCursor;
 
@@ -67,7 +69,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
     public abstract Source getSuggestionSource();
 
     public String getSuggestionLogType() {
-        return getSuggestionSource().getLogName();
+        return getStringOrNull(SUGGEST_COLUMN_LOG_TYPE);
     }
 
     public void close() {

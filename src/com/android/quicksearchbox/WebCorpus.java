@@ -29,6 +29,9 @@ import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.webkit.URLUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * The web search source.
  */
@@ -44,10 +47,16 @@ public class WebCorpus extends AbstractCorpus {
     private final Source mWebSearchSource;
     private final Source mBrowserSource;
 
+    private final ArrayList<Source> mSources;
+
     public WebCorpus(Context context, Source webSearchSource, Source browserSource) {
         mContext = context;
         mWebSearchSource = webSearchSource;
         mBrowserSource = browserSource;
+
+        mSources = new ArrayList<Source>(2);
+        mSources.add(mWebSearchSource);
+        mSources.add(mBrowserSource);
     }
 
     protected Context getContext() {
@@ -141,6 +150,10 @@ public class WebCorpus extends AbstractCorpus {
 
     public boolean isWebCorpus() {
         return true;
+    }
+
+    public Collection<Source> getSources() {
+        return mSources;
     }
 
     public CharSequence getSettingsDescription() {

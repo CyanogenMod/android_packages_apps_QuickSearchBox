@@ -22,6 +22,7 @@ import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
+import com.android.quicksearchbox.ui.SuggestionsFooter;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
 import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
@@ -36,7 +37,7 @@ public class QsbApplication extends Application {
 
     private Handler mUiThreadHandler;
     private Config mConfig;
-    private SearchableCorpora mCorpora;
+    private Corpora mCorpora;
     private CorpusRanker mCorpusRanker;
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
@@ -117,10 +118,19 @@ public class QsbApplication extends Application {
         return mCorpora;
     }
 
-    protected SearchableCorpora createCorpora() {
-        SearchableCorpora corpora = new SearchableCorpora(this, getConfig(), getMainThreadHandler());
+    protected Corpora createCorpora() {
+        SearchableCorpora corpora = new SearchableCorpora(this, getConfig(),
+                getMainThreadHandler(), createSources(), createCorpusFactory());
         corpora.load();
         return corpora;
+    }
+
+    protected Sources createSources() {
+        return new SearchableSources(this, getMainThreadHandler());
+    }
+
+    protected CorpusFactory createCorpusFactory() {
+        return new SearchableCorpusFactory(this);
     }
 
     /**
@@ -279,6 +289,10 @@ public class QsbApplication extends Application {
         SuggestionViewFactory viewFactory = getSuggestionViewFactory();
         DelayingSuggestionsAdapter adapter = new DelayingSuggestionsAdapter(viewFactory);
         return adapter;
+    }
+
+    public SuggestionsFooter createSuggestionsFooter() {
+        return null;
     }
 
     /**

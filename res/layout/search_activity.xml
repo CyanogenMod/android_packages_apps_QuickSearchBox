@@ -18,7 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    >
 
     <view
         class="com.android.quicksearchbox.ui.SuggestionsView"
@@ -26,10 +26,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/search_edit_frame"
+        android:layout_above="@+id/footer"
+        android:layout_alignWithParentIfMissing="true"
+        >
+    </view>
+
+    <LinearLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/search_edit_frame">
-    </view>
+        >
+    </LinearLayout>
 
     <!-- The search plate is after the suggestions, to give it a higher
          z-index. -->

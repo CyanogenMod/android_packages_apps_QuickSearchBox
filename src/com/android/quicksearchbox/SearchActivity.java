@@ -21,6 +21,7 @@ import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionSelectionListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
+import com.android.quicksearchbox.ui.SuggestionsFooter;
 import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
@@ -40,6 +41,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -88,6 +90,7 @@ public class SearchActivity extends Activity {
     protected boolean mQueryWasEmpty = true;
 
     protected SuggestionsView mSuggestionsView;
+    protected SuggestionsFooter mSuggestionsFooter;
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
@@ -119,6 +122,12 @@ public class SearchActivity extends Activity {
         mSuggestionsView.setInteractionListener(new InputMethodCloser());
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
+
+        mSuggestionsFooter = getQsbApplication().createSuggestionsFooter();
+        if (mSuggestionsFooter != null) {
+            ViewGroup footerFrame = (ViewGroup) findViewById(R.id.footer);
+            mSuggestionsFooter.addView(footerFrame);
+        }
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
@@ -152,6 +161,9 @@ public class SearchActivity extends Activity {
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
+        if (mSuggestionsFooter != null) {
+            mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
+        }
     }
 
     @Override
@@ -274,6 +286,9 @@ public class SearchActivity extends Activity {
     protected void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy()");
         super.onDestroy();
+        if (mSuggestionsFooter != null) {
+            mSuggestionsFooter.setAdapter(null);
+        }
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 

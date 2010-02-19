@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Handler;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -41,29 +40,37 @@ public class SearchableCorpora implements Corpora {
 
     private final Context mContext;
     private final Config mConfig;
+    private final Handler mUiThread;
+    private final CorpusFactory mCorpusFactory;
     private final SharedPreferences mPreferences;
 
     private boolean mLoaded = false;
 
-    private SearchableSources mSources;
+    private Sources mSources;
     // Maps corpus names to corpora
     private HashMap<String,Corpus> mCorporaByName;
     // Maps sources to the corpus that contains them
     private HashMap<Source,Corpus> mCorporaBySource;
     // Enabled corpora
     private List<Corpus> mEnabledCorpora;
-    private Corpus mWebCorpus;
 
     /**
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableCorpora(Context context, Config config, Handler uiThread) {
+    public SearchableCorpora(Context context, Config config, Handler uiThread,
+            Sources sources,
+            CorpusFactory corpusFactory) {
         mContext = context;
         mConfig = config;
+        mUiThread = uiThread;
+        mCorpusFactory = corpusFactory;
         mPreferences = SearchSettings.getSearchPreferences(context);
+        mSources = sources;
+    }
 
-        mSources = new SearchableSources(context, uiThread);
+    protected Context getContext() {
+        return mContext;
     }
 
     private void checkLoaded() {
@@ -130,41 +137,25 @@ public class SearchableCorpora implements Corpora {
     }
 
     private void updateCorpora() {
-        mCorporaByName = new HashMap<String,Corpus>();
-        mCorporaBySource = new HashMap<Source,Corpus>();
-        mEnabledCorpora = new ArrayList<Corpus>();
+        Collection<Corpus> corpora = mCorpusFactory.createCorpora(mSources);
 
-        Source webSource = mSources.getWebSearchSource();
-        Source browserSource = mSources.getSource(getBrowserSearchComponent());
-        mWebCorpus = new WebCorpus(mContext, webSource, browserSource);
-        addCorpus(mWebCorpus);
-        mCorporaBySource.put(webSource, mWebCorpus);
-        mCorporaBySource.put(browserSource, mWebCorpus);
+        mCorporaByName = new HashMap<String,Corpus>(corpora.size());
+        mCorporaBySource = new HashMap<Source,Corpus>(corpora.size());
+        mEnabledCorpora = new ArrayList<Corpus>(corpora.size());
 
-        // Create corpora for all unclaimed sources
-        for (Source source : mSources.getSources()) {
-            if (!mCorporaBySource.containsKey(source)) {
-                Corpus corpus = new SingleSourceCorpus(source);
-                addCorpus(corpus);
+        for (Corpus corpus : corpora) {
+            mCorporaByName.put(corpus.getName(), corpus);
+            for (Source source : corpus.getSources()) {
                 mCorporaBySource.put(source, corpus);
+            }
+            if (isCorpusEnabled(corpus)) {
+                mEnabledCorpora.add(corpus);
             }
         }
 
         if (DBG) Log.d(TAG, "Updated corpora: " + mCorporaBySource.values());
 
         mEnabledCorpora = Collections.unmodifiableList(mEnabledCorpora);
-    }
-
-    private void addCorpus(Corpus corpus) {
-        mCorporaByName.put(corpus.getName(), corpus);
-        if (isCorpusEnabled(corpus)) {
-            mEnabledCorpora.add(corpus);
-        }
-    }
-
-    private ComponentName getBrowserSearchComponent() {
-        String name = mContext.getString(R.string.browser_search_component);
-        return TextUtils.isEmpty(name) ? null : ComponentName.unflattenFromString(name);
     }
 
     public boolean isCorpusEnabled(Corpus corpus) {

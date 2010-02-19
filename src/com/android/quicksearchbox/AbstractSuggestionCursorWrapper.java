@@ -91,4 +91,8 @@ public abstract class AbstractSuggestionCursorWrapper extends AbstractSuggestion
     public boolean isSpinnerWhileRefreshing() {
         return current().isSpinnerWhileRefreshing();
     }
+
+    public boolean isSuggestionShortcut() {
+        return current().isSuggestionShortcut();
+    }
 }
