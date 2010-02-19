@@ -226,7 +226,8 @@ public class QsbApplication extends Application {
     }
 
     protected SuggestionsProvider createGlobalSuggestionsProvider() {
-        Promoter promoter =  new ShortcutPromoter(new RoundRobinPromoter());
+        Promoter promoter =  new ShortcutPromoter(new RankAwarePromoter(
+                getCorpora(), getCorpusRanker(), mConfig.getNumPromotedSources()));
         GlobalSuggestionsProvider provider = new GlobalSuggestionsProvider(getConfig(),
                 getCorpora(),
                 getSourceTaskExecutor(),

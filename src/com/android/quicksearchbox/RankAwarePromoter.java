@@ -1,0 +1,121 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.quicksearchbox;
+
+import java.util.*;
+
+/**
+ * A promoter that gives preference to suggestions from higher ranking corpora.
+ */
+public class RankAwarePromoter implements Promoter {
+
+    private final HashSet<Corpus> mPromotedCorpora;
+
+    public RankAwarePromoter(Corpora corpora, CorpusRanker corpusRanker, int maxPromotedCorpora) {
+        // Create a set of the corpora we consider to be promoted.  Note that we
+        // only do this once, even though these may change slightly during a session.
+        ArrayList<Corpus> orderedCorpora = corpusRanker.rankCorpora(corpora.getAllCorpora());
+        int count = Math.min(orderedCorpora.size(), maxPromotedCorpora);
+        mPromotedCorpora = new HashSet<Corpus>(orderedCorpora.subList(0, count));
+    }
+
+    private boolean isPromoted(Corpus corpus) {
+        return mPromotedCorpora.contains(corpus);
+    }
+
+    public void pickPromoted(SuggestionCursor shortcuts, ArrayList<CorpusResult> suggestions,
+            int maxPromoted, ListSuggestionCursor promoted) {
+
+        // Split non-empty results into promoted and other, positioned at first suggestion
+        LinkedList<CorpusResult> promotedResults = new LinkedList<CorpusResult>();
+        LinkedList<CorpusResult> otherResults = new LinkedList<CorpusResult>();
+        for (int i = 0; i < suggestions.size(); i++) {
+            CorpusResult result = suggestions.get(i);
+            if (result.getCount() > 0) {
+                result.moveTo(0);
+                if (isPromoted(result.getCorpus())) {
+                    promotedResults.add(result);
+                } else {
+                    otherResults.add(result);
+                }
+            }
+        }
+
+        // Pick 2 results from each of the promoted corpora
+        maxPromoted -= roundRobin(promotedResults, maxPromoted, 2, promoted);
+
+        // Then try to fill with the remaining promoted results
+        if (maxPromoted > 0 && !promotedResults.isEmpty()) {
+            int stripeSize = Math.max(1, maxPromoted / promotedResults.size());
+            maxPromoted -= roundRobin(promotedResults, maxPromoted, stripeSize, promoted);
+            // We may still have a few slots left
+            maxPromoted -= roundRobin(promotedResults, maxPromoted, maxPromoted, promoted);
+        }
+
+        // Then try to fill with the rest
+        if (maxPromoted > 0 && !otherResults.isEmpty()) {
+            int stripeSize = Math.max(1, maxPromoted / otherResults.size());
+            maxPromoted -= roundRobin(otherResults, maxPromoted, stripeSize, promoted);
+            // We may still have a few slots left
+            maxPromoted -= roundRobin(otherResults, maxPromoted, maxPromoted, promoted);
+        }
+    }
+
+    /**
+     * Promotes "stripes" of suggestions from each corpus.
+     *
+     * @param results     the list of CorpusResults from which to promote.
+     *                    Exhausted CorpusResults are removed from the list.
+     * @param maxPromoted maximum number of suggestions to promote.
+     * @param stripeSize  number of suggestions to take from each corpus.
+     * @param promoted    the list to which promoted suggestions are added.
+     * @return the number of suggestions actually promoted.
+     */
+    private int roundRobin(LinkedList<CorpusResult> results, int maxPromoted, int stripeSize,
+            ListSuggestionCursor promoted) {
+        int count = 0;
+        if (maxPromoted > 0 && !results.isEmpty()) {
+            for (Iterator<CorpusResult> iter = results.iterator();
+                 count < maxPromoted && iter.hasNext();) {
+                CorpusResult result = iter.next();
+                count += promote(result, stripeSize, promoted);
+                if (result.getPosition() == result.getCount()) {
+                    iter.remove();
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Copies suggestions from a SuggestionCursor to the list of promoted suggestions.
+     *
+     * @param cursor from which to copy the suggestions
+     * @param count maximum number of suggestions to copy
+     * @param promoted the list to which to add the suggestions
+     * @return the number of suggestions actually copied.
+     */
+    private int promote(SuggestionCursor cursor, int count, ListSuggestionCursor promoted) {
+        int i = 0;
+        while (i < count && cursor.getPosition() < cursor.getCount()) {
+            promoted.add(new SuggestionPosition(cursor));
+            cursor.moveTo(cursor.getPosition() + 1);
+            i++;
+        }
+        return i;
+    }
+}
