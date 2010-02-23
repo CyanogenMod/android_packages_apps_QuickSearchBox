@@ -51,6 +51,10 @@ public class MockCorpus extends AbstractCorpus {
         return null;
     }
 
+    public SuggestionData createSearchShortcut(String query) {
+        return null;
+    }
+
     public Drawable getCorpusIcon() {
         return null;
     }

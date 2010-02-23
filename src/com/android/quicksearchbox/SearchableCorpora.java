@@ -54,6 +54,8 @@ public class SearchableCorpora implements Corpora {
     private HashMap<Source,Corpus> mCorporaBySource;
     // Enabled corpora
     private List<Corpus> mEnabledCorpora;
+    // Web corpus
+    private Corpus mWebCorpus;
 
     /**
      *
@@ -91,6 +93,10 @@ public class SearchableCorpora implements Corpora {
     public Corpus getCorpus(String name) {
         checkLoaded();
         return mCorporaByName.get(name);
+    }
+
+    public Corpus getWebCorpus() {
+        return mWebCorpus;
     }
 
     public Corpus getCorpusForSource(Source source) {
@@ -141,6 +147,7 @@ public class SearchableCorpora implements Corpora {
         mCorporaByName = new HashMap<String,Corpus>(corpora.size());
         mCorporaBySource = new HashMap<Source,Corpus>(corpora.size());
         mEnabledCorpora = new ArrayList<Corpus>(corpora.size());
+        mWebCorpus = null;
 
         for (Corpus corpus : corpora) {
             mCorporaByName.put(corpus.getName(), corpus);
@@ -149,6 +156,12 @@ public class SearchableCorpora implements Corpora {
             }
             if (isCorpusEnabled(corpus)) {
                 mEnabledCorpora.add(corpus);
+            }
+            if (corpus.isWebCorpus()) {
+                if (mWebCorpus != null) {
+                    Log.w(TAG, "Multiple web corpora: " + mWebCorpus + ", " + corpus);
+                }
+                mWebCorpus = corpus;
             }
         }
 

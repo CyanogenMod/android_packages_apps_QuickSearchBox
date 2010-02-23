@@ -35,9 +35,6 @@ public class Launcher {
 
     private final Context mContext;
 
-    /** Data sent by the app that launched QSB. */
-    private Bundle mAppSearchData = null;
-
     /**
      * Data sent by the app that launched QSB.
      */
@@ -45,44 +42,22 @@ public class Launcher {
         mContext = context;
     }
 
-    public void setAppSearchData(Bundle appSearchData) {
-        mAppSearchData = appSearchData;
-    }
-
-    public static boolean shouldShowVoiceSearch(Context context, Corpus corpus) {
+    public boolean shouldShowVoiceSearch(Corpus corpus) {
         if (corpus != null && !corpus.voiceSearchEnabled()) {
             return false;
         }
+        return isVoiceSearchAvailable();
+    }
+
+    private boolean isVoiceSearchAvailable() {
         Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        ResolveInfo ri = context.getPackageManager().
+        ResolveInfo ri = mContext.getPackageManager().
                 resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
         return ri != null;
     }
 
-    public void startVoiceSearch(Corpus corpus) {
-        if (corpus == null) {
-            launchIntent(WebCorpus.createVoiceWebSearchIntent(mAppSearchData));
-        } else {
-            launchIntent(corpus.createVoiceSearchIntent(mAppSearchData));
-        }
-    }
-
-    public void startSearch(Corpus corpus, String query) {
-        if (corpus == null) {
-            launchIntent(WebCorpus.createWebIntent(query, mAppSearchData));
-        } else {
-            launchIntent(corpus.createSearchIntent(query, mAppSearchData));
-        }
-    }
-
-    /**
-     * Launches a suggestion.
-     */
-    public void launchSuggestion(SuggestionCursor cursor, int position) {
-        launchIntent(getSuggestionIntent(cursor, position));
-    }
-
-    public Intent getSuggestionIntent(SuggestionCursor cursor, int position) {
+    public Intent getSuggestionIntent(SuggestionCursor cursor, int position,
+            Bundle appSearchData) {
         cursor.moveTo(position);
         Source source = cursor.getSuggestionSource();
         String action = cursor.getSuggestionIntentAction();
@@ -115,15 +90,15 @@ public class Launcher {
         if (extraData != null) {
             intent.putExtra(SearchManager.EXTRA_DATA_KEY, extraData);
         }
-        if (mAppSearchData != null) {
-            intent.putExtra(SearchManager.APP_DATA, mAppSearchData);
+        if (appSearchData != null) {
+            intent.putExtra(SearchManager.APP_DATA, appSearchData);
         }
 
         intent.setComponent(cursor.getSuggestionSource().getComponentName());
         return intent;
     }
 
-    private void launchIntent(Intent intent) {
+    public void launchIntent(Intent intent) {
         if (intent == null) {
             return;
         }

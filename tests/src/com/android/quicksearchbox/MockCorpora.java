@@ -35,6 +35,7 @@ public class MockCorpora implements Corpora {
     private HashMap<String,Corpus> mCorporaByName = new HashMap<String,Corpus>();
     private HashMap<Source,Corpus> mCorporaBySource = new HashMap<Source,Corpus>();
     private HashMap<ComponentName,Source> mSourcesByName = new HashMap<ComponentName,Source>();
+    private Corpus mWebCorpus;
 
     public void addCorpus(Corpus corpus, Source... sources) {
         mCorporaByName.put(corpus.getName(), corpus);
@@ -45,12 +46,20 @@ public class MockCorpora implements Corpora {
         notifyDataSetChanged();
     }
 
+    public void setWebCorpus(Corpus webCorpus) {
+        mWebCorpus = webCorpus;
+    }
+
     public Collection<Corpus> getAllCorpora() {
         return Collections.unmodifiableCollection(mCorporaByName.values());
     }
 
     public Corpus getCorpus(String name) {
         return mCorporaByName.get(name);
+    }
+
+    public Corpus getWebCorpus() {
+        return mWebCorpus;
     }
 
     public Corpus getCorpusForSource(Source source) {

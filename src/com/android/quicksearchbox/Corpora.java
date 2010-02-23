@@ -49,6 +49,8 @@ public interface Corpora {
      */
     Corpus getCorpus(String name);
 
+    Corpus getWebCorpus();
+
     Source getSource(ComponentName name);
 
     /**

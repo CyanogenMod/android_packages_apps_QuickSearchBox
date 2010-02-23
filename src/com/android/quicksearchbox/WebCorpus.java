@@ -67,14 +67,12 @@ public class WebCorpus extends AbstractCorpus {
         return getContext().getText(R.string.corpus_label_web);
     }
 
-    public Intent createSearchIntent(String query, Bundle appData) {
-        return createWebIntent(query, appData);
+    private boolean isUrl(String query) {
+       return Patterns.WEB_URL.matcher(query).matches();
     }
 
-    public static Intent createWebIntent(String query, Bundle appData) {
-        return Patterns.WEB_URL.matcher(query).matches()
-                ? createBrowseIntent(query)
-                : createWebSearchIntent(query, appData);
+    public Intent createSearchIntent(String query, Bundle appData) {
+        return isUrl(query)? createBrowseIntent(query) : createWebSearchIntent(query, appData);
     }
 
     private static Intent createWebSearchIntent(String query, Bundle appData) {
@@ -94,14 +92,32 @@ public class WebCorpus extends AbstractCorpus {
         return intent;
     }
 
-    private static Intent createBrowseIntent(String url) {
+    private static Intent createBrowseIntent(String query) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addCategory(Intent.CATEGORY_BROWSABLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        url = URLUtil.guessUrl(url);
+        String url = URLUtil.guessUrl(query);
         intent.setData(Uri.parse(url));
         return intent;
+    }
+
+    public SuggestionData createSearchShortcut(String query) {
+        SuggestionData shortcut = new SuggestionData(mWebSearchSource);
+        if (isUrl(query)) {
+            shortcut.setIntentAction(Intent.ACTION_VIEW);
+            shortcut.setIcon1(String.valueOf(R.drawable.globe));
+            shortcut.setText1(query);
+            // Set query so that trackball selection works
+            shortcut.setSuggestionQuery(query);
+            shortcut.setIntentData(URLUtil.guessUrl(query));
+        } else {
+            shortcut.setIntentAction(Intent.ACTION_WEB_SEARCH);
+            shortcut.setIcon1(String.valueOf(R.drawable.magnifying_glass));
+            shortcut.setText1(query);
+            shortcut.setSuggestionQuery(query);
+        }
+        return shortcut;
     }
 
     public Intent createVoiceSearchIntent(Bundle appData) {

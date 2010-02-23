@@ -203,7 +203,7 @@ public class SearchActivity extends Activity {
         setCorpus(corpus);
         setUserQuery(query);
         mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
-        setAppSearchData(appSearchData);
+        mAppSearchData = appSearchData;
 
         if (INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(intent.getAction())) {
             showCorpusSelectionDialog();
@@ -332,11 +332,6 @@ public class SearchActivity extends Activity {
         mUserQuery = userQuery;
     }
 
-    protected void setAppSearchData(Bundle appSearchData) {
-        mAppSearchData = appSearchData;
-        mLauncher.setAppSearchData(appSearchData);
-    }
-
     protected String getQuery() {
         CharSequence q = mQueryTextView.getText();
         return q == null ? "" : q.toString();
@@ -400,7 +395,7 @@ public class SearchActivity extends Activity {
     }
 
     protected void updateVoiceSearchButton(boolean queryEmpty) {
-        if (queryEmpty && Launcher.shouldShowVoiceSearch(this, mCorpus)) {
+        if (queryEmpty && mLauncher.shouldShowVoiceSearch(mCorpus)) {
             mVoiceSearchButton.setVisibility(View.VISIBLE);
             mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
         } else {
@@ -429,6 +424,7 @@ public class SearchActivity extends Activity {
 
     @Override
     protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
+        super.onPrepareDialog(id, dialog, args);
         switch (id) {
             case CORPUS_SELECTION_DIALOG:
                 prepareCorpusSelectionDialog((CorpusSelectionDialog) dialog);
@@ -439,9 +435,7 @@ public class SearchActivity extends Activity {
     }
 
     protected CorpusSelectionDialog createCorpusSelectionDialog() {
-        CorpusSelectionDialog dialog = new CorpusSelectionDialog(this);
-        dialog.setOwnerActivity(this);
-        return dialog;
+        return new CorpusSelectionDialog(this);
     }
 
     protected void prepareCorpusSelectionDialog(CorpusSelectionDialog dialog) {
@@ -453,18 +447,55 @@ public class SearchActivity extends Activity {
     protected void onSearchClicked(int method) {
         String query = getQuery();
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
+        Corpus searchCorpus = getSearchCorpus();
+        if (searchCorpus == null) return;
+
         mTookAction = true;
+
+        // Log search start
         getLogger().logSearch(mCorpus, method, query.length());
-        mLauncher.startSearch(mCorpus, query);
+
+        // Create shortcut
+        SuggestionData searchShortcut = searchCorpus.createSearchShortcut(query);
+        if (searchShortcut != null) {
+            DataSuggestionCursor cursor = new DataSuggestionCursor(query);
+            cursor.add(searchShortcut);
+            getShortcutRepository().reportClick(cursor, 0);
+        }
+
+        // Start search
+        Intent intent = searchCorpus.createSearchIntent(query, mAppSearchData);
+        mLauncher.launchIntent(intent);
     }
 
     protected void onVoiceSearchClicked() {
         if (DBG) Log.d(TAG, "Voice Search clicked");
         mTookAction = true;
-        getLogger().logVoiceSearch(mCorpus);
+        Corpus searchCorpus = getSearchCorpus();
+        if (searchCorpus == null) return;
 
-        // TODO: should this start voice search in the current source?
-        mLauncher.startVoiceSearch(mCorpus);
+        // Log voice search start
+        getLogger().logVoiceSearch(searchCorpus);
+
+        // Start voice search
+        Intent intent = searchCorpus.createVoiceSearchIntent(mAppSearchData);
+        mLauncher.launchIntent(intent);
+    }
+
+    /**
+     * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
+     * and the selected corpus otherwise.
+     */
+    protected Corpus getSearchCorpus() {
+        if (mCorpus != null) {
+            return mCorpus;
+        } else {
+            Corpus corpus = getCorpora().getWebCorpus();
+            if (corpus == null) {
+                Log.e(TAG, "No web corpus");
+            }
+            return corpus;
+        }
     }
 
     protected SuggestionCursor getSuggestions() {
@@ -475,13 +506,20 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "Launching suggestion " + position);
         mTookAction = true;
         SuggestionCursor suggestions = getSuggestions();
+
+        // Log suggestion click
         // TODO: This should be just the queried sources, but currently
         // all sources are queried
         ArrayList<Corpus> corpora = getCorpusRanker().rankCorpora(getCorpora().getEnabledCorpora());
         getLogger().logSuggestionClick(position, suggestions, corpora);
 
-        mLauncher.launchSuggestion(suggestions, position);
+        // Create shortcut
         getShortcutRepository().reportClick(suggestions, position);
+
+        // Launch intent
+        Intent intent = mLauncher.getSuggestionIntent(suggestions, position, mAppSearchData);
+        mLauncher.launchIntent(intent);
+
         return true;
     }
 

@@ -80,6 +80,11 @@ public class SingleSourceCorpus extends AbstractCorpus {
         return mSource.createVoiceSearchIntent(appData);
     }
 
+    public SuggestionData createSearchShortcut(String query) {
+        // We don't make shortcuts for searches in app corpora
+        return null;
+    }
+
     public boolean isWebCorpus() {
         return false;
     }

@@ -76,6 +76,8 @@ public interface Corpus {
 
     Intent createVoiceSearchIntent(Bundle appData);
 
+    SuggestionData createSearchShortcut(String query);
+
     boolean isWebCorpus();
 
     /**
