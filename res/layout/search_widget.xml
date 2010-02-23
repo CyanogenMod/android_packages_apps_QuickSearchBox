@@ -20,10 +20,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingLeft="13dip"
-    android:paddingRight="13dip"
-    android:paddingTop="13dip"
-    android:paddingBottom="9dip"
     android:background="@drawable/search_floater" >
 
     <include layout="@layout/corpus_indicator" />
@@ -33,8 +29,7 @@
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_weight="1.0"
-        android:layout_marginLeft="4dip"
-        android:layout_marginBottom="0dip"
+        android:layout_marginTop="6dip"
         android:singleLine="true"
         android:ellipsize="end"
         android:editable="false"
@@ -50,8 +45,6 @@
         android:id="@+id/search_widget_voice_btn"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginLeft="4dip"
-        android:layout_marginBottom="4dip"
         android:background="@drawable/btn_search_dialog_voice"
         android:src="@drawable/ic_btn_speak_now"
     />
