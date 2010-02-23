@@ -17,6 +17,7 @@
 package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SearchSettings;
 
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -24,7 +25,6 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.provider.Settings.System;
 
 /**
  * Activity for setting Google search preferences.
@@ -43,14 +43,28 @@ public class GoogleSettings extends PreferenceActivity implements OnPreferenceCl
         mShowWebSuggestionsPreference = (CheckBoxPreference)
                 findPreference(SHOW_WEB_SUGGESTIONS_PREF);
         mShowWebSuggestionsPreference.setOnPreferenceClickListener(this);
+        updateShowWebSuggestionsPreference();
     }
 
-    public synchronized boolean onPreferenceClick(Preference preference) {
+    /**
+     * Updates the "show web suggestions" preference from the value in system settings.
+     */
+    private void updateShowWebSuggestionsPreference() {
+        boolean showWebSuggestions = SearchSettings.getShowWebSuggestions(this);
+        mShowWebSuggestionsPreference.setChecked(showWebSuggestions);
+    }
+
+    /**
+     * Stores the "show web suggestions" preference to the system settings.
+     */
+    private void storeShowWebSuggestionsPreference() {
+        boolean showWebSuggestions = mShowWebSuggestionsPreference.isChecked();
+        SearchSettings.setShowWebSuggestions(this, showWebSuggestions);
+    }
+
+    public boolean onPreferenceClick(Preference preference) {
         if (preference == mShowWebSuggestionsPreference) {
-            System.putInt(
-                    getContentResolver(),
-                    System.SHOW_WEB_SUGGESTIONS,
-                    mShowWebSuggestionsPreference.isChecked() ? 1 : 0);
+            storeShowWebSuggestionsPreference();
             return true;
         }
         return false;
