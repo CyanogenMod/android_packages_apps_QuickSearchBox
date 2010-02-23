@@ -40,7 +40,6 @@ public class SearchableCorpora implements Corpora {
 
     private final Context mContext;
     private final Config mConfig;
-    private final Handler mUiThread;
     private final CorpusFactory mCorpusFactory;
     private final SharedPreferences mPreferences;
 
@@ -58,12 +57,10 @@ public class SearchableCorpora implements Corpora {
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableCorpora(Context context, Config config, Handler uiThread,
-            Sources sources,
+    public SearchableCorpora(Context context, Config config, Sources sources,
             CorpusFactory corpusFactory) {
         mContext = context;
         mConfig = config;
-        mUiThread = uiThread;
         mCorpusFactory = corpusFactory;
         mPreferences = SearchSettings.getSearchPreferences(context);
         mSources = sources;

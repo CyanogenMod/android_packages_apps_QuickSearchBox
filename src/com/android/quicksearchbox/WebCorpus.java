@@ -54,7 +54,7 @@ public class WebCorpus extends AbstractCorpus {
         mWebSearchSource = webSearchSource;
         mBrowserSource = browserSource;
 
-        mSources = new ArrayList<Source>(2);
+        mSources = new ArrayList<Source>();
         mSources.add(mWebSearchSource);
         mSources.add(mBrowserSource);
     }

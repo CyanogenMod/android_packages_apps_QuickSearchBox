@@ -97,18 +97,11 @@ public class SuggestionsView extends ListView {
         void onInteraction();
     }
 
-    /**
-     * @return false if the given position contains a footer
-     */
-    private boolean isSuggestionPosition(int position) {
-        return position >= 0 && position < getAdapter().getCount() - getFooterViewsCount();
-    }
-
     private class ItemClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemClick(" + position + ")");
             SuggestionView suggestionView = (SuggestionView) view;
-            if (mSuggestionClickListener != null && isSuggestionPosition(position)) {
+            if (mSuggestionClickListener != null) {
                 mSuggestionClickListener.onSuggestionClicked(position);
             }
         }
@@ -118,7 +111,7 @@ public class SuggestionsView extends ListView {
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemLongClick(" + position + ")");
             SuggestionView suggestionView = (SuggestionView) view;
-            if (mSuggestionClickListener != null && isSuggestionPosition(position)) {
+            if (mSuggestionClickListener != null) {
                 return mSuggestionClickListener.onSuggestionLongClicked(position);
             }
             return false;
@@ -129,7 +122,7 @@ public class SuggestionsView extends ListView {
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemSelected(" + position + ")");
             SuggestionView suggestionView = (SuggestionView) view;
-            if (mSuggestionSelectionListener != null && isSuggestionPosition(position)) {
+            if (mSuggestionSelectionListener != null) {
                 mSuggestionSelectionListener.onSuggestionSelected(position);
             }
         }

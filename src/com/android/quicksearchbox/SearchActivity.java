@@ -124,10 +124,8 @@ public class SearchActivity extends Activity {
         mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
 
         mSuggestionsFooter = getQsbApplication().createSuggestionsFooter();
-        if (mSuggestionsFooter != null) {
-            ViewGroup footerFrame = (ViewGroup) findViewById(R.id.footer);
-            mSuggestionsFooter.addView(footerFrame);
-        }
+        ViewGroup footerFrame = (ViewGroup) findViewById(R.id.footer);
+        mSuggestionsFooter.addToContainer(footerFrame);
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
@@ -161,9 +159,7 @@ public class SearchActivity extends Activity {
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
-        if (mSuggestionsFooter != null) {
-            mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
-        }
+        mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
     }
 
     @Override
@@ -286,9 +282,7 @@ public class SearchActivity extends Activity {
     protected void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy()");
         super.onDestroy();
-        if (mSuggestionsFooter != null) {
-            mSuggestionsFooter.setAdapter(null);
-        }
+        mSuggestionsFooter.setAdapter(null);
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 

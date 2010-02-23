@@ -69,6 +69,7 @@ public class MockCorpora implements Corpora {
     }
 
     public void close() {
+        // Nothing to release
     }
 
 }

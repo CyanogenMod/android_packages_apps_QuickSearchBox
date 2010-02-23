@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,26 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.SuggestionCursor;
+import android.content.Context;
+import android.view.ViewGroup;
 
 /**
- * Interface to be implemented by any view appearing in the list of suggestions.
+ * Suggestions footer that doesn't add a footer view.
  */
-public interface SuggestionView {
-    /**
-     * Set the view's contents based on the given suggestion.
-     */
-    void bindAsSuggestion(SuggestionCursor suggestion);
+public class EmptySuggestionsFooter extends SuggestionsFooter {
+
+    public EmptySuggestionsFooter(Context context) {
+        super(context);
+    }
+
+    @Override
+    public void addToContainer(ViewGroup parent) {
+        // Do nothing
+    }
+
+    @Override
+    protected void onSuggestionsChanged() {
+        // Do nothing
+    }
 
 }

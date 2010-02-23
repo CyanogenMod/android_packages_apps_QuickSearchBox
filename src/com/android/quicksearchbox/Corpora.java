@@ -55,5 +55,8 @@ public interface Corpora {
      */
     Corpus getCorpusForSource(Source source);
 
+    /**
+     * Frees any resources used by the corpus set.
+     */
     void close();
 }

@@ -46,8 +46,7 @@ public class SearchableCorpusFactory implements CorpusFactory {
         // Creates corpora for all unclaimed sources
         for (Source source : sourceList) {
             if (source != webSource && source != browserSource) {
-                Corpus corpus = new SingleSourceCorpus(source);
-                corpora.add(corpus);
+                corpora.add(new SingleSourceCorpus(source));
             }
         }
 

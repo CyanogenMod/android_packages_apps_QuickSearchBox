@@ -38,7 +38,7 @@ public abstract class SuggestionsFooter {
         mContext = context;
     }
 
-    public abstract void addView(ViewGroup parent);
+    public abstract void addToContainer(ViewGroup parent);
 
     protected abstract void onSuggestionsChanged();
 

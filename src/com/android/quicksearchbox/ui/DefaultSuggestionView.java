@@ -113,11 +113,17 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         return false;
     }
 
-    public void setText1(CharSequence text) {
+    /**
+     * Sets the first text line.
+     */
+    private void setText1(CharSequence text) {
         mText1.setText(text);
     }
 
-    public void setText2(CharSequence text) {
+    /**
+     * Sets the second text line.
+     */
+    private void setText2(CharSequence text) {
         mText2.setText(text);
         if (TextUtils.isEmpty(text)) {
             mText2.setVisibility(GONE);
@@ -126,11 +132,17 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
-    public void setIcon1(Drawable icon) {
+    /**
+     * Sets the left-hand-side icon.
+     */
+    private void setIcon1(Drawable icon) {
         setViewDrawable(mIcon1, icon);
     }
 
-    public void setIcon2(Drawable icon) {
+    /**
+     * Sets the right-hand-side icon.
+     */
+    private void setIcon2(Drawable icon) {
         setViewDrawable(mIcon2, icon);
     }
 

@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
+import com.android.quicksearchbox.ui.EmptySuggestionsFooter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
@@ -119,8 +120,8 @@ public class QsbApplication extends Application {
     }
 
     protected Corpora createCorpora() {
-        SearchableCorpora corpora = new SearchableCorpora(this, getConfig(),
-                getMainThreadHandler(), createSources(), createCorpusFactory());
+        SearchableCorpora corpora = new SearchableCorpora(this, getConfig(), createSources(),
+                createCorpusFactory());
         corpora.load();
         return corpora;
     }
@@ -291,8 +292,11 @@ public class QsbApplication extends Application {
         return adapter;
     }
 
+    /**
+     * Creates a footer view to add at the bottom of the search activity.
+     */
     public SuggestionsFooter createSuggestionsFooter() {
-        return null;
+        return new EmptySuggestionsFooter(this);
     }
 
     /**
