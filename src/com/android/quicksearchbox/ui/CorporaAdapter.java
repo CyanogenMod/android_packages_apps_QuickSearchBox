@@ -20,6 +20,7 @@ import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.CorpusRanker;
 
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
@@ -38,6 +39,12 @@ public class CorporaAdapter extends BaseAdapter {
 
     private final CorpusViewFactory mViewFactory;
 
+    private final Corpora mCorpora;
+
+    private final CorpusRanker mRanker;
+
+    private final DataSetObserver mCorporaObserver = new CorporaObserver();
+
     private ArrayList<Corpus> mRankedEnabledCorpora;
 
     private boolean mGridView;
@@ -45,8 +52,11 @@ public class CorporaAdapter extends BaseAdapter {
     private CorporaAdapter(CorpusViewFactory viewFactory, Corpora corpora,
             CorpusRanker ranker, boolean gridView) {
         mViewFactory = viewFactory;
-        mRankedEnabledCorpora = ranker.rankCorpora(corpora.getEnabledCorpora());
+        mCorpora = corpora;
+        mRanker = ranker;
         mGridView = gridView;
+        mCorpora.registerDataSetObserver(mCorporaObserver);
+        updateCorpora();
     }
 
     public static CorporaAdapter createListAdapter(CorpusViewFactory viewFactory, Corpora corpora,
@@ -57,6 +67,15 @@ public class CorporaAdapter extends BaseAdapter {
     public static CorporaAdapter createGridAdapter(CorpusViewFactory viewFactory, Corpora corpora,
             CorpusRanker ranker) {
         return new CorporaAdapter(viewFactory, corpora, ranker, true);
+    }
+
+    private void updateCorpora() {
+        mRankedEnabledCorpora = mRanker.rankCorpora(mCorpora.getEnabledCorpora());
+        notifyDataSetChanged();
+    }
+
+    public void close() {
+        mCorpora.unregisterDataSetObserver(mCorporaObserver);
     }
 
     public int getCount() {
@@ -104,4 +123,15 @@ public class CorporaAdapter extends BaseAdapter {
         }
     }
 
+    private class CorporaObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            updateCorpora();
+        }
+
+        @Override
+        public void onInvalidated() {
+            updateCorpora();
+        }
+    }
 }

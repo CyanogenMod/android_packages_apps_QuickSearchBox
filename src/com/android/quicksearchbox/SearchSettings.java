@@ -37,6 +37,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.Log;
+import android.view.Menu;
 
 import java.util.List;
 
@@ -250,5 +251,16 @@ public class SearchSettings extends PreferenceActivity
     public static void unregisterShowWebSuggestionsSettingObserver(
             Context context, ContentObserver observer) {
         context.getContentResolver().unregisterContentObserver(observer);
+    }
+
+    public static void addSearchSettingsMenuItem(Context context, Menu menu) {
+        Intent settings = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
+        settings.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        // Don't show activity chooser if there are multiple search settings activities,
+        // e.g. from different QSB implementations.
+        settings.setPackage(context.getPackageName());
+        menu.add(Menu.NONE, Menu.NONE, 0, R.string.menu_settings)
+                .setIcon(android.R.drawable.ic_menu_preferences).setAlphabeticShortcut('P')
+                .setIntent(settings);
     }
 }

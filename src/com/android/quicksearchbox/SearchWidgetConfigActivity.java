@@ -26,6 +26,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ListAdapter;
 
 /**
  * The configuration screen for search widgets.
@@ -36,6 +37,8 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
     private static final String PREFS_NAME = "SearchWidgetConfig";
     private static final String WIDGET_CORPUS_PREF_PREFIX = "widget_corpus_";
 
+    private CorporaAdapter mAdapter;
+
     private int mAppWidgetId;
 
     @Override
@@ -44,9 +47,6 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
 
         setHeading(R.string.search_widget);
         setOnItemClickListener(new SourceClickListener());
-        CorporaAdapter adapter = CorporaAdapter.createListAdapter(getViewFactory(), getCorpora(),
-                getCorpusRanker());
-        setAdapter(adapter);
 
         Intent intent = getIntent();
         mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -54,6 +54,27 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        setAdapter(CorporaAdapter.createListAdapter(getViewFactory(), getCorpora(),
+                getCorpusRanker()));
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        setAdapter(null);
+        super.onStop();
+    }
+
+    @Override
+    public void setAdapter(ListAdapter adapter) {
+        if (adapter == mAdapter) return;
+        if (mAdapter != null) mAdapter.close();
+        mAdapter = (CorporaAdapter) adapter;
+        super.setAdapter(adapter);
     }
 
     protected void selectCorpus(Corpus corpus) {

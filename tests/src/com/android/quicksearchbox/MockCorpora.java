@@ -17,6 +17,8 @@
 package com.android.quicksearchbox;
 
 import android.content.ComponentName;
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +30,8 @@ import java.util.HashMap;
  */
 public class MockCorpora implements Corpora {
 
+    private final DataSetObservable mDataSetObservable = new DataSetObservable();
+
     private HashMap<String,Corpus> mCorporaByName = new HashMap<String,Corpus>();
     private HashMap<Source,Corpus> mCorporaBySource = new HashMap<Source,Corpus>();
     private HashMap<ComponentName,Source> mSourcesByName = new HashMap<ComponentName,Source>();
@@ -38,6 +42,7 @@ public class MockCorpora implements Corpora {
             mCorporaBySource.put(source, corpus);
             mSourcesByName.put(source.getComponentName(), source);
         }
+        notifyDataSetChanged();
     }
 
     public Collection<Corpus> getAllCorpora() {
@@ -70,6 +75,18 @@ public class MockCorpora implements Corpora {
 
     public void close() {
         // Nothing to release
+    }
+
+    public void registerDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.registerObserver(observer);
+    }
+
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.unregisterObserver(observer);
+    }
+
+    protected void notifyDataSetChanged() {
+        mDataSetObservable.notifyChanged();
     }
 
 }

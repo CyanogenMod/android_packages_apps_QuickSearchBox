@@ -19,8 +19,8 @@ package com.android.quicksearchbox;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.DataSetObservable;
 import android.database.DataSetObserver;
-import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -37,6 +37,8 @@ public class SearchableCorpora implements Corpora {
     // set to true to enable the more verbose debug logging for this file
     private static final boolean DBG = true;
     private static final String TAG = "QSB.DefaultCorpora";
+
+    private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private final Context mContext;
     private final Config mConfig;
@@ -153,6 +155,8 @@ public class SearchableCorpora implements Corpora {
         if (DBG) Log.d(TAG, "Updated corpora: " + mCorporaBySource.values());
 
         mEnabledCorpora = Collections.unmodifiableList(mEnabledCorpora);
+
+        notifyDataSetChanged();
     }
 
     public boolean isCorpusEnabled(Corpus corpus) {
@@ -167,4 +171,15 @@ public class SearchableCorpora implements Corpora {
         return mConfig.isCorpusEnabledByDefault(name);
     }
 
+    public void registerDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.registerObserver(observer);
+    }
+
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.unregisterObserver(observer);
+    }
+
+    protected void notifyDataSetChanged() {
+        mDataSetObservable.notifyChanged();
+    }
 }

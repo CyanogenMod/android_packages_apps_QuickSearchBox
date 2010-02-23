@@ -319,16 +319,7 @@ public class SearchActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-
-        Intent settings = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
-        settings.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        // Don't show activity chooser if there are multiple search settings activities,
-        // e.g. from different QSB implementations.
-        settings.setPackage(this.getPackageName());
-        menu.add(Menu.NONE, Menu.NONE, 0, R.string.menu_settings)
-                .setIcon(android.R.drawable.ic_menu_preferences).setAlphabeticShortcut('P')
-                .setIntent(settings);
-
+        SearchSettings.addSearchSettingsMenuItem(this, menu);
         return true;
     }
 

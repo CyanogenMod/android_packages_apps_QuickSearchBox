@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -50,6 +51,8 @@ public class CorpusSelectionDialog extends Dialog {
     private String mQuery;
 
     private Bundle mAppData;
+
+    private CorporaAdapter mAdapter;
 
     public CorpusSelectionDialog(Context context) {
         super(context, R.style.Theme_SelectSearchSource);
@@ -102,13 +105,28 @@ public class CorpusSelectionDialog extends Dialog {
     @Override
     protected void onStart() {
         super.onStart();
-        updateCorpora();
+        setAdapter(CorporaAdapter.createGridAdapter(getViewFactory(), getCorpora(),
+                getCorpusRanker()));
     }
 
-    private void updateCorpora() {
-        CorporaAdapter adapter = CorporaAdapter.createGridAdapter(getViewFactory(), getCorpora(),
-                getCorpusRanker());
-        mCorpusGrid.setAdapter(adapter);
+    @Override
+    protected void onStop() {
+        setAdapter(null);
+        super.onStop();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        SearchSettings.addSearchSettingsMenuItem(getContext(), menu);
+        return true;
+    }
+
+    private void setAdapter(CorporaAdapter adapter) {
+        if (adapter == mAdapter) return;
+        if (mAdapter != null) mAdapter.close();
+        mAdapter = adapter;
+        mCorpusGrid.setAdapter(mAdapter);
     }
 
     private QsbApplication getQsbApplication() {

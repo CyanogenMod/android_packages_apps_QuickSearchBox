@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import android.content.ComponentName;
+import android.database.DataSetObserver;
 
 import java.util.Collection;
 
@@ -59,4 +60,19 @@ public interface Corpora {
      * Frees any resources used by the corpus set.
      */
     void close();
+
+    /**
+     * Registers an observer that is called when corpus set changes.
+     *
+     * @param observer gets notified when the data set changes.
+     */
+    void registerDataSetObserver(DataSetObserver observer);
+
+    /**
+     * Unregisters an observer that has previously been registered with
+     * {@link #registerDataSetObserver(DataSetObserver)}
+     *
+     * @param observer the observer to unregister.
+     */
+    void unregisterDataSetObserver(DataSetObserver observer);
 }
