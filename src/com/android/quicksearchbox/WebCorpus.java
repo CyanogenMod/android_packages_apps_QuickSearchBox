@@ -150,10 +150,12 @@ public class WebCorpus extends AbstractCorpus {
     public CorpusResult getSuggestions(String query, int queryLimit) {
         // TODO: Should run web and browser queries in parallel
         SuggestionCursor webCursor = null;
-        try {
-            webCursor = mWebSearchSource.getSuggestions(query, queryLimit);
-        } catch (RuntimeException ex) {
-            Log.e(TAG, "Error querying web search source", ex);
+        if (SearchSettings.getShowWebSuggestions(getContext())) {
+            try {
+                webCursor = mWebSearchSource.getSuggestions(query, queryLimit);
+            } catch (RuntimeException ex) {
+                Log.e(TAG, "Error querying web search source", ex);
+            }
         }
         SuggestionCursor browserCursor = null;
         try {

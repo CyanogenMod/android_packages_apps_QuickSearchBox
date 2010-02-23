@@ -19,10 +19,8 @@ package com.android.quicksearchbox;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.ContentObserver;
 import android.database.DataSetObserver;
 import android.os.Handler;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -43,7 +41,6 @@ public class SearchableCorpora implements Corpora {
 
     private final Context mContext;
     private final Config mConfig;
-    private final Handler mUiThread;
     private final SharedPreferences mPreferences;
 
     private boolean mLoaded = false;
@@ -57,11 +54,6 @@ public class SearchableCorpora implements Corpora {
     private List<Corpus> mEnabledCorpora;
     private Corpus mWebCorpus;
 
-    private boolean mShowWebSuggestions;
-
-    // Updates the inclusion of the web search provider.
-    private ShowWebSuggestionsSettingObserver mShowWebSuggestionsSettingObserver;
-
     /**
      *
      * @param context Used for looking up source information etc.
@@ -69,7 +61,6 @@ public class SearchableCorpora implements Corpora {
     public SearchableCorpora(Context context, Config config, Handler uiThread) {
         mContext = context;
         mConfig = config;
-        mUiThread = uiThread;
         mPreferences = SearchSettings.getSearchPreferences(context);
 
         mSources = new SearchableSources(context, uiThread);
@@ -114,13 +105,6 @@ public class SearchableCorpora implements Corpora {
             throw new IllegalStateException("load(): Already loaded.");
         }
 
-        // Listen for web suggestion setting changes
-        mShowWebSuggestionsSettingObserver =
-                new ShowWebSuggestionsSettingObserver(mUiThread);
-        SearchSettings.registerShowWebSuggestionsSettingObserver(mContext,
-                mShowWebSuggestionsSettingObserver);
-        updateWebSuggestionsSetting();
-
         mSources.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -139,9 +123,6 @@ public class SearchableCorpora implements Corpora {
      */
     public void close() {
         checkLoaded();
-
-        SearchSettings.unregisterShowWebSuggestionsSettingObserver(mContext,
-                mShowWebSuggestionsSettingObserver);
 
         mSources.close();
         mSources = null;
@@ -196,30 +177,6 @@ public class SearchableCorpora implements Corpora {
     public boolean isCorpusDefaultEnabled(Corpus corpus) {
         String name = corpus.getName();
         return mConfig.isCorpusEnabledByDefault(name);
-    }
-
-    public boolean shouldShowWebSuggestions() {
-        return mShowWebSuggestions;
-    }
-
-    private void updateWebSuggestionsSetting() {
-        mShowWebSuggestions = SearchSettings.areWebSuggestionsEnabled(mContext);
-    }
-
-    /**
-     * ContentObserver which updates the list of enabled sources to include or exclude
-     * the web search provider depending on the state of the
-     * {@link Settings.System#SHOW_WEB_SUGGESTIONS} setting.
-     */
-    private class ShowWebSuggestionsSettingObserver extends ContentObserver {
-        public ShowWebSuggestionsSettingObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            updateWebSuggestionsSetting();
-        }
     }
 
 }

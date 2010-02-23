@@ -35,6 +35,7 @@ import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.provider.Settings;
+import android.provider.Settings.System;
 import android.util.Log;
 
 import java.util.List;
@@ -88,12 +89,6 @@ public class SearchSettings extends PreferenceActivity
         updateClearShortcutsPreference();
         populateSourcePreference();
         populateSearchEnginePreference();
-    }
-
-    public static boolean areWebSuggestionsEnabled(Context context) {
-        return (Settings.System.getInt(context.getContentResolver(),
-                Settings.System.SHOW_WEB_SUGGESTIONS,
-                1 /* default on until user actually changes it */) == 1);
     }
 
     /**
@@ -232,6 +227,17 @@ public class SearchSettings extends PreferenceActivity
     public synchronized boolean onPreferenceChange(Preference preference, Object newValue) {
         broadcastSettingsChanged();
         return true;
+    }
+
+    public static boolean getShowWebSuggestions(Context context) {
+        return (Settings.System.getInt(context.getContentResolver(),
+                Settings.System.SHOW_WEB_SUGGESTIONS,
+                1 /* default on until user actually changes it */) == 1);
+    }
+
+    public static void setShowWebSuggestions(Context context, boolean showWebSuggestions) {
+        System.putInt(context.getContentResolver(), System.SHOW_WEB_SUGGESTIONS,
+            showWebSuggestions ? 1 : 0);
     }
 
     public static void registerShowWebSuggestionsSettingObserver(
