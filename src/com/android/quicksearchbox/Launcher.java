@@ -42,6 +42,22 @@ public class Launcher {
         mContext = context;
     }
 
+    /**
+     * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
+     * and the selected corpus otherwise.
+     */
+    public Corpus getSearchCorpus(Corpora corpora, Corpus selectedCorpus) {
+        if (selectedCorpus != null) {
+            return selectedCorpus;
+        } else {
+            Corpus webCorpus = corpora.getWebCorpus();
+            if (webCorpus == null) {
+                Log.e(TAG, "No web corpus");
+            }
+            return webCorpus;
+        }
+    }
+
     public boolean shouldShowVoiceSearch(Corpus corpus) {
         if (corpus != null && !corpus.voiceSearchEnabled()) {
             return false;

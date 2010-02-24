@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -80,18 +79,10 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         qsbIntent.setData(SearchActivity.getCorpusUri(corpus));
         setOnClickIntent(context, views, R.id.search_widget_text, qsbIntent);
 
-        // Voice search button. Only shown if voice search is available.
-        // TODO: This should be Voice Search for the selected source,
-        // and only show if available for that source
-        Intent voiceSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        voiceSearchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        voiceSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        // TODO: Does VoiceSearch actually look at APP_DATA?
-        voiceSearchIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
-        if (voiceSearchIntent.resolveActivity(context.getPackageManager()) != null) {
+        Launcher launcher = new Launcher(context);
+        Corpus voiceSearchCorpus = launcher.getSearchCorpus(getCorpora(context), corpus);
+        if (voiceSearchCorpus != null && launcher.shouldShowVoiceSearch(voiceSearchCorpus)) {
+            Intent voiceSearchIntent = voiceSearchCorpus.createVoiceSearchIntent(widgetAppData);
             setOnClickIntent(context, views, R.id.search_widget_voice_btn, voiceSearchIntent);
             views.setViewVisibility(R.id.search_widget_voice_btn, View.VISIBLE);
         } else {

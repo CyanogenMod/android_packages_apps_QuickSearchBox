@@ -447,7 +447,7 @@ public class SearchActivity extends Activity {
     protected void onSearchClicked(int method) {
         String query = getQuery();
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
-        Corpus searchCorpus = getSearchCorpus();
+        Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
         if (searchCorpus == null) return;
 
         mTookAction = true;
@@ -470,9 +470,10 @@ public class SearchActivity extends Activity {
 
     protected void onVoiceSearchClicked() {
         if (DBG) Log.d(TAG, "Voice Search clicked");
-        mTookAction = true;
-        Corpus searchCorpus = getSearchCorpus();
+        Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
         if (searchCorpus == null) return;
+
+        mTookAction = true;
 
         // Log voice search start
         getLogger().logVoiceSearch(searchCorpus);
@@ -480,22 +481,6 @@ public class SearchActivity extends Activity {
         // Start voice search
         Intent intent = searchCorpus.createVoiceSearchIntent(mAppSearchData);
         mLauncher.launchIntent(intent);
-    }
-
-    /**
-     * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
-     * and the selected corpus otherwise.
-     */
-    protected Corpus getSearchCorpus() {
-        if (mCorpus != null) {
-            return mCorpus;
-        } else {
-            Corpus corpus = getCorpora().getWebCorpus();
-            if (corpus == null) {
-                Log.e(TAG, "No web corpus");
-            }
-            return corpus;
-        }
     }
 
     protected SuggestionCursor getSuggestions() {
