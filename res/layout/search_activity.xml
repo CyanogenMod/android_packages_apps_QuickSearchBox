@@ -50,6 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="-10dip"
+        android:paddingRight="4dip"
         android:orientation="horizontal"
         android:background="@drawable/search_plate_global"
         android:layout_alignParentLeft="true"
@@ -90,7 +91,6 @@
             android:layout_height="match_parent"
             android:layout_marginTop="6dip"
             android:layout_marginBottom="6dip"
-            android:layout_marginRight="4dip"
             android:visibility="gone"
         />
 
@@ -100,6 +100,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/btn_search_dialog_voice"
             android:src="@drawable/ic_btn_speak_now"
+            android:layout_marginRight="-4dip"
         />
     </LinearLayout>
 
