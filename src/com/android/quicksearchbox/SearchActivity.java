@@ -579,7 +579,7 @@ public class SearchActivity extends Activity {
     protected void showInputMethodForQuery() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) {
-            imm.showSoftInput(mQueryTextView, 0);
+            imm.showSoftInput(mQueryTextView, InputMethodManager.SHOW_IMPLICIT);
         }
     }
 
