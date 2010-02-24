@@ -17,8 +17,6 @@
 <resources>
 
     <dimen name="corpus_selection_dialog_x">0dip</dimen>
-    <dimen name="corpus_selection_dialog_y">58dip</dimen>
-
-    <dimen name="corpus_selection_arrow_x">15dip</dimen>
+    <dimen name="corpus_selection_dialog_y">44dip</dimen>
 
 </resources>

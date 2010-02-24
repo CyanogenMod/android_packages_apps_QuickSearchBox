@@ -82,10 +82,10 @@ public class CorpusSelectionDialog extends Dialog {
         Resources resources = getContext().getResources();
         int x = resources.getDimensionPixelSize(R.dimen.corpus_selection_dialog_x);
         int y = resources.getDimensionPixelSize(R.dimen.corpus_selection_dialog_y);
-        positionArrowAt(x, y);
+        positionWindowAt(x, y);
     }
 
-    private void positionArrowAt(int x, int y) {
+    private void positionWindowAt(int x, int y) {
         Window window = getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();
         lp.x = x;
@@ -93,9 +93,6 @@ public class CorpusSelectionDialog extends Dialog {
         lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        // Use screen coordinates
-        lp.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        lp.flags |=  WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         // Put window on top of input method
         lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         window.setAttributes(lp);
