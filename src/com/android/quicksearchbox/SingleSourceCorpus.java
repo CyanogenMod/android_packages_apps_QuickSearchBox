@@ -47,6 +47,10 @@ public class SingleSourceCorpus extends AbstractCorpus {
         return mSource.getLabel();
     }
 
+    public CharSequence getHint() {
+        return mSource.getHint();
+    }
+
     public CharSequence getSettingsDescription() {
         return mSource.getSettingsDescription();
     }

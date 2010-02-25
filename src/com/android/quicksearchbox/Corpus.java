@@ -53,6 +53,11 @@ public interface Corpus {
     CharSequence getSettingsDescription();
 
     /**
+     * Gets the search hint text for this corpus.
+     */
+    CharSequence getHint();
+
+    /**
      * Gets suggestions from this corpus.
      *
      * @param query The user query.

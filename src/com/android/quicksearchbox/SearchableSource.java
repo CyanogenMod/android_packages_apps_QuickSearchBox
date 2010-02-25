@@ -118,6 +118,10 @@ public class SearchableSource implements Source {
         return mLabel;
     }
 
+    public CharSequence getHint() {
+        return getText(mSearchable.getHintId());
+    }
+
     public int getQueryThreshold() {
         return mSearchable.getSuggestThreshold();
     }

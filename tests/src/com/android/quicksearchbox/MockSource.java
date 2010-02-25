@@ -78,6 +78,10 @@ public class MockSource implements Source {
         return 0;
     }
 
+    public CharSequence getHint() {
+        return null;
+    }
+
     public String getSettingsDescription() {
         return "Suggestions from MockSource " + mName;
     }

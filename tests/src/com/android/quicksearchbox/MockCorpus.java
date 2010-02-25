@@ -67,6 +67,10 @@ public class MockCorpus extends AbstractCorpus {
         return mName;
     }
 
+    public CharSequence getHint() {
+        return null;
+    }
+
     public String getName() {
         return mName;
     }

@@ -74,6 +74,11 @@ public interface Source {
     Uri getIconUri(String drawableId);
 
     /**
+     * Gets the search hint text for this suggestion source.
+     */
+    CharSequence getHint();
+
+    /**
      * Gets the description to use for this source in system search settings.
      */
     CharSequence getSettingsDescription();

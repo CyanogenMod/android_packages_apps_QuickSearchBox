@@ -67,6 +67,11 @@ public class WebCorpus extends AbstractCorpus {
         return getContext().getText(R.string.corpus_label_web);
     }
 
+    public CharSequence getHint() {
+        // The web corpus uses a drawable hint instead
+        return null;
+    }
+
     private boolean isUrl(String query) {
        return Patterns.WEB_URL.matcher(query).matches();
     }

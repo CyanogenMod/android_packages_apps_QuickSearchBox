@@ -247,7 +247,7 @@ public class SearchActivity extends Activity {
         mSuggestionsAdapter.setCorpus(corpus);
         mCorpusIndicator.setImageDrawable(sourceIcon);
 
-        updateVoiceSearchButton(getQuery().length() == 0);
+        updateUi(getQuery().length() == 0);
     }
 
     private QsbApplication getQsbApplication() {
@@ -367,22 +367,29 @@ public class SearchActivity extends Activity {
      */
     private void setTextSelection(boolean selectAll) {
         if (selectAll) {
-            mQueryTextView.setSelection(0, mQueryTextView.length());
+            mQueryTextView.selectAll();
         } else {
             mQueryTextView.setSelection(mQueryTextView.length());
         }
     }
 
+    private void updateUi(boolean queryEmpty) {
+        updateQueryTextView(queryEmpty);
+        updateSearchGoButton(queryEmpty);
+        updateVoiceSearchButton(queryEmpty);
+    }
+
     private void updateQueryTextView(boolean queryEmpty) {
         if (queryEmpty) {
-            mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty);
-            mQueryTextView.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.placeholder_google, 0, 0, 0);
-            mQueryTextView.setCursorVisible(false);
+            if (mCorpus == null || mCorpus.isWebCorpus()) {
+                mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty_google);
+                mQueryTextView.setHint(null);
+            } else {
+                mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty);
+                mQueryTextView.setHint(mCorpus.getHint());
+            }
         } else {
             mQueryTextView.setBackgroundResource(R.drawable.textfield_search);
-            mQueryTextView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-            mQueryTextView.setCursorVisible(true);
         }
     }
 
@@ -656,9 +663,7 @@ public class SearchActivity extends Activity {
             boolean empty = s.length() == 0;
             if (empty != mQueryWasEmpty) {
                 mQueryWasEmpty = empty;
-                updateQueryTextView(empty);
-                updateSearchGoButton(empty);
-                updateVoiceSearchButton(empty);
+                updateUi(empty);
             }
             if (mUpdateSuggestions) {
                 String query = s == null ? "" : s.toString();

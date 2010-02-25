@@ -70,7 +70,20 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         // Corpus indicator
         bindCorpusIndicator(context, views, widgetAppData, corpus);
 
-        // Text field
+        // Hint
+        CharSequence hint;
+        int backgroundId;
+        if (corpus == null || corpus.isWebCorpus()) {
+            hint = null;
+            backgroundId = R.drawable.textfield_search_empty_google;
+        } else {
+            hint = corpus.getHint();
+            backgroundId = R.drawable.textfield_search_empty;
+        }
+        views.setCharSequence(R.id.search_widget_text, "setHint", hint);
+        views.setInt(R.id.search_widget_text, "setBackgroundResource", backgroundId);
+
+        // Text field click
         Intent qsbIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         qsbIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP
