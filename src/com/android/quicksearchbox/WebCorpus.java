@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import com.android.common.Patterns;
 
 import android.app.SearchManager;
 import android.content.ContentResolver;
@@ -27,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
+import android.util.Patterns;
 import android.webkit.URLUtil;
 
 import java.util.ArrayList;

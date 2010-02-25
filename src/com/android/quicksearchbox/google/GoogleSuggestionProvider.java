@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox.google;
 
-import com.android.common.AndroidHttpClient;
 import com.android.quicksearchbox.R;
 
 import org.apache.http.HttpResponse;
@@ -36,6 +35,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.http.AndroidHttpClient;
 import android.text.TextUtils;
 import android.util.Log;
 
