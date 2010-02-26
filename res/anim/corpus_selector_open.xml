@@ -14,18 +14,10 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_bg_default" />
-
-    <item android:state_pressed="true"
-        android:drawable="@drawable/corpus_indicator_bg_pressed" />
-
-    <item android:state_focused="true"
-        android:drawable="@drawable/corpus_indicator_bg_focused" />
-
-    <item android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_bg_default" />
-
-</selector>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+        android:interpolator="@android:anim/decelerate_interpolator">
+    <scale android:fromXScale="0.0" android:toXScale="1.0"
+           android:fromYScale="0.0" android:toYScale="1.0"
+           android:pivotX="5%p" android:pivotY="0%p"
+           android:duration="@android:integer/config_shortAnimTime" />
+</set>
