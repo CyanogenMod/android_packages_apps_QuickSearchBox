@@ -14,39 +14,59 @@
      limitations under the License.
 -->
 
-
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="12dip"
-    android:paddingTop="20dip"
-    android:paddingBottom="20dip"
-    android:paddingLeft="8dip"
-    android:paddingRight="8dip"
-    android:background="@drawable/corpus_selector_bg"
-    android:orientation="vertical"
     >
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/corpus_selector_frame"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dip"
-        android:singleLine="true"
-        android:textColor="@android:color/tertiary_text_light"
-        android:textSize="20sp"
-        android:text="@string/corpus_selection_heading"
-    />
+        android:layout_below="@+id/corpus_selector_arrow"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:paddingTop="20dip"
+        android:paddingBottom="20dip"
+        android:paddingLeft="8dip"
+        android:paddingRight="8dip"
+        android:background="@drawable/corpus_selector_bg"
+        android:orientation="vertical"
+        >
 
-    <GridView
-        android:id="@+id/corpus_grid"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:numColumns="4"
-        android:horizontalSpacing="2dip"
-        android:verticalSpacing="2dip"
-        android:listSelector="@drawable/corpus_grid_item_bg"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dip"
+            android:singleLine="true"
+            android:textColor="@android:color/tertiary_text_light"
+            android:textSize="16dip"
+            android:text="@string/corpus_selection_heading"
         />
 
-</LinearLayout>
+        <GridView
+            android:id="@+id/corpus_grid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left"
+            android:numColumns="4"
+            android:horizontalSpacing="2dip"
+            android:verticalSpacing="2dip"
+            android:listSelector="@drawable/corpus_grid_item_bg"
+            />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/corpus_selector_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="-7dip"
+        android:layout_marginLeft="5dip"
+        android:src="@drawable/corpus_selector_arrow_up"
+        />
+
+</RelativeLayout>
