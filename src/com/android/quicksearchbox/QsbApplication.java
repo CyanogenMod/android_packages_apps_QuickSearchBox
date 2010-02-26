@@ -131,7 +131,7 @@ public class QsbApplication extends Application {
     }
 
     protected CorpusFactory createCorpusFactory() {
-        return new SearchableCorpusFactory(this);
+        return new SearchableCorpusFactory(this, getSourceTaskExecutor());
     }
 
     /**

@@ -26,23 +26,13 @@ import android.os.Bundle;
  * Interface for suggestion sources.
  *
  */
-public interface Source {
+public interface Source extends SuggestionCursorProvider<SourceResult> {
 
     /**
      * Gets the name of the activity that this source is for. When a suggestion is
      * clicked, the resulting intent will be sent to this activity.
      */
     ComponentName getComponentName();
-
-    /**
-     * Convenience method that gets the flattened component name for the source.
-     */
-    String getFlattenedComponentName();
-
-    /**
-     * Gets an identifier for this source that is used for logging.
-     */
-    String getLogName();
 
     /**
      * Gets the localized, human-readable label for this source.

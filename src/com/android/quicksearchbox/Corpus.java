@@ -30,7 +30,7 @@ import java.util.Collection;
  * Objects that implement this interface should override {@link Object#equals(Object)}
  * and {@link Object#hashCode()} so that they can be used as keys in hash maps.
  */
-public interface Corpus {
+public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
 
     /**
      * Gets the localized, human-readable label for this corpus.
@@ -56,20 +56,6 @@ public interface Corpus {
      * Gets the search hint text for this corpus.
      */
     CharSequence getHint();
-
-    /**
-     * Gets suggestions from this corpus.
-     *
-     * @param query The user query.
-     * @param queryLimit An advisory maximum number of results that the source should return.
-     * @return The suggestion results.
-     */
-    CorpusResult getSuggestions(String query, int queryLimit);
-
-    /**
-     * Gets the unique name for this corpus.
-     */
-    String getName();
 
     int getQueryThreshold();
 

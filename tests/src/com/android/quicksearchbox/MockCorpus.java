@@ -39,7 +39,7 @@ public class MockCorpus extends AbstractCorpus {
     private final Source mSource;
 
     public MockCorpus(Source source) {
-        mName = "corpus_" + source.getFlattenedComponentName();
+        mName = "corpus_" + source.getName();
         mSource = source;
     }
 

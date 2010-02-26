@@ -288,7 +288,7 @@ public class SuggestionData {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("SuggestionData(");
-        appendField(builder, "source", mSource.getFlattenedComponentName());
+        appendField(builder, "source", mSource.getName());
         appendField(builder, "text1", mText1);
         appendField(builder, "intentAction", mIntentAction);
         appendField(builder, "intentData", mIntentData);

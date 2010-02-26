@@ -94,12 +94,8 @@ public class SearchableSource implements Source {
         return mSearchable.getSearchActivity();
     }
 
-    public String getFlattenedComponentName() {
+    public String getName() {
         return getComponentName().flattenToShortString();
-    }
-
-    public String getLogName() {
-        return getFlattenedComponentName();
     }
 
     public Drawable getIcon(String drawableId) {
@@ -416,7 +412,7 @@ public class SearchableSource implements Source {
 
     @Override
     public String toString() {
-        return "SearchableSource{component=" + getFlattenedComponentName() + "}";
+        return "SearchableSource{component=" + getName() + "}";
     }
 
     public String getDefaultIntentAction() {

@@ -253,7 +253,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
-        String[] whereArgs = { shortcutId, source.getFlattenedComponentName() };
+        String[] whereArgs = { shortcutId, source.getName() };
         if (refreshed == null || refreshed.getCount() == 0) {
             if (DBG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
             db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_ID_WHERE, whereArgs);

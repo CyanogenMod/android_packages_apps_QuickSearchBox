@@ -61,7 +61,7 @@ public class SingleSourceCorpus extends AbstractCorpus {
     }
 
     public String getName() {
-        return mSource.getFlattenedComponentName();
+        return mSource.getName();
     }
 
     public boolean queryAfterZeroResults() {

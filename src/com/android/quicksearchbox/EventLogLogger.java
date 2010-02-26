@@ -117,7 +117,7 @@ public class EventLogLogger implements Logger {
         for (int i = 0; i < count; i++) {
             if (i > 0) sb.append(LIST_SEPARATOR);
             cursor.moveTo(i);
-            String source = cursor.getSuggestionSource().getLogName();
+            String source = cursor.getSuggestionSource().getName();
             String type = cursor.getSuggestionLogType();
             if (type == null) type = "";
             String shortcut = cursor.isSuggestionShortcut() ? "shortcut" : "";

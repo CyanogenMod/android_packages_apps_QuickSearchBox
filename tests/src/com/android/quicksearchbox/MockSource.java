@@ -46,11 +46,7 @@ public class MockSource implements Source {
                 getClass().getName() + "." + mName);
     }
 
-    public String getLogName() {
-        return getComponentName().getPackageName();
-    }
-
-    public String getFlattenedComponentName() {
+    public String getName() {
         return getComponentName().flattenToShortString();
     }
 

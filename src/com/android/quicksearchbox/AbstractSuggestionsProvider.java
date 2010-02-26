@@ -17,7 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.BatchingNamedTaskExecutor;
-import com.android.quicksearchbox.util.NamedTask;
+import com.android.quicksearchbox.util.Consumer;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.os.Handler;
@@ -130,15 +130,13 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
                 mBatchingExecutor, suggestions);
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
-        for (Corpus corpus : corporaToQuery) {
-            QueryTask task = new QueryTask(query, corpus, maxResultsPerSource, receiver);
-            mBatchingExecutor.execute(task);
-        }
+        QueryTask.startQueries(query, maxResultsPerSource, corporaToQuery, mBatchingExecutor,
+                mPublishThread, receiver);
 
         return suggestions;
     }
 
-    private class SuggestionCursorReceiver {
+    private class SuggestionCursorReceiver implements Consumer<CorpusResult> {
         private final BatchingNamedTaskExecutor mExecutor;
         private final Suggestions mSuggestions;
 
@@ -148,16 +146,13 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
             mSuggestions = suggestions;
         }
 
-        public void receiveSuggestionCursor(final CorpusResult cursor) {
+        public boolean consume(CorpusResult cursor) {
             updateShouldQueryStrategy(cursor);
-            mPublishThread.post(new Runnable() {
-                public void run() {
-                    mSuggestions.addCorpusResult(cursor);
-                    if (!mSuggestions.isClosed()) {
-                        executeNextBatchIfNeeded();
-                    }
-                }
-            });
+            mSuggestions.addCorpusResult(cursor);
+            if (!mSuggestions.isClosed()) {
+                executeNextBatchIfNeeded();
+            }
+            return true;
         }
 
         private void executeNextBatchIfNeeded() {
@@ -171,35 +166,4 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         }
     }
 
-    /**
-     * Gets suggestions from a given source.
-     */
-    private static class QueryTask implements NamedTask {
-        private final String mQuery;
-        private final Corpus mCorpus;
-        private final int mQueryLimit;
-        private final SuggestionCursorReceiver mReceiver;
-
-        public QueryTask(String query, Corpus corpus, int queryLimit,
-                SuggestionCursorReceiver receiver) {
-            mQuery = query;
-            mCorpus = corpus;
-            mQueryLimit = queryLimit;
-            mReceiver = receiver;
-        }
-
-        public String getName() {
-            return mCorpus.getName();
-        }
-
-        public void run() {
-            CorpusResult cursor = mCorpus.getSuggestions(mQuery, mQueryLimit);
-            mReceiver.receiveSuggestionCursor(cursor);
-        }
-
-        @Override
-        public String toString() {
-            return mCorpus + "[" + mQuery + "]";
-        }
-    }
 }

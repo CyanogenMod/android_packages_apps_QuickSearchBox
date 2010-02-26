@@ -17,6 +17,8 @@
 package com.android.quicksearchbox;
 
 
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,42 +27,24 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.util.Log;
 import android.util.Patterns;
 import android.webkit.URLUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * The web search source.
  */
-public class WebCorpus extends AbstractCorpus {
-
-    private static final boolean DBG = false;
-    private static final String TAG = "QSB.WebCorpus";
+public class WebCorpus extends MultiSourceCorpus {
 
     private static final String WEB_CORPUS_NAME = "web";
 
-    private final Context mContext;
-
     private final Source mWebSearchSource;
-    private final Source mBrowserSource;
 
-    private final ArrayList<Source> mSources;
-
-    public WebCorpus(Context context, Source webSearchSource, Source browserSource) {
-        mContext = context;
+    public WebCorpus(Context context, NamedTaskExecutor executor,
+            Source webSearchSource, Source browserSource) {
+        super(context, executor, webSearchSource, browserSource);
         mWebSearchSource = webSearchSource;
-        mBrowserSource = browserSource;
-
-        mSources = new ArrayList<Source>();
-        mSources.add(mWebSearchSource);
-        mSources.add(mBrowserSource);
-    }
-
-    protected Context getContext() {
-        return mContext;
     }
 
     public CharSequence getLabel() {
@@ -173,75 +157,42 @@ public class WebCorpus extends AbstractCorpus {
         return true;
     }
 
-    public Collection<Source> getSources() {
-        return mSources;
-    }
-
     public CharSequence getSettingsDescription() {
         return getContext().getText(R.string.corpus_description_web);
     }
 
-    public CorpusResult getSuggestions(String query, int queryLimit) {
-        // TODO: Should run web and browser queries in parallel
-        SuggestionCursor webCursor = null;
-        if (SearchSettings.getShowWebSuggestions(getContext())) {
-            try {
-                webCursor = mWebSearchSource.getSuggestions(query, queryLimit);
-            } catch (RuntimeException ex) {
-                Log.e(TAG, "Error querying web search source", ex);
-            }
-        }
-        SuggestionCursor browserCursor = null;
-        try {
-            browserCursor = mBrowserSource.getSuggestions(query, queryLimit);
-        } catch (RuntimeException ex) {
-            Log.e(TAG, "Error querying browser search source", ex);
-        }
-
-        WebResult c = new WebResult(query, webCursor, browserCursor);
-        if (DBG) Log.d(TAG, "Returning " + c.getCount() + " suggestions");
-        return c;
+    @Override
+    protected Result createResult(String query, ArrayList<SourceResult> results) {
+        return new WebResult(query, results);
     }
 
-    private class WebResult extends ListSuggestionCursor implements CorpusResult {
+    protected class WebResult extends Result {
 
-        private SuggestionCursor mWebCursor;
+        public WebResult(String query, ArrayList<SourceResult> results) {
+            super(query, results);
+        }
 
-        private SuggestionCursor mBrowserCursor;
-
-        public WebResult(String userQuery, SuggestionCursor webCursor,
-                SuggestionCursor browserCursor) {
-            super(userQuery);
-            mWebCursor = webCursor;
-            mBrowserCursor = browserCursor;
-
-            if (mBrowserCursor != null && mBrowserCursor.getCount() > 0) {
-                if (DBG) Log.d(TAG, "Adding browser suggestion");
-                add(new SuggestionPosition(mBrowserCursor, 0));
+        @Override
+        public void fill() {
+            SourceResult webSearchResult = null;
+            SourceResult browserResult = null;
+            for (SourceResult result : getResults()) {
+                if (result.getSource().equals(mWebSearchSource)) {
+                    webSearchResult = result;
+                } else {
+                    browserResult = result;
+                }
             }
-
-            if (mWebCursor != null) {
-                int count = mWebCursor.getCount();
+            if (browserResult != null && browserResult.getCount() > 0) {
+                add(new SuggestionPosition(browserResult, 0));
+            }
+            if (webSearchResult != null) {
+                int count = webSearchResult.getCount();
                 for (int i = 0; i < count; i++) {
-                    if (DBG) Log.d(TAG, "Adding web suggestion");
-                    add(new SuggestionPosition(mWebCursor, i));
+                    add(new SuggestionPosition(webSearchResult, i));
                 }
             }
         }
 
-        public Corpus getCorpus() {
-            return WebCorpus.this;
-        }
-
-        @Override
-        public void close() {
-            super.close();
-            if (mWebCursor != null) {
-                mWebCursor.close();
-            }
-            if (mBrowserCursor != null) {
-                mBrowserCursor.close();
-            }
-        }
     }
 }

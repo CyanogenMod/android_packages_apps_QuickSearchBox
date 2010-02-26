@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.text.TextUtils;
@@ -30,8 +32,11 @@ public class SearchableCorpusFactory implements CorpusFactory {
 
     private final Context mContext;
 
-    public SearchableCorpusFactory(Context context) {
+    private final NamedTaskExecutor mExecutor;
+
+    public SearchableCorpusFactory(Context context, NamedTaskExecutor executor) {
         mContext = context;
+        mExecutor = executor;
     }
 
     public Collection<Corpus> createCorpora(Sources sources) {
@@ -58,7 +63,7 @@ public class SearchableCorpusFactory implements CorpusFactory {
     }
 
     protected Corpus createWebCorpus(Source webSource, Source browserSource) {
-        return new WebCorpus(mContext, webSource, browserSource);
+        return new WebCorpus(mContext, mExecutor, webSource, browserSource);
     }
 
     private ComponentName getBrowserSearchComponent() {

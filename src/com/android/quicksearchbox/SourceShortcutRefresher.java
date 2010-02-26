@@ -99,7 +99,7 @@ class SourceShortcutRefresher implements ShortcutRefresher {
     }
 
     private static String makeKey(SuggestionCursor shortcut) {
-        return shortcut.getSuggestionSource().getFlattenedComponentName() + "#"
+        return shortcut.getSuggestionSource().getName() + "#"
                 + shortcut.getShortcutId();
     }
 
@@ -127,7 +127,7 @@ class SourceShortcutRefresher implements ShortcutRefresher {
         }
 
         public String getName() {
-            return mSource.getFlattenedComponentName();
+            return mSource.getName();
         }
 
         public void run() {
