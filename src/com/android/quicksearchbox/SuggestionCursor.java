@@ -103,6 +103,11 @@ public interface SuggestionCursor {
     String getSuggestionText2();
 
     /**
+     * Gets the second text line URL for the current suggestion.
+     */
+    String getSuggestionText2Url();
+
+    /**
      * Gets the left-hand-side icon for the current suggestion.
      *
      * @return A string that can be passed to {@link Source#getIcon(String)}.

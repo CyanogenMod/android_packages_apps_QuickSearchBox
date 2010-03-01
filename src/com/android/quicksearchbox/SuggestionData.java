@@ -27,6 +27,7 @@ public class SuggestionData {
     private String mFormat;
     private String mText1;
     private String mText2;
+    private String mText2Url;
     private String mIcon1;
     private String mIcon2;
     private String mShortcutId;
@@ -54,6 +55,10 @@ public class SuggestionData {
 
     public String getSuggestionText2() {
         return mText2;
+    }
+
+    public String getSuggestionText2Url() {
+        return mText2Url;
     }
 
     public String getSuggestionIcon1() {
@@ -104,6 +109,11 @@ public class SuggestionData {
 
     public SuggestionData setText2(String text2) {
         mText2 = text2;
+        return this;
+    }
+
+    public SuggestionData setText2Url(String text2Url) {
+        mText2Url = text2Url;
         return this;
     }
 

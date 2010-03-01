@@ -47,7 +47,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 26;
+    private static final int DB_VERSION = 27;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -104,6 +104,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             Shortcuts.format.fullName + " AS " + SearchManager.SUGGEST_COLUMN_FORMAT,
             Shortcuts.title + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
             Shortcuts.description + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
+            Shortcuts.description_url + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2_URL,
             Shortcuts.icon1 + " AS " + SearchManager.SUGGEST_COLUMN_ICON_1,
             Shortcuts.icon2 + " AS " + SearchManager.SUGGEST_COLUMN_ICON_2,
             Shortcuts.intent_action + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_ACTION,
@@ -391,6 +392,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         cv.put(Shortcuts.format.name(), suggestion.getSuggestionFormat());
         cv.put(Shortcuts.title.name(), suggestion.getSuggestionText1());
         cv.put(Shortcuts.description.name(), suggestion.getSuggestionText2());
+        cv.put(Shortcuts.description_url.name(), suggestion.getSuggestionText2Url());
         cv.put(Shortcuts.icon1.name(), suggestion.getSuggestionIcon1());
         cv.put(Shortcuts.icon2.name(), suggestion.getSuggestionIcon2());
         cv.put(Shortcuts.intent_action.name(), intentAction);
@@ -491,6 +493,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         format,
         title,
         description,
+        description_url,
         icon1,
         icon2,
         intent_action,
@@ -687,6 +690,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     Shortcuts.format.name() + " TEXT, " +
                     Shortcuts.title.name() + " TEXT, " +
                     Shortcuts.description.name() + " TEXT, " +
+                    Shortcuts.description_url.name() + " TEXT, " +
                     Shortcuts.icon1.name() + " TEXT, " +
                     Shortcuts.icon2.name() + " TEXT, " +
                     Shortcuts.intent_action.name() + " TEXT, " +
