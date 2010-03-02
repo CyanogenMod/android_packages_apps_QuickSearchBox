@@ -47,7 +47,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 27;
+    private static final int DB_VERSION = 28;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -113,6 +113,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             Shortcuts.intent_extradata + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA,
             Shortcuts.shortcut_id + " AS " + SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
             Shortcuts.spinner_while_refreshing + " AS " + SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING,
+            Shortcuts.log_type + " AS " + CursorBackedSuggestionCursor.SUGGEST_COLUMN_LOG_TYPE,
         };
         // SQL expression for the time before which no clicks should be counted.
         String cutOffTime_expr = "(" + "?3" + " - " + mConfig.getMaxStatAgeMillis() + ")";
@@ -403,6 +404,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         if (suggestion.isSpinnerWhileRefreshing()) {
             cv.put(Shortcuts.spinner_while_refreshing.name(), "true");
         }
+        cv.put(Shortcuts.log_type.name(), suggestion.getSuggestionLogType());
 
         return cv;
     }
@@ -501,7 +503,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         intent_query,
         intent_extradata,
         shortcut_id,
-        spinner_while_refreshing;
+        spinner_while_refreshing,
+        log_type;
 
         static final String TABLE_NAME = "shortcuts";
 
@@ -698,7 +701,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     Shortcuts.intent_query.name() + " TEXT, " +
                     Shortcuts.intent_extradata.name() + " TEXT, " +
                     Shortcuts.shortcut_id.name() + " TEXT, " +
-                    Shortcuts.spinner_while_refreshing.name() + " TEXT" +
+                    Shortcuts.spinner_while_refreshing.name() + " TEXT, " +
+                    Shortcuts.log_type.name() + " TEXT" +
                     ");");
 
             // index for fast lookup of shortcuts by shortcut_id

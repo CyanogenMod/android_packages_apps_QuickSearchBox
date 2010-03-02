@@ -159,7 +159,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setIntentData("data")
                 .setSuggestionQuery("query")
                 .setIntentExtraData("extradata")
-                .setShortcutId("idofshortcut");
+                .setShortcutId("idofshortcut")
+                .setSuggestionLogType("logtype");
         reportClick("q", clicked);
 
         assertShortcuts("q", clicked);

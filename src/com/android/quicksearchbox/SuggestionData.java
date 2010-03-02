@@ -36,6 +36,7 @@ public class SuggestionData {
     private String mIntentData;
     private String mIntentExtraData;
     private String mSuggestionQuery;
+    private String mLogType;
 
     public SuggestionData(Source source) {
         mSource = source;
@@ -95,6 +96,10 @@ public class SuggestionData {
 
     public String getSuggestionQuery() {
         return mSuggestionQuery;
+    }
+
+    public String getSuggestionLogType() {
+        return mLogType;
     }
 
     public SuggestionData setFormat(String format) {
@@ -157,6 +162,11 @@ public class SuggestionData {
         return this;
     }
 
+    public SuggestionData setSuggestionLogType(String logType) {
+        mLogType = logType;
+        return this;
+    }
+
     private String makeKeyComponent(String str) {
         return str == null ? "" : str;
     }
@@ -177,10 +187,6 @@ public class SuggestionData {
                 .toString();
     }
 
-    public String getSuggestionLogType() {
-        return getSuggestionSource().getLogName();
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -191,6 +197,7 @@ public class SuggestionData {
         result = prime * result + ((mIntentAction == null) ? 0 : mIntentAction.hashCode());
         result = prime * result + ((mIntentData == null) ? 0 : mIntentData.hashCode());
         result = prime * result + ((mIntentExtraData == null) ? 0 : mIntentExtraData.hashCode());
+        result = prime * result + ((mLogType == null) ? 0 : mLogType.hashCode());
         result = prime * result + ((mShortcutId == null) ? 0 : mShortcutId.hashCode());
         result = prime * result + ((mSource == null) ? 0 : mSource.hashCode());
         result = prime * result + (mSpinnerWhileRefreshing ? 1231 : 1237);
@@ -239,6 +246,11 @@ public class SuggestionData {
                 return false;
         } else if (!mIntentExtraData.equals(other.mIntentExtraData))
             return false;
+        if (mLogType == null) {
+            if (other.mLogType != null)
+                return false;
+        } else if (!mLogType.equals(other.mLogType))
+            return false;
         if (mShortcutId == null) {
             if (other.mShortcutId != null)
                 return false;
@@ -282,6 +294,7 @@ public class SuggestionData {
         appendField(builder, "intentData", mIntentData);
         appendField(builder, "query", mSuggestionQuery);
         appendField(builder, "shortcutid", mShortcutId);
+        appendField(builder, "logtype", mLogType);
         return builder.toString();
     }
 
