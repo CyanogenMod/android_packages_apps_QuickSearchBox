@@ -2,4 +2,5 @@
 
 -keepclasseswithmembers class com.android.quicksearchbox.Suggestions {
 *** getExpectedSourceCount(...);
+*** getQuery(...);
 }
