@@ -19,11 +19,6 @@
 
     <original-package android:name="com.android.quicksearchbox" />
 
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
-
-    <!-- TODO: Apps must be able to get the GLOBAL_SEARCH permission, so that
-         we can get rid of the above. -->
     <uses-permission android:name="android.permission.GLOBAL_SEARCH" />
 
     <!-- Permissions used by GoogleSearch. -->
