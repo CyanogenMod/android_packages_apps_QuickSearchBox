@@ -16,7 +16,12 @@
 
 package com.android.quicksearchbox;
 
-import java.util.*;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * A promoter that gives preference to suggestions from higher ranking corpora.
@@ -110,12 +115,14 @@ public class RankAwarePromoter implements Promoter {
      * @return the number of suggestions actually copied.
      */
     private int promote(SuggestionCursor cursor, int count, ListSuggestionCursor promoted) {
-        int i = 0;
-        while (i < count && cursor.getPosition() < cursor.getCount()) {
-            promoted.add(new SuggestionPosition(cursor));
-            cursor.moveTo(cursor.getPosition() + 1);
-            i++;
+        if (count < 1 || cursor.getPosition() >= cursor.getCount()) {
+            return 0;
         }
+        int i = 0;
+        do {
+            promoted.add(new SuggestionPosition(cursor));
+            i++;
+        } while (cursor.moveToNext() && i < count);
         return i;
     }
 }

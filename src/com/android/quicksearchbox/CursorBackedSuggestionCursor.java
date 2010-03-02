@@ -127,6 +127,19 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
         }
     }
 
+    public boolean moveToNext() {
+        if (mClosed) {
+            throw new IllegalStateException("moveToNext() after close()");
+        }
+        try {
+            return mCursor.moveToNext();
+        } catch (RuntimeException ex) {
+            // all operations on cross-process cursors can throw random exceptions
+            Log.e(TAG, "moveToNext() failed, ", ex);
+            return false;
+        }
+    }
+
     public int getPosition() {
         if (mClosed) {
             throw new IllegalStateException("getPosition after close()");

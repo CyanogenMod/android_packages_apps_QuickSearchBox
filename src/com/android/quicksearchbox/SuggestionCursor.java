@@ -40,6 +40,13 @@ public interface SuggestionCursor {
     void moveTo(int pos);
 
     /**
+     * Moves to the next suggestion, if there is one.
+     *
+     * @return {@code false} if there is no next suggestion.
+     */
+    boolean moveToNext();
+
+    /**
      * Gets the current position within the cursor.
      */
     int getPosition();

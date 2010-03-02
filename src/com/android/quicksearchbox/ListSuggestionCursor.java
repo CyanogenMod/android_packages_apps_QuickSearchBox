@@ -64,6 +64,16 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
         mPos = pos;
     }
 
+    public boolean moveToNext() {
+        int size = mSuggestions.size();
+        if (mPos >= size) {
+            // Already past the end
+            return false;
+        }
+        mPos++;
+        return mPos < size;
+    }
+
     public void removeRow() {
         mSuggestions.remove(mPos);
     }

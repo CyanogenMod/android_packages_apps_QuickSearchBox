@@ -50,6 +50,14 @@ public class SuggestionCursorWrapper extends AbstractSuggestionCursorWrapper {
         }
     }
 
+    public boolean moveToNext() {
+        if (mCursor != null) {
+            return mCursor.moveToNext();
+        } else {
+            return false;
+        }
+    }
+
     public void registerDataSetObserver(DataSetObserver observer) {
         if (mCursor != null) {
             mCursor.registerDataSetObserver(observer);
