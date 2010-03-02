@@ -1,6 +1,50 @@
 # Methods used only by tests
 
--keepclasseswithmembers class com.android.quicksearchbox.Suggestions {
-*** getExpectedSourceCount(...);
-*** getQuery(...);
+-keep class com.android.quicksearchbox.Suggestions {
+*;
 }
+
+-keep class com.android.quicksearchbox.ShortcutRepositoryImplLog {
+*;
+}
+
+-keep class com.android.quicksearchbox.SuggestionData {
+*;
+}
+
+-keep class com.android.quicksearchbox.DataSuggestionCursor {
+*;
+}
+
+-keep class com.android.quicksearchbox.Config {
+*;
+}
+
+-keep class com.android.quicksearchbox.Corpus {
+*;
+}
+
+-keep class com.android.quicksearchbox.Corpora {
+*;
+}
+
+-keep class com.android.quicksearchbox.ShortcutRefresher {
+*;
+}
+
+-keep class com.android.quicksearchbox.SuggestionCursor {
+*;
+}
+
+-keep class com.android.quicksearchbox.Source {
+*;
+}
+
+-keep class com.android.quicksearchbox.Promoter {
+*;
+}
+
+-keep class com.android.quicksearchbox.ListSuggestionCursor {
+*;
+}
+
