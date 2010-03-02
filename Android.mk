@@ -32,6 +32,8 @@ LOCAL_CERTIFICATE := shared
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
+LOCAL_PROGUARD_FLAGS := -include $(LOCAL_PATH)/proguard.flags
+
 include $(BUILD_PACKAGE)
 
 # Also build our test apk

@@ -1,0 +1,5 @@
+# Methods used only by tests
+
+-keepclasseswithmembers class com.android.quicksearchbox.Suggestions {
+*** getExpectedSourceCount(...);
+}
