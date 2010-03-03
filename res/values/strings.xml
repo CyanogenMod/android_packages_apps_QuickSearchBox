@@ -32,6 +32,21 @@
     <!-- Description of the combined Web source shown in QSB -->
     <string name="corpus_description_web">Web search, bookmarks and browser history</string>
 
+    <!-- Name of the Apps source shown in QSB -->
+    <string name="corpus_label_apps">Apps</string>
+    <!-- Settings description for the Apps source shown in QSB -->
+    <string name="corpus_description_apps">Names of installed applications</string>
+    <!-- Search hint for the Apps source shown in QSB -->
+    <string name="corpus_hint_apps">Search Apps</string>
+
+    <!-- Name of the Apps and Market source shown in QSB -->
+    <string name="corpus_label_apps_market">Apps and Market</string>
+    <!-- Settings description for the Apps and Market source shown in QSB -->
+    <string name="corpus_description_apps_market">Installed Apps and Apps from Market</string>
+    <!-- Search hint for the Apps source shown in QSB -->
+    <string name="corpus_hint_apps_market">Search Apps and Market</string>
+
+
     <!-- Search settings stuff -->
 
     <!-- Search settings menu item -->
