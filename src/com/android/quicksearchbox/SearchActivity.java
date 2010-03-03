@@ -454,6 +454,10 @@ public class SearchActivity extends Activity {
     protected void onSearchClicked(int method) {
         String query = getQuery();
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
+
+        // Don't do empty queries
+        if (TextUtils.getTrimmedLength(query) == 0) return;
+
         Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
         if (searchCorpus == null) return;
 
