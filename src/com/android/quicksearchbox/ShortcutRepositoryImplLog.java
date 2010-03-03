@@ -281,15 +281,34 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             if (srcStr == null) {
                 throw new NullPointerException("Missing source for shortcut.");
             }
-            Source source = mSourceCache.get(srcStr);
-            if (source == null) {
-                ComponentName srcName = ComponentName.unflattenFromString(srcStr);
-                source = mCorpora.getSource(srcName);
-                // We cache the source so that it can be found quickly, and so
-                // that it doesn't disappear over the lifetime of this cursor.
-                mSourceCache.put(srcStr, source);
+            // First check the cache.
+            // We store a null Source if the source is disabled, so we need two lookups.
+            if (mSourceCache.containsKey(srcStr)) {
+                return mSourceCache.get(srcStr);
             }
+            Source source = getSourceIfEnabled(srcStr);
+            // We cache the source so that it can be found quickly, and so
+            // that it doesn't disappear over the lifetime of this cursor.
+            // We cache it even if null, to make future lookups faster.
+            mSourceCache.put(srcStr, source);
             return source;
+        }
+
+        private Source getSourceIfEnabled(String srcStr) {
+            ComponentName srcName = ComponentName.unflattenFromString(srcStr);
+            if (srcName == null) {
+                return null;
+            }
+            Source source = mCorpora.getSource(srcName);
+            if (source == null) {
+                return null;
+            }
+            Corpus corpus = mCorpora.getCorpusForSource(source);
+            if (corpus != null && mCorpora.isCorpusEnabled(corpus)) {
+                return source;
+            } else {
+                return null;
+            }
         }
 
         @Override
