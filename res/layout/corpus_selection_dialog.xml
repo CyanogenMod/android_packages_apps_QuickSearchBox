@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="-7dip"
+        android:layout_marginBottom="-8.5dip"
         android:layout_marginLeft="5dip"
         android:src="@drawable/corpus_selector_arrow_up"
         />
