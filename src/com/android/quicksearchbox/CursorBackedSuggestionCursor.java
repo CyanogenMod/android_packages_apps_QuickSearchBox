@@ -296,4 +296,5 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
     public void unregisterDataSetObserver(DataSetObserver observer) {
         // We don't watch Cursor-backed SuggestionCursors for changes
     }
+
 }

@@ -322,6 +322,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         public boolean isSuggestionShortcut() {
             return true;
         }
+
+        @Override
+        public String toString() {
+            return "shortcuts[" + getUserQuery() + "]";
+        }
+
     }
 
     /**

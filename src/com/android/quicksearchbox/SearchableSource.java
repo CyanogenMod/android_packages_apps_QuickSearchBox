@@ -299,6 +299,11 @@ public class SearchableSource implements Source {
             return false;
         }
 
+        @Override
+        public String toString() {
+            return SearchableSource.this + "[" + getUserQuery() + "]";
+        }
+
     }
 
     /**

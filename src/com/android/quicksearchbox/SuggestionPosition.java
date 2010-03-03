@@ -48,4 +48,9 @@ public class SuggestionPosition {
         return mPosition;
     }
 
+    @Override
+    public String toString() {
+        return mCursor + ":" + mPosition;
+    }
+
 }

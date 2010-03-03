@@ -69,6 +69,7 @@ public class DefaultCorpusRanker implements CorpusRanker {
         ArrayList<Corpus> ordered = new ArrayList<Corpus>(corpora);
         Collections.sort(ordered, new CorpusComparator(clickScores));
 
+        if (DBG) Log.d(TAG, "Click scores: " + clickScores);
         if (DBG) Log.d(TAG, "Ordered: " + ordered);
         return ordered;
     }

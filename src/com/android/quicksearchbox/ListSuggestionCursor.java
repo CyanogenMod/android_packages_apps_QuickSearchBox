@@ -91,6 +91,11 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
         return mSuggestions.get(mPos).current();
     }
 
+    @Override
+    public String toString() {
+        return "[" + getUserQuery() + "] " + mSuggestions;
+    }
+
     /**
      * Register an observer that is called when changes happen to this data set.
      *

@@ -28,14 +28,18 @@ import java.util.LinkedList;
  */
 public class RankAwarePromoter implements Promoter {
 
+    private static final boolean DBG = true;
+    private static final String TAG = "QSB.RankAwarePromoter";
+
     private final HashSet<Corpus> mPromotedCorpora;
 
     public RankAwarePromoter(Corpora corpora, CorpusRanker corpusRanker, int maxPromotedCorpora) {
         // Create a set of the corpora we consider to be promoted.  Note that we
         // only do this once, even though these may change slightly during a session.
-        ArrayList<Corpus> orderedCorpora = corpusRanker.rankCorpora(corpora.getAllCorpora());
+        ArrayList<Corpus> orderedCorpora = corpusRanker.rankCorpora(corpora.getEnabledCorpora());
         int count = Math.min(orderedCorpora.size(), maxPromotedCorpora);
         mPromotedCorpora = new HashSet<Corpus>(orderedCorpora.subList(0, count));
+        if (DBG) Log.d(TAG, "Promoted: " + mPromotedCorpora);
     }
 
     private boolean isPromoted(Corpus corpus) {
@@ -44,6 +48,8 @@ public class RankAwarePromoter implements Promoter {
 
     public void pickPromoted(SuggestionCursor shortcuts, ArrayList<CorpusResult> suggestions,
             int maxPromoted, ListSuggestionCursor promoted) {
+
+        if (DBG) Log.d(TAG, "Available results: " + suggestions);
 
         // Split non-empty results into promoted and other, positioned at first suggestion
         LinkedList<CorpusResult> promotedResults = new LinkedList<CorpusResult>();
@@ -78,6 +84,8 @@ public class RankAwarePromoter implements Promoter {
             // We may still have a few slots left
             maxPromoted -= roundRobin(otherResults, maxPromoted, maxPromoted, promoted);
         }
+
+        if (DBG) Log.d(TAG, "Returning " + promoted.toString());
     }
 
     /**

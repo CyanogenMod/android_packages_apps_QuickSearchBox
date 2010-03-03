@@ -119,6 +119,11 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
                 result.close();
             }
         }
+
+        @Override
+        public String toString() {
+            return getCorpus() + "[" + getUserQuery() + "]";
+        }
     }
 
 }

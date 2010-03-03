@@ -33,4 +33,9 @@ public class SingleSourceCorpusResult extends SuggestionCursorWrapper implements
         return mCorpus;
     }
 
+    @Override
+    public String toString() {
+        return getCorpus() + "[" + getUserQuery() + "]";
+    }
+
 }
