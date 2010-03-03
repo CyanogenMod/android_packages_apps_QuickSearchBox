@@ -96,7 +96,6 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
     protected void finalize() {
         if (!mClosed) {
             Log.e(TAG, "LEAK! Finalized without being closed: " + toString());
-            close();
         }
     }
 
