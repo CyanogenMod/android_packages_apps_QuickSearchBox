@@ -21,11 +21,17 @@ import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SuggestionCursor;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -70,7 +76,12 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     public void bindAsSuggestion(SuggestionCursor suggestion) {
         String format = suggestion.getSuggestionFormat();
         CharSequence text1 = formatText(suggestion.getSuggestionText1(), format);
-        CharSequence text2 = formatText(suggestion.getSuggestionText2(), format);
+        CharSequence text2 = suggestion.getSuggestionText2Url();
+        if (text2 != null) {
+            text2 = formatUrl(text2);
+        } else {
+            text2 = formatText(suggestion.getSuggestionText2(), format);
+        }
         Drawable icon1 = getSuggestionDrawableIcon1(suggestion);
         Drawable icon2 = getSuggestionDrawableIcon2(suggestion);
         if (DBG) {
@@ -81,6 +92,15 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         setText2(text2);
         setIcon1(icon1);
         setIcon2(icon2);
+    }
+
+    private CharSequence formatUrl(CharSequence url) {
+        SpannableString text = new SpannableString(url);
+        ColorStateList colors = getResources().getColorStateList(R.color.url_text);
+        text.setSpan(new TextAppearanceSpan(null, 0, 0, colors, null),
+                0, url.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return text;
     }
 
     public Drawable getSuggestionDrawableIcon1(SuggestionCursor suggestion) {

@@ -152,6 +152,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setFormat("<i>%s</i>")
                 .setText1("title")
                 .setText2("description")
+                .setText2Url("description_url")
                 .setIcon1("icon1")
                 .setIcon2("icon2")
                 .setIntentAction("action")
@@ -170,6 +171,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setFormat("<i>%s</i>")
                 .setText1("title")
                 .setText2("description")
+                .setText2("description_url")
                 .setIcon1("icon1")
                 .setIcon2("icon2")
                 .setIntentAction("action")
@@ -187,6 +189,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setFormat("<i>%s</i>")
                 .setText1("title")
                 .setText2("description")
+                .setText2("description_url")
                 .setIcon1("icon1")
                 .setIcon2(spinnerUri)
                 .setIntentAction("action")
@@ -774,6 +777,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 observed.getSuggestionText1());
         assertEquals(message + ", text2", expected.getSuggestionText2(),
                 observed.getSuggestionText2());
+        assertEquals(message + ", text2Url", expected.getSuggestionText2Url(),
+                observed.getSuggestionText2Url());
         assertEquals(message + ", action", expected.getSuggestionIntentAction(),
                 observed.getSuggestionIntentAction());
         assertEquals(message + ", data", expected.getSuggestionIntentDataString(),

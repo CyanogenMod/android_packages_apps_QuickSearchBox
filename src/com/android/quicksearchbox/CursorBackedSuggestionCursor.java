@@ -41,6 +41,9 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
     /** Column index of {@link SearchManager#SUGGEST_COLUMN_TEXT_2} in @{link mCursor}. */
     private final int mText2Col;
 
+    /** Column index of {@link SearchManager#SUGGEST_COLUMN_TEXT_2_URL} in @{link mCursor}. */
+    private final int mText2UrlCol;
+
     /** Column index of {@link SearchManager#SUGGEST_COLUMN_ICON_1} in @{link mCursor}. */
     private final int mIcon1Col;
 
@@ -61,6 +64,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
         mFormatCol = getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
         mText1Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
         mText2Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
+        mText2UrlCol = getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2_URL);
         mIcon1Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
         mIcon2Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
         mRefreshSpinnerCol = getColumnIndex(SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING);
@@ -151,6 +155,10 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
 
     public String getSuggestionText2() {
         return getStringOrNull(mText2Col);
+    }
+
+    public String getSuggestionText2Url() {
+        return getStringOrNull(mText2UrlCol);
     }
 
     public String getSuggestionIcon1() {

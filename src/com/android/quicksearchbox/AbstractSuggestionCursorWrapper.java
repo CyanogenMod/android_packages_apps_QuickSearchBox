@@ -88,6 +88,10 @@ public abstract class AbstractSuggestionCursorWrapper extends AbstractSuggestion
         return current().getSuggestionText2();
     }
 
+    public String getSuggestionText2Url() {
+        return current().getSuggestionText2Url();
+    }
+
     public boolean isSpinnerWhileRefreshing() {
         return current().isSpinnerWhileRefreshing();
     }

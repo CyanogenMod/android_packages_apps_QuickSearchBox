@@ -153,6 +153,10 @@ public class DataSuggestionCursor extends AbstractSuggestionCursor {
         return current().getSuggestionText2();
     }
 
+    public String getSuggestionText2Url() {
+        return current().getSuggestionText2Url();
+    }
+
     public boolean isSpinnerWhileRefreshing() {
         return current().isSpinnerWhileRefreshing();
     }
