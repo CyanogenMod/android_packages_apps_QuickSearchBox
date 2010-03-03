@@ -157,7 +157,6 @@ public class Suggestions {
     protected void finalize() {
         if (!mClosed) {
             Log.e(TAG, "LEAK! Finalized without being closed: Suggestions[" + mQuery + "]");
-            close();
         }
     }
 
