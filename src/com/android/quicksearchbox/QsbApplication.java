@@ -147,7 +147,7 @@ public class QsbApplication extends Application {
     }
 
     protected CorpusRanker createCorpusRanker() {
-        return new DefaultCorpusRanker(getShortcutRepository());
+        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository());
     }
 
     /**
@@ -239,7 +239,6 @@ public class QsbApplication extends Application {
     protected SuggestionsProvider createGlobalSuggestionsProvider() {
         Promoter promoter =  new ShortcutPromoter(new RankAwarePromoter());
         GlobalSuggestionsProvider provider = new GlobalSuggestionsProvider(getConfig(),
-                getCorpora(),
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
                 promoter,

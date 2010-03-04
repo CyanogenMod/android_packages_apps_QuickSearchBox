@@ -22,23 +22,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
-public class DefaultCorpusRanker implements CorpusRanker {
+public class DefaultCorpusRanker extends AbstractCorpusRanker {
 
     private static final boolean DBG = true;
     private static final String TAG = "QSB.DefaultCorpusRanker";
 
     private final ShortcutRepository mShortcuts;
 
-    public DefaultCorpusRanker(ShortcutRepository shortcuts) {
+    public DefaultCorpusRanker(Corpora corpora, ShortcutRepository shortcuts) {
+        super(corpora);
         mShortcuts = shortcuts;
     }
 
     private static class CorpusComparator implements Comparator<Corpus> {
+        private final Corpora mCorpora;
         private final Map<String,Integer> mClickScores;
 
-        public CorpusComparator(Map<String,Integer> clickScores) {
+        public CorpusComparator(Corpora corpora, Map<String,Integer> clickScores) {
+            mCorpora = corpora;
             mClickScores = clickScores;
         }
 
@@ -51,23 +55,31 @@ public class DefaultCorpusRanker implements CorpusRanker {
          * Scores a corpus. Higher score is better.
          */
         private int getCorpusScore(Corpus corpus) {
+            // Web corpus always comes first
             if (corpus.isWebCorpus()) {
                 return Integer.MAX_VALUE;
             }
+            // Then use click score
             Integer clickScore = mClickScores.get(corpus.getName());
             if (clickScore != null) {
                 return clickScore;
+            }
+            // Boost default enabled corpora that don't have click scores
+            if (mCorpora.isCorpusDefaultEnabled(corpus)) {
+                return 1;
             }
             return 0;
         }
     }
 
-    public ArrayList<Corpus> rankCorpora(Collection<Corpus> corpora) {
-        if (DBG) Log.d(TAG, "Ranking: " + corpora);
+    @Override
+    public List<Corpus> rankCorpora(Corpora corpora) {
+        Collection<Corpus> enabledCorpora = corpora.getEnabledCorpora();
+        if (DBG) Log.d(TAG, "Ranking: " + enabledCorpora);
 
         Map<String,Integer> clickScores = mShortcuts.getCorpusScores();
-        ArrayList<Corpus> ordered = new ArrayList<Corpus>(corpora);
-        Collections.sort(ordered, new CorpusComparator(clickScores));
+        ArrayList<Corpus> ordered = new ArrayList<Corpus>(enabledCorpora);
+        Collections.sort(ordered, new CorpusComparator(corpora, clickScores));
 
         if (DBG) Log.d(TAG, "Click scores: " + clickScores);
         if (DBG) Log.d(TAG, "Ordered: " + ordered);

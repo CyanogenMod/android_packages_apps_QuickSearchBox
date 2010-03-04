@@ -23,8 +23,8 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Logs events to {@link EventLog}.
@@ -62,7 +62,7 @@ public class EventLogLogger implements Logger {
     }
 
     public void logStart(int latency, String intentSource, Corpus corpus,
-            ArrayList<Corpus> orderedCorpora) {
+            List<Corpus> orderedCorpora) {
         String packageName = mContext.getPackageName();
         int version = mVersionCode;
         // TODO: Add more info to startMethod

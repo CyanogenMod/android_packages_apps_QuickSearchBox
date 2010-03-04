@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -74,7 +75,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         }
     }
 
-    public abstract ArrayList<Corpus> getOrderedCorpora();
+    public abstract List<Corpus> getOrderedCorpora();
 
     protected abstract SuggestionCursor getShortcutsForQuery(String query);
 
@@ -86,7 +87,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         if (query.length() == 0) {
             return new ArrayList<Corpus>(0);
         }
-        ArrayList<Corpus> orderedCorpora = getOrderedCorpora();
+        List<Corpus> orderedCorpora = getOrderedCorpora();
         ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(orderedCorpora.size());
         for (Corpus corpus : orderedCorpora) {
             if (shouldQueryCorpus(corpus, query)) {

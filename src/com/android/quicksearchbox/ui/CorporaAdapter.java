@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.CorpusRanker;
 
@@ -27,7 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Adapter for showing a list of sources in the source selection activity.
@@ -39,43 +38,40 @@ public class CorporaAdapter extends BaseAdapter {
 
     private final CorpusViewFactory mViewFactory;
 
-    private final Corpora mCorpora;
-
     private final CorpusRanker mRanker;
 
     private final DataSetObserver mCorporaObserver = new CorporaObserver();
 
-    private ArrayList<Corpus> mRankedEnabledCorpora;
+    private List<Corpus> mRankedEnabledCorpora;
 
     private boolean mGridView;
 
-    private CorporaAdapter(CorpusViewFactory viewFactory, Corpora corpora,
+    private CorporaAdapter(CorpusViewFactory viewFactory,
             CorpusRanker ranker, boolean gridView) {
         mViewFactory = viewFactory;
-        mCorpora = corpora;
         mRanker = ranker;
         mGridView = gridView;
-        mCorpora.registerDataSetObserver(mCorporaObserver);
+        mRanker.registerDataSetObserver(mCorporaObserver);
         updateCorpora();
     }
 
-    public static CorporaAdapter createListAdapter(CorpusViewFactory viewFactory, Corpora corpora,
+    public static CorporaAdapter createListAdapter(CorpusViewFactory viewFactory,
             CorpusRanker ranker) {
-        return new CorporaAdapter(viewFactory, corpora, ranker, false);
+        return new CorporaAdapter(viewFactory, ranker, false);
     }
 
-    public static CorporaAdapter createGridAdapter(CorpusViewFactory viewFactory, Corpora corpora,
+    public static CorporaAdapter createGridAdapter(CorpusViewFactory viewFactory,
             CorpusRanker ranker) {
-        return new CorporaAdapter(viewFactory, corpora, ranker, true);
+        return new CorporaAdapter(viewFactory, ranker, true);
     }
 
     private void updateCorpora() {
-        mRankedEnabledCorpora = mRanker.rankCorpora(mCorpora.getEnabledCorpora());
+        mRankedEnabledCorpora = mRanker.getRankedCorpora();
         notifyDataSetChanged();
     }
 
     public void close() {
-        mCorpora.unregisterDataSetObserver(mCorporaObserver);
+        mRanker.unregisterDataSetObserver(mCorporaObserver);
     }
 
     public int getCount() {

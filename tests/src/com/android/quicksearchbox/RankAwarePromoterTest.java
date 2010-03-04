@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,21 +36,20 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     public static final int MAX_PROMOTED_SUGGESTIONS = 8;
     public static final String TEST_QUERY = "query";
 
-    private MockCorpora mCorpora;
     private CorpusRanker mRanker;
     private RankAwarePromoter mPromoter;
 
     @Override
     public void setUp() {
-        mCorpora = createMockCorpora(5);
-        mRanker = new LexicographicalCorpusRanker();
+        Corpora corpora = createMockCorpora(5);
+        mRanker = new LexicographicalCorpusRanker(corpora);
         mPromoter = new RankAwarePromoter();
     }
 
     public void testPromotesExpectedSuggestions() {
         ArrayList<CorpusResult> suggestions = getSuggestions(TEST_QUERY);
         ListSuggestionCursor promoted = new ListSuggestionCursor(TEST_QUERY);
-        ArrayList<Corpus> rankedCorpora = getRankedCorpora();
+        List<Corpus> rankedCorpora = getRankedCorpora();
         Set<Corpus> promotedCorpora = Util.setOfFirstN(rankedCorpora, MAX_PROMOTED_CORPORA);
         mPromoter.pickPromoted(null, suggestions, MAX_PROMOTED_SUGGESTIONS, promoted,
                 promotedCorpora);
@@ -71,8 +70,8 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         }
     }
 
-    private ArrayList<Corpus> getRankedCorpora() {
-        return mRanker.rankCorpora(mCorpora.getAllCorpora());
+    private List<Corpus> getRankedCorpora() {
+        return mRanker.getRankedCorpora();
     }
 
     private ArrayList<CorpusResult> getSuggestions(String query) {
@@ -93,9 +92,15 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     }
 
     // A corpus ranker that orders corpora lexicographically by name.
-    private static class LexicographicalCorpusRanker implements CorpusRanker {
-        public ArrayList<Corpus> rankCorpora(Collection<Corpus> corpora) {
-            ArrayList<Corpus> ordered = new ArrayList<Corpus>(corpora);
+    private class LexicographicalCorpusRanker extends AbstractCorpusRanker {
+
+        public LexicographicalCorpusRanker(Corpora corpora) {
+            super(corpora);
+        }
+
+        @Override
+        public List<Corpus> rankCorpora(Corpora corpora) {
+            ArrayList<Corpus> ordered = new ArrayList<Corpus>(corpora.getEnabledCorpora());
             Collections.sort(ordered, new Comparator<Corpus>() {
                 public int compare(Corpus c1, Corpus c2) {
                     return c1.getName().compareTo(c2.getName());
@@ -103,5 +108,6 @@ public class RankAwarePromoterTest extends AndroidTestCase {
             });
             return ordered;
         }
+
     }
 }

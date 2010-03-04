@@ -16,7 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides a set of suggestion results for a query..
@@ -28,7 +28,7 @@ public interface SuggestionsProvider {
      */
     Suggestions getSuggestions(String query);
 
-    ArrayList<Corpus> getOrderedCorpora();
+    List<Corpus> getOrderedCorpora();
 
     void close();
 }

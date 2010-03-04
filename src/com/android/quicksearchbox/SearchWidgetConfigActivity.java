@@ -58,8 +58,7 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
 
     @Override
     protected void onStart() {
-        setAdapter(CorporaAdapter.createListAdapter(getViewFactory(), getCorpora(),
-                getCorpusRanker()));
+        setAdapter(CorporaAdapter.createListAdapter(getViewFactory(), getCorpusRanker()));
         super.onStart();
     }
 

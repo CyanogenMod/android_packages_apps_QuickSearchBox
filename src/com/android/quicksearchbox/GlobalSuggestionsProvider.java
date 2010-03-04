@@ -20,7 +20,7 @@ import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.os.Handler;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A suggestions provider that gets suggestions from all enabled sources that
@@ -28,28 +28,24 @@ import java.util.ArrayList;
  */
 public class GlobalSuggestionsProvider extends AbstractSuggestionsProvider {
 
-    private final Corpora mCorpora;
-
     private final CorpusRanker mCorpusRanker;
 
     private final ShortcutRepository mShortcutRepo;
 
-    public GlobalSuggestionsProvider(Config config, Corpora corpora,
+    public GlobalSuggestionsProvider(Config config,
             NamedTaskExecutor queryExecutor,
             Handler publishThread,
             Promoter promoter,
             CorpusRanker corpusRanker,
             ShortcutRepository shortcutRepo) {
         super(config, queryExecutor, publishThread, promoter);
-        mCorpora = corpora;
         mCorpusRanker = corpusRanker;
         mShortcutRepo = shortcutRepo;
     }
 
-    // TODO: Cache this list?
     @Override
-    public ArrayList<Corpus> getOrderedCorpora() {
-        return mCorpusRanker.rankCorpora(mCorpora.getEnabledCorpora());
+    public List<Corpus> getOrderedCorpora() {
+        return mCorpusRanker.getRankedCorpora();
     }
 
     @Override

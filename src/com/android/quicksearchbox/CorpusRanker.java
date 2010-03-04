@@ -16,14 +16,36 @@
 
 package com.android.quicksearchbox;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import android.database.DataSetObserver;
+
+import java.util.List;
 
 /**
  * Orders corpora by importance.
  */
 public interface CorpusRanker {
 
-    ArrayList<Corpus> rankCorpora(Collection<Corpus> corpora);
+    /**
+     * Gets a an ordered list of corpora.
+     *
+     * @return The most important corpora come first in the list. Callers should not mofify the
+     *         returned list.
+     */
+    List<Corpus> getRankedCorpora();
+
+    /**
+     * Registers an observer that is called when the corpus list changes.
+     *
+     * @param observer gets notified when the corpus list changes.
+     */
+    void registerDataSetObserver(DataSetObserver observer);
+
+    /**
+     * Unregisters an observer that has previously been registered with
+     * {@link #registerDataSetObserver(DataSetObserver)}
+     *
+     * @param observer the observer to unregister.
+     */
+    void unregisterDataSetObserver(DataSetObserver observer);
 
 }

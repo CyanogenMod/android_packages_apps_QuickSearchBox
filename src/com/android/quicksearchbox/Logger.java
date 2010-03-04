@@ -16,8 +16,8 @@
 
 package com.android.quicksearchbox;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -34,7 +34,7 @@ public interface Logger {
      * @param latency User-visible start-up latency in milliseconds.
      */
     void logStart(int latency, String intentSource, Corpus corpus,
-            ArrayList<Corpus> orderedCorpora);
+            List<Corpus> orderedCorpora);
 
     /**
      * Called when a suggestion is clicked.

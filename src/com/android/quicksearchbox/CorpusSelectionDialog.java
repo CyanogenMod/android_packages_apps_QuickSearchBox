@@ -96,8 +96,8 @@ public class CorpusSelectionDialog extends Dialog {
     @Override
     protected void onStart() {
         super.onStart();
-        CorporaAdapter adapter = CorporaAdapter.createGridAdapter(getViewFactory(), getCorpora(),
-                getCorpusRanker());
+        CorporaAdapter adapter =
+                CorporaAdapter.createGridAdapter(getViewFactory(), getCorpusRanker());
         setAdapter(adapter);
         mCorpusGrid.setSelection(adapter.getCorpusPosition(mCorpus));
     }
@@ -157,10 +157,6 @@ public class CorpusSelectionDialog extends Dialog {
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getContext().getApplicationContext();
-    }
-
-    private Corpora getCorpora() {
-        return getQsbApplication().getCorpora();
     }
 
     private CorpusRanker getCorpusRanker() {

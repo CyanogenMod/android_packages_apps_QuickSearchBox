@@ -16,8 +16,8 @@
 
 package com.android.quicksearchbox.util;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class Util {
 
-    public static <A> Set<A> setOfFirstN(ArrayList<A> list, int n) {
+    public static <A> Set<A> setOfFirstN(List<A> list, int n) {
         int end = Math.min(list.size(), n);
         HashSet<A> set = new HashSet<A>(end);
         for (int i = 0; i < end; i++) {
