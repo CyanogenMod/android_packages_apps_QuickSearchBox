@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * A promoter that promotes one suggestion from each source.
@@ -37,7 +38,7 @@ public class RoundRobinPromoter implements Promoter {
 
     public void pickPromoted(SuggestionCursor shortcuts,
             ArrayList<CorpusResult> suggestions, int maxPromoted,
-            ListSuggestionCursor promoted) {
+            ListSuggestionCursor promoted, Set<Corpus> promotedCorpora) {
         if (DBG) Log.d(TAG, "pickPromoted(maxPromoted = " + maxPromoted + ")");
         final int sourceCount = suggestions.size();
         if (sourceCount == 0) return;

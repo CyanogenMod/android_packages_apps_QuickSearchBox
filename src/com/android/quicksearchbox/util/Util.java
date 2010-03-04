@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A simple promoter that concatenations the source results and ignores the shortcuts.
- *
+ * General utilities.
  */
-public class ConcatPromoter implements Promoter {
+public class Util {
 
-    public void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<CorpusResult> suggestions, int maxPromoted,
-            ListSuggestionCursor promoted, Set<Corpus> promotedCorpora) {
-        for (SuggestionCursor c : suggestions) {
-            for (int i = 0; i < c.getCount(); i++) {
-                if (promoted.getCount() >= maxPromoted) {
-                    return;
-                }
-                promoted.add(new SuggestionPosition(c, i));
-            }
+    public static <A> Set<A> setOfFirstN(ArrayList<A> list, int n) {
+        int end = Math.min(list.size(), n);
+        HashSet<A> set = new HashSet<A>(end);
+        for (int i = 0; i < end; i++) {
+            set.add(list.get(i));
         }
+        return set;
     }
 
 }

@@ -19,11 +19,13 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.BatchingNamedTaskExecutor;
 import com.android.quicksearchbox.util.Consumer;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
+import com.android.quicksearchbox.util.Util;
 
 import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Common suggestions provider base class.
@@ -109,10 +111,13 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
         ArrayList<Corpus> corporaToQuery = getCorporaToQuery(query);
+        int numPromotedSources = mConfig.getNumPromotedSources();
+        Set<Corpus> promotedCorpora = Util.setOfFirstN(corporaToQuery, numPromotedSources);
         final Suggestions suggestions = new Suggestions(mPromoter,
                 mConfig.getMaxPromotedSuggestions(),
                 query,
-                corporaToQuery.size());
+                corporaToQuery.size(),
+                promotedCorpora);
         SuggestionCursor shortcuts = getShortcutsForQuery(query);
         if (shortcuts != null) {
             suggestions.setShortcuts(shortcuts);
@@ -123,8 +128,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
             return suggestions;
         }
 
-        mBatchingExecutor = new BatchingNamedTaskExecutor(mQueryExecutor,
-                mConfig.getNumPromotedSources());
+        mBatchingExecutor = new BatchingNamedTaskExecutor(mQueryExecutor, numPromotedSources);
 
         SuggestionCursorReceiver receiver = new SuggestionCursorReceiver(
                 mBatchingExecutor, suggestions);

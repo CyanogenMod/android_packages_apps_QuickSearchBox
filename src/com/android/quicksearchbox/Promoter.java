@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Promoters choose which suggestions to promote from all the available suggestions.
@@ -31,9 +32,10 @@ public interface Promoter {
      * @param suggestions The suggestions from each source.
      * @param maxPromoted The maximum number of suggestions to promote.
      * @param promoted List to add the promoted suggestions to.
+     * @param promotedCorpora The set of promoted corpora.
      */
     void pickPromoted(SuggestionCursor shortcuts,
             ArrayList<CorpusResult> suggestions, int maxPromoted,
-            ListSuggestionCursor promoted);
+            ListSuggestionCursor promoted, Set<Corpus> promotedCorpora);
 
 }

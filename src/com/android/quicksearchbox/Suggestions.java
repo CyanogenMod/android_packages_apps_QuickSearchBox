@@ -22,6 +22,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Contains all {@link SuggestionCursor} objects that have been reported.
@@ -37,6 +38,9 @@ public class Suggestions {
 
     /** The number of sources that are expected to report. */
     private final int mExpectedCorpusCount;
+
+    /** The corpora that are promoted. */
+    private final Set<Corpus> mPromotedCorpora;
 
     /**
      * The observers that want notifications of changes to the published suggestions.
@@ -74,11 +78,12 @@ public class Suggestions {
      * @param expectedCorpusCount The number of sources that are expected to report.
      */
     public Suggestions(Promoter promoter, int maxPromoted,
-            String query, int expectedCorpusCount) {
+            String query, int expectedCorpusCount, Set<Corpus> promotedCorpora) {
         mPromoter = promoter;
         mMaxPromoted = maxPromoted;
         mQuery = query;
         mExpectedCorpusCount = expectedCorpusCount;
+        mPromotedCorpora = promotedCorpora;
         mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpusCount);
         mResultsByCorpus = new HashMap<Corpus,CorpusResult>(mExpectedCorpusCount);
         mPromoted = null;  // will be set by updatePromoted()
@@ -207,7 +212,8 @@ public class Suggestions {
         if (mPromoter == null) {
             return;
         }
-        mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted);
+        mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted,
+                mPromotedCorpora);
     }
 
     /**

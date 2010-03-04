@@ -16,12 +16,16 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Util;
+
 import android.test.AndroidTestCase;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Tests for RankAwarePromoter
@@ -36,16 +40,20 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     private CorpusRanker mRanker;
     private RankAwarePromoter mPromoter;
 
+    @Override
     public void setUp() {
         mCorpora = createMockCorpora(5);
         mRanker = new LexicographicalCorpusRanker();
-        mPromoter = new RankAwarePromoter(mCorpora, mRanker, MAX_PROMOTED_CORPORA);
+        mPromoter = new RankAwarePromoter();
     }
 
     public void testPromotesExpectedSuggestions() {
         ArrayList<CorpusResult> suggestions = getSuggestions(TEST_QUERY);
         ListSuggestionCursor promoted = new ListSuggestionCursor(TEST_QUERY);
-        mPromoter.pickPromoted(null, suggestions, MAX_PROMOTED_SUGGESTIONS, promoted);
+        ArrayList<Corpus> rankedCorpora = getRankedCorpora();
+        Set<Corpus> promotedCorpora = Util.setOfFirstN(rankedCorpora, MAX_PROMOTED_CORPORA);
+        mPromoter.pickPromoted(null, suggestions, MAX_PROMOTED_SUGGESTIONS, promoted,
+                promotedCorpora);
 
         assertEquals(MAX_PROMOTED_SUGGESTIONS, promoted.getCount());
 
@@ -63,9 +71,13 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         }
     }
 
+    private ArrayList<Corpus> getRankedCorpora() {
+        return mRanker.rankCorpora(mCorpora.getAllCorpora());
+    }
+
     private ArrayList<CorpusResult> getSuggestions(String query) {
         ArrayList<CorpusResult> suggestions = new ArrayList<CorpusResult>();
-        for (Corpus corpus : mRanker.rankCorpora(mCorpora.getAllCorpora())) {
+        for (Corpus corpus : getRankedCorpora()) {
             suggestions.add(corpus.getSuggestions(query, 10));
         }
         return suggestions;

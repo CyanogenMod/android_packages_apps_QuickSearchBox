@@ -19,9 +19,9 @@ package com.android.quicksearchbox;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * A promoter that gives preference to suggestions from higher ranking corpora.
@@ -31,23 +31,8 @@ public class RankAwarePromoter implements Promoter {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.RankAwarePromoter";
 
-    private final HashSet<Corpus> mPromotedCorpora;
-
-    public RankAwarePromoter(Corpora corpora, CorpusRanker corpusRanker, int maxPromotedCorpora) {
-        // Create a set of the corpora we consider to be promoted.  Note that we
-        // only do this once, even though these may change slightly during a session.
-        ArrayList<Corpus> orderedCorpora = corpusRanker.rankCorpora(corpora.getEnabledCorpora());
-        int count = Math.min(orderedCorpora.size(), maxPromotedCorpora);
-        mPromotedCorpora = new HashSet<Corpus>(orderedCorpora.subList(0, count));
-        if (DBG) Log.d(TAG, "Promoted: " + mPromotedCorpora);
-    }
-
-    private boolean isPromoted(Corpus corpus) {
-        return mPromotedCorpora.contains(corpus);
-    }
-
     public void pickPromoted(SuggestionCursor shortcuts, ArrayList<CorpusResult> suggestions,
-            int maxPromoted, ListSuggestionCursor promoted) {
+            int maxPromoted, ListSuggestionCursor promoted, Set<Corpus> promotedCorpora) {
 
         if (DBG) Log.d(TAG, "Available results: " + suggestions);
 
@@ -58,7 +43,7 @@ public class RankAwarePromoter implements Promoter {
             CorpusResult result = suggestions.get(i);
             if (result.getCount() > 0) {
                 result.moveTo(0);
-                if (isPromoted(result.getCorpus())) {
+                if (promotedCorpora.contains(result.getCorpus())) {
                     promotedResults.add(result);
                 } else {
                     otherResults.add(result);

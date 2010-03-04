@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * A promoter that first promotes any shortcuts, and then delegates to another
@@ -45,7 +46,7 @@ public class ShortcutPromoter implements Promoter {
 
     public void pickPromoted(SuggestionCursor shortcuts,
             ArrayList<CorpusResult> suggestions, int maxPromoted,
-            ListSuggestionCursor promoted) {
+            ListSuggestionCursor promoted, Set<Corpus> promotedCorpora) {
         int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
         int promotedShortcutCount = Math.min(shortcutCount, maxPromoted);
         if (DBG) {
@@ -58,7 +59,7 @@ public class ShortcutPromoter implements Promoter {
         }
 
         if (promoted.getCount() < maxPromoted && mNextPromoter != null) {
-            mNextPromoter.pickPromoted(null, suggestions, maxPromoted, promoted);
+            mNextPromoter.pickPromoted(null, suggestions, maxPromoted, promoted, promotedCorpora);
         }
     }
 
