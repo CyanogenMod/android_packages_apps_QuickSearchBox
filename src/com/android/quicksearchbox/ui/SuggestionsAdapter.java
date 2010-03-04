@@ -86,7 +86,7 @@ public class SuggestionsAdapter extends BaseAdapter {
         onSuggestionsChanged();
     }
 
-    protected Suggestions getSuggestions() {
+    public Suggestions getSuggestions() {
         return mSuggestions;
     }
 

@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 
 /**
@@ -44,7 +45,7 @@ public interface Logger {
      *        {@code suggestionCursor}, ordered by rank.
      */
     void logSuggestionClick(int position, SuggestionCursor suggestionCursor,
-            ArrayList<Corpus> queriedCorpora);
+            Collection<Corpus> queriedCorpora);
 
     /**
      * The user launched a search.

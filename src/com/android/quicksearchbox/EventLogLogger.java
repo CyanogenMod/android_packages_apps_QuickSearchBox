@@ -24,6 +24,7 @@ import android.util.EventLog;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Logs events to {@link EventLog}.
@@ -77,7 +78,7 @@ public class EventLogLogger implements Logger {
     }
 
     public void logSuggestionClick(int position,
-            SuggestionCursor suggestionCursor, ArrayList<Corpus> queriedCorpora) {
+            SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora) {
         String suggestions = getSuggestions(suggestionCursor);
         String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
@@ -126,12 +127,11 @@ public class EventLogLogger implements Logger {
         return sb.toString();
     }
 
-    private String getCorpusLogNames(ArrayList<Corpus> corpora) {
+    private String getCorpusLogNames(Collection<Corpus> corpora) {
         StringBuilder sb = new StringBuilder();
-        final int count = corpora.size();
-        for (int i = 0; i < count; i++) {
-            if (i > 0) sb.append(LIST_SEPARATOR);
-            sb.append(getCorpusLogName(corpora.get(i)));
+        for (Corpus corpus : corpora) {
+            if (sb.length() > 0) sb.append(LIST_SEPARATOR);
+            sb.append(getCorpusLogName(corpus));
         }
         return sb.toString();
     }

@@ -19,6 +19,8 @@ package com.android.quicksearchbox;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import java.util.Set;
+
 /**
  * Tests for {@link Suggestions}.
  *
@@ -45,6 +47,14 @@ public class SuggestionsTest extends AndroidTestCase {
 
     public void testGetUserQuery() {
         assertEquals("foo", mSuggestions.getQuery());
+    }
+
+    public void testGetIncludedCorpora() {
+        Corpus corpus = MockCorpus.CORPUS_1;
+        mSuggestions.addCorpusResult(corpus.getSuggestions("foo", 50));
+        Set<Corpus> includedCorpora = mSuggestions.getIncludedCorpora();
+        assertEquals(includedCorpora.size(), 1);
+        assertTrue(includedCorpora.contains(corpus));
     }
 
 }

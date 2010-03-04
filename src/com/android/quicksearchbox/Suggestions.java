@@ -22,6 +22,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -123,6 +124,15 @@ public class Suggestions {
             updatePromoted();
         }
         return mPromoted;
+    }
+
+    /**
+     * Gets the set of corpora that have reported results to this suggestions set.
+     *
+     * @return A collection of corpora.
+     */
+    public Set<Corpus> getIncludedCorpora() {
+        return new HashSet<Corpus>(mResultsByCorpus.keySet());
     }
 
     /**

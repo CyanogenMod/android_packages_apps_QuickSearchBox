@@ -47,7 +47,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * The main activity for Quick Search Box. Shows the search UI.
@@ -256,10 +256,6 @@ public class SearchActivity extends Activity {
 
     private Corpora getCorpora() {
         return getQsbApplication().getCorpora();
-    }
-
-    private CorpusRanker getCorpusRanker() {
-        return getQsbApplication().getCorpusRanker();
     }
 
     private ShortcutRepository getShortcutRepository() {
@@ -494,19 +490,18 @@ public class SearchActivity extends Activity {
         mLauncher.launchIntent(intent);
     }
 
-    protected SuggestionCursor getSuggestions() {
+    protected SuggestionCursor getCurrentSuggestions() {
         return mSuggestionsAdapter.getCurrentSuggestions();
     }
 
     protected boolean launchSuggestion(int position) {
         if (DBG) Log.d(TAG, "Launching suggestion " + position);
         mTookAction = true;
-        SuggestionCursor suggestions = getSuggestions();
+
+        SuggestionCursor suggestions = getCurrentSuggestions();
 
         // Log suggestion click
-        // TODO: This should be just the queried sources, but currently
-        // all sources are queried
-        ArrayList<Corpus> corpora = getCorpusRanker().rankCorpora(getCorpora().getEnabledCorpora());
+        Collection<Corpus> corpora = mSuggestionsAdapter.getSuggestions().getIncludedCorpora();
         getLogger().logSuggestionClick(position, suggestions, corpora);
 
         // Create shortcut
@@ -739,7 +734,7 @@ public class SearchActivity extends Activity {
 
     private class SelectionHandler implements SuggestionSelectionListener {
         public void onSuggestionSelected(int position) {
-            SuggestionCursor suggestions = getSuggestions();
+            SuggestionCursor suggestions = getCurrentSuggestions();
             suggestions.moveTo(position);
             String displayQuery = suggestions.getSuggestionDisplayQuery();
             if (TextUtils.isEmpty(displayQuery)) {
