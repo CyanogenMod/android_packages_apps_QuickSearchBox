@@ -94,6 +94,23 @@ public class CorporaAdapter extends BaseAdapter {
         return position;
     }
 
+    /**
+     * Gets the position of the given corpus.
+     */
+    public int getCorpusPosition(Corpus corpus) {
+        if (corpus == null) {
+            return 0;
+        }
+        int count = getCount();
+        for (int i = 0; i < count; i++) {
+            if (corpus.equals(getItem(i))) {
+                return i;
+            }
+        }
+        Log.w(TAG, "Corpus not in adapter: " + corpus);
+        return 0;
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
         CorpusView view = (CorpusView) convertView;
         if (view == null) {
@@ -134,4 +151,5 @@ public class CorporaAdapter extends BaseAdapter {
             updateCorpora();
         }
     }
+
 }

@@ -28,7 +28,9 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -44,6 +46,8 @@ public class CorpusSelectionDialog extends Dialog {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SelectSearchSourceDialog";
 
+    private static final int NUM_COLUMNS = 4;
+
     private GridView mCorpusGrid;
 
     private Corpus mCorpus;
@@ -58,11 +62,11 @@ public class CorpusSelectionDialog extends Dialog {
         super(context, R.style.Theme_SelectSearchSource);
         setContentView(R.layout.corpus_selection_dialog);
         mCorpusGrid = (GridView) findViewById(R.id.corpus_grid);
+        mCorpusGrid.setNumColumns(NUM_COLUMNS);
         mCorpusGrid.setOnItemClickListener(new CorpusClickListener());
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
         mCorpusGrid.setFocusable(true);
-        setCanceledOnTouchOutside(true);
         positionWindow();
     }
 
@@ -79,20 +83,10 @@ public class CorpusSelectionDialog extends Dialog {
     }
 
     private void positionWindow() {
-        Resources resources = getContext().getResources();
-        int x = resources.getDimensionPixelSize(R.dimen.corpus_selection_dialog_x);
-        int y = resources.getDimensionPixelSize(R.dimen.corpus_selection_dialog_y);
-        positionWindowAt(x, y);
-    }
-
-    private void positionWindowAt(int x, int y) {
         Window window = getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();
-        lp.x = x;
-        lp.y = y;
-        lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
         // Put window on top of input method
         lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         window.setAttributes(lp);
@@ -102,8 +96,10 @@ public class CorpusSelectionDialog extends Dialog {
     @Override
     protected void onStart() {
         super.onStart();
-        setAdapter(CorporaAdapter.createGridAdapter(getViewFactory(), getCorpora(),
-                getCorpusRanker()));
+        CorporaAdapter adapter = CorporaAdapter.createGridAdapter(getViewFactory(), getCorpora(),
+                getCorpusRanker());
+        setAdapter(adapter);
+        mCorpusGrid.setSelection(adapter.getCorpusPosition(mCorpus));
     }
 
     @Override
@@ -117,6 +113,39 @@ public class CorpusSelectionDialog extends Dialog {
         super.onCreateOptionsMenu(menu);
         SearchSettings.addSearchSettingsMenuItem(getContext(), menu);
         return true;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            // Cancel dialog on any touch down event which is not handled by the corpus grid
+            cancel();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean handled = super.onKeyDown(keyCode, event);
+        if (handled) {
+            return handled;
+        }
+        // Dismiss dialog on up move when nothing, or an item on the top row, is selected.
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+            int selectedRow = mCorpusGrid.getSelectedItemPosition() / NUM_COLUMNS;
+            if (selectedRow <= 0) {
+                cancel();
+                return true;
+            }
+        }
+        // Dismiss dialog when typing on hard keyboard (soft keyboard is behind the dialog,
+        // so that can't be typed on)
+        if (event.isPrintingKey()) {
+            cancel();
+            return true;
+        }
+        return false;
     }
 
     private void setAdapter(CorporaAdapter adapter) {

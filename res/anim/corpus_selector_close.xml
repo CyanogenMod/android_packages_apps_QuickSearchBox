@@ -18,6 +18,7 @@
         android:interpolator="@android:anim/accelerate_interpolator">
     <scale android:fromXScale="1.0" android:toXScale="0.0"
            android:fromYScale="1.0" android:toYScale="0.0"
-           android:pivotX="5%p" android:pivotY="0%p"
+           android:pivotX="5%p"
+           android:pivotY="10%p"
            android:duration="@android:integer/config_shortAnimTime" />
 </set>

@@ -289,6 +289,7 @@ public class SearchActivity extends Activity {
         // if we come back to this activity.
         mSuggestionsAdapter.setSuggestions(null);
         getQsbApplication().getShortcutRefresher().reset();
+        dismissCorpusSelectionDialog();
         super.onStop();
     }
 
@@ -412,7 +413,11 @@ public class SearchActivity extends Activity {
     }
 
     protected void dismissCorpusSelectionDialog() {
-        dismissDialog(CORPUS_SELECTION_DIALOG);
+        // We call removeDialog() instead of dismissDialog(), so that the corpus
+        // selection dialog is not saved in the instance state.
+        // Also, dismissDialog() throws an exception if the dialog is not showing,
+        // removeDialog() doesn't.
+        removeDialog(CORPUS_SELECTION_DIALOG);
     }
 
     @Override
