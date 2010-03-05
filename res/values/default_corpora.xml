@@ -24,7 +24,5 @@
     <item>apps</item>
     <item>com.android.contacts/.ContactsListActivity</item>
     <item>com.android.providers.applications/.ApplicationLauncher</item>
-    <item>com.google.android.youtube/.VideoListActivity</item>
-    <item>com.android.mms/.ui.SearchActivity</item>
   </string-array>
 </resources>
