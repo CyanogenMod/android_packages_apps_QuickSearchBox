@@ -52,6 +52,8 @@ public class SearchableSource implements Source {
 
     private final SearchableInfo mSearchable;
 
+    private final String mName;
+
     private final ActivityInfo mActivityInfo;
 
     // Cached label for the activity
@@ -67,6 +69,7 @@ public class SearchableSource implements Source {
         ComponentName componentName = searchable.getSearchActivity();
         mContext = context;
         mSearchable = searchable;
+        mName = componentName.flattenToShortString();
         mActivityInfo = context.getPackageManager().getActivityInfo(componentName, 0);
 
         mIconLoader = createIconLoader(context, searchable.getSuggestPackage());
@@ -95,7 +98,7 @@ public class SearchableSource implements Source {
     }
 
     public String getName() {
-        return getComponentName().flattenToShortString();
+        return mName;
     }
 
     public Drawable getIcon(String drawableId) {
@@ -405,14 +408,14 @@ public class SearchableSource implements Source {
     public boolean equals(Object o) {
         if (o != null && o.getClass().equals(this.getClass())) {
             SearchableSource s = (SearchableSource) o;
-            return s.getComponentName().equals(getComponentName());
+            return s.mName.equals(mName);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return getComponentName().hashCode();
+        return mName.hashCode();
     }
 
     @Override

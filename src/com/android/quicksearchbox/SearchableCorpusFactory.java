@@ -18,9 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,29 +39,9 @@ public class SearchableCorpusFactory implements CorpusFactory {
     }
 
     public Collection<Corpus> createCorpora(Sources sources) {
-        Collection<Source> sourceList = sources.getSources();
-        ArrayList<Corpus> corpora = new ArrayList<Corpus>(sourceList.size());
-        HashSet<Source> claimedSources = new HashSet<Source>();
-
-        Source webSource = sources.getWebSearchSource();
-        Source browserSource = sources.getSource(getBrowserSearchComponent());
-        Corpus webCorpus = createWebCorpus(webSource, browserSource);
-        claimedSources.add(webSource);
-        claimedSources.add(browserSource);
-        corpora.add(webCorpus);
-
-        Source appsSource = sources.getSource(getAppsSearchComponent());
-        Corpus appsCorpus = createAppsCorpus(appsSource);
-        claimedSources.add(appsSource);
-        corpora.add(appsCorpus);
-
-        // Creates corpora for all unclaimed sources
-        for (Source source : sourceList) {
-            if (!claimedSources.contains(source)) {
-                corpora.add(new SingleSourceCorpus(source));
-            }
-        }
-
+        ArrayList<Corpus> corpora = new ArrayList<Corpus>();
+        addSpecialCorpora(corpora, sources);
+        addSingleSourceCorpora(corpora, sources);
         return corpora;
     }
 
@@ -71,25 +49,66 @@ public class SearchableCorpusFactory implements CorpusFactory {
         return mContext;
     }
 
-    protected Corpus createWebCorpus(Source webSource, Source browserSource) {
+    protected NamedTaskExecutor getExecutor() {
+        return mExecutor;
+    }
+
+    /**
+     * Adds any corpora that are not simple single source corpora.
+     *
+     * @param corpora List to add corpora to.
+     * @param sources All available sources.
+     */
+    protected void addSpecialCorpora(ArrayList<Corpus> corpora, Sources sources) {
+        corpora.add(createWebCorpus(sources));
+        corpora.add(createAppsCorpus(sources));
+    }
+
+    /**
+     * Adds corpora for all sources that are not already used by a corpus.
+     *
+     * @param corpora List to add the new corpora to. Corpora will not be created for the sources
+     *        used by corpora already in this list.
+     * @param sources Sources to create corpora for.
+     */
+    protected void addSingleSourceCorpora(ArrayList<Corpus> corpora, Sources sources) {
+        // Set of all sources that are already used
+        HashSet<Source> claimedSources = new HashSet<Source>();
+        for (Corpus specialCorpus : corpora) {
+            claimedSources.addAll(specialCorpus.getSources());
+        }
+
+        // Creates corpora for all unclaimed sources
+        for (Source source : sources.getSources()) {
+            if (!claimedSources.contains(source)) {
+                corpora.add(createSingleSourceCorpus(source));
+            }
+        }
+    }
+
+    protected Corpus createWebCorpus(Sources sources) {
+        Source webSource = sources.getWebSearchSource();
+        Source browserSource = getBrowserSource(sources);
         return new WebCorpus(mContext, mExecutor, webSource, browserSource);
     }
 
-    protected Corpus createAppsCorpus(Source appsSource) {
+    protected Corpus createAppsCorpus(Sources sources) {
+        Source appsSource = getAppsSource(sources);
         return new AppsCorpus(mContext, mExecutor, appsSource);
     }
 
-    private ComponentName getBrowserSearchComponent() {
-        return getComponentNameResource(R.string.browser_search_component);
+    protected Corpus createSingleSourceCorpus(Source source) {
+        return new SingleSourceCorpus(source);
     }
 
-    private ComponentName getAppsSearchComponent() {
-        return getComponentNameResource(R.string.installed_apps_component);
+    protected Source getBrowserSource(Sources sources) {
+        String name = getContext().getString(R.string.browser_search_component);
+        return sources.getSource(name);
     }
 
-    private ComponentName getComponentNameResource(int res) {
-        String name = mContext.getString(res);
-        return TextUtils.isEmpty(name) ? null : ComponentName.unflattenFromString(name);
+    protected Source getAppsSource(Sources sources) {
+        String name = getContext().getString(R.string.installed_apps_component);
+        return sources.getSource(name);
     }
 
 }

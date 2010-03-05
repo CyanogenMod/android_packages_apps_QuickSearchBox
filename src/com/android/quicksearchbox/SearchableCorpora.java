@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.DataSetObservable;
@@ -104,7 +103,7 @@ public class SearchableCorpora implements Corpora {
         return mCorporaBySource.get(source);
     }
 
-    public Source getSource(ComponentName name) {
+    public Source getSource(String name) {
         checkLoaded();
         return mSources.getSource(name);
     }

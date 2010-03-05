@@ -1,17 +1,30 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.database.DataSetObserver;
 
 import java.util.Collection;
 
+/**
+ * Search source set.
+ */
 public interface Sources {
 
+    /**
+     * Gets all sources.
+     */
     Collection<Source> getSources();
 
-    Source getSource(ComponentName name);
+    /**
+     * Gets a source by name.
+     *
+     * @return A source, or {@code null} if no source with the given name exists.
+     */
+    Source getSource(String name);
 
+    /**
+     * Gets the web search source.
+     */
     Source getWebSearchSource();
 
     /**

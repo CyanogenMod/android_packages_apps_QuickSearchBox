@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -294,11 +293,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return source;
         }
 
-        private Source getSourceIfEnabled(String srcStr) {
-            ComponentName srcName = ComponentName.unflattenFromString(srcStr);
-            if (srcName == null) {
-                return null;
-            }
+        private Source getSourceIfEnabled(String srcName) {
             Source source = mCorpora.getSource(srcName);
             if (source == null) {
                 return null;
@@ -394,8 +389,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         String intentQuery = suggestion.getSuggestionQuery();
         String intentExtraData = suggestion.getSuggestionIntentExtraData();
 
-        ComponentName source = suggestion.getSuggestionSource().getComponentName();
-        StringBuilder key = new StringBuilder(source.flattenToShortString());
+        String sourceName = suggestion.getSuggestionSource().getName();
+        StringBuilder key = new StringBuilder(sourceName);
         key.append("#");
         if (intentData != null) {
             key.append(intentData);
@@ -414,7 +409,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         ContentValues cv = new ContentValues();
         cv.put(Shortcuts.intent_key.name(), intentKey);
-        cv.put(Shortcuts.source.name(), source.flattenToShortString());
+        cv.put(Shortcuts.source.name(), sourceName);
         cv.put(Shortcuts.format.name(), suggestion.getSuggestionFormat());
         cv.put(Shortcuts.title.name(), suggestion.getSuggestionText1());
         cv.put(Shortcuts.description.name(), suggestion.getSuggestionText2());

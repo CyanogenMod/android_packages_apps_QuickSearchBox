@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.database.DataSetObserver;
 
 import java.util.Collection;
@@ -40,6 +39,11 @@ public interface Corpora {
      */
     Collection<Corpus> getAllCorpora();
 
+    /**
+     * Gets all enabled corpora.
+     *
+     * @return Callers must not modify the returned collection.
+     */
     Collection<Corpus> getEnabledCorpora();
 
     /**
@@ -49,9 +53,20 @@ public interface Corpora {
      */
     Corpus getCorpus(String name);
 
+    /**
+     * Gets the web search corpus.
+     *
+     * @return The web search corpus, or {@code null} if there is no web search corpus.
+     */
     Corpus getWebCorpus();
 
-    Source getSource(ComponentName name);
+    /**
+     * Gets a source by name.
+     *
+     * @param name Source name.
+     * @return A source, or {@code null} if no source with the given name exists.
+     */
+    Source getSource(String name);
 
     /**
      * Gets the corpus that contains the given source.

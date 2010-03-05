@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.ComponentName;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 
@@ -30,13 +29,13 @@ public class MockSources implements Sources {
 
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
-    private final HashMap<ComponentName, Source> mSources = new HashMap<ComponentName, Source>();
+    private final HashMap<String, Source> mSources = new HashMap<String, Source>();
 
     public void addSource(Source source) {
-        mSources.put(source.getComponentName(), source);
+        mSources.put(source.getName(), source);
     }
 
-    public Source getSource(ComponentName name) {
+    public Source getSource(String name) {
         return mSources.get(name);
     }
 

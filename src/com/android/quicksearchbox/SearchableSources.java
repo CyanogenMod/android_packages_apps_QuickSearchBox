@@ -52,8 +52,8 @@ public class SearchableSources implements Sources {
     private final SearchManager mSearchManager;
     private boolean mLoaded;
 
-    // All suggestion sources.
-    private HashMap<ComponentName, Source> mSources;
+    // All suggestion sources, by name.
+    private HashMap<String, Source> mSources;
 
     // The web search source to use.
     private Source mWebSearchSource;
@@ -86,7 +86,7 @@ public class SearchableSources implements Sources {
         return mSources.values();
     }
 
-    public Source getSource(ComponentName name) {
+    public Source getSource(String name) {
         return mSources.get(name);
     }
 
@@ -147,7 +147,7 @@ public class SearchableSources implements Sources {
      */
     private void updateSources() {
         if (DBG) Log.d(TAG, "updateSources()");
-        mSources = new HashMap<ComponentName,Source>();
+        mSources = new HashMap<String,Source>();
         for (SearchableInfo searchable : mSearchManager.getSearchablesInGlobalSearch()) {
             Source source = createSearchableSource(searchable);
             if (source != null) {
@@ -161,7 +161,7 @@ public class SearchableSources implements Sources {
     }
 
     private void addSource(Source source) {
-        mSources.put(source.getComponentName(), source);
+        mSources.put(source.getName(), source);
     }
 
     private Source createWebSearchSource() {

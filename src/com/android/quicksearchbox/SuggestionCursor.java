@@ -159,7 +159,7 @@ public interface SuggestionCursor {
 
     /**
      * Gets the suggestion log type for the current suggestion. This is logged together
-     * with the value returned from {@link Source#getLogName()}.
+     * with the value returned from {@link Source#getName()}.
      * The value is source-specific. Most sources return {@code null}.
      */
     String getSuggestionLogType();

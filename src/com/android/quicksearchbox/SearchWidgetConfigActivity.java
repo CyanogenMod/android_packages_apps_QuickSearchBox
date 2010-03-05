@@ -116,10 +116,6 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         return (QsbApplication) getApplication();
     }
 
-    private Corpora getCorpora() {
-        return getQsbApplication().getCorpora();
-    }
-
     private CorpusRanker getCorpusRanker() {
         return getQsbApplication().getCorpusRanker();
     }
