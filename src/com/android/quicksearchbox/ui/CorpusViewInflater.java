@@ -56,15 +56,19 @@ public class CorpusViewInflater implements CorpusViewFactory {
         return mContext.getString(R.string.corpus_label_global);
     }
 
+    private int getGlobalSearchIconResource() {
+        return R.drawable.google_icon;
+    }
+
     public Drawable getGlobalSearchIcon() {
-        return mContext.getResources().getDrawable(R.drawable.corpus_icon_global);
+        return mContext.getResources().getDrawable(getGlobalSearchIconResource());
     }
 
     public Uri getGlobalSearchIconUri() {
         return new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
                 .authority(mContext.getPackageName())
-                .appendEncodedPath(String.valueOf(R.drawable.corpus_icon_global))
+                .appendEncodedPath(String.valueOf(getGlobalSearchIconResource()))
                 .build();
     }
 
