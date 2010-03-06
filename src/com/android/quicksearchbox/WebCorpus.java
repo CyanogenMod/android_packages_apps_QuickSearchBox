@@ -31,6 +31,8 @@ import android.util.Patterns;
 import android.webkit.URLUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The web search source.
@@ -41,10 +43,13 @@ public class WebCorpus extends MultiSourceCorpus {
 
     private final Source mWebSearchSource;
 
+    private final Source mBrowserSource;
+
     public WebCorpus(Context context, NamedTaskExecutor executor,
             Source webSearchSource, Source browserSource) {
         super(context, executor, webSearchSource, browserSource);
         mWebSearchSource = webSearchSource;
+        mBrowserSource = browserSource;
     }
 
     public CharSequence getLabel() {
@@ -159,6 +164,17 @@ public class WebCorpus extends MultiSourceCorpus {
 
     public CharSequence getSettingsDescription() {
         return getContext().getText(R.string.corpus_description_web);
+    }
+
+    @Override
+    protected List<Source> getSourcesToQuery(String query) {
+        if (SearchSettings.getShowWebSuggestions(getContext())) {
+            return super.getSourcesToQuery(query);
+        } else if (mBrowserSource != null) {
+            return Collections.singletonList(mBrowserSource);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
