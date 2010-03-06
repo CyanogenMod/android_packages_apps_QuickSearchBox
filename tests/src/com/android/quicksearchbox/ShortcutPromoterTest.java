@@ -20,6 +20,8 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests for {@link ShortcutPromoter}.
@@ -39,10 +41,12 @@ public class ShortcutPromoterTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         mQuery = "foo";
-        mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery);
+        List<Corpus> corpora = Arrays.asList(MockCorpus.CORPUS_1, MockCorpus.CORPUS_2);
+        mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery, corpora);
         mSuggestions = new ArrayList<CorpusResult>();
-        mSuggestions.add(MockCorpus.CORPUS_1.getSuggestions(mQuery, 10));
-        mSuggestions.add(MockCorpus.CORPUS_2.getSuggestions(mQuery, 10));
+        for (Corpus corpus : corpora) {
+            mSuggestions.add(corpus.getSuggestions(mQuery, 10));
+        }
         mSuggestionCount = countSuggestions(mSuggestions);
     }
 

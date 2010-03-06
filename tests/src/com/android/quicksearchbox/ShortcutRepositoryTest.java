@@ -68,6 +68,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     protected MockCorpora mCorpora;
     protected ShortcutRefresher mRefresher;
 
+    protected List<Corpus> mAllowedCorpora;
+
     protected ShortcutRepositoryImplLog mRepo;
 
     protected DataSuggestionCursor mAppSuggestions;
@@ -95,6 +97,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         mCorpora.addCorpus(CONTACTS_CORPUS, CONTACTS_SOURCE);
         mRefresher = new MockShortcutRefresher();
         mRepo = createShortcutRepository();
+
+        mAllowedCorpora = new ArrayList<Corpus>(mCorpora.getAllCorpora());
 
         mApp1 = makeApp("app1");
         mApp2 = makeApp("app2");
@@ -540,6 +544,14 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 "", mConfig.getMaxShortcutsReturned());
     }
 
+    public void testShortcutsAllowedCorpora() {
+        reportClick("a", mApp1);
+        reportClick("a", mContact1);
+
+        assertShortcuts("only allowed shortcuts should be returned",
+                "a", Arrays.asList(APP_CORPUS), mApp1);
+    }
+
     //
     // SOURCE RANKING TESTS BELOW
     //
@@ -671,7 +683,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertNoShortcuts(String message, String query) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, NOW);
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
         try {
             assertNull(message + ", got shortcuts", cursor);
         } finally {
@@ -685,7 +697,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     void assertShortcutAtPosition(String message, String query,
             int position, SuggestionData expected) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, NOW);
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
         try {
             SuggestionCursor expectedCursor = new DataSuggestionCursor(query, expected);
             assertSameSuggestion(message, position, expectedCursor, cursor);
@@ -695,7 +707,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertShortcutCount(String message, String query, int expectedCount) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, NOW);
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
         try {
             assertEquals(message, expectedCount, cursor.getCount());
         } finally {
@@ -703,8 +715,9 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         }
     }
 
-    void assertShortcuts(String message, String query, SuggestionData... expected) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, NOW);
+    void assertShortcuts(String message, String query, List<Corpus> allowedCorpora,
+            SuggestionData... expected) {
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, allowedCorpora, NOW);
         try {
             assertSameSuggestions(message,
                     new DataSuggestionCursor(query, expected),
@@ -712,6 +725,10 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         } finally {
             if (cursor != null) cursor.close();
         }
+    }
+
+    void assertShortcuts(String message, String query, SuggestionData... expected) {
+        assertShortcuts(message, query, mAllowedCorpora, expected);
     }
 
     void assertCorpusRanking(String message, Corpus... expected) {

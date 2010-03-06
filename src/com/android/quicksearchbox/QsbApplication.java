@@ -43,7 +43,7 @@ public class QsbApplication extends Application {
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
     private NamedTaskExecutor mSourceTaskExecutor;
-    private SuggestionsProvider mGlobalSuggestionsProvider;
+    private SuggestionsProvider mSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
     private Logger mLogger;
@@ -79,9 +79,9 @@ public class QsbApplication extends Application {
             mSourceTaskExecutor.close();
             mSourceTaskExecutor = null;
         }
-        if (mGlobalSuggestionsProvider != null) {
-            mGlobalSuggestionsProvider.close();
-            mGlobalSuggestionsProvider = null;
+        if (mSuggestionsProvider != null) {
+            mSuggestionsProvider.close();
+            mSuggestionsProvider = null;
         }
     }
 
@@ -204,45 +204,23 @@ public class QsbApplication extends Application {
     }
 
     /**
-     * Gets the suggestion provider for a corpus.
+     * Gets the suggestion provider.
      * May only be called from the main thread.
      */
-    public SuggestionsProvider getSuggestionsProvider(Corpus corpus) {
+    protected SuggestionsProvider getSuggestionsProvider() {
         checkThread();
-        if (corpus == null) {
-            return getGlobalSuggestionsProvider();
+        if (mSuggestionsProvider == null) {
+            mSuggestionsProvider = createSuggestionsProvider();
         }
-        // TODO: Cache this to avoid creating a new one for each key press
-        return createSuggestionsProvider(corpus);
+        return mSuggestionsProvider;
     }
 
-    protected SuggestionsProvider createSuggestionsProvider(Corpus corpus) {
-        // TODO: We could use simpler promoter here
-        Promoter promoter =  new ShortcutPromoter(new RoundRobinPromoter());
-        SingleCorpusSuggestionsProvider provider = new SingleCorpusSuggestionsProvider(getConfig(),
-                corpus,
-                getSourceTaskExecutor(),
-                getMainThreadHandler(),
-                promoter,
-                getShortcutRepository());
-        return provider;
-    }
-
-    protected SuggestionsProvider getGlobalSuggestionsProvider() {
-        checkThread();
-        if (mGlobalSuggestionsProvider == null) {
-            mGlobalSuggestionsProvider = createGlobalSuggestionsProvider();
-        }
-        return mGlobalSuggestionsProvider;
-    }
-
-    protected SuggestionsProvider createGlobalSuggestionsProvider() {
+    protected SuggestionsProvider createSuggestionsProvider() {
         Promoter promoter =  new ShortcutPromoter(new RankAwarePromoter());
-        GlobalSuggestionsProvider provider = new GlobalSuggestionsProvider(getConfig(),
+        SuggestionsProvider provider = new SuggestionsProviderImpl(getConfig(),
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
                 promoter,
-                getCorpusRanker(),
                 getShortcutRepository());
         return provider;
     }
