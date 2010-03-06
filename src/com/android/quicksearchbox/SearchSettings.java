@@ -158,6 +158,7 @@ public class SearchSettings extends PreferenceActivity
      * Fills the suggestion source list.
      */
     private void populateSourcePreference() {
+        mSourcePreferences.setOrderingAsAdded(false);
         for (Corpus corpus : getCorpora().getAllCorpora()) {
             Preference pref = createCorpusPreference(corpus);
             if (pref != null) {
@@ -173,6 +174,10 @@ public class SearchSettings extends PreferenceActivity
     private Preference createCorpusPreference(Corpus corpus) {
         CheckBoxPreference sourcePref = new CheckBoxPreference(this);
         sourcePref.setKey(getCorpusEnabledPreference(corpus));
+        // Put web corpus first. The rest are alphabetical.
+        if (corpus.isWebCorpus()) {
+            sourcePref.setOrder(0);
+        }
         sourcePref.setDefaultValue(getCorpora().isCorpusDefaultEnabled(corpus));
         sourcePref.setOnPreferenceChangeListener(this);
         CharSequence label = corpus.getLabel();
