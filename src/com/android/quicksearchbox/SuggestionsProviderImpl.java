@@ -89,9 +89,6 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
      * Gets the sources that should be queried for the given query.
      */
     private List<Corpus> getCorporaToQuery(String query, List<Corpus> orderedCorpora) {
-        if (query.length() == 0) {
-            return Collections.emptyList();
-        }
         ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(orderedCorpora.size());
         for (Corpus corpus : orderedCorpora) {
             if (shouldQueryCorpus(corpus, query)) {
@@ -102,6 +99,10 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
     }
 
     protected boolean shouldQueryCorpus(Corpus corpus, String query) {
+        if (query.length() == 0 && !corpus.isWebCorpus()) {
+            // Only the web corpus sees zero length queries.
+            return false;
+        }
         return mShouldQueryStrategy.shouldQueryCorpus(corpus, query);
     }
 
