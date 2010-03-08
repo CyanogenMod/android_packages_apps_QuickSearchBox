@@ -24,6 +24,7 @@ import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Base class for corpora backed by multiple sources.
@@ -42,7 +43,9 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
 
         mSources = new ArrayList<Source>();
         for (Source source : sources) {
-            mSources.add(source);
+            if (source != null) {
+                mSources.add(source);
+            }
         }
     }
 
@@ -64,10 +67,21 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
      */
     protected abstract Result createResult(String query, ArrayList<SourceResult> results);
 
+    /**
+     * Gets the sources to query for the given input.
+     *
+     * @param query The current input.
+     * @return The sources to query.
+     */
+    protected List<Source> getSourcesToQuery(String query) {
+        return mSources;
+    }
+
     public CorpusResult getSuggestions(String query, int queryLimit) {
+        List<Source> sources = getSourcesToQuery(query);
         BarrierConsumer<SourceResult> consumer =
-                new BarrierConsumer<SourceResult>(mSources.size());
-        QueryTask.startQueries(query, queryLimit, mSources, mExecutor,
+                new BarrierConsumer<SourceResult>(sources.size());
+        QueryTask.startQueries(query, queryLimit, sources, mExecutor,
                 null, consumer);
         ArrayList<SourceResult> results = consumer.getValues();
         Result result = createResult(query, results);
