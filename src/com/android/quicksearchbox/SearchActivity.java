@@ -48,6 +48,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The main activity for Quick Search Box. Shows the search UI.
@@ -263,7 +265,11 @@ public class SearchActivity extends Activity {
     }
 
     private SuggestionsProvider getSuggestionsProvider() {
-        return getQsbApplication().getSuggestionsProvider(mCorpus);
+        return getQsbApplication().getSuggestionsProvider();
+    }
+
+    private CorpusRanker getCorpusRanker() {
+        return getQsbApplication().getCorpusRanker();
     }
 
     private CorpusViewFactory getCorpusViewFactory() {
@@ -309,7 +315,7 @@ public class SearchActivity extends Activity {
             int latency = (int) (SystemClock.uptimeMillis() - mStartTime);
             String source = getIntent().getStringExtra(Search.SOURCE);
             getLogger().logStart(latency, source, mCorpus,
-                    getSuggestionsProvider().getOrderedCorpora());
+                    getCorpusRanker().getRankedCorpora());
         }
     }
 
@@ -617,10 +623,19 @@ public class SearchActivity extends Activity {
         mSearchGoButton.setImageResource(R.drawable.ic_btn_search);
     }
 
+    private List<Corpus> getCorporaToQuery() {
+        if (mCorpus == null) {
+            return getCorpusRanker().getRankedCorpora();
+        } else {
+            return Collections.singletonList(mCorpus);
+        }
+    }
+
     private void updateSuggestions(String query) {
         query = ltrim(query);
         LatencyTracker latency = new LatencyTracker(TAG);
-        Suggestions suggestions = getSuggestionsProvider().getSuggestions(query);
+        List<Corpus> corporaToQuery = getCorporaToQuery();
+        Suggestions suggestions = getSuggestionsProvider().getSuggestions(query, corporaToQuery);
         latency.addEvent("getSuggestions_done");
         if (!suggestions.isDone()) {
             suggestions.registerDataSetObserver(new ProgressUpdater(suggestions));

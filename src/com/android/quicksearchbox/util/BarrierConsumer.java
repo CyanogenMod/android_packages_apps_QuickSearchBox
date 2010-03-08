@@ -17,7 +17,6 @@
 package com.android.quicksearchbox.util;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -53,22 +52,11 @@ public class BarrierConsumer<A> implements Consumer<A> {
      * @return A list of values, never {@code null}.
      */
     public ArrayList<A> getValues() {
-        return getValues(0);
-    }
-
-    /**
-     * Blocks until the expected number of results is available, or until the
-     * timeout has passed, or until the thread is interrupted.
-     * This method should not be called multiple times.
-     *
-     * @return A list of values, never {@code null}.
-     */
-    public ArrayList<A> getValues(long millis) {
         mLock.lock();
         try {
             try {
                 while (!isFull()) {
-                    mNotFull.await(millis, TimeUnit.MILLISECONDS);
+                    mNotFull.await();
                 }
             } catch (InterruptedException ex) {
                 // Return the values that we've gotten so far

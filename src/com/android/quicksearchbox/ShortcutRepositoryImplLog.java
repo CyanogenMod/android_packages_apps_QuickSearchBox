@@ -28,8 +28,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -195,8 +195,9 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         reportClickAtTime(suggestions, position, System.currentTimeMillis());
     }
 
-    public SuggestionCursor getShortcutsForQuery(String query) {
-        ShortcutCursor shortcuts = getShortcutsForQuery(query, System.currentTimeMillis());
+    public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora) {
+        ShortcutCursor shortcuts =
+                getShortcutsForQuery(query, allowedCorpora, System.currentTimeMillis());
         if (shortcuts != null) {
             startRefresh(shortcuts);
         }
@@ -213,14 +214,11 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return mRefresher.shouldRefresh(suggestion);
     }
 
-    /* package for testing */ ShortcutCursor getShortcutsForQuery(String query, long now) {
-        if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + ")");
+    /* package for testing */ ShortcutCursor getShortcutsForQuery(String query,
+            List<Corpus> allowedCorpora, long now) {
+        if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + "," + allowedCorpora + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
-        if (DBG) {
-            Log.d(TAG, sql);
-            Log.d(TAG, Arrays.toString(params));
-        }
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery(sql, params);
@@ -228,7 +226,15 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             cursor.close();
             return null;
         }
-        return new ShortcutCursor(new SuggestionCursorImpl(query, cursor));
+
+        HashMap<String,Source> allowedSources = new HashMap<String,Source>();
+        for (Corpus corpus : allowedCorpora) {
+            for (Source source : corpus.getSources()) {
+                allowedSources.put(source.getName(), source);
+            }
+        }
+
+        return new ShortcutCursor(new SuggestionCursorImpl(allowedSources, query, cursor));
     }
 
     private void startRefresh(final ShortcutCursor shortcuts) {
@@ -266,11 +272,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
     private class SuggestionCursorImpl extends CursorBackedSuggestionCursor {
 
-        private final HashMap<String, Source> mSourceCache;
+        private final HashMap<String, Source> mAllowedSources;
 
-        public SuggestionCursorImpl(String userQuery, Cursor cursor) {
+        public SuggestionCursorImpl(HashMap<String,Source> allowedSources,
+                String userQuery, Cursor cursor) {
             super(userQuery, cursor);
-            mSourceCache = new HashMap<String, Source>();
+            mAllowedSources = allowedSources;
         }
 
         @Override
@@ -280,30 +287,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             if (srcStr == null) {
                 throw new NullPointerException("Missing source for shortcut.");
             }
-            // First check the cache.
-            // We store a null Source if the source is disabled, so we need two lookups.
-            if (mSourceCache.containsKey(srcStr)) {
-                return mSourceCache.get(srcStr);
-            }
-            Source source = getSourceIfEnabled(srcStr);
-            // We cache the source so that it can be found quickly, and so
-            // that it doesn't disappear over the lifetime of this cursor.
-            // We cache it even if null, to make future lookups faster.
-            mSourceCache.put(srcStr, source);
-            return source;
-        }
-
-        private Source getSourceIfEnabled(String srcName) {
-            Source source = mCorpora.getSource(srcName);
-            if (source == null) {
-                return null;
-            }
-            Corpus corpus = mCorpora.getCorpusForSource(source);
-            if (corpus != null && mCorpora.isCorpusEnabled(corpus)) {
-                return source;
-            } else {
-                return null;
-            }
+            return mAllowedSources.get(srcStr);
         }
 
         @Override

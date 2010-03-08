@@ -25,19 +25,20 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Common suggestions provider base class.
+ * Suggestions provider implementation.
  *
  * The provider will only handle a single query at a time. If a new query comes
  * in, the old one is canceled.
  */
-public abstract class AbstractSuggestionsProvider implements SuggestionsProvider {
+public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private static final boolean DBG = true;
-    private static final String TAG = "QSB.AbstractSuggestionsProvider";
+    private static final String TAG = "QSB.SuggestionsProviderImpl";
 
     private final Config mConfig;
 
@@ -47,18 +48,22 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
 
     private final Promoter mPromoter;
 
+    private final ShortcutRepository mShortcutRepo;
+
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
 
     private BatchingNamedTaskExecutor mBatchingExecutor;
 
-    public AbstractSuggestionsProvider(Config config,
+    public SuggestionsProviderImpl(Config config,
             NamedTaskExecutor queryExecutor,
             Handler publishThread,
-            Promoter promoter) {
+            Promoter promoter,
+            ShortcutRepository shortcutRepo) {
         mConfig = config;
         mQueryExecutor = queryExecutor;
         mPublishThread = publishThread;
         mPromoter = promoter;
+        mShortcutRepo = shortcutRepo;
     }
 
     public void close() {
@@ -75,19 +80,18 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         }
     }
 
-    public abstract List<Corpus> getOrderedCorpora();
-
-    protected abstract SuggestionCursor getShortcutsForQuery(String query);
+    protected SuggestionCursor getShortcutsForQuery(String query, List<Corpus> corpora) {
+        if (mShortcutRepo == null) return null;
+        return mShortcutRepo.getShortcutsForQuery(query, corpora);
+    }
 
     /**
      * Gets the sources that should be queried for the given query.
-     *
      */
-    private ArrayList<Corpus> getCorporaToQuery(String query) {
+    private List<Corpus> getCorporaToQuery(String query, List<Corpus> orderedCorpora) {
         if (query.length() == 0) {
-            return new ArrayList<Corpus>(0);
+            return Collections.emptyList();
         }
-        List<Corpus> orderedCorpora = getOrderedCorpora();
         ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(orderedCorpora.size());
         for (Corpus corpus : orderedCorpora) {
             if (shouldQueryCorpus(corpus, query)) {
@@ -108,10 +112,10 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         }
     }
 
-    public Suggestions getSuggestions(String query) {
+    public Suggestions getSuggestions(String query, List<Corpus> corpora) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
-        ArrayList<Corpus> corporaToQuery = getCorporaToQuery(query);
+        List<Corpus> corporaToQuery = getCorporaToQuery(query, corpora);
         int numPromotedSources = mConfig.getNumPromotedSources();
         Set<Corpus> promotedCorpora = Util.setOfFirstN(corporaToQuery, numPromotedSources);
         final Suggestions suggestions = new Suggestions(mPromoter,
@@ -119,7 +123,7 @@ public abstract class AbstractSuggestionsProvider implements SuggestionsProvider
                 query,
                 corporaToQuery.size(),
                 promotedCorpora);
-        SuggestionCursor shortcuts = getShortcutsForQuery(query);
+        SuggestionCursor shortcuts = getShortcutsForQuery(query, corpora);
         if (shortcuts != null) {
             suggestions.setShortcuts(shortcuts);
         }

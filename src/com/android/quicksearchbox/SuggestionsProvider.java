@@ -25,10 +25,11 @@ import java.util.List;
 public interface SuggestionsProvider {
     /**
      * Gets suggestions for a query.
+     *
+     * @param query The query.
+     * @param corpora The corpora to query.
      */
-    Suggestions getSuggestions(String query);
-
-    List<Corpus> getOrderedCorpora();
+    Suggestions getSuggestions(String query, List<Corpus> corpora);
 
     void close();
 }

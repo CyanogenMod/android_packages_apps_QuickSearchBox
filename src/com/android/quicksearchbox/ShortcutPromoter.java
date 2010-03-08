@@ -29,7 +29,7 @@ import java.util.Set;
 public class ShortcutPromoter implements Promoter {
 
     private static final String TAG = "QSB.ShortcutPromoter";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     /** The promoter to use when there are no more shortcuts. */
     private final Promoter mNextPromoter;

@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class SingleThreadNamedTaskExecutor implements NamedTaskExecutor {
 
+    private static final boolean DBG = true;
     private static final String TAG = "QSB.SingleThreadNamedTaskExecutor";
 
     private final LinkedBlockingQueue<NamedTask> mQueue;
@@ -39,6 +40,7 @@ public class SingleThreadNamedTaskExecutor implements NamedTaskExecutor {
     }
 
     public void cancelPendingTasks() {
+        if (DBG) Log.d(TAG, "Cancelling " + mQueue.size() + " tasks: " + mWorker.getName());
         if (mClosed) {
             throw new IllegalStateException("cancelPendingTasks() after close()");
         }
