@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.util.Log;
@@ -90,6 +92,7 @@ public class Suggestions {
         mPromoted = null;  // will be set by updatePromoted()
     }
 
+    @VisibleForTesting
     public String getQuery() {
         return mQuery;
     }
@@ -97,6 +100,7 @@ public class Suggestions {
     /**
      * Gets the number of sources that are expected to report.
      */
+    @VisibleForTesting
     public int getExpectedSourceCount() {
         return mExpectedCorpusCount;
     }
