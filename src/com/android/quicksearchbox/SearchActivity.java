@@ -549,10 +549,11 @@ public class SearchActivity extends Activity {
             // Moved left / right from a suggestion, keep current query, move
             // focus to query box, and move cursor to far left / right
             if (DBG) Log.d(TAG, "Left/right on a suggestion");
-            int cursorPos = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 0 : mQueryTextView.length();
+            String query = getQuery();
+            int cursorPos = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 0 : query.length();
             mQueryTextView.setSelection(cursorPos);
             mQueryTextView.requestFocus();
-            // TODO: should we modify the list selection?
+            updateSuggestions(query);
             return true;
         }
 
