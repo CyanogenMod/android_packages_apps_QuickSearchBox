@@ -27,8 +27,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class QueryThreadFactory implements ThreadFactory {
 
+    /** Used to give each factory a unique id. */
+    private static final AtomicInteger sFactoryCount = new AtomicInteger(1);
+
     /** Used to give a unique name to each thread. */
-    private final AtomicInteger mCount = new AtomicInteger(1);
+    private final AtomicInteger mThreadCount = new AtomicInteger(1);
+
+    private final int mFactoryId;
 
     private final int mPriority;
 
@@ -46,11 +51,13 @@ public class QueryThreadFactory implements ThreadFactory {
      *        For values, see {@link Process}.
      */
     public QueryThreadFactory(int priority) {
+        mFactoryId = sFactoryCount.getAndIncrement();
         mPriority = priority;
     }
 
     public Thread newThread(Runnable r) {
-        return new QueryThread(r, "QSB #" + mCount.getAndIncrement(), mPriority);
+        return new QueryThread(r, "QSB #" + mFactoryId + "/"
+            + mThreadCount.getAndIncrement(), mPriority);
     }
 
     /**
