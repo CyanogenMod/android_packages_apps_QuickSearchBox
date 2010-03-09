@@ -62,13 +62,24 @@ public class SingleThreadNamedTaskExecutor implements NamedTaskExecutor {
 
     private class Worker implements Runnable {
         public void run() {
+            try {
+                loop();
+            } finally {
+                if (!mClosed) Log.w(TAG, "Worker exited before close");
+            }
+        }
+
+        private void loop() {
+            Thread currentThread = Thread.currentThread();
+            String threadName = currentThread.getName();
             while (!mClosed) {
                 NamedTask task;
                 try {
                     task = mQueue.take();
                 } catch (InterruptedException ex) {
-                    break;
+                    continue;
                 }
+                currentThread.setName(threadName + " " + task.getName());
                 try {
                     task.run();
                 } catch (RuntimeException ex) {
