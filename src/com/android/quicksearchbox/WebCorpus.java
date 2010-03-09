@@ -17,8 +17,6 @@
 package com.android.quicksearchbox;
 
 
-import com.android.quicksearchbox.util.NamedTaskExecutor;
-
 import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,6 +31,7 @@ import android.webkit.URLUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * The web search source.
@@ -45,7 +44,7 @@ public class WebCorpus extends MultiSourceCorpus {
 
     private final Source mBrowserSource;
 
-    public WebCorpus(Context context, NamedTaskExecutor executor,
+    public WebCorpus(Context context, Executor executor,
             Source webSearchSource, Source browserSource) {
         super(context, executor, webSearchSource, browserSource);
         mWebSearchSource = webSearchSource;

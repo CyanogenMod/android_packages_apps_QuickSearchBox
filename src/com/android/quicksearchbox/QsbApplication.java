@@ -24,6 +24,7 @@ import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsFooter;
+import com.android.quicksearchbox.util.Factory;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
 import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
@@ -32,6 +33,8 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class QsbApplication extends Application {
@@ -43,6 +46,7 @@ public class QsbApplication extends Application {
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
     private NamedTaskExecutor mSourceTaskExecutor;
+    private ThreadFactory mQueryThreadFactory;
     private SuggestionsProvider mSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
@@ -131,7 +135,17 @@ public class QsbApplication extends Application {
     }
 
     protected CorpusFactory createCorpusFactory() {
-        return new SearchableCorpusFactory(this, getSourceTaskExecutor());
+        int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
+        return new SearchableCorpusFactory(this, createExecutorFactory(numWebCorpusThreads));
+    }
+
+    protected Factory<Executor> createExecutorFactory(final int numThreads) {
+        final ThreadFactory threadFactory = getQueryThreadFactory();
+        return new Factory<Executor>() {
+            public Executor create() {
+                return Executors.newFixedThreadPool(numThreads, threadFactory);
+            }
+        };
     }
 
     /**
@@ -198,9 +212,24 @@ public class QsbApplication extends Application {
 
     protected NamedTaskExecutor createSourceTaskExecutor() {
         Config config = getConfig();
-        ThreadFactory queryThreadFactory =
-            new QueryThreadFactory(config.getQueryThreadPriority());
+        ThreadFactory queryThreadFactory = getQueryThreadFactory();
         return new PerNameExecutor(SingleThreadNamedTaskExecutor.factory(queryThreadFactory));
+    }
+
+    /**
+     * Gets the query thread factory.
+     * May only be called from the main thread.
+     */
+    protected ThreadFactory getQueryThreadFactory() {
+        checkThread();
+        if (mQueryThreadFactory == null) {
+            mQueryThreadFactory = createQueryThreadFactory();
+        }
+        return mQueryThreadFactory;
+    }
+
+    protected ThreadFactory createQueryThreadFactory() {
+        return new QueryThreadFactory(getConfig().getQueryThreadPriority());
     }
 
     /**

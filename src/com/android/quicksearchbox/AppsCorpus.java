@@ -17,8 +17,6 @@
 package com.android.quicksearchbox;
 
 
-import com.android.quicksearchbox.util.NamedTaskExecutor;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,48 +24,40 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
-import java.util.ArrayList;
-
 /**
- * The web search source.
+ * The apps search source.
  */
-public class AppsCorpus extends MultiSourceCorpus {
+public class AppsCorpus extends SingleSourceCorpus {
 
     private static final String APPS_CORPUS_NAME = "apps";
 
-    public AppsCorpus(Context context, NamedTaskExecutor executor,
-            Source appsSource) {
-        super(context, executor, appsSource);
+    public AppsCorpus(Context context, Source appsSource) {
+        super(context, appsSource);
     }
 
+    @Override
     public CharSequence getLabel() {
         return getContext().getText(R.string.corpus_label_apps);
     }
 
+    @Override
     public CharSequence getHint() {
         return getContext().getText(R.string.corpus_hint_apps);
     }
 
+    @Override
     public Intent createSearchIntent(String query, Bundle appData) {
         // TODO: Start a Market search if Market is installed
         return null;
     }
 
-    public SuggestionData createSearchShortcut(String query) {
-        // No search shortcuts for apps at the moment
-        return null;
-    }
-
-    public Intent createVoiceSearchIntent(Bundle appData) {
-        // No voice search for apps at the moment
-        return null;
-    }
-
+    @Override
     public Drawable getCorpusIcon() {
         // TODO: Should we have a different icon for the apps corpus?
         return getContext().getResources().getDrawable(android.R.drawable.sym_def_app_icon);
     }
 
+    @Override
     public Uri getCorpusIconUri() {
         int resourceId = android.R.drawable.sym_def_app_icon;
         return new Uri.Builder()
@@ -77,33 +67,14 @@ public class AppsCorpus extends MultiSourceCorpus {
                 .build();
     }
 
+    @Override
     public String getName() {
         return APPS_CORPUS_NAME;
     }
 
-    public int getQueryThreshold() {
-        return 0;
-    }
-
-    public boolean queryAfterZeroResults() {
-        return false;
-    }
-
-    public boolean voiceSearchEnabled() {
-        return false;
-    }
-
-    public boolean isWebCorpus() {
-        return false;
-    }
-
+    @Override
     public CharSequence getSettingsDescription() {
         return getContext().getText(R.string.corpus_description_apps);
-    }
-
-    @Override
-    protected Result createResult(String query, ArrayList<SourceResult> results) {
-        return new Result(query, results);
     }
 
 }

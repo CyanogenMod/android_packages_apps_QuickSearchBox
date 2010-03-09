@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -29,10 +30,17 @@ import java.util.Collections;
  */
 public class SingleSourceCorpus extends AbstractCorpus {
 
+    private final Context mContext;
+
     private final Source mSource;
 
-    public SingleSourceCorpus(Source source) {
+    public SingleSourceCorpus(Context context, Source source) {
+        mContext = context;
         mSource = source;
+    }
+
+    protected Context getContext() {
+        return mContext;
     }
 
     public Drawable getCorpusIcon() {

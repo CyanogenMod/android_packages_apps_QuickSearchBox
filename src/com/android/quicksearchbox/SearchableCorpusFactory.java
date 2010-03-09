@@ -16,13 +16,14 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.util.NamedTaskExecutor;
+import com.android.quicksearchbox.util.Factory;
 
 import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.concurrent.Executor;
 
 /**
  * Creates corpora.
@@ -31,11 +32,11 @@ public class SearchableCorpusFactory implements CorpusFactory {
 
     private final Context mContext;
 
-    private final NamedTaskExecutor mExecutor;
+    private final Factory<Executor> mWebCorpusExecutorFactory;
 
-    public SearchableCorpusFactory(Context context, NamedTaskExecutor executor) {
+    public SearchableCorpusFactory(Context context, Factory<Executor> webCorpusExecutorFactory) {
         mContext = context;
-        mExecutor = executor;
+        mWebCorpusExecutorFactory = webCorpusExecutorFactory;
     }
 
     public Collection<Corpus> createCorpora(Sources sources) {
@@ -49,8 +50,8 @@ public class SearchableCorpusFactory implements CorpusFactory {
         return mContext;
     }
 
-    protected NamedTaskExecutor getExecutor() {
-        return mExecutor;
+    protected Executor createWebCorpusExecutor() {
+        return mWebCorpusExecutorFactory.create();
     }
 
     /**
@@ -89,16 +90,17 @@ public class SearchableCorpusFactory implements CorpusFactory {
     protected Corpus createWebCorpus(Sources sources) {
         Source webSource = sources.getWebSearchSource();
         Source browserSource = getBrowserSource(sources);
-        return new WebCorpus(mContext, mExecutor, webSource, browserSource);
+        Executor executor = createWebCorpusExecutor();
+        return new WebCorpus(mContext, executor, webSource, browserSource);
     }
 
     protected Corpus createAppsCorpus(Sources sources) {
         Source appsSource = getAppsSource(sources);
-        return new AppsCorpus(mContext, mExecutor, appsSource);
+        return new AppsCorpus(mContext, appsSource);
     }
 
     protected Corpus createSingleSourceCorpus(Source source) {
-        return new SingleSourceCorpus(source);
+        return new SingleSourceCorpus(mContext, source);
     }
 
     protected Source getBrowserSource(Sources sources) {

@@ -54,6 +54,8 @@ public class Config {
 
     private static final long THREAD_START_DELAY_MILLIS = 100;
 
+    private static final int NUM_WEB_CORPUS_THREADS = 2;
+
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
 
@@ -192,6 +194,10 @@ public class Config {
      */
     public long getThreadStartDelayMillis() {
         return THREAD_START_DELAY_MILLIS;
+    }
+
+    public int getNumWebCorpusThreads() {
+        return NUM_WEB_CORPUS_THREADS;
     }
 
 }

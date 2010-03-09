@@ -18,13 +18,13 @@ package com.android.quicksearchbox;
 
 
 import com.android.quicksearchbox.util.BarrierConsumer;
-import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Base class for corpora backed by multiple sources.
@@ -33,11 +33,11 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
 
     private final Context mContext;
 
-    private final NamedTaskExecutor mExecutor;
+    private final Executor mExecutor;
 
     private final ArrayList<Source> mSources;
 
-    public MultiSourceCorpus(Context context, NamedTaskExecutor executor, Source... sources) {
+    public MultiSourceCorpus(Context context, Executor executor, Source... sources) {
         mContext = context;
         mExecutor = executor;
 
@@ -65,7 +65,9 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
      * @param results The results of the queries.
      * @return An instance of {@link Result} or a subclass of it.
      */
-    protected abstract Result createResult(String query, ArrayList<SourceResult> results);
+    protected Result createResult(String query, ArrayList<SourceResult> results) {
+        return new Result(query, results);
+    }
 
     /**
      * Gets the sources to query for the given input.
@@ -81,8 +83,11 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
         List<Source> sources = getSourcesToQuery(query);
         BarrierConsumer<SourceResult> consumer =
                 new BarrierConsumer<SourceResult>(sources.size());
-        QueryTask.startQueries(query, queryLimit, sources, mExecutor,
-                null, consumer);
+        for (Source source : sources) {
+            QueryTask<SourceResult> task = new QueryTask<SourceResult>(query, queryLimit,
+                    source, null, consumer);
+            mExecutor.execute(task);
+        }
         ArrayList<SourceResult> results = consumer.getValues();
         Result result = createResult(query, results);
         result.fill();
