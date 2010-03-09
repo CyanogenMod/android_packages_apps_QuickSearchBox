@@ -21,6 +21,9 @@
 
     <uses-permission android:name="android.permission.GLOBAL_SEARCH" />
 
+    <!-- Permission required to show quick contact badges. -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <!-- Permissions used by GoogleSearch. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
