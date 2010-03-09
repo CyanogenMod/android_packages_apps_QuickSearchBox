@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -183,6 +185,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         getOpenHelper().clearDatabase(db);
     }
 
+    @VisibleForTesting
     public void deleteRepository() {
         getOpenHelper().deleteDatabase();
     }

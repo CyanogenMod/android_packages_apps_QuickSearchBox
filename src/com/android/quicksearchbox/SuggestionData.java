@@ -16,10 +16,12 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
+
 /**
  * Holds data for each suggest item including the display data and how to launch the result.
  * Used for passing from the provider to the suggest cursor.
- *
  */
 public class SuggestionData {
 
@@ -102,66 +104,79 @@ public class SuggestionData {
         return mLogType;
     }
 
+    @VisibleForTesting
     public SuggestionData setFormat(String format) {
         mFormat = format;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setText1(String text1) {
         mText1 = text1;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setText2(String text2) {
         mText2 = text2;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setText2Url(String text2Url) {
         mText2Url = text2Url;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setIcon1(String icon1) {
         mIcon1 = icon1;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setIcon2(String icon2) {
         mIcon2 = icon2;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setIntentAction(String intentAction) {
         mIntentAction = intentAction;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setIntentData(String intentData) {
         mIntentData = intentData;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setIntentExtraData(String intentExtraData) {
         mIntentExtraData = intentExtraData;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setSuggestionQuery(String suggestionQuery) {
         mSuggestionQuery = suggestionQuery;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setShortcutId(String shortcutId) {
         mShortcutId = shortcutId;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setSpinnerWhileRefreshing(boolean spinnerWhileRefreshing) {
         mSpinnerWhileRefreshing = spinnerWhileRefreshing;
         return this;
     }
 
+    @VisibleForTesting
     public SuggestionData setSuggestionLogType(String logType) {
         mLogType = logType;
         return this;

@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 
@@ -23,7 +25,6 @@ import java.util.ArrayList;
 
 /**
  * A SuggestionCursor that is backed by a list of SuggestionData objects.
- *
  */
 public class DataSuggestionCursor extends AbstractSuggestionCursor {
 
@@ -39,6 +40,7 @@ public class DataSuggestionCursor extends AbstractSuggestionCursor {
         mPos = 0;
     }
 
+    @VisibleForTesting
     public DataSuggestionCursor(String userQuery, SuggestionData... suggestions) {
         this(userQuery);
         for (SuggestionData suggestion : suggestions) {
