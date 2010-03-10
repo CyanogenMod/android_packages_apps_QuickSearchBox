@@ -214,7 +214,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 // -------------------------- end ShortcutRepository --------------------------
 
     private boolean shouldRefresh(SuggestionCursor suggestion) {
-        return mRefresher.shouldRefresh(suggestion);
+        return mRefresher.shouldRefresh(suggestion.getSuggestionSource(),
+                suggestion.getShortcutId());
     }
 
     /* package for testing */ ShortcutCursor getShortcutsForQuery(String query,
@@ -430,7 +431,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         // Once the user has clicked on a shortcut, don't bother refreshing
         // (especially if this is a new shortcut)
-        mRefresher.onShortcutRefreshed(suggestion);
+        mRefresher.markShortcutRefreshed(suggestion.getSuggestionSource(),
+                suggestion.getShortcutId());
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 

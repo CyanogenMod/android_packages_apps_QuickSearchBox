@@ -25,7 +25,7 @@ public class MockShortcutRefresher implements ShortcutRefresher {
     public void cancelPendingTasks() {
     }
 
-    public void onShortcutRefreshed(SuggestionCursor shortcut) {
+    public void markShortcutRefreshed(Source source, String shortcutId) {
     }
 
     public void refresh(SuggestionCursor shortcuts, Listener listener) {
@@ -34,8 +34,8 @@ public class MockShortcutRefresher implements ShortcutRefresher {
     public void reset() {
     }
 
-    public boolean shouldRefresh(SuggestionCursor shortcut) {
-        return shortcut.getShortcutId() != null;
+    public boolean shouldRefresh(Source source, String shortcutId) {
+        return shortcutId != null;
     }
 
 }

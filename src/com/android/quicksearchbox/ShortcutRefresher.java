@@ -46,12 +46,12 @@ public interface ShortcutRefresher {
     /**
      * Returns true if the given shortcut requires refreshing.
      */
-    boolean shouldRefresh(SuggestionCursor shortcut);
+    boolean shouldRefresh(Source source, String shortcutId);
 
     /**
      * Indicates that the shortcut no longer requires refreshing.
      */
-    public void onShortcutRefreshed(SuggestionCursor shortcut);
+    public void markShortcutRefreshed(Source source, String shortcutId);
 
     /**
      * Resets internal state. This results in all shortcuts requiring refreshing.

@@ -51,20 +51,16 @@ class SourceShortcutRefresher implements ShortcutRefresher {
         int count = shortcuts.getCount();
         for (int i = 0; i < count; i++) {
             shortcuts.moveTo(i);
-            if (shouldRefresh(shortcuts)) {
-                String shortcutId = shortcuts.getShortcutId();
-                Source source = shortcuts.getSuggestionSource();
-
-                // If we can't find the source then invalidate the shortcut.
-                // Otherwise, send off the refresh task.
-                if (source == null) {
-                    listener.onShortcutRefreshed(source, shortcutId, null);
-                } else {
-                    String extraData = shortcuts.getSuggestionIntentExtraData();
-                    ShortcutRefreshTask refreshTask = new ShortcutRefreshTask(
-                            source, shortcutId, extraData, listener);
-                    mExecutor.execute(refreshTask);
-                }
+            Source source = shortcuts.getSuggestionSource();
+            if (source == null) {
+                throw new NullPointerException("source");
+            }
+            String shortcutId = shortcuts.getShortcutId();
+            if (shouldRefresh(source, shortcutId)) {
+                String extraData = shortcuts.getSuggestionIntentExtraData();
+                ShortcutRefreshTask refreshTask = new ShortcutRefreshTask(
+                        source, shortcutId, extraData, listener);
+                mExecutor.execute(refreshTask);
             }
         }
     }
@@ -72,16 +68,16 @@ class SourceShortcutRefresher implements ShortcutRefresher {
     /**
      * Returns true if the given shortcut requires refreshing.
      */
-    public boolean shouldRefresh(SuggestionCursor shortcut) {
-        return shortcut.getShortcutId() != null
-                && ! mRefreshed.contains(makeKey(shortcut));
+    public boolean shouldRefresh(Source source, String shortcutId) {
+        return source != null && shortcutId != null
+                && !mRefreshed.contains(makeKey(source, shortcutId));
     }
 
     /**
      * Indicate that the shortcut no longer requires refreshing.
      */
-    public void onShortcutRefreshed(SuggestionCursor shortcut) {
-        mRefreshed.add(makeKey(shortcut));
+    public void markShortcutRefreshed(Source source, String shortcutId) {
+        mRefreshed.add(makeKey(source, shortcutId));
     }
 
     /**
@@ -98,9 +94,8 @@ class SourceShortcutRefresher implements ShortcutRefresher {
         mExecutor.cancelPendingTasks();
     }
 
-    private static String makeKey(SuggestionCursor shortcut) {
-        return shortcut.getSuggestionSource().getName() + "#"
-                + shortcut.getShortcutId();
+    private static String makeKey(Source source, String shortcutId) {
+        return source.getName() + "#" + shortcutId;
     }
 
     /**
@@ -133,7 +128,12 @@ class SourceShortcutRefresher implements ShortcutRefresher {
         public void run() {
             // TODO: Add latency tracking and logging.
             SuggestionCursor refreshed = mSource.refreshShortcut(mShortcutId, mExtraData);
-            onShortcutRefreshed(refreshed);
+            // Close cursor if empty and pass null as the refreshed cursor
+            if (refreshed != null && refreshed.getCount() == 0) {
+                refreshed.close();
+                refreshed = null;
+            }
+            markShortcutRefreshed(mSource, mShortcutId);
             mListener.onShortcutRefreshed(mSource, mShortcutId, refreshed);
         }
 
