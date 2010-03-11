@@ -41,7 +41,8 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        Executor executor = Executors.newCachedThreadPool();
+        // Using a single thread to make the test deterministic
+        Executor executor = Executors.newSingleThreadExecutor();
         mCorpus = new SkeletonMultiSourceCorpus(getContext(), executor,
                 MockSource.SOURCE_1, MockSource.SOURCE_2);
     }
