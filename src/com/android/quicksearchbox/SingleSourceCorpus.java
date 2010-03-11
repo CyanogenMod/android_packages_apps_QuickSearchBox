@@ -64,8 +64,10 @@ public class SingleSourceCorpus extends AbstractCorpus {
     }
 
     public CorpusResult getSuggestions(String query, int queryLimit) {
+        LatencyTracker latencyTracker = new LatencyTracker();
         SourceResult sourceResult = mSource.getSuggestions(query, queryLimit);
-        return new SingleSourceCorpusResult(this, query, sourceResult);
+        int latency = latencyTracker.getLatency();
+        return new SingleSourceCorpusResult(this, query, sourceResult, latency);
     }
 
     public String getName() {

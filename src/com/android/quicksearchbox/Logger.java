@@ -68,6 +68,11 @@ public interface Logger {
      */
     void logExit(SuggestionCursor suggestionCursor, int numChars);
 
-    void logWebLatency();
+    /**
+     * Logs the latency of a suggestion query to a specific source.
+     *
+     * @param result The result of the query.
+     */
+    void logLatency(CorpusResult result);
 
 }

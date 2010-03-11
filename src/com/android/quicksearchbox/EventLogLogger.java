@@ -19,38 +19,42 @@ package com.android.quicksearchbox;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.text.TextUtils;
 import android.util.EventLog;
-import android.util.Log;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Logs events to {@link EventLog}.
  */
 public class EventLogLogger implements Logger {
 
-    private static final boolean DBG = true;
-    private static final String TAG = "QSB.EventLogLogger";
-
     private static final char LIST_SEPARATOR = '|';
 
     private final Context mContext;
 
+    private final Config mConfig;
+
+    private final String mPackageName;
+
     private final int mVersionCode;
 
-    public EventLogLogger(Context context) {
+    private final Random mRandom;
+
+    public EventLogLogger(Context context, Config config) {
         mContext = context;
-        String pkgName = mContext.getPackageName();
+        mConfig = config;
+        mPackageName= mContext.getPackageName();
         try {
-            PackageInfo pkgInfo = mContext.getPackageManager().getPackageInfo(pkgName, 0);
+            PackageInfo pkgInfo = mContext.getPackageManager().getPackageInfo(mPackageName, 0);
             mVersionCode = pkgInfo.versionCode;
         } catch (PackageManager.NameNotFoundException ex) {
             // The current package should always exist, how else could we
             // run code from it?
             throw new RuntimeException(ex);
         }
+        mRandom = new Random();
     }
 
     protected Context getContext() {
@@ -61,19 +65,17 @@ public class EventLogLogger implements Logger {
         return mVersionCode;
     }
 
+    protected Config getConfig() {
+        return mConfig;
+    }
+
     public void logStart(int latency, String intentSource, Corpus corpus,
             List<Corpus> orderedCorpora) {
-        String packageName = mContext.getPackageName();
-        int version = mVersionCode;
         // TODO: Add more info to startMethod
         String startMethod = intentSource;
         String currentCorpus = getCorpusLogName(corpus);
         String enabledCorpora = getCorpusLogNames(orderedCorpora);
-        if (DBG) {
-            debug("qsb_start", packageName, version, startMethod, latency,
-                    currentCorpus, enabledCorpora);
-        }
-        EventLogTags.writeQsbStart(packageName, version, startMethod,
+        EventLogTags.writeQsbStart(mPackageName, mVersionCode, startMethod,
                 latency, currentCorpus, enabledCorpora);
     }
 
@@ -82,9 +84,6 @@ public class EventLogLogger implements Logger {
         String suggestions = getSuggestions(suggestionCursor);
         String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
-        if (DBG) {
-            debug("qsb_click", position, suggestions, corpora, numChars);
-        }
         EventLogTags.writeQsbClick(position, suggestions, corpora, numChars);
     }
 
@@ -103,8 +102,17 @@ public class EventLogLogger implements Logger {
         EventLogTags.writeQsbExit(suggestions, numChars);
     }
 
-    public void logWebLatency() {
-        
+    public void logLatency(CorpusResult result) {
+        if (!shouldLogLatency()) return;
+        String corpusName = getCorpusLogName(result.getCorpus());
+        int latency = result.getLatency();
+        int numChars = result.getUserQuery().length();
+        EventLogTags.writeQsbLatency(corpusName, latency, numChars);
+    }
+
+    private boolean shouldLogLatency() {
+        int freq = mConfig.getLatencyLogFrequency();
+        return freq > mRandom.nextInt(1000);
     }
 
     private String getCorpusLogName(Corpus corpus) {
@@ -114,7 +122,7 @@ public class EventLogLogger implements Logger {
 
     private String getSuggestions(SuggestionCursor cursor) {
         StringBuilder sb = new StringBuilder();
-        final int count = cursor.getCount();
+        final int count = cursor == null ? 0 : cursor.getCount();
         for (int i = 0; i < count; i++) {
             if (i > 0) sb.append(LIST_SEPARATOR);
             cursor.moveTo(i);
@@ -136,7 +144,4 @@ public class EventLogLogger implements Logger {
         return sb.toString();
     }
 
-    private void debug(String tag, Object... args) {
-        Log.d(TAG, tag + "(" + TextUtils.join(",", args) + ")");
-    }
 }

@@ -24,13 +24,21 @@ public class SingleSourceCorpusResult extends SuggestionCursorWrapper implements
 
     private final Corpus mCorpus;
 
-    public SingleSourceCorpusResult(Corpus corpus, String userQuery, SuggestionCursor cursor) {
+    private final int mLatency;
+
+    public SingleSourceCorpusResult(Corpus corpus, String userQuery, SuggestionCursor cursor,
+            int latency) {
         super(userQuery, cursor);
         mCorpus = corpus;
+        mLatency = latency;
     }
 
     public Corpus getCorpus() {
         return mCorpus;
+    }
+
+    public int getLatency() {
+        return mLatency;
     }
 
     @Override

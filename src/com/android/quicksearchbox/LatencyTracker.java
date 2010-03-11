@@ -16,92 +16,40 @@
 
 package com.android.quicksearchbox;
 
-import android.util.Log;
-
-import java.util.HashMap;
+import android.os.SystemClock;
 
 /**
- * Tracks events in wall-clock time. 
- *
+ * Tracks latency in wall-clock time. Since {@link #getLatency} returns an {@code int},
+ * latencies over 2^31 ms (~ 25 days) cannot be measured.
+ * This class uses {@link SystemClock#uptimeMillis} which does not advance during deep sleep.
  */
 public class LatencyTracker {
 
-    private static final boolean DBG = true;
-
-    public static final String NETWORK_ROUNDTRIP_START = "network_roundtrip_start";
-    public static final String NETWORK_ROUNDTRIP_END = "network_roundtrip_end";
+    /**
+     * Start time, in milliseconds as returned by {@link SystemClock#uptimeMillis}.
+     */
+    private long mStartTime;
 
     /**
-     * The logging tag of the component whose latency this object tracks.
+     * Creates a new latency tracker and sets the start time.
      */
-    private final String mLogTag;
-
-    /**
-     * Start time, in nanoseconds as returned by {@link System#nanoTime}.
-     */
-    private final long mStartTime;
-
-    /**
-     * Time of the last reported event. Same as {@link #mStartTime} before the first event.
-     */
-    private long mLastTime;
-
-    /**
-     * The time of each event that has been logged.
-     */
-    private final HashMap<String,Long> mTimeStamps;
-
-    /**
-     * Creates a new latency tracker.
-     *
-     * @param tag The logging tag of the component whose latency this object tracks.
-     */
-    public LatencyTracker(String tag) {
-        mLogTag = tag;
-        mStartTime = System.nanoTime();
-        mLastTime = mStartTime;
-        mTimeStamps = new HashMap<String,Long>();
-    }
-
-    public synchronized void addEvent(String event) {
-        long now = System.nanoTime();
-        long total = now - mStartTime;
-        long diff = now - mLastTime;
-        if (DBG) {
-            Log.d(mLogTag, ms(total) + " ms (+" + ms(diff) + " ms): " + event);
-        }
-        mLastTime = now;
-        mTimeStamps.put(event, now);
+    public LatencyTracker() {
+        mStartTime = SystemClock.uptimeMillis();
     }
 
     /**
-     * Gets the best estimate of the user visible latency for the query.
-     *
-     * @return The latency in milliseconds.
+     * Resets the start time.
      */
-    public synchronized int getUserVisibleLatency() {
-        return ms(mLastTime - mStartTime);
+    public void reset() {
+        mStartTime = SystemClock.uptimeMillis();
     }
 
     /**
-     * Gets the best estimate of the network roundtrip latency for the query.
-     *
-     * @return The latency in milliseconds, or {@code -1} if the latency is unknown.
+     * Gets the number of milliseconds since the object was created, or {@link #reset} was called.
      */
-    public synchronized int getNetworkRoundtripLatency() {
-        Long start = mTimeStamps.get(NETWORK_ROUNDTRIP_START);
-        Long end = mTimeStamps.get(NETWORK_ROUNDTRIP_END);
-        if (start == null || end == null) {
-            return -1;
-        }
-        return ms(end - start);
-    }
-
-    /**
-     * Converts nanoseconds to milliseconds.
-     */
-    private static int ms(long ns) {
-        return (int) (ns / 1000000);
+    public int getLatency() {
+        long now = SystemClock.uptimeMillis();
+        return (int) (now - mStartTime);
     }
 
 }

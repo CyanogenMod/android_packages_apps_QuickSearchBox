@@ -177,14 +177,14 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     @Override
-    protected Result createResult(String query, ArrayList<SourceResult> results) {
-        return new WebResult(query, results);
+    protected Result createResult(String query, ArrayList<SourceResult> results, int latency) {
+        return new WebResult(query, results, latency);
     }
 
     protected class WebResult extends Result {
 
-        public WebResult(String query, ArrayList<SourceResult> results) {
-            super(query, results);
+        public WebResult(String query, ArrayList<SourceResult> results, int latency) {
+            super(query, results, latency);
         }
 
         @Override

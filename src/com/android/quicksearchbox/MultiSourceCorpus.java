@@ -20,6 +20,7 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.BarrierConsumer;
 
 import android.content.Context;
+import android.os.SystemClock;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,10 +64,11 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
      *
      * @param query The query text.
      * @param results The results of the queries.
+     * @param latency Latency in milliseconds of the suggestion queries.
      * @return An instance of {@link Result} or a subclass of it.
      */
-    protected Result createResult(String query, ArrayList<SourceResult> results) {
-        return new Result(query, results);
+    protected Result createResult(String query, ArrayList<SourceResult> results, int latency) {
+        return new Result(query, results, latency);
     }
 
     /**
@@ -80,6 +82,7 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
     }
 
     public CorpusResult getSuggestions(String query, int queryLimit) {
+        LatencyTracker latencyTracker = new LatencyTracker();
         List<Source> sources = getSourcesToQuery(query);
         BarrierConsumer<SourceResult> consumer =
                 new BarrierConsumer<SourceResult>(sources.size());
@@ -89,7 +92,8 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
             mExecutor.execute(task);
         }
         ArrayList<SourceResult> results = consumer.getValues();
-        Result result = createResult(query, results);
+        int latency = latencyTracker.getLatency();
+        Result result = createResult(query, results, latency);
         result.fill();
         return result;
     }
@@ -104,9 +108,12 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
 
         private final ArrayList<SourceResult> mResults;
 
-        public Result(String userQuery, ArrayList<SourceResult> results) {
+        private final int mLatency;
+
+        public Result(String userQuery, ArrayList<SourceResult> results, int latency) {
             super(userQuery);
             mResults = results;
+            mLatency = latency;
         }
 
         protected ArrayList<SourceResult> getResults() {
@@ -129,6 +136,10 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
 
         public Corpus getCorpus() {
             return MultiSourceCorpus.this;
+        }
+
+        public int getLatency() {
+            return mLatency;
         }
 
         @Override

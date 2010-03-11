@@ -56,6 +56,8 @@ public class Config {
 
     private static final int NUM_WEB_CORPUS_THREADS = 2;
 
+    private static final int LATENCY_LOG_FREQUENCY = 1000;
+
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
 
@@ -200,4 +202,13 @@ public class Config {
         return NUM_WEB_CORPUS_THREADS;
     }
 
+    /**
+     * How often query latency should be logged.
+     *
+     * @return An integer in the range 0-1000. 0 means that no latency events
+     *         should be logged. 1000 means that all latency events should be logged.
+     */
+    public int getLatencyLogFrequency() {
+        return LATENCY_LOG_FREQUENCY;
+    }
 }

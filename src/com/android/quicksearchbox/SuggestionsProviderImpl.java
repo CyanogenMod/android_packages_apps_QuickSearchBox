@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -50,6 +49,8 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private final ShortcutRepository mShortcutRepo;
 
+    private final Logger mLogger;
+
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
 
     private BatchingNamedTaskExecutor mBatchingExecutor;
@@ -58,12 +59,14 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
             NamedTaskExecutor queryExecutor,
             Handler publishThread,
             Promoter promoter,
-            ShortcutRepository shortcutRepo) {
+            ShortcutRepository shortcutRepo,
+            Logger logger) {
         mConfig = config;
         mQueryExecutor = queryExecutor;
         mPublishThread = publishThread;
         mPromoter = promoter;
         mShortcutRepo = shortcutRepo;
+        mLogger = logger;
     }
 
     public void close() {
@@ -161,6 +164,9 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
             mSuggestions.addCorpusResult(cursor);
             if (!mSuggestions.isClosed()) {
                 executeNextBatchIfNeeded();
+            }
+            if (cursor != null && mLogger != null) {
+                mLogger.logLatency(cursor);
             }
             return true;
         }

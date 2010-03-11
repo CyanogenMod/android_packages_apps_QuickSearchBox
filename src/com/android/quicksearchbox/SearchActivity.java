@@ -25,7 +25,6 @@ import com.android.quicksearchbox.ui.SuggestionsFooter;
 import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.database.DataSetObserver;
@@ -33,7 +32,6 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -74,16 +72,15 @@ public class SearchActivity extends Activity {
     private static final String INSTANCE_KEY_CORPUS = "corpus";
     private static final String INSTANCE_KEY_USER_QUERY = "query";
 
-    // Dialog IDs
-    private static final int CORPUS_SELECTION_DIALOG = 0;
-
-    // Timestamp for last onCreate()/onNewIntent() call, as returned by SystemClock.uptimeMillis().
-    private long mStartTime;
+    // Measures time from for last onCreate()/onNewIntent() call.
+    private LatencyTracker mStartLatencyTracker;
     // Whether QSB is starting. True between the calls to onCreate()/onNewIntent() and onResume().
     private boolean mStarting;
     // True if the user has taken some action, e.g. launching a search, voice search,
     // or suggestions, since QSB was last started.
     private boolean mTookAction;
+
+    private CorpusSelectionDialog mCorpusSelectionDialog;
 
     protected SuggestionsAdapter mSuggestionsAdapter;
 
@@ -172,7 +169,7 @@ public class SearchActivity extends Activity {
     }
 
     private void recordStartTime() {
-        mStartTime = SystemClock.uptimeMillis();
+        mStartLatencyTracker = new LatencyTracker();
         mStarting = true;
         mTookAction = false;
     }
@@ -291,6 +288,11 @@ public class SearchActivity extends Activity {
     @Override
     protected void onStop() {
         if (DBG) Log.d(TAG, "onStop()");
+        if (!mTookAction) {
+            // TODO: This gets logged when starting other activities, e.g. by opening he search
+            // settings, or clicking a notification in the status bar.
+            getLogger().logExit(getCurrentSuggestions(), getQuery().length());
+        }
         // Close all open suggestion cursors. The query will be redone in onResume()
         // if we come back to this activity.
         mSuggestionsAdapter.setSuggestions(null);
@@ -310,12 +312,10 @@ public class SearchActivity extends Activity {
         mQueryTextView.requestFocus();
         if (mStarting) {
             mStarting = false;
-            // Start up latency should not exceed 2^31 ms (~ 25 days). Note that
-            // SystemClock.uptimeMillis() does not advance during deep sleep.
-            int latency = (int) (SystemClock.uptimeMillis() - mStartTime);
             String source = getIntent().getStringExtra(Search.SOURCE);
-            getLogger().logStart(latency, source, mCorpus,
-                    getCorpusRanker().getRankedCorpora());
+            List<Corpus> rankedCorpora = getCorpusRanker().getRankedCorpora();
+            int latency = mStartLatencyTracker.getLatency();
+            getLogger().logStart(latency, source, mCorpus, rankedCorpora);
         }
     }
 
@@ -415,47 +415,18 @@ public class SearchActivity extends Activity {
     }
 
     protected void showCorpusSelectionDialog() {
-        showDialog(CORPUS_SELECTION_DIALOG);
+        if (mCorpusSelectionDialog == null) {
+            mCorpusSelectionDialog = new CorpusSelectionDialog(this);
+            mCorpusSelectionDialog.setOwnerActivity(this);
+            mCorpusSelectionDialog.setOnCorpusSelectedListener(new CorpusSelectionListener());
+        }
+        mCorpusSelectionDialog.show(mCorpus);
     }
 
     protected void dismissCorpusSelectionDialog() {
-        // We call removeDialog() instead of dismissDialog(), so that the corpus
-        // selection dialog is not saved in the instance state.
-        // Also, dismissDialog() throws an exception if the dialog is not showing,
-        // removeDialog() doesn't.
-        removeDialog(CORPUS_SELECTION_DIALOG);
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id, Bundle args) {
-        switch (id) {
-            case CORPUS_SELECTION_DIALOG:
-                return createCorpusSelectionDialog();
-            default:
-                throw new IllegalArgumentException("Unknown dialog: " + id);
+        if (mCorpusSelectionDialog != null) {
+            mCorpusSelectionDialog.dismiss();
         }
-    }
-
-    @Override
-    protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
-        super.onPrepareDialog(id, dialog, args);
-        switch (id) {
-            case CORPUS_SELECTION_DIALOG:
-                prepareCorpusSelectionDialog((CorpusSelectionDialog) dialog);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown dialog: " + id);
-        }
-    }
-
-    protected CorpusSelectionDialog createCorpusSelectionDialog() {
-        return new CorpusSelectionDialog(this);
-    }
-
-    protected void prepareCorpusSelectionDialog(CorpusSelectionDialog dialog) {
-        dialog.setCorpus(mCorpus);
-        dialog.setQuery(getQuery());
-        dialog.setAppData(mAppSearchData);
     }
 
     protected void onSearchClicked(int method) {
@@ -634,10 +605,8 @@ public class SearchActivity extends Activity {
 
     private void updateSuggestions(String query) {
         query = ltrim(query);
-        LatencyTracker latency = new LatencyTracker(TAG);
         List<Corpus> corporaToQuery = getCorporaToQuery();
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(query, corporaToQuery);
-        latency.addEvent("getSuggestions_done");
         if (!suggestions.isDone()) {
             suggestions.registerDataSetObserver(new ProgressUpdater(suggestions));
             startSearchProgress();
@@ -645,11 +614,6 @@ public class SearchActivity extends Activity {
             stopSearchProgress();
         }
         mSuggestionsAdapter.setSuggestions(suggestions);
-        latency.addEvent("shortcuts_shown");
-        long userVisibleLatency = latency.getUserVisibleLatency();
-        if (DBG) {
-            Log.d(TAG, "User visible latency (shortcuts): " + userVisibleLatency + " ms.");
-        }
     }
 
     private boolean forwardKeyToQueryTextView(int keyCode, KeyEvent event) {
@@ -788,6 +752,15 @@ public class SearchActivity extends Activity {
     private class CorpusIndicatorClickListener implements View.OnClickListener {
         public void onClick(View view) {
             showCorpusSelectionDialog();
+        }
+    }
+
+    private class CorpusSelectionListener
+            implements CorpusSelectionDialog.OnCorpusSelectedListener {
+        public void onCorpusSelected(Corpus corpus) {
+            setCorpus(corpus);
+            updateSuggestions(getQuery());
+            mQueryTextView.requestFocus();
         }
     }
 

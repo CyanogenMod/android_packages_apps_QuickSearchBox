@@ -99,6 +99,10 @@ public class MockCorpus extends AbstractCorpus {
         public Corpus getCorpus() {
             return MockCorpus.this;
         }
+
+        public int getLatency() {
+            return 0;
+        }
     }
 
     public boolean isWebCorpus() {

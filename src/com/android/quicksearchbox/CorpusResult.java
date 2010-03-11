@@ -32,4 +32,10 @@ public interface CorpusResult extends SuggestionCursor {
      */
     String getUserQuery();
 
+    /**
+     * Gets the latency of the suggestion query that produced this result.
+     *
+     * @return The latency in milliseconds.
+     */
+    int getLatency();
 }

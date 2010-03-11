@@ -250,7 +250,8 @@ public class QsbApplication extends Application {
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
                 promoter,
-                getShortcutRepository());
+                getShortcutRepository(),
+                getLogger());
         return provider;
     }
 
@@ -317,6 +318,6 @@ public class QsbApplication extends Application {
     }
 
     protected Logger createLogger() {
-        return new EventLogLogger(this);
+        return new EventLogLogger(this, getConfig());
     }
 }
