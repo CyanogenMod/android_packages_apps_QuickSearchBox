@@ -48,7 +48,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 28;
+    private static final int DB_VERSION = 29;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -102,6 +102,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         String[] columns = {
             Shortcuts.intent_key.fullName,
             Shortcuts.source.fullName,
+            Shortcuts.source_version_code.fullName,
             Shortcuts.format.fullName + " AS " + SearchManager.SUGGEST_COLUMN_FORMAT,
             Shortcuts.title + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
             Shortcuts.description + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
@@ -141,9 +142,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         String preferLatest = "(" + last_hit_time_expr + " = (SELECT " + last_hit_time_expr +
                 " FROM " + ClickLog.TABLE_NAME + " WHERE " + where + "))";
         String orderBy = preferLatest + " DESC, " + ordering_expr + " DESC";
-        final String limit = Integer.toString(mConfig.getMaxShortcutsReturned());
         return SQLiteQueryBuilder.buildQueryString(
-                false, tables, columns, where, groupBy, having, orderBy, limit);
+                false, tables, columns, where, groupBy, having, orderBy, null);
     }
 
     /**
@@ -198,9 +198,10 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         reportClickAtTime(suggestions, position, System.currentTimeMillis());
     }
 
-    public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora) {
-        ShortcutCursor shortcuts =
-                getShortcutsForQuery(query, allowedCorpora, System.currentTimeMillis());
+    public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora,
+            int maxShortcuts) {
+        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora, maxShortcuts,
+                        System.currentTimeMillis());
         if (shortcuts != null) {
             startRefresh(shortcuts);
         }
@@ -219,7 +220,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     /* package for testing */ ShortcutCursor getShortcutsForQuery(String query,
-            List<Corpus> allowedCorpora, long now) {
+            List<Corpus> allowedCorpora, int maxShortcuts, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + "," + allowedCorpora + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
@@ -238,7 +239,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             }
         }
 
-        return new ShortcutCursor(new SuggestionCursorImpl(allowedSources, query, cursor));
+        return new ShortcutCursor(maxShortcuts,
+                new SuggestionCursorImpl(allowedSources, query, cursor));
     }
 
     private void startRefresh(final ShortcutCursor shortcuts) {
@@ -291,7 +293,20 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             if (srcStr == null) {
                 throw new NullPointerException("Missing source for shortcut.");
             }
-            return mAllowedSources.get(srcStr);
+            Source source = mAllowedSources.get(srcStr);
+            if (source == null) {
+                if (DBG) Log.d(TAG, "Source " + srcStr + " not allowed");
+                return null;
+            }
+            int versionCode = mCursor.getInt(Shortcuts.source_version_code.ordinal());
+            if (versionCode != source.getVersionCode()) {
+                if (DBG) {
+                    Log.d(TAG, "Wrong version (" + versionCode + " != " + source.getVersionCode()
+                            + ") for source " + srcStr);
+                }
+                return null;
+            }
+            return source;
         }
 
         @Override
@@ -377,7 +392,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         String intentQuery = suggestion.getSuggestionQuery();
         String intentExtraData = suggestion.getSuggestionIntentExtraData();
 
-        String sourceName = suggestion.getSuggestionSource().getName();
+        Source source = suggestion.getSuggestionSource();
+        String sourceName = source.getName();
         StringBuilder key = new StringBuilder(sourceName);
         key.append("#");
         if (intentData != null) {
@@ -398,6 +414,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         ContentValues cv = new ContentValues();
         cv.put(Shortcuts.intent_key.name(), intentKey);
         cv.put(Shortcuts.source.name(), sourceName);
+        cv.put(Shortcuts.source_version_code.name(), source.getVersionCode());
         cv.put(Shortcuts.format.name(), suggestion.getSuggestionFormat());
         cv.put(Shortcuts.title.name(), suggestion.getSuggestionText1());
         cv.put(Shortcuts.description.name(), suggestion.getSuggestionText2());
@@ -501,6 +518,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     enum Shortcuts {
         intent_key,
         source,
+        source_version_code,
         format,
         title,
         description,
@@ -699,6 +717,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     // to implement fast prefix filtering.
                     Shortcuts.intent_key.name() + " TEXT NOT NULL COLLATE UNICODE PRIMARY KEY, " +
                     Shortcuts.source.name() + " TEXT NOT NULL, " +
+                    Shortcuts.source_version_code.name() + " INTEGER NOT NULL, " +
                     Shortcuts.format.name() + " TEXT, " +
                     Shortcuts.title.name() + " TEXT, " +
                     Shortcuts.description.name() + " TEXT, " +

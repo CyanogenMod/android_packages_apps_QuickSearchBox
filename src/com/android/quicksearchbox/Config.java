@@ -50,7 +50,7 @@ public class Config {
     private static final long MAX_SOURCE_EVENT_AGE_MILLIS = 30 * DAY_MILLIS;
     private static final int MIN_IMPRESSIONS_FOR_SOURCE_RANKING = 5;
     private static final int MIN_CLICKS_FOR_SOURCE_RANKING = 3;
-    private static final int MAX_SHORTCUTS_RETURNED = 12;
+    private static final int MAX_SHORTCUTS_RETURNED = MAX_PROMOTED_SUGGESTIONS;
 
     private static final long THREAD_START_DELAY_MILLIS = 100;
 

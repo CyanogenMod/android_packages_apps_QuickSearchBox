@@ -97,8 +97,9 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
         assertTrue(mExecutor.runNext());
         assertEquals(mSource1, mRefreshedSource);
         assertEquals("success", mRefreshedShortcutId);
-        SuggestionCursor expected = slice(mSource1.getSuggestions(mQuery, 1), 0, 1);
-        // TODO: check expected == observed
+        SuggestionCursor expected =
+                SuggestionCursorUtil.slice(mSource1.getSuggestions(mQuery, 1), 0, 1);
+        SuggestionCursorUtil.assertSameSuggestions(expected, mRefreshedCursor);
     }
 
     private class RefreshListener implements ShortcutRefresher.Listener {
@@ -123,16 +124,9 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
                 return new DataSuggestionCursor(mQuery);
             } else {
                  SuggestionCursor suggestions = getSuggestions(mQuery, 1);
-                 return slice(suggestions, 0, 1);
+                 return SuggestionCursorUtil.slice(suggestions, 0, 1);
             }
         }
     }
 
-    private ListSuggestionCursor slice(SuggestionCursor cursor, int start, int length) {
-        ListSuggestionCursor out = new ListSuggestionCursor(cursor.getUserQuery());
-        for (int i = start; i < start + length; i++) {
-            out.add(new SuggestionPosition(cursor, i));
-        }
-        return out;
-    }
 }

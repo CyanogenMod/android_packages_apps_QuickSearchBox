@@ -91,6 +91,20 @@ public class MockCorpus extends AbstractCorpus {
         return new Result(query, mSource.getSuggestions(query, queryLimit));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o != null && o.getClass().equals(this.getClass())) {
+            MockCorpus s = (MockCorpus) o;
+            return s.mName.equals(mName);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mName.hashCode();
+    }
+
     private class Result extends SuggestionCursorWrapper implements CorpusResult {
         public Result(String userQuery, SuggestionCursor cursor) {
             super(userQuery, cursor);

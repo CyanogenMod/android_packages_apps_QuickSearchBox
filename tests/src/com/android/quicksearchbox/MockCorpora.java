@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
+import android.util.Log;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -29,18 +30,17 @@ import java.util.HashMap;
  */
 public class MockCorpora implements Corpora {
 
+    private static final String TAG = "QSB.MockCorpora";
+
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private HashMap<String,Corpus> mCorporaByName = new HashMap<String,Corpus>();
-    private HashMap<Source,Corpus> mCorporaBySource = new HashMap<Source,Corpus>();
-    private HashMap<String,Source> mSourcesByName = new HashMap<String,Source>();
     private Corpus mWebCorpus;
 
-    public void addCorpus(Corpus corpus, Source... sources) {
-        mCorporaByName.put(corpus.getName(), corpus);
-        for (Source source : sources) {
-            mCorporaBySource.put(source, corpus);
-            mSourcesByName.put(source.getName(), source);
+    public void addCorpus(Corpus corpus) {
+        Corpus oldCorpus = mCorporaByName.put(corpus.getName(), corpus);
+        if (oldCorpus != null) {
+            Log.d(TAG, "Replaced " + oldCorpus + " with " + corpus);
         }
         notifyDataSetChanged();
     }
@@ -62,7 +62,14 @@ public class MockCorpora implements Corpora {
     }
 
     public Corpus getCorpusForSource(Source source) {
-        return mCorporaBySource.get(source);
+        for (Corpus corpus : mCorporaByName.values()) {
+            for (Source corpusSource : corpus.getSources()) {
+                if (corpusSource.equals(source)) {
+                    return corpus;
+                }
+            }
+        }
+        return null;
     }
 
     public Collection<Corpus> getEnabledCorpora() {
@@ -70,7 +77,14 @@ public class MockCorpora implements Corpora {
     }
 
     public Source getSource(String name) {
-        return mSourcesByName.get(name);
+        for (Corpus corpus : mCorporaByName.values()) {
+            for (Source source : corpus.getSources()) {
+                if (source.getName().equals(name)) {
+                    return source;
+                }
+            }
+        }
+        return null;
     }
 
     public boolean isCorpusDefaultEnabled(Corpus corpus) {

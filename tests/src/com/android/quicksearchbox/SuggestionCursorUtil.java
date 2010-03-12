@@ -85,4 +85,11 @@ public class SuggestionCursorUtil extends Assert {
         }
     }
 
+    public static ListSuggestionCursor slice(SuggestionCursor cursor, int start, int length) {
+        ListSuggestionCursor out = new ListSuggestionCursor(cursor.getUserQuery());
+        for (int i = start; i < start + length; i++) {
+            out.add(new SuggestionPosition(cursor, i));
+        }
+        return out;
+    }
 }

@@ -31,7 +31,8 @@ public class MockShortcutRepository implements ShortcutRepository {
     public void close() {
     }
 
-    public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> corporaToQuery) {
+    public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> corporaToQuery,
+            int maxShortcuts) {
         // TODO: should look at corporaToQuery
         DataSuggestionCursor cursor = new DataSuggestionCursor(query);
         SuggestionData s1 = new SuggestionData(MockSource.SOURCE_1);
