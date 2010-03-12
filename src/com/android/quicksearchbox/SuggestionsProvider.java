@@ -28,8 +28,9 @@ public interface SuggestionsProvider {
      *
      * @param query The query.
      * @param corpora The corpora to query.
+     * @param maxSuggestions The maximum number of suggestions to return.
      */
-    Suggestions getSuggestions(String query, List<Corpus> corpora);
+    Suggestions getSuggestions(String query, List<Corpus> corpora, int maxSuggestions);
 
     void close();
 }

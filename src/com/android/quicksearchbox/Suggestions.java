@@ -58,12 +58,6 @@ public class Suggestions {
      * */
     private final ArrayList<CorpusResult> mCorpusResults;
 
-    /**
-     * All {@link SuggestionCursor} objects that have been published so far.
-     * This object may only be accessed on the UI thread.
-     * */
-    private final HashMap<Corpus,CorpusResult> mResultsByCorpus;
-
     private SuggestionCursor mShortcuts;
 
     private MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
@@ -88,7 +82,6 @@ public class Suggestions {
         mExpectedCorpusCount = expectedCorpusCount;
         mPromotedCorpora = promotedCorpora;
         mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpusCount);
-        mResultsByCorpus = new HashMap<Corpus,CorpusResult>(mExpectedCorpusCount);
         mPromoted = null;  // will be set by updatePromoted()
     }
 
@@ -136,7 +129,11 @@ public class Suggestions {
      * @return A collection of corpora.
      */
     public Set<Corpus> getIncludedCorpora() {
-        return new HashSet<Corpus>(mResultsByCorpus.keySet());
+        HashSet<Corpus> corpora = new HashSet<Corpus>();
+        for (CorpusResult result : mCorpusResults) {
+            corpora.add(result.getCorpus());
+        }
+        return corpora;
     }
 
     /**
@@ -165,7 +162,6 @@ public class Suggestions {
             result.close();
         }
         mCorpusResults.clear();
-        mResultsByCorpus.clear();
     }
 
     public boolean isClosed() {
@@ -216,7 +212,6 @@ public class Suggestions {
                 + mQuery + " != " + corpusResult.getUserQuery());
         }
         mCorpusResults.add(corpusResult);
-        mResultsByCorpus.put(corpusResult.getCorpus(), corpusResult);
         mPromoted = null;
         notifyDataSetChanged();
     }
@@ -228,21 +223,6 @@ public class Suggestions {
         }
         mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted,
                 mPromotedCorpora);
-    }
-
-    /**
-     * Gets a given corpus result.
-     * Must be called on the UI thread, or before this object is seen by the UI thread.
-     *
-     * @param corpus corpus
-     * @return The source result for the given source. {@code null} if the source has not
-     *         yet returned.
-     */
-    public CorpusResult getCorpusResult(Corpus corpus) {
-        if (mClosed) {
-            throw new IllegalStateException("getCorpusResult(" + corpus + ") when closed.");
-        }
-        return mResultsByCorpus.get(corpus);
     }
 
     /**

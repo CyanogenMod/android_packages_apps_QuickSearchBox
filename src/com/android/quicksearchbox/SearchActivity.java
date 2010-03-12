@@ -603,6 +603,13 @@ public class SearchActivity extends Activity {
         }
     }
 
+    private int getMaxSuggestions() {
+        Config config = getConfig();
+        return mCorpus == null
+                ? config.getMaxPromotedSuggestions()
+                : config.getMaxResultsPerSource();
+    }
+
     private void updateSuggestionsBuffered() {
         mUpdateSuggestionsHandler.removeCallbacks(mUpdateSuggestionsTask);
         long delay = getConfig().getTypingUpdateSuggestionsDelayMillis();
@@ -612,7 +619,8 @@ public class SearchActivity extends Activity {
     private void updateSuggestions(String query) {
         query = ltrim(query);
         List<Corpus> corporaToQuery = getCorporaToQuery();
-        Suggestions suggestions = getSuggestionsProvider().getSuggestions(query, corporaToQuery);
+        Suggestions suggestions = getSuggestionsProvider().getSuggestions(
+                query, corporaToQuery, getMaxSuggestions());
         mSuggestionsAdapter.setSuggestions(suggestions);
     }
 

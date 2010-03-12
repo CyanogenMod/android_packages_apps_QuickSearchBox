@@ -116,14 +116,14 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
     }
 
-    public Suggestions getSuggestions(String query, List<Corpus> corpora) {
+    public Suggestions getSuggestions(String query, List<Corpus> corpora, int maxSuggestions) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
         List<Corpus> corporaToQuery = getCorporaToQuery(query, corpora);
         int numPromotedSources = mConfig.getNumPromotedSources();
         Set<Corpus> promotedCorpora = Util.setOfFirstN(corporaToQuery, numPromotedSources);
         final Suggestions suggestions = new Suggestions(mPromoter,
-                mConfig.getMaxPromotedSuggestions(),
+                maxSuggestions,
                 query,
                 corporaToQuery.size(),
                 promotedCorpora);

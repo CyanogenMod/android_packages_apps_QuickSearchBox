@@ -162,8 +162,7 @@ public class SuggestionsAdapter extends BaseAdapter {
      */
     protected SuggestionCursor getCorpusCursor(Suggestions suggestions, Corpus corpus) {
         if (suggestions == null) return null;
-        if (corpus == null) return suggestions.getPromoted();
-        return suggestions.getCorpusResult(corpus);
+        return suggestions.getPromoted();
     }
 
     /**
