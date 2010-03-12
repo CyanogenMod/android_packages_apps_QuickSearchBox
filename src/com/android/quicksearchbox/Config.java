@@ -58,6 +58,8 @@ public class Config {
 
     private static final int LATENCY_LOG_FREQUENCY = 1000;
 
+    private static final long TYPING_SUGGESTIONS_UPDATE_DELAY_MILLIS = 100;
+
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
 
@@ -210,5 +212,13 @@ public class Config {
      */
     public int getLatencyLogFrequency() {
         return LATENCY_LOG_FREQUENCY;
+    }
+
+    /**
+     * The delay in milliseconds before suggestions are updated while typing.
+     * If a new character is typed before this timeout expires, the timeout is reset.
+     */
+    public long getTypingUpdateSuggestionsDelayMillis() {
+        return TYPING_SUGGESTIONS_UPDATE_DELAY_MILLIS;
     }
 }

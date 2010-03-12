@@ -27,11 +27,10 @@ import com.android.quicksearchbox.ui.SuggestionsView;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
-import android.database.DataSetObserver;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -102,6 +101,13 @@ public class SearchActivity extends Activity {
     private boolean mUpdateSuggestions;
     private String mUserQuery;
     private boolean mSelectAll;
+
+    private Handler mUpdateSuggestionsHandler = new Handler();
+    private Runnable mUpdateSuggestionsTask = new Runnable() {
+        public void run() {
+            updateSuggestions(getQuery());
+        }
+    };
 
     /** Called when the activity is first created. */
     @Override
@@ -251,6 +257,10 @@ public class SearchActivity extends Activity {
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getApplication();
+    }
+
+    private Config getConfig() {
+        return getQsbApplication().getConfig();
     }
 
     private Corpora getCorpora() {
@@ -581,20 +591,6 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private void startSearchProgress() {
-        // TODO: Do we need a progress indicator?
-    }
-
-    private void stopSearchProgress() {
-        Drawable animation = mSearchGoButton.getDrawable();
-        if (animation instanceof Animatable) {
-            // TODO: Is this needed, or is it done automatically when the
-            // animation is removed?
-            ((Animatable) animation).stop();
-        }
-        mSearchGoButton.setImageResource(R.drawable.ic_btn_search);
-    }
-
     private List<Corpus> getCorporaToQuery() {
         if (mCorpus == null) {
             return getCorpusRanker().getRankedCorpora();
@@ -603,16 +599,16 @@ public class SearchActivity extends Activity {
         }
     }
 
+    private void updateSuggestionsBuffered() {
+        mUpdateSuggestionsHandler.removeCallbacks(mUpdateSuggestionsTask);
+        long delay = getConfig().getTypingUpdateSuggestionsDelayMillis();
+        mUpdateSuggestionsHandler.postDelayed(mUpdateSuggestionsTask, delay);
+    }
+
     private void updateSuggestions(String query) {
         query = ltrim(query);
         List<Corpus> corporaToQuery = getCorporaToQuery();
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(query, corporaToQuery);
-        if (!suggestions.isDone()) {
-            suggestions.registerDataSetObserver(new ProgressUpdater(suggestions));
-            startSearchProgress();
-        } else {
-            stopSearchProgress();
-        }
         mSuggestionsAdapter.setSuggestions(suggestions);
     }
 
@@ -652,7 +648,7 @@ public class SearchActivity extends Activity {
             if (mUpdateSuggestions) {
                 String query = s == null ? "" : s.toString();
                 setUserQuery(query);
-                updateSuggestions(query);
+                updateSuggestionsBuffered();
             }
         }
 
@@ -770,24 +766,6 @@ public class SearchActivity extends Activity {
     private class VoiceSearchButtonClickListener implements View.OnClickListener {
         public void onClick(View view) {
             onVoiceSearchClicked();
-        }
-    }
-
-    /**
-     * Updates the progress bar when the suggestions adapter changes its progress.
-     */
-    private class ProgressUpdater extends DataSetObserver {
-        private final Suggestions mSuggestions;
-
-        public ProgressUpdater(Suggestions suggestions) {
-            mSuggestions = suggestions;
-        }
-
-        @Override
-        public void onChanged() {
-            if (mSuggestions.isDone()) {
-                stopSearchProgress();
-            }
         }
     }
 
