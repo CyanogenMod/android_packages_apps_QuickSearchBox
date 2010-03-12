@@ -210,9 +210,13 @@ public class SearchActivity extends Activity {
         mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
         mAppSearchData = appSearchData;
 
-        if (INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(intent.getAction())) {
+        if (startedIntoCorpusSelectionDialog()) {
             showCorpusSelectionDialog();
         }
+    }
+
+    public boolean startedIntoCorpusSelectionDialog() {
+        return INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(getIntent().getAction());
     }
 
     public static Uri getCorpusUri(Corpus corpus) {

@@ -143,6 +143,19 @@ public class CorpusSelectionDialog extends Dialog {
         return false;
     }
 
+    @Override
+    public void onBackPressed() {
+        SearchActivity searchActivity = getSearchActivity();
+        if (searchActivity.startedIntoCorpusSelectionDialog()) {
+            searchActivity.moveTaskToBack(true);
+        }
+        cancel();
+    }
+
+    private SearchActivity getSearchActivity() {
+        return (SearchActivity) getOwnerActivity();
+    }
+
     private void setAdapter(CorporaAdapter adapter) {
         if (adapter == mAdapter) return;
         if (mAdapter != null) mAdapter.close();
