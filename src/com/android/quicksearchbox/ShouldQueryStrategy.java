@@ -46,7 +46,7 @@ class ShouldQueryStrategy {
     /**
      * Returns whether we should query the given source for the given query.
      */
-    public synchronized boolean shouldQueryCorpus(Corpus corpus, String query) {
+    public boolean shouldQueryCorpus(Corpus corpus, String query) {
         updateQuery(query);
         if (query.length() >= corpus.getQueryThreshold()) {
             if (!corpus.queryAfterZeroResults() && mEmptyCorpora.containsKey(corpus)) {
@@ -62,19 +62,17 @@ class ShouldQueryStrategy {
     /**
      * Called to notify ShouldQueryStrategy when a source reports no results for a query.
      */
-    public synchronized void onZeroResults(Corpus corpus, String query) {
-        if (DBG) Log.i(TAG, corpus + " returned 0 results for " + query);
+    public void onZeroResults(Corpus corpus, String query) {
         // Make sure this result is actually for a prefix of the current query.
-        if (mLastQuery.startsWith(query)) {
-            // TODO: Don't bother if queryAfterZeroResults is true
+        if (mLastQuery.startsWith(query) && !corpus.queryAfterZeroResults()) {
+            if (DBG) Log.d(TAG, corpus + " returned 0 results for " + query);
             mEmptyCorpora.put(corpus, query.length());
         }
     }
 
     private void updateQuery(String query) {
         if (query.startsWith(mLastQuery)) {
-            // This is a refinement of the last query
-            mLastQuery = query;
+            // This is a refinement of the last query, no changes to mEmptyCorpora needed
         } else if (mLastQuery.startsWith(query)) {
             // This is a widening of the last query: clear out any sources
             // that reported zero results after this query.
@@ -88,5 +86,6 @@ class ShouldQueryStrategy {
             // This is a completely different query, clear everything.
             mEmptyCorpora.clear();
         }
+        mLastQuery = query;
     }
 }

@@ -17,10 +17,12 @@
 package com.android.quicksearchbox;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Tests for {@link ShouldQueryStrategy}.
  */
+@SmallTest
 public class ShouldQueryStrategyTest extends AndroidTestCase {
 
     private ShouldQueryStrategy mShouldQuery;
@@ -58,13 +60,61 @@ public class ShouldQueryStrategyTest extends AndroidTestCase {
         assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_2, "query123"));
     }
 
-    public void testDoesntQueryAfterNoResultsWhenQueryAfterZeroIsFalse() {
+    public void testDoesntQueryLongerAfterNoResults() {
         assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
         mShouldQuery.onZeroResults(CORPUS_1, "query");
         // Now we don't query for queries starting with "query"
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "queryx"));
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "queryxy"));
+    }
+
+    public void testDoesntQuerySameAfterNoResults() {
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
+        mShouldQuery.onZeroResults(CORPUS_1, "query");
+        // Now we don't query for "query"
         assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
-        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query123"));
-        // But we do query for something shorter
+    }
+
+    public void testQueriesDifferent() {
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
+        mShouldQuery.onZeroResults(CORPUS_1, "query");
+        // Now we do query for "queen"
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "queen"));
+        mShouldQuery.onZeroResults(CORPUS_1, "queen");
+        // And then not for "queens"
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "queens"));
+    }
+
+    public void testShorterThenDifferent() {
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
+        mShouldQuery.onZeroResults(CORPUS_1, "query");
+        // Should query for shorter
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "que"));
+        mShouldQuery.onZeroResults(CORPUS_1, "que");
+        // But not for longer after that
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "queen"));
+    }
+
+    public void testQueriesForShorterAfterNoResults() {
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
+        mShouldQuery.onZeroResults(CORPUS_1, "query");
+        // We do query for something shorter
         assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "quer"));
+    }
+
+    public void testOutOfOrder1() {
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "quer"));
+        // Result for something typed earlier comes in
+        mShouldQuery.onZeroResults(CORPUS_1, "que");
+        // Now we don't query for the original
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "quer"));
+    }
+
+    public void testOutOfOrder2() {
+        assertTrue(mShouldQuery.shouldQueryCorpus(CORPUS_1, "quer"));
+        // Result for something typed earlier comes in
+        mShouldQuery.onZeroResults(CORPUS_1, "que");
+        // Now we don't query for an extension of the original
+        assertFalse(mShouldQuery.shouldQueryCorpus(CORPUS_1, "query"));
     }
 }
