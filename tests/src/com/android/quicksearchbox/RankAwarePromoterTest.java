@@ -19,9 +19,9 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.Util;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,8 +29,8 @@ import java.util.Set;
 
 /**
  * Tests for RankAwarePromoter
- *
  */
+@SmallTest
 public class RankAwarePromoterTest extends AndroidTestCase {
     public static final int MAX_PROMOTED_CORPORA = 3;
     public static final int MAX_PROMOTED_SUGGESTIONS = 8;
