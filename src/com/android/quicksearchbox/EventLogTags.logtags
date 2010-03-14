@@ -54,4 +54,4 @@ option java_package com.android.quicksearchbox
 # @param corpus The corpus that was queried.
 # @param latency Query latency.
 # @param numChars Number of characters in the query.
-? qsb_latency (corpus|3,latency|1|3,num_chars|1)
+? qsb_latency (corpus|3),(latency|1|3),(num_chars|1)
