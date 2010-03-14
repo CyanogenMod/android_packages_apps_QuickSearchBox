@@ -149,8 +149,8 @@ public class SearchableSources implements Sources {
         if (DBG) Log.d(TAG, "updateSources()");
         mSources = new HashMap<String,Source>();
         for (SearchableInfo searchable : mSearchManager.getSearchablesInGlobalSearch()) {
-            Source source = createSearchableSource(searchable);
-            if (source != null) {
+            SearchableSource source = createSearchableSource(searchable);
+            if (source != null && source.canRead()) {
                 if (DBG) Log.d(TAG, "Created source " + source);
                 addSource(source);
             }
@@ -184,7 +184,7 @@ public class SearchableSources implements Sources {
         return webSearchIntent.resolveActivity(pm);
     }
 
-    private Source createSearchableSource(SearchableInfo searchable) {
+    private SearchableSource createSearchableSource(SearchableInfo searchable) {
         if (searchable == null) return null;
         try {
             return new SearchableSource(mContext, searchable);

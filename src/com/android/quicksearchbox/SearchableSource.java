@@ -26,6 +26,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PathPermission;
+import android.content.pm.ProviderInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -86,6 +88,75 @@ public class SearchableSource implements Source {
 
     protected SearchableInfo getSearchableInfo() {
         return mSearchable;
+    }
+
+    /**
+     * Checks if the current process can read the suggestion provider in this source.
+     */
+    public boolean canRead() {
+        String authority = mSearchable.getSuggestAuthority();
+        if (authority == null) {
+            Log.w(TAG, getName() + " has no searchSuggestAuthority");
+            return false;
+        }
+
+        Uri.Builder uriBuilder = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority);
+        // if content path provided, insert it now
+        String contentPath = mSearchable.getSuggestPath();
+        if (contentPath != null) {
+            uriBuilder.appendEncodedPath(contentPath);
+        }
+        // append standard suggestion query path
+        uriBuilder.appendEncodedPath(SearchManager.SUGGEST_URI_PATH_QUERY);
+        Uri uri = uriBuilder.build();
+        return canRead(uri);
+    }
+
+    /**
+     * Checks if the current process can read the given content URI.
+     *
+     * TODO: Shouldn't this be a PackageManager / Context / ContentResolver method?
+     */
+    private boolean canRead(Uri uri) {
+        ProviderInfo provider = mContext.getPackageManager().resolveContentProvider(
+                uri.getAuthority(), 0);
+        if (provider == null) {
+            Log.w(TAG, getName() + " has bad suggestion authority " + uri.getAuthority());
+            return false;
+        }
+        String readPermission = provider.readPermission;
+        if (readPermission == null) {
+            // No permission required to read anything in the content provider
+            return true;
+        }
+        int pid = android.os.Process.myPid();
+        int uid = android.os.Process.myUid();
+        if (mContext.checkPermission(readPermission, pid, uid)
+                == PackageManager.PERMISSION_GRANTED) {
+            // We have permission to read everything in the content provider
+            return true;
+        }
+        PathPermission[] pathPermissions = provider.pathPermissions;
+        if (pathPermissions == null || pathPermissions.length == 0) {
+            // We don't have the readPermission, and there are no pathPermissions
+            if (DBG) Log.d(TAG, "Missing " + readPermission);
+            return false;
+        }
+        String path = uri.getPath();
+        for (PathPermission perm : pathPermissions) {
+            String pathReadPermission = perm.getReadPermission();
+            if (pathReadPermission != null
+                    && perm.match(path)
+                    && mContext.checkPermission(pathReadPermission, pid, uid)
+                            == PackageManager.PERMISSION_GRANTED) {
+                // We have the path permission
+                return true;
+            }
+        }
+        if (DBG) Log.d(TAG, "Missing " + readPermission + " and no path permission applies");
+        return false;
     }
 
     private IconLoader createIconLoader(Context context, String providerPackage) {

@@ -57,7 +57,7 @@ public class CorpusViewInflater implements CorpusViewFactory {
     }
 
     private int getGlobalSearchIconResource() {
-        return R.drawable.google_icon;
+        return R.drawable.search_app_icon;
     }
 
     public Drawable getGlobalSearchIcon() {

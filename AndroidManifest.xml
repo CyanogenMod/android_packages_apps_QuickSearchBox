@@ -21,8 +21,11 @@
 
     <uses-permission android:name="android.permission.GLOBAL_SEARCH" />
 
-    <!-- Permission required to show quick contact badges. -->
+    <!-- Permissions needed by the default corpora. We request these instead of just relying on
+         GLOBAL_SEARCH so that we can use the default corpora when not in the system
+         partition. -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
 
     <!-- Permissions used by GoogleSearch. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -30,7 +33,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application android:label="@string/app_name"
-                 android:icon="@drawable/google_icon"
+                 android:icon="@drawable/search_app_icon"
                  android:name=".QsbApplication">
         <activity android:name=".SearchActivity"
                   android:label="@string/app_name"
@@ -78,7 +81,7 @@
         </activity>
 
         <receiver android:name=".SearchWidgetProvider"
-                  android:label="@string/search_widget">
+                  android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

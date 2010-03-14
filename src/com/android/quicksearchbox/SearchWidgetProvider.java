@@ -85,6 +85,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
 
         // Text field click
         Intent qsbIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+        qsbIntent.setPackage(context.getPackageName());
         qsbIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
@@ -111,6 +112,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         views.setImageViewUri(R.id.corpus_indicator, sourceIconUri);
 
         Intent intent = new Intent(SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS);
+        intent.setPackage(context.getPackageName());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
