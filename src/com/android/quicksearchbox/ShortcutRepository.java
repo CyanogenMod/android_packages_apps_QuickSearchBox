@@ -50,9 +50,11 @@ public interface ShortcutRepository {
      *
      * @param query The query. May be empty.
      * @param allowedCorpora The corpora to get shortcuts for.
+     * @param maxShortcuts The maximum number of shortcuts to return.
      * @return A cursor containing shortcutted results for the query.
      */
-    SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora);
+    SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora,
+            int maxShortcuts);
 
     /**
      * @return A map for corpus name to score. A higher score means that the corpus

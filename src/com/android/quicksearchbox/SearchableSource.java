@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
@@ -56,6 +57,8 @@ public class SearchableSource implements Source {
 
     private final ActivityInfo mActivityInfo;
 
+    private final int mVersionCode;
+
     // Cached label for the activity
     private CharSequence mLabel = null;
 
@@ -70,8 +73,10 @@ public class SearchableSource implements Source {
         mContext = context;
         mSearchable = searchable;
         mName = componentName.flattenToShortString();
-        mActivityInfo = context.getPackageManager().getActivityInfo(componentName, 0);
-
+        PackageManager pm = context.getPackageManager();
+        mActivityInfo = pm.getActivityInfo(componentName, 0);
+        PackageInfo pkgInfo = pm.getPackageInfo(componentName.getPackageName(), 0);
+        mVersionCode = pkgInfo.versionCode;
         mIconLoader = createIconLoader(context, searchable.getSuggestPackage());
     }
 
@@ -95,6 +100,10 @@ public class SearchableSource implements Source {
 
     public ComponentName getComponentName() {
         return mSearchable.getSearchActivity();
+    }
+
+    public int getVersionCode() {
+        return mVersionCode;
     }
 
     public String getName() {

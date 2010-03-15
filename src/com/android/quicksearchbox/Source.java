@@ -35,6 +35,12 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
     ComponentName getComponentName();
 
     /**
+     * Gets the version code of the source. This is expected to change when the app that
+     * this source is for is upgraded.
+     */
+    int getVersionCode();
+
+    /**
      * Gets the localized, human-readable label for this source.
      */
     CharSequence getLabel();

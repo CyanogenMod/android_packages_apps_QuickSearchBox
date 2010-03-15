@@ -36,14 +36,25 @@ public class MockSource implements Source {
 
     private final String mName;
 
+    private final int mVersionCode;
+
     public MockSource(String name) {
+        this(name, 0);
+    }
+
+    public MockSource(String name, int versionCode) {
         mName = name;
+        mVersionCode = versionCode;
     }
 
     public ComponentName getComponentName() {
         // Not an activity, but no code should treat it as one.
         return new ComponentName("com.android.quicksearchbox",
                 getClass().getName() + "." + mName);
+    }
+
+    public int getVersionCode() {
+        return mVersionCode;
     }
 
     public String getName() {
@@ -107,6 +118,25 @@ public class MockSource implements Source {
         cursor.add(s1);
         cursor.add(s2);
         return new Result(query, cursor);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o != null && o.getClass().equals(this.getClass())) {
+            MockSource s = (MockSource) o;
+            return s.mName.equals(mName);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mName.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getName() + ":" + getVersionCode();
     }
 
     private class Result extends SuggestionCursorWrapper implements SourceResult {
