@@ -16,8 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Util;
+
 import android.app.SearchManager;
-import android.content.ContentResolver;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -167,8 +168,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setText1("title")
                 .setText2("description")
                 .setText2Url("description_url")
-                .setIcon1("icon1")
-                .setIcon2("icon2")
+                .setIcon1("android.resource://system/drawable/foo")
+                .setIcon2("content://test/bar")
                 .setIntentAction("action")
                 .setIntentData("data")
                 .setSuggestionQuery("query")
@@ -183,14 +184,9 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     public void testSpinnerWhileRefreshing() {
         SuggestionData clicked = new SuggestionData(CONTACTS_SOURCE)
-                .setFormat("<i>%s</i>")
                 .setText1("title")
                 .setText2("description")
-                .setText2("description_url")
-                .setIcon1("icon1")
                 .setIcon2("icon2")
-                .setIntentAction("action")
-                .setIntentData("data")
                 .setSuggestionQuery("query")
                 .setIntentExtraData("extradata")
                 .setShortcutId("idofshortcut")
@@ -198,17 +194,11 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
         reportClick("q", clicked);
 
-        String spinnerUri = ContentResolver.SCHEME_ANDROID_RESOURCE
-                + "://" + mContext.getPackageName() + "/"  + R.drawable.search_spinner;
+        String spinnerUri = Util.getResourceUri(mContext, R.drawable.search_spinner).toString();
         SuggestionData expected = new SuggestionData(CONTACTS_SOURCE)
-                .setFormat("<i>%s</i>")
                 .setText1("title")
                 .setText2("description")
-                .setText2("description_url")
-                .setIcon1("icon1")
                 .setIcon2(spinnerUri)
-                .setIntentAction("action")
-                .setIntentData("data")
                 .setSuggestionQuery("query")
                 .setIntentExtraData("extradata")
                 .setShortcutId("idofshortcut")

@@ -17,6 +17,8 @@
 package com.android.quicksearchbox;
 
 
+import com.android.quicksearchbox.util.Util;
+
 import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -128,17 +130,16 @@ public class WebCorpus extends MultiSourceCorpus {
         return intent;
     }
 
+    private int getCorpusIconResource() {
+        return R.drawable.corpus_icon_web;
+    }
+
     public Drawable getCorpusIcon() {
-        return getContext().getResources().getDrawable(R.drawable.corpus_icon_web);
+        return getContext().getResources().getDrawable(getCorpusIconResource());
     }
 
     public Uri getCorpusIconUri() {
-        int resourceId = R.drawable.corpus_icon_web;
-        return new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(getContext().getPackageName())
-                .appendEncodedPath(String.valueOf(resourceId))
-                .build();
+        return Util.getResourceUri(getContext(), getCorpusIconResource());
     }
 
     public String getName() {

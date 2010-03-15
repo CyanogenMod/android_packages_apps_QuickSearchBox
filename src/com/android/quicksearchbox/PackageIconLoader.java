@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Util;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -53,7 +55,7 @@ public class PackageIconLoader implements IconLoader {
      */
     public PackageIconLoader(Context context, String packageName)
             throws PackageManager.NameNotFoundException, SecurityException {
-        mPackageContext = context.createPackageContext(packageName, 0);
+        mPackageContext = context.createPackageContext(packageName, Context.CONTEXT_RESTRICTED);
     }
 
     public Drawable getIcon(String drawableId) {
@@ -83,11 +85,7 @@ public class PackageIconLoader implements IconLoader {
         }
         try {
             int resourceId = Integer.parseInt(drawableId);
-            return new Uri.Builder()
-                    .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                    .authority(mPackageContext.getPackageName())
-                    .appendEncodedPath(String.valueOf(resourceId))
-                    .build();
+            return Util.getResourceUri(mPackageContext, resourceId);
         } catch (NumberFormatException nfe) {
             return Uri.parse(drawableId);
         }
@@ -151,7 +149,7 @@ public class PackageIconLoader implements IconLoader {
             try {
                 r = mPackageContext.getPackageManager().getResourcesForApplication(authority);
             } catch (NameNotFoundException ex) {
-                throw new FileNotFoundException("No package found for authority: " + uri);
+                throw new FileNotFoundException("Failed to get resources: " + ex);
             }
         }
         List<String> path = uri.getPathSegments();

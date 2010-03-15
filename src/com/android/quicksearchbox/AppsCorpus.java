@@ -17,6 +17,8 @@
 package com.android.quicksearchbox;
 
 
+import com.android.quicksearchbox.util.Util;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -59,12 +61,7 @@ public class AppsCorpus extends SingleSourceCorpus {
 
     @Override
     public Uri getCorpusIconUri() {
-        int resourceId = android.R.drawable.sym_def_app_icon;
-        return new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(getContext().getPackageName())
-                .appendEncodedPath(String.valueOf(resourceId))
-                .build();
+        return Util.getResourceUri(getContext(), android.R.drawable.sym_def_app_icon);
     }
 
     @Override

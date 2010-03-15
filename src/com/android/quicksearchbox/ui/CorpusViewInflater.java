@@ -17,6 +17,7 @@
 package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.util.Util;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -65,11 +66,7 @@ public class CorpusViewInflater implements CorpusViewFactory {
     }
 
     public Uri getGlobalSearchIconUri() {
-        return new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(mContext.getPackageName())
-                .appendEncodedPath(String.valueOf(getGlobalSearchIconResource()))
-                .build();
+        return Util.getResourceUri(mContext, getGlobalSearchIconResource());
     }
 
 }

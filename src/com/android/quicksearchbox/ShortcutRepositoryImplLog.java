@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Util;
 import com.google.common.annotations.VisibleForTesting;
 
 import android.app.SearchManager;
@@ -26,7 +27,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.Uri;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
@@ -91,8 +94,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         mOpenHelper = new DbOpenHelper(context, name, DB_VERSION, config);
         mEmptyQueryShortcutQuery = buildShortcutQuery(true);
         mShortcutQuery = buildShortcutQuery(false);
-        mSearchSpinner = ContentResolver.SCHEME_ANDROID_RESOURCE
-                + "://" + mContext.getPackageName() + "/"  + R.drawable.search_spinner;
+        mSearchSpinner = Util.getResourceUri(mContext, R.drawable.search_spinner).toString();
     }
 
     private String buildShortcutQuery(boolean emptyQuery) {
@@ -411,6 +413,10 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         // for use as a unique identifier of a suggestion.
         String intentKey = key.toString();
 
+        // Get URIs for all icons, to make sure that they are stable
+        String icon1Uri = getIconUriString(source, suggestion.getSuggestionIcon1());
+        String icon2Uri = getIconUriString(source, suggestion.getSuggestionIcon2());
+
         ContentValues cv = new ContentValues();
         cv.put(Shortcuts.intent_key.name(), intentKey);
         cv.put(Shortcuts.source.name(), sourceName);
@@ -419,8 +425,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         cv.put(Shortcuts.title.name(), suggestion.getSuggestionText1());
         cv.put(Shortcuts.description.name(), suggestion.getSuggestionText2());
         cv.put(Shortcuts.description_url.name(), suggestion.getSuggestionText2Url());
-        cv.put(Shortcuts.icon1.name(), suggestion.getSuggestionIcon1());
-        cv.put(Shortcuts.icon2.name(), suggestion.getSuggestionIcon2());
+        cv.put(Shortcuts.icon1.name(), icon1Uri);
+        cv.put(Shortcuts.icon2.name(), icon2Uri);
         cv.put(Shortcuts.intent_action.name(), intentAction);
         cv.put(Shortcuts.intent_data.name(), intentData);
         cv.put(Shortcuts.intent_query.name(), intentQuery);
@@ -432,6 +438,21 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         cv.put(Shortcuts.log_type.name(), suggestion.getSuggestionLogType());
 
         return cv;
+    }
+
+    private String getIconUriString(Source source, String drawableId) {
+        // Fast path for empty icons
+        if (TextUtils.isEmpty(drawableId) || "0".equals(drawableId)) {
+            return null;
+        }
+        // Fast path for icon URIs
+        if (drawableId.startsWith(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                || drawableId.startsWith(ContentResolver.SCHEME_CONTENT)
+                || drawableId.startsWith(ContentResolver.SCHEME_FILE)) {
+            return drawableId;
+        }
+        Uri uri = source.getIconUri(drawableId);
+        return uri == null ? null : uri.toString();
     }
 
     /* package for testing */ void reportClickAtTime(SuggestionCursor suggestion,

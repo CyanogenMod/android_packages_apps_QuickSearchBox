@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Util;
+
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -226,11 +228,7 @@ public class SearchableSource implements Source {
 
     public Uri getSourceIconUri() {
         int resourceId = getSourceIconResource();
-        return new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(getComponentName().getPackageName())
-                .appendEncodedPath(String.valueOf(resourceId))
-                .build();
+        return Util.getResourceUri(getContext(), mActivityInfo.applicationInfo, resourceId);
     }
 
     private int getSourceIconResource() {
