@@ -147,7 +147,7 @@ public class CorpusSelectionDialog extends Dialog {
     public void onBackPressed() {
         SearchActivity searchActivity = getSearchActivity();
         if (searchActivity.startedIntoCorpusSelectionDialog()) {
-            searchActivity.moveTaskToBack(true);
+            searchActivity.onBackPressed();
         }
         cancel();
     }

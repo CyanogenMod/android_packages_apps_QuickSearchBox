@@ -80,7 +80,7 @@
             android:textStyle="normal"
             android:textColor="@android:color/primary_text_light"
             android:textColorHint="@color/search_hint"
-            android:imeOptions="actionGo|flagNoExtractUi"
+            android:imeOptions="actionGo"
         />
 
         <ImageButton 

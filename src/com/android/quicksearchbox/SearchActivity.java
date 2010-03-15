@@ -26,6 +26,7 @@ import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -219,6 +220,19 @@ public class SearchActivity extends Activity {
         return INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(getIntent().getAction());
     }
 
+    /**
+     * Removes corpus selector intent action, so that BACK works normally after
+     * dismissing and reopening the corpus selector.
+     */
+    private void clearStartedIntoCorpusSelectionDialog() {
+        Intent oldIntent = getIntent();
+        if (SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(oldIntent.getAction())) {
+            Intent newIntent = new Intent(oldIntent);
+            newIntent.setAction(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+            setIntent(newIntent);
+        }
+    }
+
     public static Uri getCorpusUri(Corpus corpus) {
         if (corpus == null) return null;
         return new Uri.Builder()
@@ -323,7 +337,10 @@ public class SearchActivity extends Activity {
         // Only select everything the first time after creating the activity.
         mSelectAll = false;
         updateSuggestions(mUserQuery);
-        mQueryTextView.requestFocus();
+        if (!isCorpusSelectionDialogShowing()) {
+            mQueryTextView.requestFocus();
+            showInputMethodForQuery();
+        }
         if (mStarting) {
             mStarting = false;
             String source = getIntent().getStringExtra(Search.SOURCE);
@@ -432,9 +449,14 @@ public class SearchActivity extends Activity {
         if (mCorpusSelectionDialog == null) {
             mCorpusSelectionDialog = new CorpusSelectionDialog(this);
             mCorpusSelectionDialog.setOwnerActivity(this);
+            mCorpusSelectionDialog.setOnDismissListener(new CorpusSelectorDismissListener());
             mCorpusSelectionDialog.setOnCorpusSelectedListener(new CorpusSelectionListener());
         }
         mCorpusSelectionDialog.show(mCorpus);
+    }
+
+    protected boolean isCorpusSelectionDialogShowing() {
+        return mCorpusSelectionDialog != null && mCorpusSelectionDialog.isShowing();
     }
 
     protected void dismissCorpusSelectionDialog() {
@@ -588,8 +610,7 @@ public class SearchActivity extends Activity {
         public void onFocusChange(View v, boolean focused) {
             if (DBG) Log.d(TAG, "Query focus change, now: " + focused);
             if (focused) {
-                // The query box got focus, show the input method if the
-                // query box got focus?
+                // The query box got focus, show the input method
                 showInputMethodForQuery();
             }
         }
@@ -763,12 +784,20 @@ public class SearchActivity extends Activity {
         }
     }
 
+    private class CorpusSelectorDismissListener implements DialogInterface.OnDismissListener {
+        public void onDismiss(DialogInterface dialog) {
+            if (DBG) Log.d(TAG, "Corpus selector dismissed");
+            clearStartedIntoCorpusSelectionDialog();
+        }
+    }
+
     private class CorpusSelectionListener
             implements CorpusSelectionDialog.OnCorpusSelectedListener {
         public void onCorpusSelected(Corpus corpus) {
             setCorpus(corpus);
             updateSuggestions(getQuery());
             mQueryTextView.requestFocus();
+            showInputMethodForQuery();
         }
     }
 
