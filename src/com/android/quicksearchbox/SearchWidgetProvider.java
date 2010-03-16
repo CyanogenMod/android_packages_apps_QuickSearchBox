@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import com.android.common.Search;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.app.PendingIntent;
@@ -39,10 +40,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.SearchWidgetProvider";
 
-    private static final String WIDGET_SEARCH_SOURCE = "launcher-search";
-
-    // TODO: Expose SearchManager.SOURCE instead.
-    private static final String SOURCE = "source";
+    private static final String WIDGET_SEARCH_SOURCE = "launcher-widget";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -65,7 +63,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
 
         Bundle widgetAppData = new Bundle();
-        widgetAppData.putString(SOURCE, WIDGET_SEARCH_SOURCE);
+        widgetAppData.putString(Search.SOURCE, WIDGET_SEARCH_SOURCE);
 
         // Corpus indicator
         bindCorpusIndicator(context, views, widgetAppData, corpus);
