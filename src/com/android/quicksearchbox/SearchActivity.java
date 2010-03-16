@@ -513,10 +513,14 @@ public class SearchActivity extends Activity {
     }
 
     protected boolean launchSuggestion(int position) {
+        SuggestionCursor suggestions = getCurrentSuggestions();
+        if (position < 0 || position >= suggestions.getCount()) {
+            Log.w(TAG, "Tried to launch invalid suggestion " + position);
+            return false;
+        }
+
         if (DBG) Log.d(TAG, "Launching suggestion " + position);
         mTookAction = true;
-
-        SuggestionCursor suggestions = getCurrentSuggestions();
 
         // Log suggestion click
         Collection<Corpus> corpora = mSuggestionsAdapter.getSuggestions().getIncludedCorpora();
@@ -543,8 +547,7 @@ public class SearchActivity extends Activity {
             return launchSuggestion(position);
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_UP
-                && mSuggestionsView.getSelectedItemPosition() == 0) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP && position == 0) {
             // Moved up from the top suggestion, restore the user query and focus query box
             if (DBG) Log.d(TAG, "Up and out");
             restoreUserQuery();
