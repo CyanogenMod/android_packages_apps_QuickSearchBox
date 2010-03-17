@@ -275,8 +275,8 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
 
     public String getSuggestionKey() {
         String action = makeKeyComponent(getSuggestionIntentAction());
-        String data = makeKeyComponent(getSuggestionIntentDataString());
-        String query = makeKeyComponent(getSuggestionQuery());
+        String data = makeKeyComponent(normalizeUrl(getSuggestionIntentDataString()));
+        String query = makeKeyComponent(normalizeUrl(getSuggestionQuery()));
         // calculating accurate size of string builder avoids an allocation vs starting with
         // the default size and having to expand.
         int size = action.length() + 2 + data.length() + query.length();
@@ -287,6 +287,22 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
                 .append('#')
                 .append(query)
                 .toString();
+    }
+
+    /** Simple url normalization that strips http:// and empty paths, i.e.,
+     *  http://www.google.com/ -> www.google.com.  Used to prevent obvious
+     * duplication of nav suggestions, bookmarks and urls entered by the user.
+     */
+    private static String normalizeUrl(String url) {
+        if (url != null && url.startsWith("http://")) {
+            int start = 7;   // length of http://
+            int end = url.length();
+            if (url.indexOf('/', start) == end - 1) {
+                end--;
+            }
+            return url.substring(start, end);
+        }
+        return url;
     }
 
     public void registerDataSetObserver(DataSetObserver observer) {
