@@ -22,6 +22,7 @@
     android:paddingRight="14dip"
     android:orientation="horizontal"
     android:background="@drawable/search_floater" >
+
     <include layout="@layout/corpus_indicator" />
 
     <TextView
