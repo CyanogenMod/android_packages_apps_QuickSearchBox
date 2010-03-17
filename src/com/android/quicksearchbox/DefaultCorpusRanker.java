@@ -47,8 +47,16 @@ public class DefaultCorpusRanker extends AbstractCorpusRanker {
         }
 
         public int compare(Corpus corpus1, Corpus corpus2) {
-            // Note that this is reversed from the usual order
-            return getCorpusScore(corpus2) - getCorpusScore(corpus1);
+            boolean corpus1IsDefault = mCorpora.isCorpusDefaultEnabled(corpus1);
+            boolean corpus2IsDefault = mCorpora.isCorpusDefaultEnabled(corpus2);
+
+            if (corpus1IsDefault != corpus2IsDefault) {
+                // Default corpora always come before non-default
+                return corpus1IsDefault ? -1 : 1;
+            } else {
+                // Then by descending score
+                return getCorpusScore(corpus2) - getCorpusScore(corpus1);
+            }
         }
 
         /**
@@ -63,10 +71,6 @@ public class DefaultCorpusRanker extends AbstractCorpusRanker {
             Integer clickScore = mClickScores.get(corpus.getName());
             if (clickScore != null) {
                 return clickScore;
-            }
-            // Boost default enabled corpora that don't have click scores
-            if (mCorpora.isCorpusDefaultEnabled(corpus)) {
-                return 1;
             }
             return 0;
         }

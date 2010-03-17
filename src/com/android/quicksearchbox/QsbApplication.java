@@ -245,12 +245,14 @@ public class QsbApplication extends Application {
     }
 
     protected SuggestionsProvider createSuggestionsProvider() {
-        Promoter promoter =  new ShortcutPromoter(new RankAwarePromoter());
+        Promoter promoter =  new ShortcutPromoter(
+                new RankAwarePromoter(getConfig(), getCorpora()));
         SuggestionsProvider provider = new SuggestionsProviderImpl(getConfig(),
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
                 promoter,
                 getShortcutRepository(),
+                getCorpora(),
                 getLogger());
         return provider;
     }

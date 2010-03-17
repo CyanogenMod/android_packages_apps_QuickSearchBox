@@ -46,7 +46,7 @@ public class ShortcutPromoter implements Promoter {
 
     public void pickPromoted(SuggestionCursor shortcuts,
             ArrayList<CorpusResult> suggestions, int maxPromoted,
-            ListSuggestionCursor promoted, Set<Corpus> promotedCorpora) {
+            ListSuggestionCursor promoted) {
         int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
         int promotedShortcutCount = Math.min(shortcutCount, maxPromoted);
         if (DBG) {
@@ -59,7 +59,7 @@ public class ShortcutPromoter implements Promoter {
         }
 
         if (promoted.getCount() < maxPromoted && mNextPromoter != null) {
-            mNextPromoter.pickPromoted(null, suggestions, maxPromoted, promoted, promotedCorpora);
+            mNextPromoter.pickPromoted(null, suggestions, maxPromoted, promoted);
         }
     }
 

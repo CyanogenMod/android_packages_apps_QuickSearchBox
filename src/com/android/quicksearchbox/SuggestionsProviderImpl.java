@@ -53,6 +53,8 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
 
+    private final Corpora mCorpora;
+
     private BatchingNamedTaskExecutor mBatchingExecutor;
 
     public SuggestionsProviderImpl(Config config,
@@ -60,6 +62,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
             Handler publishThread,
             Promoter promoter,
             ShortcutRepository shortcutRepo,
+            Corpora corpora,
             Logger logger) {
         mConfig = config;
         mQueryExecutor = queryExecutor;
@@ -67,6 +70,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         mPromoter = promoter;
         mShortcutRepo = shortcutRepo;
         mLogger = logger;
+        mCorpora = corpora;
     }
 
     public void close() {
@@ -121,13 +125,10 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
         List<Corpus> corporaToQuery = getCorporaToQuery(query, corpora);
-        int numPromotedSources = mConfig.getNumPromotedSources();
-        Set<Corpus> promotedCorpora = Util.setOfFirstN(corporaToQuery, numPromotedSources);
         final Suggestions suggestions = new Suggestions(mPromoter,
                 maxSuggestions,
                 query,
-                corporaToQuery.size(),
-                promotedCorpora);
+                corporaToQuery.size());
         int maxShortcuts = mConfig.getMaxShortcutsReturned();
         SuggestionCursor shortcuts = getShortcutsForQuery(query, corpora, maxShortcuts);
         if (shortcuts != null) {
@@ -139,26 +140,46 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
             return suggestions;
         }
 
-        mBatchingExecutor = new BatchingNamedTaskExecutor(mQueryExecutor, numPromotedSources);
+        int initialBatchSize = countDefaultCorpora(corporaToQuery);
+        initialBatchSize = Math.min(initialBatchSize, mConfig.getNumPromotedSources());
+        if (initialBatchSize == 0) {
+            initialBatchSize = mConfig.getNumPromotedSources();
+        }
+
+        mBatchingExecutor = new BatchingNamedTaskExecutor(mQueryExecutor);
 
         SuggestionCursorReceiver receiver = new SuggestionCursorReceiver(
-                mBatchingExecutor, suggestions);
+                mBatchingExecutor, suggestions, initialBatchSize);
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
         QueryTask.startQueries(query, maxResultsPerSource, corporaToQuery, mBatchingExecutor,
                 mPublishThread, receiver);
+        mBatchingExecutor.executeNextBatch(initialBatchSize);
 
         return suggestions;
+    }
+
+    private int countDefaultCorpora(List<Corpus> corpora) {
+        int count = 0;
+        for (Corpus corpus : corpora) {
+            if (mCorpora.isCorpusDefaultEnabled(corpus)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private class SuggestionCursorReceiver implements Consumer<CorpusResult> {
         private final BatchingNamedTaskExecutor mExecutor;
         private final Suggestions mSuggestions;
 
+        private int mCountAtWhichToExecuteNextBatch;
+
         public SuggestionCursorReceiver(BatchingNamedTaskExecutor executor,
-                Suggestions suggestions) {
+                Suggestions suggestions, int initialBatchSize) {
             mExecutor = executor;
             mSuggestions = suggestions;
+            mCountAtWhichToExecuteNextBatch = initialBatchSize;
         }
 
         public boolean consume(CorpusResult cursor) {
@@ -174,11 +195,13 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
 
         private void executeNextBatchIfNeeded() {
-            if (mSuggestions.getSourceCount() % mConfig.getNumPromotedSources() == 0) {
+            if (mSuggestions.getSourceCount() == mCountAtWhichToExecuteNextBatch) {
                 // We've just finished one batch
                 if (mSuggestions.getPromoted().getCount() < mConfig.getMaxPromotedSuggestions()) {
                     // But we still don't have enough results, ask for more
-                    mExecutor.executeNextBatch();
+                    int nextBatchSize = mConfig.getNumPromotedSources();
+                    mCountAtWhichToExecuteNextBatch += nextBatchSize;
+                    mExecutor.executeNextBatch(nextBatchSize);
                 }
             }
         }

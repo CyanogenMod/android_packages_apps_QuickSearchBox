@@ -16,8 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.util.Util;
-
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -25,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Tests for RankAwarePromoter
@@ -41,23 +38,20 @@ public class RankAwarePromoterTest extends AndroidTestCase {
 
     @Override
     public void setUp() {
-        Corpora corpora = createMockCorpora(5);
+        Corpora corpora = createMockCorpora(5, MAX_PROMOTED_CORPORA);
         mRanker = new LexicographicalCorpusRanker(corpora);
-        mPromoter = new RankAwarePromoter();
+        mPromoter = new RankAwarePromoter(new Config(mContext), corpora);
     }
 
     public void testPromotesExpectedSuggestions() {
         ArrayList<CorpusResult> suggestions = getSuggestions(TEST_QUERY);
         ListSuggestionCursor promoted = new ListSuggestionCursor(TEST_QUERY);
-        List<Corpus> rankedCorpora = getRankedCorpora();
-        Set<Corpus> promotedCorpora = Util.setOfFirstN(rankedCorpora, MAX_PROMOTED_CORPORA);
-        mPromoter.pickPromoted(null, suggestions, MAX_PROMOTED_SUGGESTIONS, promoted,
-                promotedCorpora);
+        mPromoter.pickPromoted(null, suggestions, MAX_PROMOTED_SUGGESTIONS, promoted);
 
         assertEquals(MAX_PROMOTED_SUGGESTIONS, promoted.getCount());
 
-        int[] expectedSource = {0, 0, 1, 1, 2, 2, 3, 4};
-        int[] expectedSuggestion = {1, 2, 1, 2, 1, 2, 1, 1};
+        int[] expectedSource = {0, 1, 2, 0, 1, 2, 3, 4};
+        int[] expectedSuggestion = {1, 1, 1, 2, 2, 2, 1, 1};
 
         for (int i = 0; i < promoted.getCount(); i++) {
             promoted.moveTo(i);
@@ -82,11 +76,15 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         return suggestions;
     }
 
-    private static MockCorpora createMockCorpora(int count) {
+    private static MockCorpora createMockCorpora(int count, int defaultCount) {
         MockCorpora corpora = new MockCorpora();
         for (int i = 0; i < count; i++) {
             Source mockSource = new MockSource("Source" + i);
-            corpora.addCorpus(new MockCorpus(mockSource));
+            Corpus mockCorpus = new MockCorpus(mockSource);
+            corpora.addCorpus(mockCorpus);
+            if (i < defaultCount) {
+                corpora.addDefaultCorpus(mockCorpus);
+            }
         }
         return corpora;
     }

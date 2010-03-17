@@ -32,7 +32,7 @@ public class SuggestionsTest extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        mSuggestions = new Suggestions(null, 0, "foo", 2, null);
+        mSuggestions = new Suggestions(null, 0, "foo", 2);
     }
 
     @Override

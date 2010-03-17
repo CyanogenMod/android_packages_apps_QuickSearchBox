@@ -31,35 +31,48 @@ public class RankAwarePromoter implements Promoter {
     private static final boolean DBG = true;
     private static final String TAG = "QSB.RankAwarePromoter";
 
+    private final Config mConfig;
+    private final Corpora mCorpora;
+
+    public RankAwarePromoter(Config config, Corpora corpora) {
+        mConfig = config;
+        mCorpora = corpora;
+    }
+
     public void pickPromoted(SuggestionCursor shortcuts, ArrayList<CorpusResult> suggestions,
-            int maxPromoted, ListSuggestionCursor promoted, Set<Corpus> promotedCorpora) {
+            int maxPromoted, ListSuggestionCursor promoted) {
 
         if (DBG) Log.d(TAG, "Available results: " + suggestions);
 
-        // Split non-empty results into promoted and other, positioned at first suggestion
-        LinkedList<CorpusResult> promotedResults = new LinkedList<CorpusResult>();
+        // Split non-empty results into default sources and other, positioned at first suggestion
+        LinkedList<CorpusResult> defaultResults = new LinkedList<CorpusResult>();
         LinkedList<CorpusResult> otherResults = new LinkedList<CorpusResult>();
-        for (int i = 0; i < suggestions.size(); i++) {
-            CorpusResult result = suggestions.get(i);
+        for (CorpusResult result : suggestions) {
             if (result.getCount() > 0) {
                 result.moveTo(0);
-                if (promotedCorpora.contains(result.getCorpus())) {
-                    promotedResults.add(result);
+                if (mCorpora.isCorpusDefaultEnabled(result.getCorpus())) {
+                    defaultResults.add(result);
                 } else {
                     otherResults.add(result);
                 }
             }
         }
 
-        // Pick 2 results from each of the promoted corpora
-        maxPromoted -= roundRobin(promotedResults, maxPromoted, 2, promoted);
+        // Share the top slots equally among each of the default corpora
+        if (maxPromoted > 0 && !defaultResults.isEmpty()) {
+            int slotsToFill = Math.min(getSlotsAboveKeyboard() - promoted.getCount(), maxPromoted);
+            if (slotsToFill > 0) {
+                int stripeSize = Math.max(1, slotsToFill / defaultResults.size());
+                maxPromoted -= roundRobin(defaultResults, slotsToFill, stripeSize, promoted);
+            }
+        }
 
         // Then try to fill with the remaining promoted results
-        if (maxPromoted > 0 && !promotedResults.isEmpty()) {
-            int stripeSize = Math.max(1, maxPromoted / promotedResults.size());
-            maxPromoted -= roundRobin(promotedResults, maxPromoted, stripeSize, promoted);
+        if (maxPromoted > 0 && !defaultResults.isEmpty()) {
+            int stripeSize = Math.max(1, maxPromoted / defaultResults.size());
+            maxPromoted -= roundRobin(defaultResults, maxPromoted, stripeSize, promoted);
             // We may still have a few slots left
-            maxPromoted -= roundRobin(promotedResults, maxPromoted, maxPromoted, promoted);
+            maxPromoted -= roundRobin(defaultResults, maxPromoted, maxPromoted, promoted);
         }
 
         // Then try to fill with the rest
@@ -71,6 +84,10 @@ public class RankAwarePromoter implements Promoter {
         }
 
         if (DBG) Log.d(TAG, "Returning " + promoted.toString());
+    }
+
+    private int getSlotsAboveKeyboard() {
+        return mConfig.getNumSuggestionsAboveKeyboard();
     }
 
     /**

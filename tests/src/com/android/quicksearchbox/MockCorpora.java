@@ -23,6 +23,7 @@ import android.util.Log;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 
 /**
@@ -35,6 +36,8 @@ public class MockCorpora implements Corpora {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private HashMap<String,Corpus> mCorporaByName = new HashMap<String,Corpus>();
+    private HashSet<Corpus> mDefaultCorpora = new HashSet<Corpus>();
+
     private Corpus mWebCorpus;
 
     public void addCorpus(Corpus corpus) {
@@ -47,6 +50,10 @@ public class MockCorpora implements Corpora {
 
     public void setWebCorpus(Corpus webCorpus) {
         mWebCorpus = webCorpus;
+    }
+
+    public void addDefaultCorpus(Corpus corpus) {
+        mDefaultCorpora.add(corpus);
     }
 
     public Collection<Corpus> getAllCorpora() {
@@ -88,7 +95,7 @@ public class MockCorpora implements Corpora {
     }
 
     public boolean isCorpusDefaultEnabled(Corpus corpus) {
-        return true;
+        return mDefaultCorpora.contains(corpus);
     }
 
     public boolean isCorpusEnabled(Corpus corpus) {

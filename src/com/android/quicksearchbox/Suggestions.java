@@ -42,9 +42,6 @@ public class Suggestions {
     /** The number of sources that are expected to report. */
     private final int mExpectedCorpusCount;
 
-    /** The corpora that are promoted. */
-    private final Set<Corpus> mPromotedCorpora;
-
     /**
      * The observers that want notifications of changes to the published suggestions.
      * This object may be accessed on any thread.
@@ -75,12 +72,11 @@ public class Suggestions {
      * @param expectedCorpusCount The number of sources that are expected to report.
      */
     public Suggestions(Promoter promoter, int maxPromoted,
-            String query, int expectedCorpusCount, Set<Corpus> promotedCorpora) {
+            String query, int expectedCorpusCount) {
         mPromoter = promoter;
         mMaxPromoted = maxPromoted;
         mQuery = query;
         mExpectedCorpusCount = expectedCorpusCount;
-        mPromotedCorpora = promotedCorpora;
         mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpusCount);
         mPromoted = null;  // will be set by updatePromoted()
     }
@@ -221,8 +217,7 @@ public class Suggestions {
         if (mPromoter == null) {
             return;
         }
-        mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted,
-                mPromotedCorpora);
+        mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted);
     }
 
     /**

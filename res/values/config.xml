@@ -25,4 +25,16 @@
     <item>com.android.contacts/.ContactsListActivity</item>
     <item>com.android.providers.applications/.ApplicationLauncher</item>
   </string-array>
+
+  <!-- The component name of the installed apps source used in QSB  -->
+  <string name="installed_apps_component" translatable="false">com.android.providers.applications/.ApplicationLauncher</string>
+
+  <!-- The component name of the browser bookmarks and history source used in QSB  -->
+  <string name="browser_search_component" translatable="false">com.android.browser/.BookmarkSearch</string>
+
+  <!-- Number of suggestions slots that are visible above
+      the onscreen keyboard. These slots will be shared among
+      the default sources. -->
+  <integer name="num_suggestions_above_keyboard">4</integer>
+
 </resources>

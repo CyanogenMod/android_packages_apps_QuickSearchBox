@@ -23,9 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Executes NamedTasks in batches of a predefined size.  Tasks in excess of
- * the batch size are queued until the caller indicates that more results
- * are required.
+ * Executes NamedTasks in batches of a given size.  Tasks are queued until
+ * executeNextBatch is called.
  */
 public class BatchingNamedTaskExecutor implements NamedTaskExecutor {
 
@@ -34,36 +33,23 @@ public class BatchingNamedTaskExecutor implements NamedTaskExecutor {
 
     private final NamedTaskExecutor mExecutor;
 
-    private final int mBatchSize;
-
     /** Queue of tasks waiting to be dispatched to mExecutor **/
     private final ArrayList<NamedTask> mQueuedTasks = new ArrayList<NamedTask>();
-
-    /** Count of tasks already dispatched to mExecutor in this batch **/
-    private int mDispatchedCount;
 
     /**
      * Creates a new BatchingSourceTaskExecutor.
      *
      * @param executor A SourceTaskExecutor for actually executing the tasks.
-     * @param batchSize The number of tasks to submit in each batch.
      */
-    public BatchingNamedTaskExecutor(NamedTaskExecutor executor, int batchSize) {
+    public BatchingNamedTaskExecutor(NamedTaskExecutor executor) {
         mExecutor = executor;
-        mBatchSize = batchSize;
     }
 
     public void execute(NamedTask task) {
         synchronized (mQueuedTasks) {
-            if (mDispatchedCount == mBatchSize) {
-                if (DBG) Log.d(TAG, "Queueing " + task);
-                mQueuedTasks.add(task);
-                return;
-            }
-            mDispatchedCount++;
+            if (DBG) Log.d(TAG, "Queuing " + task);
+            mQueuedTasks.add(task);
         }
-        // Avoid holding the lock when dispatching the task.
-        dispatch(task);
     }
 
     private void dispatch(NamedTask task) {
@@ -73,15 +59,15 @@ public class BatchingNamedTaskExecutor implements NamedTaskExecutor {
 
     /**
      * Instructs the executor to submit the next batch of results.
+     * @param batchSize the maximum number of entries to execute.
      */
-    public void executeNextBatch() {
+    public void executeNextBatch(int batchSize) {
         NamedTask[] batch = new NamedTask[0];
         synchronized (mQueuedTasks) {
-            int count = Math.min(mQueuedTasks.size(), mBatchSize);
+            int count = Math.min(mQueuedTasks.size(), batchSize);
             List<NamedTask> nextTasks = mQueuedTasks.subList(0, count);
             batch = nextTasks.toArray(batch);
             nextTasks.clear();
-            mDispatchedCount = count;
             if (DBG) Log.d(TAG, "Dispatching batch of " + count);
         }
 
@@ -97,7 +83,6 @@ public class BatchingNamedTaskExecutor implements NamedTaskExecutor {
     public void cancelPendingTasks() {
         synchronized (mQueuedTasks) {
             mQueuedTasks.clear();
-            mDispatchedCount = 0;
         }
         mExecutor.cancelPendingTasks();
     }

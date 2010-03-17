@@ -79,7 +79,7 @@ public class ShortcutPromoterTest extends AndroidTestCase {
         Promoter promoter = new ShortcutPromoter(null);
         int expectedCount = Math.min(maxPromoted, mShortcuts.getCount());
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
-        promoter.pickPromoted(mShortcuts, mSuggestions, maxPromoted, promoted, null);
+        promoter.pickPromoted(mShortcuts, mSuggestions, maxPromoted, promoted);
         assertEquals(expectedCount, promoted.getCount());
         for (int i = 0; i < Math.min(maxPromoted, mShortcuts.getCount()); i++) {
             assertSuggestionEquals(new SuggestionPosition(promoted, i),
@@ -91,7 +91,7 @@ public class ShortcutPromoterTest extends AndroidTestCase {
         Promoter promoter = new ShortcutPromoter(new ConcatPromoter());
         int expectedCount = Math.min(maxPromoted, mShortcuts.getCount() + mSuggestionCount);
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
-        promoter.pickPromoted(mShortcuts, mSuggestions, maxPromoted, promoted, null);
+        promoter.pickPromoted(mShortcuts, mSuggestions, maxPromoted, promoted);
         assertEquals(expectedCount, promoted.getCount());
         for (int i = 0; i < Math.min(maxPromoted, mShortcuts.getCount()); i++) {
             assertSuggestionEquals(new SuggestionPosition(promoted, i),

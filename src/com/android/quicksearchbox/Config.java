@@ -36,6 +36,7 @@ public class Config {
 
     private static final long DAY_MILLIS = 86400000L;
 
+    private static final int NUM_SUGGESTIONS_ABOVE_KEYBOARD = 4;
     private static final int NUM_PROMOTED_SOURCES = 3;
     private static final int MAX_PROMOTED_SUGGESTIONS = 8;
     private static final int MAX_RESULTS_PER_SOURCE = 50;
@@ -112,6 +113,19 @@ public class Config {
      */
     public int getNumPromotedSources() {
         return NUM_PROMOTED_SOURCES;
+    }
+
+    /**
+     * The number of suggestions visible above the onscreen keyboard.
+     */
+    public int getNumSuggestionsAboveKeyboard() {
+        try {
+            // Get the list of default corpora from a resource, which allows vendor overlays.
+            return mContext.getResources().getInteger(R.integer.num_suggestions_above_keyboard);
+        } catch (Resources.NotFoundException ex) {
+            Log.e(TAG, "Could not load num_suggestions_above_keyboard", ex);
+            return NUM_SUGGESTIONS_ABOVE_KEYBOARD;
+        }
     }
 
     /**
