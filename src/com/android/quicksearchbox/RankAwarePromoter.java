@@ -21,14 +21,13 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * A promoter that gives preference to suggestions from higher ranking corpora.
  */
 public class RankAwarePromoter implements Promoter {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.RankAwarePromoter";
 
     private final Config mConfig;

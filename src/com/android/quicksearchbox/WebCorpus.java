@@ -20,7 +20,6 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.Util;
 
 import android.app.SearchManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -31,7 +30,6 @@ import android.util.Patterns;
 import android.webkit.URLUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 

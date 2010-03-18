@@ -32,7 +32,7 @@ import android.widget.ListView;
  */
 public class SuggestionsView extends ListView {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsView";
 
     private SuggestionClickListener mSuggestionClickListener;

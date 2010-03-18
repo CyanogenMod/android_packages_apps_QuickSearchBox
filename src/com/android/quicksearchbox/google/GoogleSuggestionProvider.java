@@ -51,7 +51,7 @@ import java.util.Locale;
  */
 public class GoogleSuggestionProvider extends ContentProvider {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String LOG_TAG = "GoogleSearch";
 
     private static final String USER_AGENT = "Android/1.0";

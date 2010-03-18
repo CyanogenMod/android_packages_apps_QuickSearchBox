@@ -19,7 +19,6 @@ package com.android.quicksearchbox;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * A promoter that first promotes any shortcuts, and then delegates to another
@@ -29,7 +28,7 @@ import java.util.Set;
 public class ShortcutPromoter implements Promoter {
 
     private static final String TAG = "QSB.ShortcutPromoter";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /** The promoter to use when there are no more shortcuts. */
     private final Promoter mNextPromoter;

@@ -19,7 +19,6 @@ package com.android.quicksearchbox.ui;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.util.Util;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;

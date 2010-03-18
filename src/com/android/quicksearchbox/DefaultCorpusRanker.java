@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class DefaultCorpusRanker extends AbstractCorpusRanker {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.DefaultCorpusRanker";
 
     private final ShortcutRepository mShortcuts;

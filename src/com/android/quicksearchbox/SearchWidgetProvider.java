@@ -37,7 +37,7 @@ import android.widget.RemoteViews;
  */
 public class SearchWidgetProvider extends AppWidgetProvider {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchWidgetProvider";
 
     private static final String WIDGET_SEARCH_SOURCE = "launcher-widget";

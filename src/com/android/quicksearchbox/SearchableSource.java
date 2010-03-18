@@ -46,7 +46,7 @@ import java.util.Arrays;
  */
 public class SearchableSource implements Source {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchableSource";
 
     // TODO: This should be exposed or moved to android-common, see http://b/issue?id=2440614

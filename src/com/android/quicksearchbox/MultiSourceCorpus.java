@@ -20,7 +20,6 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.BarrierConsumer;
 
 import android.content.Context;
-import android.os.SystemClock;
 
 import java.util.ArrayList;
 import java.util.Collection;

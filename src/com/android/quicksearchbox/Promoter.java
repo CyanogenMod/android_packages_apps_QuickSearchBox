@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Promoters choose which suggestions to promote from all the available suggestions.

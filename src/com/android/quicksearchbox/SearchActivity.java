@@ -55,7 +55,7 @@ import java.util.List;
  */
 public class SearchActivity extends Activity {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchActivity";
 
     private static final String SCHEME_CORPUS = "qsb.corpus";

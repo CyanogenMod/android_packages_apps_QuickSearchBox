@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";

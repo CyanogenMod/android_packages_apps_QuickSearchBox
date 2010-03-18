@@ -26,7 +26,7 @@ import java.util.HashSet;
  */
 public class ListSuggestionCursorNoDuplicates extends ListSuggestionCursor {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.ListSuggestionCursorNoDuplicates";
 
     private final HashSet<String> mSuggestionKeys;

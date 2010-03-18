@@ -29,7 +29,8 @@ import java.util.Map;
  * This class is thread safe.
  */
 class ShouldQueryStrategy {
-    private static final boolean DBG = true;
+
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.ShouldQueryStrategy";
 
     // The last query we've seen

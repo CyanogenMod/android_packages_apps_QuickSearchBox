@@ -19,7 +19,6 @@ package com.android.quicksearchbox;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * A promoter that promotes one suggestion from each source.

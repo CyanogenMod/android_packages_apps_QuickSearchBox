@@ -34,7 +34,7 @@ import java.util.List;
 public class SearchableCorpora implements Corpora {
 
     // set to true to enable the more verbose debug logging for this file
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.DefaultCorpora";
 
     private final DataSetObservable mDataSetObservable = new DataSetObservable();

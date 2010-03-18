@@ -37,7 +37,7 @@ import android.widget.GridView;
  */
 public class CorpusSelectionDialog extends Dialog {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SelectSearchSourceDialog";
 
     private static final int NUM_COLUMNS = 4;

@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class SingleThreadNamedTaskExecutor implements NamedTaskExecutor {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SingleThreadNamedTaskExecutor";
 
     private final LinkedBlockingQueue<NamedTask> mQueue;

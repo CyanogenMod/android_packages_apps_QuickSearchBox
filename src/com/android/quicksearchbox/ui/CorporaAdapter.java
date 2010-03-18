@@ -34,7 +34,7 @@ import java.util.List;
 public class CorporaAdapter extends BaseAdapter {
 
     private static final String TAG = "CorporaAdapter";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private final CorpusViewFactory mViewFactory;
 

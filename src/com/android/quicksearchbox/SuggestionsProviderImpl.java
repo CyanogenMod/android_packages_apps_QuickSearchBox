@@ -36,7 +36,7 @@ import java.util.Set;
  */
 public class SuggestionsProviderImpl implements SuggestionsProvider {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsProviderImpl";
 
     private final Config mConfig;
