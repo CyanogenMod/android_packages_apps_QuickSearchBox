@@ -163,12 +163,7 @@ public class SearchableSource implements Source {
 
     private IconLoader createIconLoader(Context context, String providerPackage) {
         if (providerPackage == null) return null;
-        try {
-            return new CachingIconLoader(new PackageIconLoader(context, providerPackage));
-        } catch (PackageManager.NameNotFoundException ex) {
-            Log.e(TAG, "Suggestion provider package not found: " + providerPackage);
-            return null;
-        }
+        return new CachingIconLoader(new PackageIconLoader(context, providerPackage));
     }
 
     public ComponentName getComponentName() {

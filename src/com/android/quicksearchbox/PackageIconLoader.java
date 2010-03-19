@@ -43,19 +43,37 @@ public class PackageIconLoader implements IconLoader {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.PackageIconLoader";
 
-    private final Context mPackageContext;
+    private final Context mContext;
+
+    private final String mPackageName;
+
+    private Context mPackageContext;
 
     /**
      * Creates a new icon loader.
      *
+     * @param context The QSB application context.
      * @param packageName The name of the package from which the icons will be loaded.
      *        Resource IDs without an explicit package will be resolved against the package
      *        of this context.
-     * @throws PackageManager.NameNotFoundException If the package is not found.
      */
-    public PackageIconLoader(Context context, String packageName)
-            throws PackageManager.NameNotFoundException, SecurityException {
-        mPackageContext = context.createPackageContext(packageName, Context.CONTEXT_RESTRICTED);
+    public PackageIconLoader(Context context, String packageName) {
+        mContext = context;
+        mPackageName = packageName;
+    }
+
+    private boolean ensurePackageContext() {
+        if (mPackageContext == null) {
+            try {
+                mPackageContext = mContext.createPackageContext(mPackageName,
+                        Context.CONTEXT_RESTRICTED);
+            } catch (PackageManager.NameNotFoundException ex) {
+                // This should only happen if the app has just be uninstalled
+                Log.e(TAG, "Application not found " + mPackageName);
+                return false;
+            }
+        }
+        return true;
     }
 
     public Drawable getIcon(String drawableId) {
@@ -63,6 +81,7 @@ public class PackageIconLoader implements IconLoader {
         if (TextUtils.isEmpty(drawableId) || "0".equals(drawableId)) {
             return null;
         }
+        if (!ensurePackageContext()) return null;
         try {
             // First, see if it's just an integer
             int resourceId = Integer.parseInt(drawableId);
@@ -83,6 +102,7 @@ public class PackageIconLoader implements IconLoader {
         if (TextUtils.isEmpty(drawableId) || "0".equals(drawableId)) {
             return null;
         }
+        if (!ensurePackageContext()) return null;
         try {
             int resourceId = Integer.parseInt(drawableId);
             return Util.getResourceUri(mPackageContext, resourceId);
@@ -132,7 +152,7 @@ public class PackageIconLoader implements IconLoader {
     /**
      * A resource identified by the {@link Resources} that contains it, and a resource id.
      */
-    public class OpenResourceIdResult {
+    private class OpenResourceIdResult {
         public Resources r;
         public int id;
     }
@@ -140,7 +160,7 @@ public class PackageIconLoader implements IconLoader {
     /**
      * Resolves an android.resource URI to a {@link Resources} and a resource id.
      */
-    public OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
+    private OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
         String authority = uri.getAuthority();
         Resources r;
         if (TextUtils.isEmpty(authority)) {
