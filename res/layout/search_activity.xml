@@ -14,16 +14,11 @@
      limitations under the License.
 -->
 
-<com.android.quicksearchbox.ui.ActivityClosingView
+<com.android.quicksearchbox.ui.SearchActivityView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 >
-
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
 
     <view
         class="com.android.quicksearchbox.ui.SuggestionsView"
@@ -109,6 +104,4 @@
         />
     </LinearLayout>
 
-</RelativeLayout>
-
-</com.android.quicksearchbox.ui.ActivityClosingView>
+</com.android.quicksearchbox.ui.SearchActivityView>

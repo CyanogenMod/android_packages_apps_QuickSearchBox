@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -45,6 +46,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +59,7 @@ public class SearchActivity extends Activity {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchActivity";
+    private static final boolean TRACE = false;
 
     private static final String SCHEME_CORPUS = "qsb.corpus";
 
@@ -113,6 +116,7 @@ public class SearchActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (TRACE) startMethodTracing();
         recordStartTime();
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
@@ -166,6 +170,12 @@ public class SearchActivity extends Activity {
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
         mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
+    }
+
+    private void startMethodTracing() {
+        File traceDir = getDir("traces", 0);
+        String traceFile = new File(traceDir, "qsb.trace").getAbsolutePath();
+        Debug.startMethodTracing(traceFile);
     }
 
     @Override
@@ -336,18 +346,12 @@ public class SearchActivity extends Activity {
         setQuery(mUserQuery, mSelectAll);
         // Only select everything the first time after creating the activity.
         mSelectAll = false;
-        updateSuggestions(mUserQuery);
+        updateSuggestionsBuffered();
         if (!isCorpusSelectionDialogShowing()) {
             mQueryTextView.requestFocus();
             showInputMethodForQuery();
         }
-        if (mStarting) {
-            mStarting = false;
-            String source = getIntent().getStringExtra(Search.SOURCE);
-            List<Corpus> rankedCorpora = getCorpusRanker().getRankedCorpora();
-            int latency = mStartLatencyTracker.getLatency();
-            getLogger().logStart(latency, source, mCorpus, rankedCorpora);
-        }
+        if (TRACE) Debug.stopMethodTracing();
     }
 
     @Override
@@ -641,6 +645,15 @@ public class SearchActivity extends Activity {
     }
 
     private void updateSuggestions(String query) {
+        // Log start latency if this is the first suggestions update
+        if (mStarting) {
+            mStarting = false;
+            String source = getIntent().getStringExtra(Search.SOURCE);
+            List<Corpus> rankedCorpora = getCorpusRanker().getRankedCorpora();
+            int latency = mStartLatencyTracker.getLatency();
+            getLogger().logStart(latency, source, mCorpus, rankedCorpora);
+        }
+
         query = ltrim(query);
         List<Corpus> corporaToQuery = getCorporaToQuery();
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(

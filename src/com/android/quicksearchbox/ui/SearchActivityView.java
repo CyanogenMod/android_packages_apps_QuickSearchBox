@@ -21,22 +21,22 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 /**
  * Finishes the containing activity on BACK, even if input method is showing.
  */
-public class ActivityClosingView extends FrameLayout {
+public class SearchActivityView extends RelativeLayout {
 
-    public ActivityClosingView(Context context) {
+    public SearchActivityView(Context context) {
         super(context);
     }
 
-    public ActivityClosingView(Context context, AttributeSet attrs) {
+    public SearchActivityView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ActivityClosingView(Context context, AttributeSet attrs, int defStyle) {
+    public SearchActivityView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
