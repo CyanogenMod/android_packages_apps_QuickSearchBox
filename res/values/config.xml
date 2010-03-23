@@ -22,7 +22,7 @@
   <string-array name="default_corpora" translatable="false">
     <item>web</item>
     <item>apps</item>
-    <item>com.android.contacts/.ContactsListActivity</item>
+    <item>com.android.contacts/.SearchResultsActivity</item>
     <item>com.android.providers.applications/.ApplicationLauncher</item>
   </string-array>
 
