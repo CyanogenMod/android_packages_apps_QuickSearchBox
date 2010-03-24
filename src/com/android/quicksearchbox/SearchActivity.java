@@ -106,10 +106,16 @@ public class SearchActivity extends Activity {
     private String mUserQuery;
     private boolean mSelectAll;
 
-    private Handler mUpdateSuggestionsHandler = new Handler();
+    private Handler mHandler = new Handler();
     private Runnable mUpdateSuggestionsTask = new Runnable() {
         public void run() {
             updateSuggestions(getQuery());
+        }
+    };
+
+    private Runnable mShowInputMethodTask = new Runnable() {
+        public void run() {
+            showInputMethodForQuery();
         }
     };
 
@@ -349,7 +355,6 @@ public class SearchActivity extends Activity {
         updateSuggestionsBuffered();
         if (!isCorpusSelectionDialogShowing()) {
             mQueryTextView.requestFocus();
-            showInputMethodForQuery();
         }
         if (TRACE) Debug.stopMethodTracing();
     }
@@ -359,6 +364,15 @@ public class SearchActivity extends Activity {
         super.onCreateOptionsMenu(menu);
         SearchSettings.addSearchSettingsMenuItem(this, menu);
         return true;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            // Launch the IME after a bit
+            mHandler.postDelayed(mShowInputMethodTask, 0);
+        }
     }
 
     /**
@@ -596,7 +610,7 @@ public class SearchActivity extends Activity {
     protected void showInputMethodForQuery() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) {
-            imm.showSoftInput(mQueryTextView, InputMethodManager.SHOW_IMPLICIT);
+            imm.showSoftInput(mQueryTextView, 0);
         }
     }
 
@@ -639,9 +653,9 @@ public class SearchActivity extends Activity {
     }
 
     private void updateSuggestionsBuffered() {
-        mUpdateSuggestionsHandler.removeCallbacks(mUpdateSuggestionsTask);
+        mHandler.removeCallbacks(mUpdateSuggestionsTask);
         long delay = getConfig().getTypingUpdateSuggestionsDelayMillis();
-        mUpdateSuggestionsHandler.postDelayed(mUpdateSuggestionsTask, delay);
+        mHandler.postDelayed(mUpdateSuggestionsTask, delay);
     }
 
     private void updateSuggestions(String query) {
