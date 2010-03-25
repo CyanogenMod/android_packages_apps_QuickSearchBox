@@ -28,7 +28,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -199,14 +198,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
     public void reportClick(final SuggestionCursor suggestions, final int position) {
         final long now = System.currentTimeMillis();
-        // Log click asynchronously, to avoid blocking the UI thread
-        new AsyncTask<Void,Void,Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                reportClickAtTime(suggestions, position, now);
-                return null;
-            }
-        }.execute();
+        reportClickAtTime(suggestions, position, now);
     }
 
     public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora,
