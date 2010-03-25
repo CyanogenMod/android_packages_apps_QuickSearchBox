@@ -42,6 +42,7 @@ public interface ShortcutRepository {
 
     /**
      * Reports a click on a suggestion.
+     * Must be called on the UI thread.
      */
     void reportClick(SuggestionCursor suggestions, int position);
 

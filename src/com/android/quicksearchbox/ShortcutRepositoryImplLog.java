@@ -28,6 +28,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -51,7 +52,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 29;
+    private static final int DB_VERSION = 30;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -196,8 +197,16 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         getOpenHelper().close();
     }
 
-    public void reportClick(SuggestionCursor suggestions, int position) {
-        reportClickAtTime(suggestions, position, System.currentTimeMillis());
+    public void reportClick(final SuggestionCursor suggestions, final int position) {
+        final long now = System.currentTimeMillis();
+        // Log click asynchronously, to avoid blocking the UI thread
+        new AsyncTask<Void,Void,Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                reportClickAtTime(suggestions, position, now);
+                return null;
+            }
+        }.execute();
     }
 
     public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora,
@@ -227,7 +236,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
 
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery(sql, params);
         if (cursor.getCount() == 0) {
             cursor.close();
@@ -259,7 +268,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         });
     }
 
-    /* package for testing */ void refreshShortcut(Source source, String shortcutId,
+    @VisibleForTesting
+    void refreshShortcut(Source source, String shortcutId,
             SuggestionCursor refreshed) {
         if (source == null) throw new NullPointerException("source");
         if (shortcutId == null) throw new NullPointerException("shortcutId");
@@ -455,7 +465,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return uri == null ? null : uri.toString();
     }
 
-    /* package for testing */ void reportClickAtTime(SuggestionCursor suggestion,
+    @VisibleForTesting
+    void reportClickAtTime(SuggestionCursor suggestion,
             int position, long now) {
         suggestion.moveTo(position);
         if (DBG) {
@@ -464,6 +475,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         if (SearchManager.SUGGEST_NEVER_MAKE_SHORTCUT.equals(suggestion.getShortcutId())) {
             if (DBG) Log.d(TAG, "clicked suggestion requested not to be shortcuted");
+            return;
+        }
+
+        Corpus corpus = mCorpora.getCorpusForSource(suggestion.getSuggestionSource());
+        if (corpus == null) {
+            Log.w(TAG, "no corpus for clicked suggestion");
             return;
         }
 
@@ -483,52 +500,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         db.replaceOrThrow(Shortcuts.TABLE_NAME, null, shortcut);
 
         // Log click for shortcut
-        {
-            final ContentValues cv = new ContentValues();
-            cv.put(ClickLog.intent_key.name(), intentKey);
-            cv.put(ClickLog.query.name(), suggestion.getUserQuery());
-            cv.put(ClickLog.hit_time.name(), now);
-            db.insertOrThrow(ClickLog.TABLE_NAME, null, cv);
-        }
-
-        // Log click for corpus
-        Corpus corpus = mCorpora.getCorpusForSource(suggestion.getSuggestionSource());
-        logCorpusClick(db, corpus, now);
-
-        postSourceEventCleanup(now);
-    }
-
-    private void logCorpusClick(SQLiteDatabase db, Corpus corpus, long now) {
-        if (corpus == null) return;
         ContentValues cv = new ContentValues();
-        cv.put(SourceLog.corpus.name(), corpus.getName());
-        cv.put(SourceLog.time.name(), now);
-        cv.put(SourceLog.click_count.name(), 1);
-        db.insertOrThrow(SourceLog.TABLE_NAME, null, cv);
-    }
-
-    /**
-     * Execute queries necessary to keep things up to date after inserting into {@link SourceLog}.
-     *
-     * TODO: Switch back to using a trigger?
-     *
-     * @param now Millis since epoch of "now".
-     */
-    private void postSourceEventCleanup(long now) {
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-        // purge old log entries
-        db.execSQL("DELETE FROM " + SourceLog.TABLE_NAME + " WHERE "
-                + SourceLog.time.name() + " <"
-                + now + " - " + mConfig.getMaxSourceEventAgeMillis() + ";");
-
-        // update the source stats
-        final String columns = SourceLog.corpus + "," +
-                "SUM(" + SourceLog.click_count.fullName + ")";
-        db.execSQL("DELETE FROM " + SourceStats.TABLE_NAME);
-        db.execSQL("INSERT INTO " + SourceStats.TABLE_NAME  + " "
-                + "SELECT " + columns + " FROM " + SourceLog.TABLE_NAME + " GROUP BY "
-                + SourceLog.corpus.name());
+        cv.put(ClickLog.intent_key.name(), intentKey);
+        cv.put(ClickLog.query.name(), suggestion.getUserQuery());
+        cv.put(ClickLog.hit_time.name(), now);
+        cv.put(ClickLog.corpus.name(), corpus.getName());
+        db.insertOrThrow(ClickLog.TABLE_NAME, null, cv);
     }
 
 // -------------------------- TABLES --------------------------
@@ -570,7 +547,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         _id,
         intent_key,
         query,
-        hit_time;
+        hit_time,
+        corpus;
 
         static final String[] COLUMNS = initColumns();
 
@@ -593,41 +571,9 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     /**
-     * We store stats about clicks and impressions per source to facilitate the ranking of
-     * the sources, and which are promoted vs under the "more results" entry.
-     */
-    enum SourceLog {
-        _id,
-        corpus,
-        time,
-        click_count,
-        impression_count;
-
-        static final String[] COLUMNS = initColumns();
-
-        static final String TABLE_NAME = "sourceeventlog";
-
-        private static String[] initColumns() {
-            SourceLog[] vals = SourceLog.values();
-            String[] columns = new String[vals.length];
-            for (int i = 0; i < vals.length; i++) {
-                columns[i] = vals[i].fullName;
-            }
-            return columns;
-        }
-
-        public final String fullName;
-
-        SourceLog() {
-            fullName = TABLE_NAME + "." + name();
-        }
-    }
-
-    /**
-     * This is an aggregate table of {@link SourceLog} that stays up to date with the total
-     * clicks for each source.  This makes computing the source ranking more
-     * more efficient, at the expense of some extra work when the source clicks
-     * are reported.
+     * This is an aggregate table of {@link ClickLog} that stays up to date with the total
+     * clicks for each corpus. This makes computing the corpus ranking more
+     * more efficient, at the expense of some extra work when the clicks are reported.
      */
     enum SourceStats {
         corpus,
@@ -665,8 +611,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                 = ClickLog.TABLE_NAME + "_" + ClickLog.query.name();
         private static final String CLICKLOG_HIT_TIME_INDEX
                 = ClickLog.TABLE_NAME + "_" + ClickLog.hit_time.name();
-        private static final String CLICKLOG_PURGE_TRIGGER
-                = ClickLog.TABLE_NAME + "_purge";
+        private static final String CLICKLOG_INSERT_TRIGGER
+                = ClickLog.TABLE_NAME + "_insert";
         private static final String SHORTCUTS_DELETE_TRIGGER
                 = Shortcuts.TABLE_NAME + "_delete";
         private static final String SHORTCUTS_UPDATE_INTENT_KEY_TRIGGER
@@ -692,7 +638,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         }
 
         private void dropTables(SQLiteDatabase db) {
-            db.execSQL("DROP TRIGGER IF EXISTS " + CLICKLOG_PURGE_TRIGGER);
+            db.execSQL("DROP TRIGGER IF EXISTS " + CLICKLOG_INSERT_TRIGGER);
             db.execSQL("DROP TRIGGER IF EXISTS " + SHORTCUTS_DELETE_TRIGGER);
             db.execSQL("DROP TRIGGER IF EXISTS " + SHORTCUTS_UPDATE_INTENT_KEY_TRIGGER);
             db.execSQL("DROP INDEX IF EXISTS " + CLICKLOG_HIT_TIME_INDEX);
@@ -700,14 +646,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             db.execSQL("DROP INDEX IF EXISTS " + SHORTCUT_ID_INDEX);
             db.execSQL("DROP TABLE IF EXISTS " + ClickLog.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + Shortcuts.TABLE_NAME);
-            db.execSQL("DROP TABLE IF EXISTS " + SourceLog.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + SourceStats.TABLE_NAME);
         }
 
         private void clearDatabase(SQLiteDatabase db) {
             db.delete(ClickLog.TABLE_NAME, null, null);
             db.delete(Shortcuts.TABLE_NAME, null, null);
-            db.delete(SourceLog.TABLE_NAME, null, null);
             db.delete(SourceStats.TABLE_NAME, null, null);
         }
 
@@ -765,7 +709,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     ClickLog.intent_key.name() + " TEXT NOT NULL COLLATE UNICODE REFERENCES "
                         + Shortcuts.TABLE_NAME + "(" + Shortcuts.intent_key + "), " +
                     ClickLog.query.name() + " TEXT, " +
-                    ClickLog.hit_time.name() + " INTEGER" +
+                    ClickLog.hit_time.name() + " INTEGER," +
+                    ClickLog.corpus.name() + " TEXT" +
                     ");");
 
             // index for fast lookup of clicks by query
@@ -778,14 +723,18 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
             // trigger for purging old clicks, i.e. those such that
             // hit_time < now - MAX_MAX_STAT_AGE_MILLIS, where now is the
-            // hit_time of the inserted record
-            db.execSQL("CREATE TRIGGER " + CLICKLOG_PURGE_TRIGGER + " AFTER INSERT ON "
+            // hit_time of the inserted record, and for updating the SourceStats table
+            db.execSQL("CREATE TRIGGER " + CLICKLOG_INSERT_TRIGGER + " AFTER INSERT ON "
                     + ClickLog.TABLE_NAME
                     + " BEGIN"
                     + " DELETE FROM " + ClickLog.TABLE_NAME + " WHERE "
                             + ClickLog.hit_time.name() + " <"
                             + " NEW." + ClickLog.hit_time.name()
                                     + " - " + mConfig.getMaxStatAgeMillis() + ";"
+                    + " DELETE FROM " + SourceStats.TABLE_NAME + ";"
+                    + " INSERT INTO " + SourceStats.TABLE_NAME  + " "
+                            + "SELECT " + ClickLog.corpus + "," + "COUNT(*) FROM "
+                            + ClickLog.TABLE_NAME + " GROUP BY " + ClickLog.corpus.name() + ";"
                     + " END");
 
             // trigger for deleting clicks about a shortcut once that shortcut has been
@@ -810,13 +759,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                             + ClickLog.intent_key.name() + " = OLD." + Shortcuts.intent_key.name()
                             + ";"
                     + " END");
-
-            db.execSQL("CREATE TABLE " + SourceLog.TABLE_NAME + " ( " +
-                    SourceLog._id.name() + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                    SourceLog.corpus.name() + " TEXT NOT NULL COLLATE UNICODE, " +
-                    SourceLog.time.name() + " INTEGER, " +
-                    SourceLog.click_count + " INTEGER);"
-            );
 
             db.execSQL("CREATE TABLE " + SourceStats.TABLE_NAME + " ( " +
                     SourceStats.corpus.name() + " TEXT NOT NULL COLLATE UNICODE PRIMARY KEY, " +

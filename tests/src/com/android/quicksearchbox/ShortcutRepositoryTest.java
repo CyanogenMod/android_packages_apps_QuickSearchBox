@@ -146,7 +146,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     public void testHasHistory() {
         assertFalse(mRepo.hasHistory());
-        mRepo.reportClick(mAppSuggestions, 0);
+        mRepo.reportClickAtTime(mAppSuggestions, 0, NOW);
         assertTrue(mRepo.hasHistory());
         mRepo.clearHistory();
         assertFalse(mRepo.hasHistory());
@@ -583,7 +583,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     public void testOldSourceStatsDontCount() {
         // apps were popular back in the day
-        final long toOld = mConfig.getMaxSourceEventAgeMillis() + 1;
+        final long toOld = mConfig.getMaxStatAgeMillis() + 1;
         int minClicks = mConfig.getMinClicksForSourceRanking();
         for (int i = 0; i < minClicks; i++) {
             reportClick("app", mApp1, NOW - toOld);

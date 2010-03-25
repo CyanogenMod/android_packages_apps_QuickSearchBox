@@ -42,18 +42,12 @@ public class Config {
     private static final int MAX_RESULTS_PER_SOURCE = 50;
     private static final long SOURCE_TIMEOUT_MILLIS = 10000;
 
-    private static final int QUERY_THREAD_MAX_POOL_SIZE = 4;
-    private static final long QUERY_THREAD_KEEPALIVE_MILLIS = 30000;
     private static final int QUERY_THREAD_PRIORITY =
             Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
-    private static final long MAX_STAT_AGE_MILLIS = 7 * DAY_MILLIS;
-    private static final long MAX_SOURCE_EVENT_AGE_MILLIS = 30 * DAY_MILLIS;
-    private static final int MIN_IMPRESSIONS_FOR_SOURCE_RANKING = 5;
+    private static final long MAX_STAT_AGE_MILLIS = 30 * DAY_MILLIS;
     private static final int MIN_CLICKS_FOR_SOURCE_RANKING = 3;
     private static final int MAX_SHORTCUTS_RETURNED = MAX_PROMOTED_SUGGESTIONS;
-
-    private static final long THREAD_START_DELAY_MILLIS = 100;
 
     private static final int NUM_WEB_CORPUS_THREADS = 2;
 
@@ -150,20 +144,6 @@ public class Config {
     }
 
     /**
-     * The maximum thread pool size for the query thread pool.
-     */
-    public int getQueryThreadMaxPoolSize(){
-        return QUERY_THREAD_MAX_POOL_SIZE;
-    }
-
-    /**
-     * The keep-alive time for the query thread pool, in millisseconds.
-     */
-    public long getQueryThreadKeepAliveMillis() {
-        return QUERY_THREAD_KEEPALIVE_MILLIS;
-    }
-
-    /**
      * The priority of query threads.
      *
      * @return A thread priority, as defined in {@link Process}.
@@ -180,20 +160,6 @@ public class Config {
     }
 
     /**
-     * The maximum age of log data used for source ranking.
-     */
-    public long getMaxSourceEventAgeMillis(){
-        return MAX_SOURCE_EVENT_AGE_MILLIS;
-    }
-
-    /**
-     * The minimum number of impressions needed to rank a source.
-     */
-    public int getMinImpressionsForSourceRanking(){
-        return MIN_IMPRESSIONS_FOR_SOURCE_RANKING;
-    }
-
-    /**
      * The minimum number of clicks needed to rank a source.
      */
     public int getMinClicksForSourceRanking(){
@@ -205,13 +171,6 @@ public class Config {
      */
     public int getMaxShortcutsReturned(){
         return MAX_SHORTCUTS_RETURNED;
-    }
-
-    /**
-     * The maximum time to delay starting a search query thread after the user types a character.
-     */
-    public long getThreadStartDelayMillis() {
-        return THREAD_START_DELAY_MILLIS;
     }
 
     public int getNumWebCorpusThreads() {
