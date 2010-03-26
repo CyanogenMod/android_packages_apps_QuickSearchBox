@@ -16,30 +16,41 @@
 
 package com.android.quicksearchbox.util;
 
+import java.util.LinkedList;
+import java.util.concurrent.Executor;
 
 /**
  * A simple executor that maintains a queue and executes one task synchronously every
  * time {@link #runNext()} is called. This gives us predictable scheduling for the tests to
  * avoid timeouts waiting for threads to finish.
  */
-public class MockNamedTaskExecutor implements NamedTaskExecutor {
+public class MockExecutor implements Executor {
 
-    private final MockExecutor mExecutor = new MockExecutor();
+    private final LinkedList<Runnable> mQueue = new LinkedList<Runnable>();
 
-    public void execute(NamedTask task) {
-        mExecutor.execute(task);
+    private boolean mClosed = false;
+
+    public void execute(Runnable task) {
+        if (mClosed) throw new IllegalStateException("closed");
+        mQueue.addLast(task);
     }
 
     public void cancelPendingTasks() {
-        mExecutor.cancelPendingTasks();
+        mQueue.clear();
     }
 
     public void close() {
-        mExecutor.close();
+        cancelPendingTasks();
+        mClosed = true;
     }
 
     public boolean runNext() {
-        return mExecutor.runNext();
+        if (mQueue.isEmpty()) {
+            return false;
+        }
+        Runnable command = mQueue.removeFirst();
+        command.run();
+        return true;
     }
 
 }

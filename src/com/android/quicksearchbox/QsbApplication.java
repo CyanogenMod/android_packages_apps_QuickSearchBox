@@ -27,11 +27,14 @@ import com.android.quicksearchbox.ui.SuggestionsFooter;
 import com.android.quicksearchbox.util.Factory;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
+import com.android.quicksearchbox.util.PriorityThreadFactory;
 import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
+import com.google.common.util.concurrent.NamingThreadFactory;
 
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -177,8 +180,11 @@ public class QsbApplication extends Application {
     }
 
     protected ShortcutRepository createShortcutRepository() {
+        ThreadFactory logThreadFactory = new NamingThreadFactory("ShortcutRepositoryWriter #%d",
+                new PriorityThreadFactory(Process.THREAD_PRIORITY_BACKGROUND));
+        Executor logExecutor = Executors.newSingleThreadExecutor(logThreadFactory);
         return ShortcutRepositoryImplLog.create(this, getConfig(), getCorpora(),
-            getShortcutRefresher(), getMainThreadHandler());
+            getShortcutRefresher(), getMainThreadHandler(), logExecutor);
     }
 
     /**
@@ -229,7 +235,10 @@ public class QsbApplication extends Application {
     }
 
     protected ThreadFactory createQueryThreadFactory() {
-        return new QueryThreadFactory(getConfig().getQueryThreadPriority());
+        String nameFormat = "QSB #%d";
+        int priority = getConfig().getQueryThreadPriority();
+        return new NamingThreadFactory(nameFormat,
+                new PriorityThreadFactory(priority));
     }
 
     /**

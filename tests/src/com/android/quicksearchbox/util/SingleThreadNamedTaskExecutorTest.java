@@ -16,9 +16,9 @@
 
 package com.android.quicksearchbox.util;
 
-import com.android.quicksearchbox.QueryThreadFactory;
-
 import android.test.suitebuilder.annotation.MediumTest;
+
+import java.util.concurrent.Executors;
 
 import junit.framework.TestCase;
 
@@ -34,7 +34,7 @@ public class SingleThreadNamedTaskExecutorTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        mExecutor = new SingleThreadNamedTaskExecutor(new QueryThreadFactory());
+        mExecutor = new SingleThreadNamedTaskExecutor(Executors.defaultThreadFactory());
     }
 
     public void testExecute() throws Exception {

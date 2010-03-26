@@ -210,7 +210,7 @@ public class SearchSettings extends PreferenceActivity
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (DBG) Log.d(TAG, "Clearing history...");
                                 getShortcuts().clearHistory();
-                                updateClearShortcutsPreference();
+                                mClearShortcutsPreference.setEnabled(false);
                             }
                         })
                         .setNegativeButton(R.string.disagree, null).create();

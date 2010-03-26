@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.MockExecutor;
 import com.android.quicksearchbox.util.Util;
 
 import android.app.SearchManager;
@@ -69,6 +70,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected Config mConfig;
     protected MockCorpora mCorpora;
+    protected MockExecutor mLogExecutor;
     protected ShortcutRefresher mRefresher;
 
     protected List<Corpus> mAllowedCorpora;
@@ -87,7 +89,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected ShortcutRepositoryImplLog createShortcutRepository() {
         return new ShortcutRepositoryImplLog(getContext(), mConfig, mCorpora,
-                mRefresher, new MockHandler(), "test-shortcuts-log.db");
+                mRefresher, new MockHandler(), mLogExecutor,
+                "test-shortcuts-log.db");
     }
 
     @Override
@@ -99,6 +102,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         mCorpora.addCorpus(APP_CORPUS);
         mCorpora.addCorpus(CONTACTS_CORPUS);
         mRefresher = new MockShortcutRefresher();
+        mLogExecutor = new MockExecutor();
         mRepo = createShortcutRepository();
 
         mAllowedCorpora = new ArrayList<Corpus>(mCorpora.getAllCorpora());
@@ -146,9 +150,11 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     public void testHasHistory() {
         assertFalse(mRepo.hasHistory());
-        mRepo.reportClickAtTime(mAppSuggestions, 0, NOW);
+        reportClickAtTime(mAppSuggestions, 0, NOW);
         assertTrue(mRepo.hasHistory());
         mRepo.clearHistory();
+        assertTrue(mRepo.hasHistory());
+        mLogExecutor.runNext();
         assertFalse(mRepo.hasHistory());
     }
 
@@ -496,7 +502,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         reportClick("joe", contact);
         assertShortcuts("app and contact should be there.", "", contact, app);
 
-        mRepo.refreshShortcut(APP_SOURCE, sameid, null);
+        refreshShortcut(APP_SOURCE, sameid, null);
         assertNoShortcuts("app should not be there.", "app");
         assertShortcuts("contact with same shortcut id should still be there.",
                 "joe", contact);
@@ -699,19 +705,27 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     protected void reportClick(String query, SuggestionData suggestion, long now) {
-        mRepo.reportClickAtTime(new DataSuggestionCursor(query, suggestion), 0, now);
+        reportClickAtTime(new DataSuggestionCursor(query, suggestion), 0, now);
     }
 
     protected void reportClick(SuggestionCursor suggestions, int position) {
-        mRepo.reportClickAtTime(suggestions, position, NOW);
+        reportClickAtTime(suggestions, position, NOW);
+    }
+
+    protected void reportClickAtTime(SuggestionCursor suggestions, int position, long now) {
+        mRepo.reportClickAtTime(suggestions, position, now);
+        mLogExecutor.runNext();
     }
 
     protected void invalidateShortcut(Source source, String shortcutId) {
-        mRepo.refreshShortcut(source, shortcutId, null);
+        refreshShortcut(source, shortcutId, null);
     }
 
     protected void refreshShortcut(Source source, String shortcutId, SuggestionData suggestion) {
-        mRepo.refreshShortcut(source, shortcutId, new DataSuggestionCursor(null, suggestion));
+        SuggestionCursor refreshed =
+                suggestion == null ? null : new DataSuggestionCursor(null, suggestion);
+        mRepo.refreshShortcut(source, shortcutId, refreshed);
+        mLogExecutor.runNext();
     }
 
     protected void sourceImpressions(Source source, int clicks, int impressions) {

@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.SQLiteTransaction;
 import com.android.quicksearchbox.util.Util;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -36,6 +37,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * A shortcut repository implementation that uses a log of every click.
@@ -68,6 +70,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private final Corpora mCorpora;
     private final ShortcutRefresher mRefresher;
     private final Handler mUiThread;
+    // Used to perform log write operations asynchronously
+    private final Executor mLogExecutor;
     private final DbOpenHelper mOpenHelper;
     private final String mSearchSpinner;
 
@@ -75,22 +79,25 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
      * Create an instance to the repo.
      */
     public static ShortcutRepository create(Context context, Config config,
-            Corpora sources, ShortcutRefresher refresher, Handler uiThread) {
+            Corpora sources, ShortcutRefresher refresher, Handler uiThread,
+            Executor logExecutor) {
         return new ShortcutRepositoryImplLog(context, config, sources, refresher,
-                uiThread, DB_NAME);
+                uiThread, logExecutor, DB_NAME);
     }
 
     /**
      * @param context Used to create / open db
      * @param name The name of the database to create.
      */
+    @VisibleForTesting
     ShortcutRepositoryImplLog(Context context, Config config, Corpora corpora,
-            ShortcutRefresher refresher, Handler uiThread, String name) {
+            ShortcutRefresher refresher, Handler uiThread, Executor logExecutor, String name) {
         mContext = context;
         mConfig = config;
         mCorpora = corpora;
         mRefresher = refresher;
         mUiThread = uiThread;
+        mLogExecutor = logExecutor;
         mOpenHelper = new DbOpenHelper(context, name, DB_VERSION, config);
         mEmptyQueryShortcutQuery = buildShortcutQuery(true);
         mShortcutQuery = buildShortcutQuery(false);
@@ -169,6 +176,14 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         return mOpenHelper;
     }
 
+    private void runTransactionAsync(final SQLiteTransaction transaction) {
+        mLogExecutor.execute(new Runnable() {
+            public void run() {
+                transaction.run(mOpenHelper.getWritableDatabase());
+            }
+        });
+    }
+
 // --------------------- Interface ShortcutRepository ---------------------
 
     public boolean hasHistory() {
@@ -183,8 +198,15 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     public void clearHistory() {
-        SQLiteDatabase db = getOpenHelper().getWritableDatabase();
-        getOpenHelper().clearDatabase(db);
+        runTransactionAsync(new SQLiteTransaction() {
+            @Override
+            public boolean performTransaction(SQLiteDatabase db) {
+                db.delete(ClickLog.TABLE_NAME, null, null);
+                db.delete(Shortcuts.TABLE_NAME, null, null);
+                db.delete(SourceStats.TABLE_NAME, null, null);
+                return true;
+            }
+        });
     }
 
     @VisibleForTesting
@@ -261,23 +283,33 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     @VisibleForTesting
-    void refreshShortcut(Source source, String shortcutId,
+    void refreshShortcut(Source source, final String shortcutId,
             SuggestionCursor refreshed) {
         if (source == null) throw new NullPointerException("source");
         if (shortcutId == null) throw new NullPointerException("shortcutId");
 
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
-        String[] whereArgs = { shortcutId, source.getName() };
+        final String[] whereArgs = { shortcutId, source.getName() };
+        final ContentValues shortcut;
         if (refreshed == null || refreshed.getCount() == 0) {
-            if (DBG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
-            db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_ID_WHERE, whereArgs);
+            shortcut = null;
         } else {
-            ContentValues shortcut = makeShortcutRow(refreshed);
-            if (DBG) Log.d(TAG, "Updating shortcut: " + shortcut);
-            db.updateWithOnConflict(Shortcuts.TABLE_NAME, shortcut,
-                    SHORTCUT_BY_ID_WHERE, whereArgs, SQLiteDatabase.CONFLICT_REPLACE);
+            shortcut = makeShortcutRow(refreshed);
         }
+
+        runTransactionAsync(new SQLiteTransaction() {
+            @Override
+            protected boolean performTransaction(SQLiteDatabase db) {
+                if (shortcut == null) {
+                    if (DBG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
+                    db.delete(Shortcuts.TABLE_NAME, SHORTCUT_BY_ID_WHERE, whereArgs);
+                } else {
+                    if (DBG) Log.d(TAG, "Updating shortcut: " + shortcut);
+                    db.updateWithOnConflict(Shortcuts.TABLE_NAME, shortcut,
+                            SHORTCUT_BY_ID_WHERE, whereArgs, SQLiteDatabase.CONFLICT_REPLACE);
+                }
+                return true;
+            }
+        });
     }
 
     private class SuggestionCursorImpl extends CursorBackedSuggestionCursor {
@@ -481,23 +513,28 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         mRefresher.markShortcutRefreshed(suggestion.getSuggestionSource(),
                 suggestion.getShortcutId());
 
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-
         // Add or update suggestion info
         // Since intent_key is the primary key, any existing
         // suggestion with the same source+data+action will be replaced
-        ContentValues shortcut = makeShortcutRow(suggestion);
+        final ContentValues shortcut = makeShortcutRow(suggestion);
         String intentKey = shortcut.getAsString(Shortcuts.intent_key.name());
-        if (DBG) Log.d(TAG, "Adding shortcut: " + shortcut);
-        db.replaceOrThrow(Shortcuts.TABLE_NAME, null, shortcut);
 
         // Log click for shortcut
-        ContentValues cv = new ContentValues();
-        cv.put(ClickLog.intent_key.name(), intentKey);
-        cv.put(ClickLog.query.name(), suggestion.getUserQuery());
-        cv.put(ClickLog.hit_time.name(), now);
-        cv.put(ClickLog.corpus.name(), corpus.getName());
-        db.insertOrThrow(ClickLog.TABLE_NAME, null, cv);
+        final ContentValues click = new ContentValues();
+        click.put(ClickLog.intent_key.name(), intentKey);
+        click.put(ClickLog.query.name(), suggestion.getUserQuery());
+        click.put(ClickLog.hit_time.name(), now);
+        click.put(ClickLog.corpus.name(), corpus.getName());
+
+        runTransactionAsync(new SQLiteTransaction() {
+            @Override
+            protected boolean performTransaction(SQLiteDatabase db) {
+                if (DBG) Log.d(TAG, "Adding shortcut: " + shortcut);
+                db.replaceOrThrow(Shortcuts.TABLE_NAME, null, shortcut);
+                db.insertOrThrow(ClickLog.TABLE_NAME, null, click);
+                return true;
+            }
+        });
     }
 
 // -------------------------- TABLES --------------------------
@@ -639,12 +676,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             db.execSQL("DROP TABLE IF EXISTS " + ClickLog.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + Shortcuts.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + SourceStats.TABLE_NAME);
-        }
-
-        private void clearDatabase(SQLiteDatabase db) {
-            db.delete(ClickLog.TABLE_NAME, null, null);
-            db.delete(Shortcuts.TABLE_NAME, null, null);
-            db.delete(SourceStats.TABLE_NAME, null, null);
         }
 
         /**

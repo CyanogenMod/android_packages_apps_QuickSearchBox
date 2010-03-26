@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,18 @@
  */
 
 
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.util;
 
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
+import java.util.concurrent.ThreadFactory;
+
 /**
- * Tests for {@link QueryThreadFactory}.
- *
+ * Tests for {@link PriorityThreadFactory}.
  */
 @MediumTest
-public class QueryThreadFactoryTest extends AndroidTestCase {
-
-    public void testName() {
-        QueryThreadFactory factory =
-            new QueryThreadFactory(android.os.Process.THREAD_PRIORITY_DEFAULT);
-        Runnable r = new Runnable() {
-            public void run() {}
-        };
-        Thread t = factory.newThread(r);
-        assertNotNull(t.getName());
-    }
+public class PriorityThreadFactoryTest extends AndroidTestCase {
 
     public void testPriority() throws InterruptedException {
         priorityTest(android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -47,8 +38,7 @@ public class QueryThreadFactoryTest extends AndroidTestCase {
      * Helper method for {@link #testPriority()}.
      */
     private void priorityTest(int priority) throws InterruptedException {
-        QueryThreadFactory factory =
-                new QueryThreadFactory(priority);
+        ThreadFactory factory = new PriorityThreadFactory(priority);
         CheckPriorityRunnable r = new CheckPriorityRunnable();
         Thread t = factory.newThread(r);
         t.start();
