@@ -504,18 +504,6 @@ public class SearchableSource implements Source {
         return mSearchable.getSuggestIntentData();
     }
 
-    public String getSuggestActionMsg(int keyCode) {
-        SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
-        if (actionKey == null) return null;
-        return actionKey.getSuggestActionMsg();
-    }
-
-    public String getSuggestActionMsgColumn(int keyCode) {
-        SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
-        if (actionKey == null) return null;
-        return actionKey.getSuggestActionMsgColumn();
-    }
-
     private CharSequence getText(int id) {
         if (id == 0) return null;
         return mContext.getPackageManager().getText(mActivityInfo.packageName, id,

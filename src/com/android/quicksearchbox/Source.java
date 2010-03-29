@@ -154,25 +154,4 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      */
     String getDefaultIntentData();
 
-    /**
-     * Gets the action message for a give action key code for suggestions from
-     * this source. This is only used if {@link #getSuggestActionMsgColumn}
-     * does not get an action message.
-     *
-     * @param keyCode Action key code, see {@link android.view.KeyEvent}.
-     * @return An action message, of {@code null} if this source does not support the given
-     *         action key.
-     */
-    String getSuggestActionMsg(int keyCode);
-
-    /**
-     * Gets the column name containing the action message for a give action key code.
-     *
-     * TODO: This is only meaningful for cursor-backed suggestion cursors.
-     *
-     * @param keyCode Action key code, see {@link android.view.KeyEvent}.
-     * @return A column name, of {@code null} if this source does not support the given
-     *         action key.
-     */
-    String getSuggestActionMsgColumn(int keyCode);
 }
