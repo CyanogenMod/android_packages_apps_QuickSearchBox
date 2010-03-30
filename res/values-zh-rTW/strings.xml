@@ -35,7 +35,7 @@
     <string name="system_search_category_title" msgid="1507902891285388819">"手機"</string>
     <string name="search_sources" msgid="505874718206340313">"可搜尋項目"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"選取要在手機上搜尋的內容"</string>
-    <string name="clear_shortcuts" msgid="1964107586205103593">"清除捷徑"</string>
+    <string name="clear_shortcuts" msgid="1964107586205103593">"清除搜尋捷徑"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"清除最近選擇搜尋建議時建立的所有捷徑"</string>
     <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"這會清除最近選擇搜尋建議時建立的所有捷徑。"\n\n"(若要清除瀏覽記錄，請使用瀏覽器的設定選項)。"</string>
     <string name="agree" msgid="5918867532928233161">"確定"</string>
