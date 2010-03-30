@@ -22,7 +22,7 @@
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Søg"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Alle"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
-    <string name="corpus_description_web" msgid="5553049179123250409">"Websøgning, bogmærker og browseroversigt"</string>
+    <string name="corpus_description_web" msgid="5553049179123250409">"Internetsøgning, bogmærker og browseroversigt"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Apps"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Navne på installerede programmer"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Søg i Apps"</string>
