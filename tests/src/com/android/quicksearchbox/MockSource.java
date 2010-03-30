@@ -171,14 +171,6 @@ public class MockSource implements Source {
         return false;
     }
 
-    public String getSuggestActionMsg(int keyCode) {
-        return null;
-    }
-
-    public String getSuggestActionMsgColumn(int keyCode) {
-        return null;
-    }
-
     public Intent createSearchIntent(String query, Bundle appData) {
         return null;
     }
