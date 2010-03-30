@@ -53,7 +53,6 @@
             android:horizontalSpacing="2dip"
             android:verticalSpacing="2dip"
             android:listSelector="@drawable/corpus_grid_item_bg"
-            android:overscrollMode="ifContentScrolls"
             />
 
     </LinearLayout>
