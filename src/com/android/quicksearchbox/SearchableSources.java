@@ -32,6 +32,7 @@ import android.util.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Maintains a list of search sources.
@@ -148,16 +149,26 @@ public class SearchableSources implements Sources {
     private void updateSources() {
         if (DBG) Log.d(TAG, "updateSources()");
         mSources = new HashMap<String,Source>();
-        for (SearchableInfo searchable : mSearchManager.getSearchablesInGlobalSearch()) {
+
+        addSearchableSources();
+
+        mWebSearchSource = createWebSearchSource();
+        addSource(mWebSearchSource);
+    }
+
+    private void addSearchableSources() {
+        List<SearchableInfo> searchables = mSearchManager.getSearchablesInGlobalSearch();
+        if (searchables == null) {
+            Log.e(TAG, "getSearchablesInGlobalSearch() returned null");
+            return;
+        }
+        for (SearchableInfo searchable : searchables) {
             SearchableSource source = createSearchableSource(searchable);
             if (source != null && source.canRead()) {
                 if (DBG) Log.d(TAG, "Created source " + source);
                 addSource(source);
             }
         }
-
-        mWebSearchSource = createWebSearchSource();
-        addSource(mWebSearchSource);
     }
 
     private void addSource(Source source) {
