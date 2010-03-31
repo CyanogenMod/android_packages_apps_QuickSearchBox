@@ -19,12 +19,9 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.Util;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Bundle;
 
 /**
  * The apps search source.
@@ -45,12 +42,6 @@ public class AppsCorpus extends SingleSourceCorpus {
     @Override
     public CharSequence getHint() {
         return getContext().getText(R.string.corpus_hint_apps);
-    }
-
-    @Override
-    public Intent createSearchIntent(String query, Bundle appData) {
-        // TODO: Start a Market search if Market is installed
-        return null;
     }
 
     @Override
