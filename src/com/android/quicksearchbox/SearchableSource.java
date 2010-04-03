@@ -235,11 +235,18 @@ public class SearchableSource implements Source {
         return mSearchable.getVoiceSearchEnabled();
     }
 
-    // TODO: not all apps handle ACTION_SEARCH properly, e.g. ApplicationsProvider.
-    // Maybe we should add a flag to searchable, so that QSB can hide the search button?
     public Intent createSearchIntent(String query, Bundle appData) {
+        return createSourceSearchIntent(getComponentName(), query, appData);
+    }
+
+    public static Intent createSourceSearchIntent(ComponentName activity, String query,
+            Bundle appData) {
+        if (activity == null) {
+            Log.w(TAG, "Tried to create search intent with no target activity");
+            return null;
+        }
         Intent intent = new Intent(Intent.ACTION_SEARCH);
-        intent.setComponent(getComponentName());
+        intent.setComponent(activity);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // We need CLEAR_TOP to avoid reusing an old task that has other activities
         // on top of the one we want.

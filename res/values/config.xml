@@ -32,6 +32,10 @@
   <!-- The component name of the browser bookmarks and history source used in QSB  -->
   <string name="browser_search_component" translatable="false">com.android.browser/.BookmarkSearch</string>
 
+  <!-- The component name of the activity that search intents in the Apps corpus are sent to.
+       If not set, Apps search intents are sent to the Apps suggestion source. -->
+  <string name="apps_search_activity" translatable="false"></string>
+
   <!-- Number of suggestions slots that are visible above
       the onscreen keyboard. These slots will be shared among
       the default sources. -->
