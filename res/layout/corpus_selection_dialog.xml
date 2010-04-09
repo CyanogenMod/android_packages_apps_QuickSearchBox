@@ -55,6 +55,18 @@
             android:listSelector="@drawable/corpus_grid_item_bg"
             />
 
+        <TextView
+            android:id="@+id/corpus_edit_items"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dip"
+            android:layout_gravity="bottom|right"
+            android:singleLine="true"
+            android:textColor="@android:color/tertiary_text_light"
+            android:textSize="16dip"
+            android:text="@string/corpus_selection_edit_items"
+        />
+
     </LinearLayout>
 
     <ImageView

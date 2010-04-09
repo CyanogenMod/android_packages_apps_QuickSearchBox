@@ -76,6 +76,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SearchableItemsSettings"
+                android:label="@string/search_sources"
+                android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="com.android.quicksearchbox.action.SEARCHABLE_ITEMS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <receiver android:name=".SearchWidgetProvider"
                   android:label="@string/app_name">
             <intent-filter>

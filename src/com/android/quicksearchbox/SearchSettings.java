@@ -27,12 +27,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
-import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -42,17 +39,20 @@ import android.view.Menu;
 import java.util.List;
 
 /**
- * Activity for setting global search preferences. Changes to search preferences trigger a broadcast
- * intent that causes all SuggestionSources objects to be updated.
+ * Activity for setting global search preferences.
  */
 public class SearchSettings extends PreferenceActivity
-        implements OnPreferenceClickListener, OnPreferenceChangeListener {
+        implements OnPreferenceClickListener {
 
     private static final boolean DBG = false;
     private static final String TAG = "SearchSettings";
 
     // Name of the preferences file used to store search preference
     public static final String PREFERENCES_NAME = "SearchSettings";
+
+    // Intent action that opens the "Searchable Items" preference
+    public static final String ACTION_SEARCHABLE_ITEMS =
+            "com.android.quicksearchbox.action.SEARCHABLE_ITEMS";
 
     // Only used to find the preferences after inflating
     private static final String CLEAR_SHORTCUTS_PREF = "clear_shortcuts";
@@ -65,7 +65,6 @@ public class SearchSettings extends PreferenceActivity
     // References to the top-level preference objects
     private Preference mClearShortcutsPreference;
     private PreferenceScreen mSearchEngineSettingsPreference;
-    private PreferenceGroup mSourcePreferences;
 
     // Dialog ids
     private static final int CLEAR_SHORTCUTS_CONFIRM_DIALOG = 0;
@@ -82,14 +81,19 @@ public class SearchSettings extends PreferenceActivity
         mClearShortcutsPreference = preferenceScreen.findPreference(CLEAR_SHORTCUTS_PREF);
         mSearchEngineSettingsPreference = (PreferenceScreen) preferenceScreen.findPreference(
                 SEARCH_ENGINE_SETTINGS_PREF);
-        mSourcePreferences = (PreferenceGroup) getPreferenceScreen().findPreference(
-                SEARCH_CORPORA_PREF);
+        Preference corporaPreference = preferenceScreen.findPreference(SEARCH_CORPORA_PREF);
+        corporaPreference.setIntent(getSearchableItemsIntent(this));
 
         mClearShortcutsPreference.setOnPreferenceClickListener(this);
 
         updateClearShortcutsPreference();
-        populateSourcePreference();
         populateSearchEnginePreference();
+    }
+
+    public static Intent getSearchableItemsIntent(Context context) {
+        Intent intent = new Intent(SearchSettings.ACTION_SEARCHABLE_ITEMS);
+        intent.setPackage(context.getPackageName());
+        return intent;
     }
 
     /**
@@ -107,10 +111,6 @@ public class SearchSettings extends PreferenceActivity
 
     private QsbApplication getQsbApplication() {
         return (QsbApplication) getApplication();
-    }
-
-    private Corpora getCorpora() {
-        return getQsbApplication().getCorpora();
     }
 
     private ShortcutRepository getShortcuts() {
@@ -155,40 +155,6 @@ public class SearchSettings extends PreferenceActivity
     }
 
     /**
-     * Fills the suggestion source list.
-     */
-    private void populateSourcePreference() {
-        mSourcePreferences.setOrderingAsAdded(false);
-        for (Corpus corpus : getCorpora().getAllCorpora()) {
-            Preference pref = createCorpusPreference(corpus);
-            if (pref != null) {
-                if (DBG) Log.d(TAG, "Adding corpus: " + corpus);
-                mSourcePreferences.addPreference(pref);
-            }
-        }
-    }
-
-    /**
-     * Adds a suggestion source to the list of suggestion source checkbox preferences.
-     */
-    private Preference createCorpusPreference(Corpus corpus) {
-        CheckBoxPreference sourcePref = new CheckBoxPreference(this);
-        sourcePref.setKey(getCorpusEnabledPreference(corpus));
-        // Put web corpus first. The rest are alphabetical.
-        if (corpus.isWebCorpus()) {
-            sourcePref.setOrder(0);
-        }
-        sourcePref.setDefaultValue(getCorpora().isCorpusDefaultEnabled(corpus));
-        sourcePref.setOnPreferenceChangeListener(this);
-        CharSequence label = corpus.getLabel();
-        sourcePref.setTitle(label);
-        CharSequence description = corpus.getSettingsDescription();
-        sourcePref.setSummaryOn(description);
-        sourcePref.setSummaryOff(description);
-        return sourcePref;
-    }
-
-    /**
      * Handles clicks on the "Clear search shortcuts" preference.
      */
     public synchronized boolean onPreferenceClick(Preference preference) {
@@ -223,16 +189,11 @@ public class SearchSettings extends PreferenceActivity
     /**
      * Informs our listeners about the updated settings data.
      */
-    private void broadcastSettingsChanged() {
+    public static void broadcastSettingsChanged(Context context) {
         // We use a message broadcast since the listeners could be in multiple processes.
         Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS_CHANGED);
         Log.i(TAG, "Broadcasting: " + intent);
-        sendBroadcast(intent);
-    }
-
-    public synchronized boolean onPreferenceChange(Preference preference, Object newValue) {
-        broadcastSettingsChanged();
-        return true;
+        context.sendBroadcast(intent);
     }
 
     public static boolean getShowWebSuggestions(Context context) {

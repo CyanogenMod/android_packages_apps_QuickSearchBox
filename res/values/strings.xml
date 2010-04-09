@@ -25,6 +25,7 @@
 
     <!-- Source selector -->
     <string name="corpus_selection_heading">Search</string>
+    <string name="corpus_selection_edit_items">Add or remove searchable items...</string>
     <string name="corpus_label_global">All</string>
 
     <!-- Name of the combined Web source shown in QSB -->

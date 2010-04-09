@@ -21,6 +21,7 @@ import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -31,6 +32,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 
 /**
  * Corpus selection dialog.
@@ -77,6 +79,9 @@ public class CorpusSelectionDialog extends Dialog {
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
         mCorpusGrid.setFocusable(true);
+
+        TextView editItems = (TextView) findViewById(R.id.corpus_edit_items);
+        editItems.setOnClickListener(new CorpusEditListener());
 
         Window window = getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();
@@ -186,6 +191,13 @@ public class CorpusSelectionDialog extends Dialog {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Corpus corpus = (Corpus) parent.getItemAtPosition(position);
             selectCorpus(corpus);
+        }
+    }
+
+    private class CorpusEditListener implements View.OnClickListener {
+        public void onClick(View v) {
+            Intent intent = SearchSettings.getSearchableItemsIntent(getContext());
+            getContext().startActivity(intent);
         }
     }
 
