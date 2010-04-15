@@ -33,7 +33,7 @@
     <string name="search_settings" msgid="4101951238194600323">"Configuración de búsqueda"</string>
     <string name="web_search_category_title" msgid="3696363552067530526">"Búsqueda web"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Teléfono"</string>
-    <string name="search_sources" msgid="505874718206340313">"Elementos que se pueden buscar"</string>
+    <string name="search_sources" msgid="505874718206340313">"Elementos de búsqueda"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Elegir lo que se quiere buscar en el teléfono"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Borrar accesos directos"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Borrar los accesos directos a las sugerencias de búsqueda seleccionadas recientemente"</string>
