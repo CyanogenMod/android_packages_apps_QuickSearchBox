@@ -53,7 +53,7 @@ public class SearchWidgetProvider extends AppWidgetProvider {
     private void updateSearchWidget(Context context, AppWidgetManager appWidgetManager,
             int appWidgetId) {
         String corpusName = SearchWidgetConfigActivity.readWidgetCorpusPref(context, appWidgetId);
-        Corpus corpus = getCorpora(context).getCorpus(corpusName);
+        Corpus corpus = corpusName == null ? null : getCorpora(context).getCorpus(corpusName);
         setupSearchWidget(context, appWidgetManager, appWidgetId, corpus);
     }
 
