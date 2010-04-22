@@ -144,7 +144,7 @@ public interface SuggestionCursor {
     String getSuggestionIntentDataString();
 
     /**
-     * Gets the data associated with this suggestion's intent.
+     * Gets the query associated with this suggestion's intent.
      */
     String getSuggestionQuery();
 

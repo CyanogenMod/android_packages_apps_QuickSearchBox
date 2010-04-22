@@ -86,10 +86,38 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
             Log.d(TAG, "bindAsSuggestion(), text1=" + text1 + ",text2=" + text2
                     + ",icon1=" + icon1 + ",icon2=" + icon2);
         }
+        // If there is no text for the second line, allow the first line to be up to two lines
+        int text1MaxLines = TextUtils.isEmpty(text2) ? 2 : 1;
+        mText1.setSingleLine(text1MaxLines == 1);
+        mText1.setMaxLines(text1MaxLines);
         setText1(text1);
         setText2(text2);
         setIcon1(icon1);
         setIcon2(icon2);
+        updateRefinable(suggestion);
+    }
+
+    protected void updateRefinable(SuggestionCursor suggestion) {
+        boolean refinable = mIcon2.getDrawable() == null
+                && !TextUtils.isEmpty(suggestion.getSuggestionQuery());
+        setRefinable(suggestion, refinable);
+    }
+
+    protected void setRefinable(SuggestionCursor suggestion, boolean refinable) {
+        if (refinable) {
+            final int position = suggestion.getPosition();
+            mIcon2.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Log.d(TAG, "Clicked query refine");
+                    SuggestionsView suggestions = (SuggestionsView) getParent();
+                    suggestions.onIcon2Clicked(position);
+                }
+            });
+            Drawable icon2 = getContext().getResources().getDrawable(R.drawable.refine_query);
+            setIcon2(icon2);
+        } else {
+            mIcon2.setOnClickListener(null);
+        }
     }
 
     private CharSequence formatUrl(CharSequence url) {

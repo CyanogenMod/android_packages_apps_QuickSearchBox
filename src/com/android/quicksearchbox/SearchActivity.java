@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -135,7 +136,7 @@ public class SearchActivity extends Activity {
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
         mSuggestionsView.setSuggestionClickListener(new ClickHandler());
         mSuggestionsView.setSuggestionSelectionListener(new SelectionHandler());
-        mSuggestionsView.setInteractionListener(new InputMethodCloser());
+        mSuggestionsView.setOnScrollListener(new InputMethodCloser());
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
 
@@ -760,8 +761,13 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private class InputMethodCloser implements SuggestionsView.InteractionListener {
-        public void onInteraction() {
+    private class InputMethodCloser implements SuggestionsView.OnScrollListener {
+
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                int totalItemCount) {
+        }
+
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
             hideInputMethod();
         }
     }
@@ -773,6 +779,24 @@ public class SearchActivity extends Activity {
 
        public boolean onSuggestionLongClicked(int position) {
            return SearchActivity.this.onSuggestionLongClicked(position);
+       }
+
+       public void onSuggestionQueryRefineClicked(int position) {
+           if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
+           SuggestionCursor suggestions = getCurrentSuggestions();
+           if (suggestions != null) {
+               suggestions.moveTo(position);
+               String query = suggestions.getSuggestionQuery();
+               if (!TextUtils.isEmpty(query)) {
+                   query += " ";
+                   setUserQuery(query);
+                   setQuery(query, false);
+                   updateSuggestions(query);
+               }
+           }
+           // After a query refinement, don't hide the keyboard, since the user is likely
+           // to want to type something
+           mQueryTextView.requestFocus();
        }
     }
 

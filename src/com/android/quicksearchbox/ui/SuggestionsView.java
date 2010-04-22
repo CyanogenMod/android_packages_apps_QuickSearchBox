@@ -39,8 +39,6 @@ public class SuggestionsView extends ListView {
 
     private SuggestionSelectionListener mSuggestionSelectionListener;
 
-    private InteractionListener mInteractionListener;
-
     public SuggestionsView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -61,10 +59,6 @@ public class SuggestionsView extends ListView {
         mSuggestionSelectionListener = listener;
     }
 
-    public void setInteractionListener(InteractionListener listener) {
-        mInteractionListener = listener;
-    }
-
     /**
      * Gets the position of the selected suggestion.
      *
@@ -81,14 +75,6 @@ public class SuggestionsView extends ListView {
      */
     public SuggestionPosition getSelectedSuggestion() {
         return (SuggestionPosition) getSelectedItem();
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN && mInteractionListener != null) {
-            mInteractionListener.onInteraction();
-        }
-        return super.onInterceptTouchEvent(event);
     }
 
     @Override
@@ -130,13 +116,6 @@ public class SuggestionsView extends ListView {
         }
     }
 
-    public interface InteractionListener {
-        /**
-         * Called when the user interacts with this view.
-         */
-        void onInteraction();
-    }
-
     private class ItemClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemClick(" + position + ")");
@@ -174,4 +153,11 @@ public class SuggestionsView extends ListView {
             fireNothingSelected();
         }
     }
+
+    public void onIcon2Clicked(int position) {
+        if (mSuggestionClickListener != null) {
+            mSuggestionClickListener.onSuggestionQueryRefineClicked(position);
+        }
+    }
+
 }
