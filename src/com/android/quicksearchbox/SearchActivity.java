@@ -794,9 +794,6 @@ public class SearchActivity extends Activity {
                    updateSuggestions(query);
                }
            }
-           // After a query refinement, don't hide the keyboard, since the user is likely
-           // to want to type something
-           mQueryTextView.requestFocus();
        }
     }
 
