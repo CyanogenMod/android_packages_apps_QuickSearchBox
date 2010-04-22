@@ -78,18 +78,12 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
 
     protected void selectCorpus(Corpus corpus) {
         writeWidgetCorpusPref(mAppWidgetId, corpus);
-        updateWidget(corpus);
+        SearchWidgetProvider.updateSearchWidgets(this);
 
         Intent result = new Intent();
         result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
         setResult(RESULT_OK, result);
         finish();
-    }
-
-    private void updateWidget(Corpus corpus) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        SearchWidgetProvider.setupSearchWidget(this, appWidgetManager,
-                mAppWidgetId, corpus);
     }
 
     private static SharedPreferences getWidgetPreferences(Context context) {

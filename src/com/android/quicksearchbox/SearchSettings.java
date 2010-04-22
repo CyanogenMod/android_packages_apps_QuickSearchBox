@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
@@ -61,10 +62,12 @@ public class SearchSettings extends PreferenceActivity
 
     // Preifx of per-corpus enable preference
     private static final String CORPUS_ENABLED_PREF_PREFIX = "enable_corpus_";
+    private static final String VOICE_SEARCH_HINTS_ENABLED_PREF = "voice_search_hints_enabled";
 
     // References to the top-level preference objects
     private Preference mClearShortcutsPreference;
     private PreferenceScreen mSearchEngineSettingsPreference;
+    private CheckBoxPreference mVoiceSearchHintsPreference;
 
     // Dialog ids
     private static final int CLEAR_SHORTCUTS_CONFIRM_DIALOG = 0;
@@ -81,10 +84,13 @@ public class SearchSettings extends PreferenceActivity
         mClearShortcutsPreference = preferenceScreen.findPreference(CLEAR_SHORTCUTS_PREF);
         mSearchEngineSettingsPreference = (PreferenceScreen) preferenceScreen.findPreference(
                 SEARCH_ENGINE_SETTINGS_PREF);
+        mVoiceSearchHintsPreference = (CheckBoxPreference)
+                preferenceScreen.findPreference(VOICE_SEARCH_HINTS_ENABLED_PREF);
         Preference corporaPreference = preferenceScreen.findPreference(SEARCH_CORPORA_PREF);
         corporaPreference.setIntent(getSearchableItemsIntent(this));
 
         mClearShortcutsPreference.setOnPreferenceClickListener(this);
+        mVoiceSearchHintsPreference.setOnPreferenceClickListener(this);
 
         updateClearShortcutsPreference();
         populateSearchEnginePreference();
@@ -103,6 +109,16 @@ public class SearchSettings extends PreferenceActivity
      */
     public static String getCorpusEnabledPreference(Corpus corpus) {
         return CORPUS_ENABLED_PREF_PREFIX + corpus.getName();
+    }
+
+    public static boolean areVoiceSearchHintsEnabled(Context context) {
+        return getSearchPreferences(context).getBoolean(VOICE_SEARCH_HINTS_ENABLED_PREF, true);
+    }
+
+    public static void setVoiceSearchHintsEnabled(Context context, boolean enabled) {
+        getSearchPreferences(context)
+                .edit().putBoolean(VOICE_SEARCH_HINTS_ENABLED_PREF, enabled).commit();
+        SearchWidgetProvider.updateSearchWidgets(context);
     }
 
     public static SharedPreferences getSearchPreferences(Context context) {
@@ -154,12 +170,12 @@ public class SearchSettings extends PreferenceActivity
         return resolveInfos.get(0).activityInfo.loadLabel(pm);
     }
 
-    /**
-     * Handles clicks on the "Clear search shortcuts" preference.
-     */
     public synchronized boolean onPreferenceClick(Preference preference) {
         if (preference == mClearShortcutsPreference) {
             showDialog(CLEAR_SHORTCUTS_CONFIRM_DIALOG);
+            return true;
+        } else if (preference == mVoiceSearchHintsPreference) {
+            SearchWidgetProvider.updateSearchWidgets(this);
             return true;
         }
         return false;

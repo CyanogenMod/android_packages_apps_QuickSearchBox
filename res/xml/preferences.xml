@@ -42,4 +42,16 @@
                 
     </PreferenceCategory>
 
+    <PreferenceCategory
+            android:title="@string/voice_search_category_title">
+
+        <CheckBoxPreference
+                android:key="voice_search_hints_enabled"
+                android:title="@string/voice_search_hints_enabled_title"
+                android:summary="@string/voice_search_hints_enabled_summary"
+                android:defaultValue="true"
+                />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

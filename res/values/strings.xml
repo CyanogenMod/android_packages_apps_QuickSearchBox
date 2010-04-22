@@ -96,6 +96,19 @@
     <string name="google_show_web_suggestions_summary_enabled">Show suggestions from Google as you type</string>
     <string name="google_show_web_suggestions_summary_disabled">Don\'t show suggestions from Google as you type</string>
 
+    <!-- Title for 'Voice Search' category of search settings -->
+    <string name="voice_search_category_title">Voice Search</string>
+    <!-- Title and summary for 'show voice search hints' check box setting -->
+    <string name="voice_search_hints_enabled_title">Show Voice Search hints</string>
+    <string name="voice_search_hints_enabled_summary">Shows hints in the search widget for how to use Voice Search</string>
+
+    <!-- Title for Voice Search hints bubble -->
+    <string name="voice_search_hint_title">Try saying:</string>
+    <!-- Starting quotation marks of the voice search hint -->
+    <string name="voice_search_hint_quotation_start">“</string>
+    <!-- Ending quotation marks of the voice search hint -->
+    <string name="voice_search_hint_quotation_end">”</string>
+
     <!-- Note that this is the standard search url.  It uses the current locale for language -->
     <!-- (%1$s) and country (%2$s) and shouldn't need to be replaced by locale or mcc selected -->
     <!-- resources. -->
