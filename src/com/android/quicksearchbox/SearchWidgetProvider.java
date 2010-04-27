@@ -91,10 +91,8 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         qsbIntent.setData(SearchActivity.getCorpusUri(corpus));
         setOnClickIntent(context, views, R.id.search_widget_text, qsbIntent);
 
-        Launcher launcher = new Launcher(context);
-        Corpus voiceSearchCorpus = launcher.getSearchCorpus(getCorpora(context), corpus);
-        if (voiceSearchCorpus != null && launcher.shouldShowVoiceSearch(voiceSearchCorpus)) {
-            Intent voiceSearchIntent = voiceSearchCorpus.createVoiceSearchIntent(widgetAppData);
+        Intent voiceSearchIntent = getVoiceSearchIntent(context, corpus, widgetAppData);
+        if (voiceSearchIntent != null) {
             setOnClickIntent(context, views, R.id.search_widget_voice_btn, voiceSearchIntent);
             views.setViewVisibility(R.id.search_widget_voice_btn, View.VISIBLE);
         } else {
@@ -117,6 +115,17 @@ public class SearchWidgetProvider extends AppWidgetProvider {
         intent.putExtra(SearchManager.APP_DATA, widgetAppData);
         intent.setData(SearchActivity.getCorpusUri(corpus));
         setOnClickIntent(context, views, R.id.corpus_indicator, intent);
+    }
+
+    private static Intent getVoiceSearchIntent(Context context, Corpus corpus,
+            Bundle widgetAppData) {
+        Launcher launcher = new Launcher(context);
+        if (!launcher.shouldShowVoiceSearch(corpus)) return null;
+        if (corpus == null) {
+            return WebCorpus.createVoiceWebSearchIntent(widgetAppData);
+        } else {
+            return corpus.createVoiceSearchIntent(widgetAppData);
+        }
     }
 
     private static void setOnClickIntent(Context context, RemoteViews views,
