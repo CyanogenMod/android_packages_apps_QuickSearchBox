@@ -23,7 +23,7 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"Tudo"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
     <string name="corpus_description_web" msgid="5553049179123250409">"Pesquisa Web, marcadores e histórico do navegador"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"Aplicações"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"Apps"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Nomes das aplicações instaladas"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Pesquisar no Google Apps"</string>
     <string name="corpus_label_apps_market" msgid="7625179316335589490">"Apps e Market"</string>
