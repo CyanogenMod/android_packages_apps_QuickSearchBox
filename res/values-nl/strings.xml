@@ -44,7 +44,7 @@
     <string name="google_app_label" msgid="7877830942664670350">"Google Zoeken"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Google Zoeken"</string>
     <string name="google_search_settings" msgid="4169698045412400949">"Google Zoeken"</string>
-    <string name="google_show_web_suggestions" msgid="9018281734662733247">"Websuggesties weergeven"</string>
+    <string name="google_show_web_suggestions" msgid="9018281734662733247">"Websuggesties tonen"</string>
     <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"Suggesties van Google weergeven terwijl u typt"</string>
     <string name="google_show_web_suggestions_summary_disabled" msgid="3768151514600543003">"Geen suggesties van Google weergeven terwijl u typt"</string>
 </resources>
