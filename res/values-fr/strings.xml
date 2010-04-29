@@ -44,7 +44,7 @@
     <string name="google_app_label" msgid="7877830942664670350">"Recherche Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Recherche Google"</string>
     <string name="google_search_settings" msgid="4169698045412400949">"Recherche Google"</string>
-    <string name="google_show_web_suggestions" msgid="9018281734662733247">"Afficher les suggestions Web"</string>
+    <string name="google_show_web_suggestions" msgid="9018281734662733247">"Afficher les suggestions"</string>
     <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"Afficher les suggestions de Google lors de la saisie"</string>
     <string name="google_show_web_suggestions_summary_disabled" msgid="3768151514600543003">"Ne pas afficher les suggestions de Google lors de la saisie"</string>
 </resources>

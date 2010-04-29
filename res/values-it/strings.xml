@@ -23,28 +23,28 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"Tutto"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
     <string name="corpus_description_web" msgid="5553049179123250409">"Ricerca web, segnalibri e cronologia browser"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"Google Apps"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"Applicazioni"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Nomi delle applicazioni installate"</string>
-    <string name="corpus_hint_apps" msgid="4230401643970165739">"Cerca in Google Apps"</string>
-    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Google Apps e Market"</string>
+    <string name="corpus_hint_apps" msgid="4230401643970165739">"Cerca applicazioni"</string>
+    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Applicazioni e Market"</string>
     <string name="corpus_description_apps_market" msgid="6676825865398169853">"Applicazioni installate e applicazioni da Market"</string>
-    <string name="corpus_hint_apps_market" msgid="627025611326022658">"Cerca Google Apps e Market"</string>
+    <string name="corpus_hint_apps_market" msgid="627025611326022658">"Cerca in applicazioni e Market"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Impostazioni ricerca"</string>
     <string name="search_settings" msgid="4101951238194600323">"Impostazioni ricerca"</string>
     <string name="web_search_category_title" msgid="3696363552067530526">"Web"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Telefono"</string>
     <string name="search_sources" msgid="505874718206340313">"Elementi ricercabili"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Scegli che cosa cercare sul cellulare"</string>
-    <string name="clear_shortcuts" msgid="1964107586205103593">"Cancella collegamenti"</string>
-    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Cancella collegamenti a suggerimenti di ricerca scelti di recente"</string>
-    <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"Questa azione cancellerà tutti i collegamenti ai suggerimenti di ricerca scelti di recente."\n\n"Per cancellare la cronologia del browser, utilizza le impostazioni del browser."</string>
+    <string name="clear_shortcuts" msgid="1964107586205103593">"Cancella scorciatoie"</string>
+    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Cancella scorciatoie a suggerimenti di ricerca scelti di recente"</string>
+    <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"Questa azione cancellerà tutte le scorciatoie ai suggerimenti di ricerca scelti di recente."\n\n"Per cancellare la cronologia del browser, utilizza le impostazioni del browser."</string>
     <string name="agree" msgid="5918867532928233161">"OK"</string>
     <string name="disagree" msgid="4631189706900617900">"Annulla"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"Ricerca Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Ricerca Google"</string>
     <string name="google_search_settings" msgid="4169698045412400949">"Ricerca·Google"</string>
-    <string name="google_show_web_suggestions" msgid="9018281734662733247">"Mostra suggerimenti web"</string>
+    <string name="google_show_web_suggestions" msgid="9018281734662733247">"Mostra suggerimenti"</string>
     <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"Mostra suggerimenti Google durante la digitazione"</string>
     <string name="google_show_web_suggestions_summary_disabled" msgid="3768151514600543003">"Non mostrare suggerimenti da Google durante la digitazione"</string>
 </resources>
