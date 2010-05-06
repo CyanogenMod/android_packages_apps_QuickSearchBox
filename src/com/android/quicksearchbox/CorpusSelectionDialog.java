@@ -42,9 +42,9 @@ public class CorpusSelectionDialog extends Dialog {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SelectSearchSourceDialog";
 
-    private static final int NUM_COLUMNS = 4;
-
     private GridView mCorpusGrid;
+
+    private final int mGridColumns;
 
     private OnCorpusSelectedListener mListener;
 
@@ -54,6 +54,7 @@ public class CorpusSelectionDialog extends Dialog {
 
     public CorpusSelectionDialog(Context context) {
         super(context, R.style.Theme_SelectSearchSource);
+        mGridColumns = context.getResources().getInteger(R.integer.corpus_selection_dialog_columns);
     }
 
     /**
@@ -74,7 +75,6 @@ public class CorpusSelectionDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.corpus_selection_dialog);
         mCorpusGrid = (GridView) findViewById(R.id.corpus_grid);
-        mCorpusGrid.setNumColumns(NUM_COLUMNS);
         mCorpusGrid.setOnItemClickListener(new CorpusClickListener());
         // TODO: for some reason, putting this in the XML layout instead makes
         // the list items unclickable.
@@ -133,7 +133,7 @@ public class CorpusSelectionDialog extends Dialog {
         }
         // Dismiss dialog on up move when nothing, or an item on the top row, is selected.
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            int selectedRow = mCorpusGrid.getSelectedItemPosition() / NUM_COLUMNS;
+            int selectedRow = mCorpusGrid.getSelectedItemPosition() / mGridColumns;
             if (selectedRow <= 0) {
                 cancel();
                 return true;

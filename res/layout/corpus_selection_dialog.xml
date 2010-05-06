@@ -52,6 +52,7 @@
             android:layout_gravity="top|left"
             android:horizontalSpacing="2dip"
             android:verticalSpacing="2dip"
+            android:numColumns="@integer/corpus_selection_dialog_columns"
             android:listSelector="@drawable/corpus_grid_item_bg"
             />
 

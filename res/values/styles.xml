@@ -41,4 +41,7 @@
         <item name="android:windowExitAnimation">@anim/corpus_selector_close</item>
     </style>
 
+    <!-- The number of columns in the business listing launcher GridView -->
+    <integer name="corpus_selection_dialog_columns">4</integer>
+
 </resources>

@@ -19,14 +19,12 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.BatchingNamedTaskExecutor;
 import com.android.quicksearchbox.util.Consumer;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
-import com.android.quicksearchbox.util.Util;
 
 import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Suggestions provider implementation.
