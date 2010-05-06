@@ -107,14 +107,14 @@ public class SearchActivity extends Activity {
     private String mUserQuery;
     private boolean mSelectAll;
 
-    private Handler mHandler = new Handler();
-    private Runnable mUpdateSuggestionsTask = new Runnable() {
+    private final Handler mHandler = new Handler();
+    private final Runnable mUpdateSuggestionsTask = new Runnable() {
         public void run() {
             updateSuggestions(getQuery());
         }
     };
 
-    private Runnable mShowInputMethodTask = new Runnable() {
+    private final Runnable mShowInputMethodTask = new Runnable() {
         public void run() {
             showInputMethodForQuery();
         }
@@ -731,6 +731,9 @@ public class SearchActivity extends Activity {
             // Handle IME search action key
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
                 onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
+                // if no action was taken, consume the key event so that the keyboard
+                // remains on screen.
+                return !mTookAction;
             }
             return false;
         }
