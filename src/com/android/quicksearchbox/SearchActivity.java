@@ -484,15 +484,18 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected void onSearchClicked(int method) {
+    /**
+     * @return true if a search was performed as a result of this click, false otherwise.
+     */
+    protected boolean onSearchClicked(int method) {
         String query = getQuery();
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
 
         // Don't do empty queries
-        if (TextUtils.getTrimmedLength(query) == 0) return;
+        if (TextUtils.getTrimmedLength(query) == 0) return false;
 
         Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
-        if (searchCorpus == null) return;
+        if (searchCorpus == null) return false;
 
         mTookAction = true;
 
@@ -510,6 +513,7 @@ public class SearchActivity extends Activity {
         // Start search
         Intent intent = searchCorpus.createSearchIntent(query, mAppSearchData);
         mLauncher.launchIntent(intent);
+        return true;
     }
 
     protected void onVoiceSearchClicked() {
@@ -730,10 +734,9 @@ public class SearchActivity extends Activity {
         public boolean onKey(View view, int keyCode, KeyEvent event) {
             // Handle IME search action key
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
                 // if no action was taken, consume the key event so that the keyboard
                 // remains on screen.
-                return !mTookAction;
+                return !onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
             }
             return false;
         }
