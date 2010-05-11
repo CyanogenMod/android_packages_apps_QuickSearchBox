@@ -164,7 +164,7 @@ public class SearchableSources implements Sources {
         }
         for (SearchableInfo searchable : searchables) {
             SearchableSource source = createSearchableSource(searchable);
-            if (source != null && source.canRead()) {
+            if (source != null) {
                 if (DBG) Log.d(TAG, "Created source " + source);
                 addSource(source);
             }

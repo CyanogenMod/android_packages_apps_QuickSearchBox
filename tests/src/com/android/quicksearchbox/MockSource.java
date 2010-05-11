@@ -47,7 +47,7 @@ public class MockSource implements Source {
         mVersionCode = versionCode;
     }
 
-    public ComponentName getComponentName() {
+    public ComponentName getIntentComponent() {
         // Not an activity, but no code should treat it as one.
         return new ComponentName("com.android.quicksearchbox",
                 getClass().getName() + "." + mName);
@@ -58,7 +58,7 @@ public class MockSource implements Source {
     }
 
     public String getName() {
-        return getComponentName().flattenToShortString();
+        return getIntentComponent().flattenToShortString();
     }
 
     public String getDefaultIntentAction() {
@@ -99,6 +99,10 @@ public class MockSource implements Source {
 
     public Uri getSourceIconUri() {
         return null;
+    }
+
+    public boolean canRead() {
+        return true;
     }
 
     public SourceResult getSuggestions(String query, int queryLimit) {
@@ -153,6 +157,10 @@ public class MockSource implements Source {
 
     public SuggestionCursor refreshShortcut(String shortcutId, String extraData) {
         return null;
+    }
+
+    public boolean isExternal() {
+        return false;
     }
 
     public boolean isWebSuggestionSource() {

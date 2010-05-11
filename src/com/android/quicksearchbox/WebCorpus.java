@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.util.Patterns;
 import android.webkit.URLUtil;
 
@@ -114,18 +113,7 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     public Intent createVoiceSearchIntent(Bundle appData) {
-        return createVoiceWebSearchIntent(appData);
-    }
-
-    public static Intent createVoiceWebSearchIntent(Bundle appData) {
-        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        if (appData != null) {
-            intent.putExtra(SearchManager.APP_DATA, appData);
-        }
-        return intent;
+        return new VoiceSearch(getContext()).createVoiceWebSearchIntent(appData);
     }
 
     private int getCorpusIconResource() {

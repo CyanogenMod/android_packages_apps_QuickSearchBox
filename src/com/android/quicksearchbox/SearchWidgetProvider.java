@@ -186,10 +186,10 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static Intent getVoiceSearchIntent(Context context, Corpus corpus,
             Bundle widgetAppData) {
-        Launcher launcher = new Launcher(context);
-        if (!launcher.shouldShowVoiceSearch(corpus)) return null;
+        VoiceSearch voiceSearch = new VoiceSearch(context);
+        if (!voiceSearch.shouldShowVoiceSearch(corpus)) return null;
         if (corpus == null) {
-            return WebCorpus.createVoiceWebSearchIntent(widgetAppData);
+            return voiceSearch.createVoiceWebSearchIntent(widgetAppData);
         } else {
             return corpus.createVoiceSearchIntent(widgetAppData);
         }

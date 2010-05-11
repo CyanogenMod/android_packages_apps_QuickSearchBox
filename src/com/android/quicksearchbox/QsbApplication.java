@@ -99,6 +99,10 @@ public class QsbApplication extends Application {
         return mUiThreadHandler;
     }
 
+    public void runOnUiThread(Runnable action) {
+        getMainThreadHandler().post(action);
+    }
+
     /**
      * Gets the QSB configuration object.
      * May be called from any thread.
@@ -262,6 +266,7 @@ public class QsbApplication extends Application {
                 promoter,
                 getShortcutRepository(),
                 getCorpora(),
+                getCorpusRanker(),
                 getLogger());
         return provider;
     }

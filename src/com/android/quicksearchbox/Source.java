@@ -29,10 +29,9 @@ import android.os.Bundle;
 public interface Source extends SuggestionCursorProvider<SourceResult> {
 
     /**
-     * Gets the name of the activity that this source is for. When a suggestion is
-     * clicked, the resulting intent will be sent to this activity.
+     * Gets the name activity that intents from this source are sent to.
      */
-    ComponentName getComponentName();
+    ComponentName getIntentComponent();
 
     /**
      * Gets the version code of the source. This is expected to change when the app that
@@ -107,6 +106,11 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
     Intent createVoiceSearchIntent(Bundle appData);
 
     /**
+     * Checks if the current process can read the suggestions from this source.
+     */
+    boolean canRead();
+
+    /**
      * Gets suggestions from this source.
      *
      * @param query The user query.
@@ -124,11 +128,6 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      *         cursor is empty or <code>null</code>, the shortcut will be removed.
      */
     SuggestionCursor refreshShortcut(String shortcutId, String extraData);
-
-    /**
-     * Checks whether this is a web suggestion source.
-     */
-    boolean isWebSuggestionSource();
 
     /**
      * Checks whether the text in the query field should come from the suggestion intent data.

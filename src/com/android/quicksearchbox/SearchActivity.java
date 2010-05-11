@@ -49,7 +49,6 @@ import android.widget.ImageButton;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -99,7 +98,7 @@ public class SearchActivity extends Activity {
     protected ImageButton mVoiceSearchButton;
     protected ImageButton mCorpusIndicator;
 
-    private Launcher mLauncher;
+    private VoiceSearch mVoiceSearch;
 
     private Corpus mCorpus;
     private Bundle mAppSearchData;
@@ -148,7 +147,7 @@ public class SearchActivity extends Activity {
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
         mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
 
-        mLauncher = new Launcher(this);
+        mVoiceSearch = new VoiceSearch(this);
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
@@ -455,7 +454,7 @@ public class SearchActivity extends Activity {
     }
 
     protected void updateVoiceSearchButton(boolean queryEmpty) {
-        if (queryEmpty && mLauncher.shouldShowVoiceSearch(mCorpus)) {
+        if (queryEmpty && mVoiceSearch.shouldShowVoiceSearch(mCorpus)) {
             mVoiceSearchButton.setVisibility(View.VISIBLE);
             mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
         } else {
@@ -494,7 +493,7 @@ public class SearchActivity extends Activity {
         // Don't do empty queries
         if (TextUtils.getTrimmedLength(query) == 0) return false;
 
-        Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
+        Corpus searchCorpus = getSearchCorpus();
         if (searchCorpus == null) return false;
 
         mTookAction = true;
@@ -512,13 +511,13 @@ public class SearchActivity extends Activity {
 
         // Start search
         Intent intent = searchCorpus.createSearchIntent(query, mAppSearchData);
-        mLauncher.launchIntent(intent);
+        launchIntent(intent);
         return true;
     }
 
     protected void onVoiceSearchClicked() {
         if (DBG) Log.d(TAG, "Voice Search clicked");
-        Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
+        Corpus searchCorpus = getSearchCorpus();
         if (searchCorpus == null) return;
 
         mTookAction = true;
@@ -528,11 +527,40 @@ public class SearchActivity extends Activity {
 
         // Start voice search
         Intent intent = searchCorpus.createVoiceSearchIntent(mAppSearchData);
-        mLauncher.launchIntent(intent);
+        launchIntent(intent);
+    }
+
+    /**
+     * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
+     * and the selected corpus otherwise.
+     */
+    private Corpus getSearchCorpus() {
+        if (mCorpus != null) {
+            return mCorpus;
+        } else {
+            Corpus webCorpus = getCorpora().getWebCorpus();
+            if (webCorpus == null) {
+                Log.e(TAG, "No web corpus");
+            }
+            return webCorpus;
+        }
     }
 
     protected SuggestionCursor getCurrentSuggestions() {
         return mSuggestionsAdapter.getCurrentSuggestions();
+    }
+
+    protected void launchIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+        try {
+            startActivity(intent);
+        } catch (RuntimeException ex) {
+            // Since the intents for suggestions specified by suggestion providers,
+            // guard against them not being handled, not allowed, etc.
+            Log.e(TAG, "Failed to start " + intent.toUri(0), ex);
+        }
     }
 
     protected boolean launchSuggestion(int position) {
@@ -553,8 +581,9 @@ public class SearchActivity extends Activity {
         getShortcutRepository().reportClick(suggestions, position);
 
         // Launch intent
-        Intent intent = mLauncher.getSuggestionIntent(suggestions, position, mAppSearchData);
-        mLauncher.launchIntent(intent);
+        suggestions.moveTo(position);
+        Intent intent = suggestions.getSuggestionIntent(mAppSearchData);
+        launchIntent(intent);
 
         return true;
     }
@@ -642,14 +671,6 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private List<Corpus> getCorporaToQuery() {
-        if (mCorpus == null) {
-            return getCorpusRanker().getRankedCorpora();
-        } else {
-            return Collections.singletonList(mCorpus);
-        }
-    }
-
     private int getMaxSuggestions() {
         Config config = getConfig();
         return mCorpus == null
@@ -674,9 +695,8 @@ public class SearchActivity extends Activity {
         }
 
         query = ltrim(query);
-        List<Corpus> corporaToQuery = getCorporaToQuery();
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
-                query, corporaToQuery, getMaxSuggestions());
+                query, mCorpus, getMaxSuggestions());
         mSuggestionsAdapter.setSuggestions(suggestions);
     }
 

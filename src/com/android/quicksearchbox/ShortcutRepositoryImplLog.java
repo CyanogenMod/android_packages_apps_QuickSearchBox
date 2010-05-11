@@ -34,8 +34,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -223,7 +223,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         reportClickAtTime(suggestions, position, now);
     }
 
-    public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora,
+    public SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora,
             int maxShortcuts) {
         ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora, maxShortcuts,
                         System.currentTimeMillis());
@@ -245,7 +245,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     /* package for testing */ ShortcutCursor getShortcutsForQuery(String query,
-            List<Corpus> allowedCorpora, int maxShortcuts, long now) {
+            Collection<Corpus> allowedCorpora, int maxShortcuts, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + "," + allowedCorpora + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);

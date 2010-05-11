@@ -69,7 +69,7 @@ public class SearchableSource implements Source {
     // Cached icon for the activity
     private Drawable.ConstantState mSourceIcon = null;
 
-    private final IconLoader mIconLoader;
+    private IconLoader mIconLoader;
 
     public SearchableSource(Context context, SearchableInfo searchable)
             throws NameNotFoundException {
@@ -81,7 +81,6 @@ public class SearchableSource implements Source {
         mActivityInfo = pm.getActivityInfo(componentName, 0);
         PackageInfo pkgInfo = pm.getPackageInfo(componentName.getPackageName(), 0);
         mVersionCode = pkgInfo.versionCode;
-        mIconLoader = createIconLoader(context, searchable.getSuggestPackage());
     }
 
     protected Context getContext() {
@@ -98,8 +97,9 @@ public class SearchableSource implements Source {
     public boolean canRead() {
         String authority = mSearchable.getSuggestAuthority();
         if (authority == null) {
-            Log.w(TAG, getName() + " has no searchSuggestAuthority");
-            return false;
+            // TODO: maybe we should have a way to distinguish between having suggestions
+            // and being readable.
+            return true;
         }
 
         Uri.Builder uriBuilder = new Uri.Builder()
@@ -161,12 +161,20 @@ public class SearchableSource implements Source {
         return false;
     }
 
-    private IconLoader createIconLoader(Context context, String providerPackage) {
-        if (providerPackage == null) return null;
-        return new CachingIconLoader(new PackageIconLoader(context, providerPackage));
+    private IconLoader getIconLoader() {
+        if (mIconLoader == null) {
+            // Get icons from the package containing the suggestion provider, if any
+            String iconPackage = mSearchable.getSuggestPackage();
+            if (iconPackage == null) {
+                // Fall back to the package containing the searchable activity
+                iconPackage = mSearchable.getSearchActivity().getPackageName();
+            }
+            mIconLoader = new CachingIconLoader(new PackageIconLoader(mContext, iconPackage));
+        }
+        return mIconLoader;
     }
 
-    public ComponentName getComponentName() {
+    public ComponentName getIntentComponent() {
         return mSearchable.getSearchActivity();
     }
 
@@ -179,11 +187,11 @@ public class SearchableSource implements Source {
     }
 
     public Drawable getIcon(String drawableId) {
-        return mIconLoader == null ? null : mIconLoader.getIcon(drawableId);
+        return getIconLoader().getIcon(drawableId);
     }
 
     public Uri getIconUri(String drawableId) {
-        return mIconLoader == null ? null : mIconLoader.getIconUri(drawableId);
+        return getIconLoader().getIconUri(drawableId);
     }
 
     public CharSequence getLabel() {
@@ -236,7 +244,7 @@ public class SearchableSource implements Source {
     }
 
     public Intent createSearchIntent(String query, Bundle appData) {
-        return createSourceSearchIntent(getComponentName(), query, appData);
+        return createSourceSearchIntent(getIntentComponent(), query, appData);
     }
 
     public static Intent createSourceSearchIntent(ComponentName activity, String query,
@@ -261,7 +269,7 @@ public class SearchableSource implements Source {
 
     public Intent createVoiceSearchIntent(Bundle appData) {
         if (mSearchable.getVoiceSearchLaunchWebSearch()) {
-            return WebCorpus.createVoiceWebSearchIntent(appData);
+            return new VoiceSearch(mContext).createVoiceWebSearchIntent(appData);
         } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
             return createVoiceAppSearchIntent(appData);
         }

@@ -27,6 +27,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -803,7 +804,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         }
     }
 
-    void assertShortcuts(String message, String query, List<Corpus> allowedCorpora,
+    void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
             SuggestionCursor expected) {
         SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, allowedCorpora,
                 mConfig.getMaxShortcutsReturned(), NOW);
@@ -814,7 +815,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         }
     }
 
-    void assertShortcuts(String message, String query, List<Corpus> allowedCorpora,
+    void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
             SuggestionData... expected) {
         assertShortcuts(message, query, allowedCorpora, new DataSuggestionCursor(query, expected));
     }

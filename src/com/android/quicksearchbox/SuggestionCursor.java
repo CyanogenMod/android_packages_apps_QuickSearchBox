@@ -16,7 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import android.content.Intent;
 import android.database.DataSetObserver;
+import android.os.Bundle;
 
 
 /**
@@ -147,6 +149,11 @@ public interface SuggestionCursor {
      * Gets the query associated with this suggestion's intent.
      */
     String getSuggestionQuery();
+
+    /**
+     * Gets the intent launched by this suggestion.
+     */
+    Intent getSuggestionIntent(Bundle appSearchData);
 
     String getSuggestionDisplayQuery();
 

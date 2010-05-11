@@ -24,6 +24,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,11 +49,13 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private final ShortcutRepository mShortcutRepo;
 
-    private final Logger mLogger;
-
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
 
     private final Corpora mCorpora;
+
+    private final CorpusRanker mCorpusRanker;
+
+    private final Logger mLogger;
 
     private BatchingNamedTaskExecutor mBatchingExecutor;
 
@@ -61,14 +65,16 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
             Promoter promoter,
             ShortcutRepository shortcutRepo,
             Corpora corpora,
+            CorpusRanker corpusRanker,
             Logger logger) {
         mConfig = config;
         mQueryExecutor = queryExecutor;
         mPublishThread = publishThread;
         mPromoter = promoter;
         mShortcutRepo = shortcutRepo;
-        mLogger = logger;
         mCorpora = corpora;
+        mCorpusRanker = corpusRanker;
+        mLogger = logger;
     }
 
     public void close() {
@@ -85,16 +91,19 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
     }
 
-    protected SuggestionCursor getShortcutsForQuery(String query, List<Corpus> corpora,
+    protected SuggestionCursor getShortcutsForQuery(String query, Corpus singleCorpus,
             int maxShortcuts) {
         if (mShortcutRepo == null) return null;
-        return mShortcutRepo.getShortcutsForQuery(query, corpora, maxShortcuts);
+        Collection<Corpus> allowedCorpora = mCorpora.getEnabledCorpora();
+        return mShortcutRepo.getShortcutsForQuery(query, allowedCorpora, maxShortcuts);
     }
 
     /**
      * Gets the sources that should be queried for the given query.
      */
-    private List<Corpus> getCorporaToQuery(String query, List<Corpus> orderedCorpora) {
+    private List<Corpus> getCorporaToQuery(String query, Corpus singleCorpus) {
+        if (singleCorpus != null) return Collections.singletonList(singleCorpus);
+        List<Corpus> orderedCorpora = mCorpusRanker.getRankedCorpora();
         ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(orderedCorpora.size());
         for (Corpus corpus : orderedCorpora) {
             if (shouldQueryCorpus(corpus, query)) {
@@ -119,16 +128,16 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
     }
 
-    public Suggestions getSuggestions(String query, List<Corpus> corpora, int maxSuggestions) {
+    public Suggestions getSuggestions(String query, Corpus singleCorpus, int maxSuggestions) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
-        List<Corpus> corporaToQuery = getCorporaToQuery(query, corpora);
+        List<Corpus> corporaToQuery = getCorporaToQuery(query, singleCorpus);
         final Suggestions suggestions = new Suggestions(mPromoter,
                 maxSuggestions,
                 query,
                 corporaToQuery.size());
         int maxShortcuts = mConfig.getMaxShortcutsReturned();
-        SuggestionCursor shortcuts = getShortcutsForQuery(query, corpora, maxShortcuts);
+        SuggestionCursor shortcuts = getShortcutsForQuery(query, singleCorpus, maxShortcuts);
         if (shortcuts != null) {
             suggestions.setShortcuts(shortcuts);
         }

@@ -42,7 +42,7 @@ public class ShortcutPromoterTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         mQuery = "foo";
         List<Corpus> corpora = Arrays.asList(MockCorpus.CORPUS_1, MockCorpus.CORPUS_2);
-        mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery, corpora, 8);
+        mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery, null, 8);
         mSuggestions = new ArrayList<CorpusResult>();
         for (Corpus corpus : corpora) {
             mSuggestions.add(corpus.getSuggestions(mQuery, 10));

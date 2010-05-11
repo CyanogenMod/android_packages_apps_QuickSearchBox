@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.Factory;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,8 @@ import java.util.concurrent.Executor;
  * Creates corpora.
  */
 public class SearchableCorpusFactory implements CorpusFactory {
+
+    private static final String TAG = "QSB.SearchableCorpusFactory";
 
     private final Context mContext;
 
@@ -61,8 +64,10 @@ public class SearchableCorpusFactory implements CorpusFactory {
      * @param sources All available sources.
      */
     protected void addSpecialCorpora(ArrayList<Corpus> corpora, Sources sources) {
-        corpora.add(createWebCorpus(sources));
-        corpora.add(createAppsCorpus(sources));
+        Corpus webCorpus = createWebCorpus(sources);
+        if (webCorpus != null) corpora.add(webCorpus);
+        Corpus appsCorpus = createAppsCorpus(sources);
+        if (appsCorpus != null) corpora.add(appsCorpus);
     }
 
     /**
@@ -82,14 +87,23 @@ public class SearchableCorpusFactory implements CorpusFactory {
         // Creates corpora for all unclaimed sources
         for (Source source : sources.getSources()) {
             if (!claimedSources.contains(source)) {
-                corpora.add(createSingleSourceCorpus(source));
+                Corpus corpus = createSingleSourceCorpus(source);
+                if (corpus != null) corpora.add(corpus);
             }
         }
     }
 
     protected Corpus createWebCorpus(Sources sources) {
         Source webSource = sources.getWebSearchSource();
+        if (webSource != null && !webSource.canRead()) {
+            Log.w(TAG, "Can't read web source " + webSource.getName());
+            webSource = null;
+        }
         Source browserSource = getBrowserSource(sources);
+        if (browserSource != null && !browserSource.canRead()) {
+            Log.w(TAG, "Can't read browser source " + browserSource.getName());
+            browserSource = null;
+        }
         Executor executor = createWebCorpusExecutor();
         return new WebCorpus(mContext, executor, webSource, browserSource);
     }
@@ -100,6 +114,7 @@ public class SearchableCorpusFactory implements CorpusFactory {
     }
 
     protected Corpus createSingleSourceCorpus(Source source) {
+        if (!source.canRead()) return null;
         return new SingleSourceCorpus(mContext, source);
     }
 

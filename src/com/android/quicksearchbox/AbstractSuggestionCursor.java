@@ -16,6 +16,11 @@
 
 package com.android.quicksearchbox;
 
+import android.app.SearchManager;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+
 
 /**
  * Base class for suggestion cursors.
@@ -30,6 +35,46 @@ public abstract class AbstractSuggestionCursor implements SuggestionCursor {
 
     public String getUserQuery() {
         return mUserQuery;
+    }
+
+    public Intent getSuggestionIntent(Bundle appSearchData) {
+        Source source = getSuggestionSource();
+        String action = getSuggestionIntentAction();
+        // use specific action if supplied, or default action if supplied, or fixed default
+        if (action == null) {
+            action = source.getDefaultIntentAction();
+            if (action == null) {
+                action = Intent.ACTION_SEARCH;
+            }
+        }
+
+        String data = getSuggestionIntentDataString();
+        String query = getSuggestionQuery();
+        String userQuery = getUserQuery();
+        String extraData = getSuggestionIntentExtraData();
+
+        // Now build the Intent
+        Intent intent = new Intent(action);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // We need CLEAR_TOP to avoid reusing an old task that has other activities
+        // on top of the one we want.
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (data != null) {
+            intent.setData(Uri.parse(data));
+        }
+        intent.putExtra(SearchManager.USER_QUERY, userQuery);
+        if (query != null) {
+            intent.putExtra(SearchManager.QUERY, query);
+        }
+        if (extraData != null) {
+            intent.putExtra(SearchManager.EXTRA_DATA_KEY, extraData);
+        }
+        if (appSearchData != null) {
+            intent.putExtra(SearchManager.APP_DATA, appSearchData);
+        }
+
+        intent.setComponent(source.getIntentComponent());
+        return intent;
     }
 
     public String getSuggestionDisplayQuery() {

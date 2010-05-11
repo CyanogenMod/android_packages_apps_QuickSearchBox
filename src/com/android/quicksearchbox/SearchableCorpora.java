@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -105,6 +106,10 @@ public class SearchableCorpora implements Corpora {
 
     public Source getSource(String name) {
         checkLoaded();
+        if (TextUtils.isEmpty(name)) {
+            Log.w(TAG, "Empty source name");
+            return null;
+        }
         return mSources.getSource(name);
     }
 
