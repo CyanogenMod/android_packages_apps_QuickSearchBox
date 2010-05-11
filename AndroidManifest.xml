@@ -62,7 +62,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="qsb.corpus" />
             </intent-filter>
+            <meta-data android:name="android.app.search.shortcut.provider" android:value="content://com.android.quicksearchbox.shortcuts/shortcuts" />
         </activity>
+
+        <provider android:name=".ShortcutsProvider"
+                android:authorities="com.android.quicksearchbox.shortcuts">
+        </provider>
 
         <activity android:name=".SearchSettings"
                 android:label="@string/search_settings"
