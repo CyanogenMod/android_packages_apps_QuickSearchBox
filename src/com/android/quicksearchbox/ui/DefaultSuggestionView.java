@@ -87,9 +87,15 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
                     + ",icon1=" + icon1 + ",icon2=" + icon2);
         }
         // If there is no text for the second line, allow the first line to be up to two lines
-        int text1MaxLines = TextUtils.isEmpty(text2) ? 2 : 1;
-        mText1.setSingleLine(text1MaxLines == 1);
-        mText1.setMaxLines(text1MaxLines);
+        if (TextUtils.isEmpty(text2)) {
+            mText1.setSingleLine(false);
+            mText1.setMaxLines(2);
+            mText1.setEllipsize(TextUtils.TruncateAt.START);
+        } else {
+            mText1.setSingleLine(true);
+            mText1.setMaxLines(1);
+            mText1.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+        }
         setText1(text1);
         setText2(text2);
         setIcon1(icon1);
