@@ -64,27 +64,16 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     public Intent createSearchIntent(String query, Bundle appData) {
-        return isUrl(query)? createBrowseIntent(query) : createWebSearchIntent(query, appData);
-    }
-
-    private static Intent createWebSearchIntent(String query, Bundle appData) {
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // We need CLEAR_TOP to avoid reusing an old task that has other activities
-        // on top of the one we want.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(SearchManager.USER_QUERY, query);
-        intent.putExtra(SearchManager.QUERY, query);
-        if (appData != null) {
-            intent.putExtra(SearchManager.APP_DATA, appData);
+        if (isUrl(query)) {
+            return createBrowseIntent(query);
+        } else if (mWebSearchSource != null){
+            return mWebSearchSource.createSearchIntent(query, appData);
+        } else {
+            return null;
         }
-        // TODO: Include something like this, to let the web search activity
-        // know how this query was started.
-        //intent.putExtra(SearchManager.SEARCH_MODE, SearchManager.MODE_GLOBAL_SEARCH_TYPED_QUERY);
-        return intent;
     }
 
-    private static Intent createBrowseIntent(String query) {
+    private Intent createBrowseIntent(String query) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addCategory(Intent.CATEGORY_BROWSABLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
