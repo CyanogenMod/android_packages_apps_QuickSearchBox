@@ -64,10 +64,8 @@ public class SearchableCorpusFactory implements CorpusFactory {
      * @param sources All available sources.
      */
     protected void addSpecialCorpora(ArrayList<Corpus> corpora, Sources sources) {
-        Corpus webCorpus = createWebCorpus(sources);
-        if (webCorpus != null) corpora.add(webCorpus);
-        Corpus appsCorpus = createAppsCorpus(sources);
-        if (appsCorpus != null) corpora.add(appsCorpus);
+        addCorpus(corpora, createWebCorpus(sources));
+        addCorpus(corpora, createAppsCorpus(sources));
     }
 
     /**
@@ -87,10 +85,13 @@ public class SearchableCorpusFactory implements CorpusFactory {
         // Creates corpora for all unclaimed sources
         for (Source source : sources.getSources()) {
             if (!claimedSources.contains(source)) {
-                Corpus corpus = createSingleSourceCorpus(source);
-                if (corpus != null) corpora.add(corpus);
+                addCorpus(corpora, createSingleSourceCorpus(source));
             }
         }
+    }
+
+    private void addCorpus(ArrayList<Corpus> corpora, Corpus corpus) {
+        if (corpus != null) corpora.add(corpus);
     }
 
     protected Corpus createWebCorpus(Sources sources) {

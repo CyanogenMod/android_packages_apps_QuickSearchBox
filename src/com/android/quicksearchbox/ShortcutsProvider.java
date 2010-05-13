@@ -38,7 +38,7 @@ public class ShortcutsProvider extends ContentProvider {
 
     public static final String EXTRA_SHORTCUT_SOURCE = "shortcut_source";
 
-    private static final int SHORTCUTS = 0;
+    private static final int URI_CODE_SHORTCUTS = 0;
 
     private UriMatcher mUriMatcher;
 
@@ -51,7 +51,7 @@ public class ShortcutsProvider extends ContentProvider {
     private UriMatcher buildUriMatcher() {
         String authority = getAuthority();
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        matcher.addURI(authority, "shortcuts", SHORTCUTS);
+        matcher.addURI(authority, "shortcuts", URI_CODE_SHORTCUTS);
         return matcher;
     }
 
@@ -62,7 +62,7 @@ public class ShortcutsProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (mUriMatcher.match(uri)) {
-            case SHORTCUTS:
+            case URI_CODE_SHORTCUTS:
                 return SearchManager.SUGGEST_MIME_TYPE;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -72,7 +72,7 @@ public class ShortcutsProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         switch (mUriMatcher.match(uri)) {
-            case SHORTCUTS:
+            case URI_CODE_SHORTCUTS:
                 addShortcut(values);
                 return null;
             default:
