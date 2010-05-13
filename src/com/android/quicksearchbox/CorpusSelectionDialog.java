@@ -183,7 +183,8 @@ public class CorpusSelectionDialog extends Dialog {
     protected void selectCorpus(Corpus corpus) {
         dismiss();
         if (mListener != null) {
-            mListener.onCorpusSelected(corpus);
+            String corpusName = corpus == null ? null : corpus.getName();
+            mListener.onCorpusSelected(corpusName);
         }
     }
 
@@ -202,6 +203,6 @@ public class CorpusSelectionDialog extends Dialog {
     }
 
     public interface OnCorpusSelectedListener {
-        void onCorpusSelected(Corpus corpus);
+        void onCorpusSelected(String corpusName);
     }
 }

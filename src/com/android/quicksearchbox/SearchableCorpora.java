@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Maintains the list of all suggestion sources.
+ * Maintains the list of all corpora.
  */
 public class SearchableCorpora implements Corpora {
 
@@ -44,8 +44,6 @@ public class SearchableCorpora implements Corpora {
     private final Config mConfig;
     private final CorpusFactory mCorpusFactory;
     private final SharedPreferences mPreferences;
-
-    private boolean mLoaded = false;
 
     private Sources mSources;
     // Maps corpus names to corpora
@@ -74,24 +72,15 @@ public class SearchableCorpora implements Corpora {
         return mContext;
     }
 
-    private void checkLoaded() {
-        if (!mLoaded) {
-            throw new IllegalStateException("corpora not loaded.");
-        }
-    }
-
     public Collection<Corpus> getAllCorpora() {
-        checkLoaded();
         return Collections.unmodifiableCollection(mCorporaByName.values());
     }
 
     public Collection<Corpus> getEnabledCorpora() {
-        checkLoaded();
         return mEnabledCorpora;
     }
 
     public Corpus getCorpus(String name) {
-        checkLoaded();
         return mCorporaByName.get(name);
     }
 
@@ -100,12 +89,10 @@ public class SearchableCorpora implements Corpora {
     }
 
     public Corpus getCorpusForSource(Source source) {
-        checkLoaded();
         return mCorporaBySource.get(source);
     }
 
     public Source getSource(String name) {
-        checkLoaded();
         if (TextUtils.isEmpty(name)) {
             Log.w(TAG, "Empty source name");
             return null;
@@ -113,39 +100,9 @@ public class SearchableCorpora implements Corpora {
         return mSources.getSource(name);
     }
 
-    /**
-     * After calling, clients must call {@link #close()} when done with this object.
-     */
-    public void load() {
-        if (mLoaded) {
-            throw new IllegalStateException("load(): Already loaded.");
-        }
+    public void update() {
+        mSources.update();
 
-        mSources.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                updateCorpora();
-            }
-        });
-
-        // will cause a callback to updateCorpora()
-        mSources.load();
-        mLoaded = true;
-    }
-
-    /**
-     * Releases all resources used by this object. It is possible to call
-     * {@link #load()} again after calling this method.
-     */
-    public void close() {
-        checkLoaded();
-
-        mSources.close();
-        mSources = null;
-        mLoaded = false;
-    }
-
-    private void updateCorpora() {
         Collection<Corpus> corpora = mCorpusFactory.createCorpora(mSources);
 
         mCorporaByName = new HashMap<String,Corpus>(corpora.size());

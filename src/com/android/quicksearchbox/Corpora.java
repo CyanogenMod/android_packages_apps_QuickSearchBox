@@ -74,9 +74,9 @@ public interface Corpora {
     Corpus getCorpusForSource(Source source);
 
     /**
-     * Frees any resources used by the corpus set.
+     * Updates the corpora.
      */
-    void close();
+    void update();
 
     /**
      * Registers an observer that is called when corpus set changes.

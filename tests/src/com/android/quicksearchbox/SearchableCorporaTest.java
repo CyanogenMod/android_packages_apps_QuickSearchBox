@@ -39,7 +39,7 @@ public class SearchableCorporaTest extends AndroidTestCase {
         sources.addSource(MockSource.SOURCE_1);
         sources.addSource(MockSource.SOURCE_2);
         mCorpora = new SearchableCorpora(mContext, config, sources, new MockCorpusFactory());
-        mCorpora.load();
+        mCorpora.update();
     }
 
     public void testGetAllCorpora() {

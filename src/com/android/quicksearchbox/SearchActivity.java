@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -86,6 +87,8 @@ public class SearchActivity extends Activity {
     private CorpusSelectionDialog mCorpusSelectionDialog;
 
     protected SuggestionsAdapter mSuggestionsAdapter;
+
+    private CorporaObserver mCorporaObserver;
 
     protected EditText mQueryTextView;
     // True if the query was empty on the previous call to updateQuery()
@@ -176,6 +179,9 @@ public class SearchActivity extends Activity {
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
         mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
+
+        mCorporaObserver = new CorporaObserver();
+        getCorpora().registerDataSetObserver(mCorporaObserver);
     }
 
     private void startMethodTracing() {
@@ -201,7 +207,7 @@ public class SearchActivity extends Activity {
         if (savedInstanceState == null) return;
         String corpusName = savedInstanceState.getString(INSTANCE_KEY_CORPUS);
         String query = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
-        setCorpus(getCorpus(corpusName));
+        setCorpus(corpusName);
         setUserQuery(query);
     }
 
@@ -211,18 +217,17 @@ public class SearchActivity extends Activity {
         // We don't save appSearchData, since we always get the value
         // from the intent and the user can't change it.
 
-        String corpusName = mCorpus == null ? null : mCorpus.getName();
-        outState.putString(INSTANCE_KEY_CORPUS, corpusName);
+        outState.putString(INSTANCE_KEY_CORPUS, getCorpusName());
         outState.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
     }
 
     private void setupFromIntent(Intent intent) {
         if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
-        Corpus corpus = getCorpusFromUri(intent.getData());
+        String corpusName = getCorpusNameFromUri(intent.getData());
         String query = intent.getStringExtra(SearchManager.QUERY);
         Bundle appSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
 
-        setCorpus(corpus);
+        setCorpus(corpusName);
         setUserQuery(query);
         mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
         mAppSearchData = appSearchData;
@@ -257,11 +262,10 @@ public class SearchActivity extends Activity {
                 .build();
     }
 
-    private Corpus getCorpusFromUri(Uri uri) {
+    private String getCorpusNameFromUri(Uri uri) {
         if (uri == null) return null;
         if (!SCHEME_CORPUS.equals(uri.getScheme())) return null;
-        String name = uri.getAuthority();
-        return getCorpus(name);
+        return uri.getAuthority();
     }
 
     private Corpus getCorpus(String sourceName) {
@@ -274,19 +278,23 @@ public class SearchActivity extends Activity {
         return corpus;
     }
 
-    private void setCorpus(Corpus corpus) {
-        if (DBG) Log.d(TAG, "setCorpus(" + corpus + ")");
-        mCorpus = corpus;
+    private void setCorpus(String corpusName) {
+        if (DBG) Log.d(TAG, "setCorpus(" + corpusName + ")");
+        mCorpus = getCorpus(corpusName);
         Drawable sourceIcon;
-        if (corpus == null) {
+        if (mCorpus == null) {
             sourceIcon = getCorpusViewFactory().getGlobalSearchIcon();
         } else {
-            sourceIcon = corpus.getCorpusIcon();
+            sourceIcon = mCorpus.getCorpusIcon();
         }
-        mSuggestionsAdapter.setCorpus(corpus);
+        mSuggestionsAdapter.setCorpus(mCorpus);
         mCorpusIndicator.setImageDrawable(sourceIcon);
 
         updateUi(getQuery().length() == 0);
+    }
+
+    private String getCorpusName() {
+        return mCorpus == null ? null : mCorpus.getName();
     }
 
     private QsbApplication getQsbApplication() {
@@ -325,6 +333,7 @@ public class SearchActivity extends Activity {
     protected void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy()");
         super.onDestroy();
+        getCorpora().unregisterDataSetObserver(mCorporaObserver);
         mSuggestionsFooter.setAdapter(null);
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
@@ -870,8 +879,8 @@ public class SearchActivity extends Activity {
 
     private class CorpusSelectionListener
             implements CorpusSelectionDialog.OnCorpusSelectedListener {
-        public void onCorpusSelected(Corpus corpus) {
-            setCorpus(corpus);
+        public void onCorpusSelected(String corpusName) {
+            setCorpus(corpusName);
             updateSuggestions(getQuery());
             mQueryTextView.requestFocus();
             showInputMethodForQuery();
@@ -884,6 +893,14 @@ public class SearchActivity extends Activity {
     private class VoiceSearchButtonClickListener implements View.OnClickListener {
         public void onClick(View view) {
             onVoiceSearchClicked();
+        }
+    }
+
+    private class CorporaObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            setCorpus(getCorpusName());
+            updateSuggestions(getQuery());
         }
     }
 

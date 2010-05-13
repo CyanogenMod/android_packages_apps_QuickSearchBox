@@ -27,8 +27,6 @@ import java.util.HashMap;
  */
 public class MockSources implements Sources {
 
-    private final DataSetObservable mDataSetObservable = new DataSetObservable();
-
     private final HashMap<String, Source> mSources = new HashMap<String, Source>();
 
     public void addSource(Source source) {
@@ -47,21 +45,7 @@ public class MockSources implements Sources {
         return null;
     }
 
-    public void load() {
-        notifyDataSetChanged();
+    public void update() {
     }
 
-    public void close() {
-    }
-
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.registerObserver(observer);
-    }
-
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.unregisterObserver(observer);
-    }
-
-    protected void notifyDataSetChanged() {
-        mDataSetObservable.notifyChanged();
-    }}
+}

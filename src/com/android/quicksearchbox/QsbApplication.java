@@ -74,10 +74,6 @@ public class QsbApplication extends Application {
             mConfig.close();
             mConfig = null;
         }
-        if (mCorpora != null) {
-            mCorpora.close();
-            mCorpora = null;
-        }
         if (mShortcutRepository != null) {
             mShortcutRepository.close();
             mShortcutRepository = null;
@@ -133,12 +129,23 @@ public class QsbApplication extends Application {
     protected Corpora createCorpora() {
         SearchableCorpora corpora = new SearchableCorpora(this, getConfig(), createSources(),
                 createCorpusFactory());
-        corpora.load();
+        corpora.update();
         return corpora;
     }
 
+    /**
+     * Updates the corpora, if they are loaded.
+     * May only be called from the main thread.
+     */
+    public void updateCorpora() {
+        checkThread();
+        if (mCorpora != null) {
+            mCorpora.update();
+        }
+    }
+
     protected Sources createSources() {
-        return new SearchableSources(this, getMainThreadHandler());
+        return new SearchableSources(this);
     }
 
     protected CorpusFactory createCorpusFactory() {

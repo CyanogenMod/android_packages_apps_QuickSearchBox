@@ -90,6 +90,15 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name=".CorporaUpdateReceiver">
+            <intent-filter>
+                <action android:name="android.search.action.SEARCHABLES_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.search.action.SETTINGS_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name=".SearchWidgetProvider"
                   android:label="@string/app_name">
             <intent-filter>
