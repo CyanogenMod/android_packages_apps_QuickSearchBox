@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"Google検索"</string>
     <string name="google_search_settings" msgid="4169698045412400949">"Google検索"</string>
     <string name="google_show_web_suggestions" msgid="9018281734662733247">"入力候補の表示"</string>
-    <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"入力時にGoogleの入力候補を表示する"</string>
+    <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"入力時にGoogleの検索候補を表示する"</string>
     <string name="google_show_web_suggestions_summary_disabled" msgid="3768151514600543003">"入力時にGoogleの入力候補を表示しない"</string>
 </resources>

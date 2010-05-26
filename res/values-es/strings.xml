@@ -29,8 +29,8 @@
     <string name="corpus_label_apps_market" msgid="7625179316335589490">"Aplicaciones y Market"</string>
     <string name="corpus_description_apps_market" msgid="6676825865398169853">"Aplicaciones instaladas y de Market"</string>
     <string name="corpus_hint_apps_market" msgid="627025611326022658">"Buscar aplicaciones y Market"</string>
-    <string name="menu_settings" msgid="5600043319144155953">"Configuración de búsqueda"</string>
-    <string name="search_settings" msgid="4101951238194600323">"Configuración de búsqueda"</string>
+    <string name="menu_settings" msgid="5600043319144155953">"Ajustes de búsqueda"</string>
+    <string name="search_settings" msgid="4101951238194600323">"Ajustes de búsqueda"</string>
     <string name="web_search_category_title" msgid="3696363552067530526">"Búsqueda web"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Teléfono"</string>
     <string name="search_sources" msgid="505874718206340313">"Elementos de búsqueda"</string>
