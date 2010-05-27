@@ -32,7 +32,7 @@ import java.util.List;
  * Suggestions provider implementation.
  *
  * The provider will only handle a single query at a time. If a new query comes
- * in, the old one is canceled.
+ * in, the old one is cancelled.
  */
 public class SuggestionsProviderImpl implements SuggestionsProvider {
 
