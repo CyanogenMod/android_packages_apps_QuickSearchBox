@@ -21,7 +21,6 @@ import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionSelectionListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
-import com.android.quicksearchbox.ui.SuggestionsDecoration;
 import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
@@ -41,7 +40,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -95,8 +93,6 @@ public class SearchActivity extends Activity {
     protected boolean mQueryWasEmpty = true;
 
     protected SuggestionsView mSuggestionsView;
-    protected SuggestionsDecoration mSuggestionsHeader;
-    protected SuggestionsDecoration mSuggestionsFooter;
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
@@ -138,18 +134,10 @@ public class SearchActivity extends Activity {
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
         mSuggestionsView.setSuggestionClickListener(new ClickHandler());
-        mSuggestionsView.setSuggestionSelectionListener(new SelectionHandler());
+        mSuggestionsView.addSuggestionSelectionListener(new SelectionHandler());
         mSuggestionsView.setOnScrollListener(new InputMethodCloser());
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
-
-        mSuggestionsHeader = getQsbApplication().createSuggestionsHeader();
-        ViewGroup headerFrame = (ViewGroup) findViewById(R.id.header);
-        mSuggestionsHeader.addToContainer(headerFrame);
-
-        mSuggestionsFooter = getQsbApplication().createSuggestionsFooter();
-        ViewGroup footerFrame = (ViewGroup) findViewById(R.id.footer);
-        mSuggestionsFooter.addToContainer(footerFrame);
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
@@ -183,8 +171,6 @@ public class SearchActivity extends Activity {
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
-        mSuggestionsHeader.setAdapter(mSuggestionsAdapter);
-        mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
 
         mCorporaObserver = new CorporaObserver();
         getCorpora().registerDataSetObserver(mCorporaObserver);
@@ -340,8 +326,6 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onDestroy()");
         super.onDestroy();
         getCorpora().unregisterDataSetObserver(mCorporaObserver);
-        mSuggestionsFooter.setAdapter(null);
-        mSuggestionsHeader.setAdapter(null);
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 

@@ -26,6 +26,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.util.HashSet;
+
 /**
  * Holds a list of suggestions.
  */
@@ -36,10 +38,11 @@ public class SuggestionsView extends ListView {
 
     private SuggestionClickListener mSuggestionClickListener;
 
-    private SuggestionSelectionListener mSuggestionSelectionListener;
+    private final HashSet<SuggestionSelectionListener> mSuggestionSelectionListener;
 
     public SuggestionsView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mSuggestionSelectionListener = new HashSet<SuggestionSelectionListener>();
     }
 
     @Override
@@ -54,8 +57,15 @@ public class SuggestionsView extends ListView {
         mSuggestionClickListener = listener;
     }
 
-    public void setSuggestionSelectionListener(SuggestionSelectionListener listener) {
-        mSuggestionSelectionListener = listener;
+    public void addSuggestionSelectionListener(SuggestionSelectionListener listener) {
+        if ((listener == null) || (mSuggestionSelectionListener.contains(listener))) {
+            return;
+        }
+        mSuggestionSelectionListener.add(listener);
+    }
+
+    public void removeSuggestionSelectionListener(SuggestionSelectionListener listener) {
+        mSuggestionSelectionListener.remove(listener);
     }
 
     /**
@@ -103,15 +113,15 @@ public class SuggestionsView extends ListView {
 
     private void fireSuggestionSelected(int position) {
         if (DBG) Log.d(TAG, "fireSuggestionSelected(" + position + ")");
-        if (mSuggestionSelectionListener != null) {
-            mSuggestionSelectionListener.onSuggestionSelected(position);
+        for (SuggestionSelectionListener listener : mSuggestionSelectionListener) {
+            listener.onSuggestionSelected(position);
         }
     }
 
     private void fireNothingSelected() {
         if (DBG) Log.d(TAG, "fireNothingSelected()");
-        if (mSuggestionSelectionListener != null) {
-            mSuggestionSelectionListener.onNothingSelected();
+        for (SuggestionSelectionListener listener : mSuggestionSelectionListener) {
+            listener.onNothingSelected();
         }
     }
 

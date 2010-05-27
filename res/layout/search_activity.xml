@@ -34,13 +34,9 @@
         >
     </view>
 
-    <FrameLayout
+    <include
         android:id="@+id/footer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true" />
+        layout="@layout/search_activity_footer" />
 
     <!-- The search plate is after the suggestions, to give it a higher
          z-index. -->
@@ -105,12 +101,8 @@
 
     <!-- The header comes last so that is is on top of all the other views. It sits on top of the
          suggestions list. -->
-    <FrameLayout
+    <include
         android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/search_edit_frame" />
+        layout="@layout/search_activity_header" />
 
 </com.android.quicksearchbox.ui.SearchActivityView>
