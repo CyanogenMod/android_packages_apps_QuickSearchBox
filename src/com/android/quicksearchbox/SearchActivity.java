@@ -21,7 +21,7 @@ import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionSelectionListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
-import com.android.quicksearchbox.ui.SuggestionsFooter;
+import com.android.quicksearchbox.ui.SuggestionsDecoration;
 import com.android.quicksearchbox.ui.SuggestionsView;
 
 import android.app.Activity;
@@ -95,7 +95,8 @@ public class SearchActivity extends Activity {
     protected boolean mQueryWasEmpty = true;
 
     protected SuggestionsView mSuggestionsView;
-    protected SuggestionsFooter mSuggestionsFooter;
+    protected SuggestionsDecoration mSuggestionsHeader;
+    protected SuggestionsDecoration mSuggestionsFooter;
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
@@ -142,6 +143,10 @@ public class SearchActivity extends Activity {
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
 
+        mSuggestionsHeader = getQsbApplication().createSuggestionsHeader();
+        ViewGroup headerFrame = (ViewGroup) findViewById(R.id.header);
+        mSuggestionsHeader.addToContainer(headerFrame);
+
         mSuggestionsFooter = getQsbApplication().createSuggestionsFooter();
         ViewGroup footerFrame = (ViewGroup) findViewById(R.id.footer);
         mSuggestionsFooter.addToContainer(footerFrame);
@@ -178,6 +183,7 @@ public class SearchActivity extends Activity {
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
+        mSuggestionsHeader.setAdapter(mSuggestionsAdapter);
         mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
 
         mCorporaObserver = new CorporaObserver();
@@ -335,6 +341,7 @@ public class SearchActivity extends Activity {
         super.onDestroy();
         getCorpora().unregisterDataSetObserver(mCorporaObserver);
         mSuggestionsFooter.setAdapter(null);
+        mSuggestionsHeader.setAdapter(null);
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 

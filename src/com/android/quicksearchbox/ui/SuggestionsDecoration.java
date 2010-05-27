@@ -24,9 +24,9 @@ import android.database.DataSetObserver;
 import android.view.ViewGroup;
 
 /**
- * View shown at the bottom of the suggestions list.
+ * Extra view that can be shown at the top or bottom of the suggestion list
  */
-public abstract class SuggestionsFooter {
+public class SuggestionsDecoration {
 
     private final DataSetObserver mDataSetObserver = new AdapterObserver();
 
@@ -34,13 +34,17 @@ public abstract class SuggestionsFooter {
 
     private SuggestionsAdapter mAdapter;
 
-    public SuggestionsFooter(Context context) {
+    public SuggestionsDecoration(Context context) {
         mContext = context;
     }
 
-    public abstract void addToContainer(ViewGroup parent);
+    public void addToContainer(ViewGroup parent) {
+        // Do nothing - default is no decoration.
+    }
 
-    protected abstract void onSuggestionsChanged();
+    protected void onSuggestionsChanged() {
+        // Do nothing
+    }
 
     protected Context getContext() {
         return mContext;

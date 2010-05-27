@@ -19,11 +19,10 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
-import com.android.quicksearchbox.ui.EmptySuggestionsFooter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
-import com.android.quicksearchbox.ui.SuggestionsFooter;
+import com.android.quicksearchbox.ui.SuggestionsDecoration;
 import com.android.quicksearchbox.util.Factory;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
@@ -322,10 +321,17 @@ public class QsbApplication extends Application {
     }
 
     /**
+     * Creates a header view to add at the top of the search activity.
+     */
+    public SuggestionsDecoration createSuggestionsHeader() {
+        return new SuggestionsDecoration(this);
+    }
+
+    /**
      * Creates a footer view to add at the bottom of the search activity.
      */
-    public SuggestionsFooter createSuggestionsFooter() {
-        return new EmptySuggestionsFooter(this);
+    public SuggestionsDecoration createSuggestionsFooter() {
+        return new SuggestionsDecoration(this);
     }
 
     /**
