@@ -21,6 +21,7 @@ import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SuggestionCursor;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
@@ -104,7 +105,9 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     }
 
     protected void updateRefinable(SuggestionCursor suggestion) {
-        boolean refinable = mIcon2.getDrawable() == null
+        boolean refinable = 
+                Intent.ACTION_WEB_SEARCH.equals(suggestion.getSuggestionIntentAction())
+                && mIcon2.getDrawable() == null
                 && !TextUtils.isEmpty(suggestion.getSuggestionQuery());
         setRefinable(suggestion, refinable);
     }

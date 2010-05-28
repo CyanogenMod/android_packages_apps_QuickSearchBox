@@ -189,7 +189,8 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
      * Gets the intent action for the current suggestion.
      */
     public String getSuggestionIntentAction() {
-        return getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
+        return getSuggestionIntentAction(
+                getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_ACTION));
     }
 
     /**

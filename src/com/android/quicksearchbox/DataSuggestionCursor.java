@@ -130,7 +130,7 @@ public class DataSuggestionCursor extends AbstractSuggestionCursor {
     }
 
     public String getSuggestionIntentAction() {
-        return current().getSuggestionIntentAction();
+        return getSuggestionIntentAction(current().getSuggestionIntentAction());
     }
 
     public String getSuggestionIntentDataString() {

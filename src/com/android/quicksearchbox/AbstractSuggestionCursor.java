@@ -37,16 +37,16 @@ public abstract class AbstractSuggestionCursor implements SuggestionCursor {
         return mUserQuery;
     }
 
+    protected String getSuggestionIntentAction(String action) {
+        if (action != null) return action;
+        String defaultAction = getSuggestionSource().getDefaultIntentAction();
+        if (defaultAction != null) return defaultAction;
+        return Intent.ACTION_SEARCH;
+    }
+
     public Intent getSuggestionIntent(Bundle appSearchData) {
         Source source = getSuggestionSource();
         String action = getSuggestionIntentAction();
-        // use specific action if supplied, or default action if supplied, or fixed default
-        if (action == null) {
-            action = source.getDefaultIntentAction();
-            if (action == null) {
-                action = Intent.ACTION_SEARCH;
-            }
-        }
 
         String data = getSuggestionIntentDataString();
         String query = getSuggestionQuery();
