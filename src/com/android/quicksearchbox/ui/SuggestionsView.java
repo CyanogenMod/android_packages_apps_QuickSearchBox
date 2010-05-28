@@ -58,7 +58,7 @@ public class SuggestionsView extends ListView {
     }
 
     public void addSuggestionSelectionListener(SuggestionSelectionListener listener) {
-        if ((listener == null) || (mSuggestionSelectionListener.contains(listener))) {
+        if (listener == null) {
             return;
         }
         mSuggestionSelectionListener.add(listener);

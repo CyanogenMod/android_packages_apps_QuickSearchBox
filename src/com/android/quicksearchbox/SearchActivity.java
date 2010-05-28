@@ -425,7 +425,7 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private void updateUi(boolean queryEmpty) {
+    protected void updateUi(boolean queryEmpty) {
         updateQueryTextView(queryEmpty);
         updateSearchGoButton(queryEmpty);
         updateVoiceSearchButton(queryEmpty);
