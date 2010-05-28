@@ -80,11 +80,8 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         MockCorpora corpora = new MockCorpora();
         for (int i = 0; i < count; i++) {
             Source mockSource = new MockSource("Source" + i);
-            Corpus mockCorpus = new MockCorpus(mockSource);
+            Corpus mockCorpus = new MockCorpus(mockSource, i < defaultCount);
             corpora.addCorpus(mockCorpus);
-            if (i < defaultCount) {
-                corpora.addDefaultCorpus(mockCorpus);
-            }
         }
         return corpora;
     }

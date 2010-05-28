@@ -38,9 +38,16 @@ public class MockCorpus implements Corpus {
 
     private final Source mSource;
 
+    private final boolean mDefaultEnabled;
+
     public MockCorpus(Source source) {
+        this(source, true);
+    }
+
+    public MockCorpus(Source source, boolean defaultEnabled) {
         mName = "corpus_" + source.getName();
         mSource = source;
+        mDefaultEnabled = defaultEnabled;
     }
 
     public Intent createSearchIntent(String query, Bundle appData) {
@@ -137,7 +144,7 @@ public class MockCorpus implements Corpus {
     }
 
     public boolean isCorpusDefaultEnabled() {
-        return true;
+        return mDefaultEnabled;
     }
 
     public boolean isCorpusEnabled() {
