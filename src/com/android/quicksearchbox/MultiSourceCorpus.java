@@ -31,14 +31,13 @@ import java.util.concurrent.Executor;
  */
 public abstract class MultiSourceCorpus extends AbstractCorpus {
 
-    private final Context mContext;
-
     private final Executor mExecutor;
 
     private final ArrayList<Source> mSources;
 
-    public MultiSourceCorpus(Context context, Executor executor, Source... sources) {
-        mContext = context;
+    public MultiSourceCorpus(Context context, Config config,
+            Executor executor, Source... sources) {
+        super(context, config);
         mExecutor = executor;
 
         mSources = new ArrayList<Source>();
@@ -47,10 +46,6 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
                 mSources.add(source);
             }
         }
-    }
-
-    protected Context getContext() {
-        return mContext;
     }
 
     public Collection<Source> getSources() {

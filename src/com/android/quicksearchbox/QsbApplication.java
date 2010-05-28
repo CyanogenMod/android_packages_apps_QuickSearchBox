@@ -125,7 +125,7 @@ public class QsbApplication extends Application {
     }
 
     protected Corpora createCorpora() {
-        SearchableCorpora corpora = new SearchableCorpora(this, getConfig(), createSources(),
+        SearchableCorpora corpora = new SearchableCorpora(this, createSources(),
                 createCorpusFactory());
         corpora.update();
         return corpora;
@@ -148,7 +148,8 @@ public class QsbApplication extends Application {
 
     protected CorpusFactory createCorpusFactory() {
         int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
-        return new SearchableCorpusFactory(this, createExecutorFactory(numWebCorpusThreads));
+        return new SearchableCorpusFactory(this, getConfig(),
+                createExecutorFactory(numWebCorpusThreads));
     }
 
     protected Factory<Executor> createExecutorFactory(final int numThreads) {

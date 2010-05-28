@@ -38,8 +38,8 @@ public class AppsCorpus extends SingleSourceCorpus {
 
     private static final String APPS_CORPUS_NAME = "apps";
 
-    public AppsCorpus(Context context, Source appsSource) {
-        super(context, appsSource);
+    public AppsCorpus(Context context, Config config, Source appsSource) {
+        super(context, config, appsSource);
     }
 
     @Override

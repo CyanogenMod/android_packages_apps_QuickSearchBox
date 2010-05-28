@@ -85,7 +85,7 @@ public class SearchableItemsSettings extends PreferenceActivity
         if (corpus.isWebCorpus()) {
             sourcePref.setOrder(0);
         }
-        sourcePref.setDefaultValue(getCorpora().isCorpusDefaultEnabled(corpus));
+        sourcePref.setDefaultValue(corpus.isCorpusDefaultEnabled());
         sourcePref.setOnPreferenceChangeListener(this);
         CharSequence label = corpus.getLabel();
         sourcePref.setTitle(label);

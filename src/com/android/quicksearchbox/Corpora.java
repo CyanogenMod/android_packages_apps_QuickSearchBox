@@ -25,13 +25,6 @@ import java.util.Collection;
  */
 public interface Corpora {
 
-    boolean isCorpusEnabled(Corpus corpus);
-
-    /**
-     * Checks if a corpus should be enabled by default.
-     */
-    boolean isCorpusDefaultEnabled(Corpus corpus);
-
     /**
      * Gets all corpora, including the web corpus.
      *

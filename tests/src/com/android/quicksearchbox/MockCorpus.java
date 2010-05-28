@@ -28,7 +28,7 @@ import java.util.Collections;
  * Mock implementation of {@link Corpus}.
  *
  */
-public class MockCorpus extends AbstractCorpus {
+public class MockCorpus implements Corpus {
 
     public static final Corpus CORPUS_1 = new MockCorpus(MockSource.SOURCE_1);
 
@@ -92,6 +92,11 @@ public class MockCorpus extends AbstractCorpus {
     }
 
     @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o != null && o.getClass().equals(this.getClass())) {
             MockCorpus s = (MockCorpus) o;
@@ -128,6 +133,18 @@ public class MockCorpus extends AbstractCorpus {
     }
 
     public boolean voiceSearchEnabled() {
+        return false;
+    }
+
+    public boolean isCorpusDefaultEnabled() {
+        return true;
+    }
+
+    public boolean isCorpusEnabled() {
+        return true;
+    }
+
+    public boolean isCorpusHidden() {
         return false;
     }
 

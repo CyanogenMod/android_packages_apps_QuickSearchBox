@@ -169,7 +169,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
     private int countDefaultCorpora(List<Corpus> corpora) {
         int count = 0;
         for (Corpus corpus : corpora) {
-            if (mCorpora.isCorpusDefaultEnabled(corpus)) {
+            if (corpus.isCorpusDefaultEnabled()) {
                 count++;
             }
         }

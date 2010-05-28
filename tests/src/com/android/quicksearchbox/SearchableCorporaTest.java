@@ -34,11 +34,10 @@ public class SearchableCorporaTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        Config config = new Config(mContext);
         MockSources sources = new MockSources();
         sources.addSource(MockSource.SOURCE_1);
         sources.addSource(MockSource.SOURCE_2);
-        mCorpora = new SearchableCorpora(mContext, config, sources, new MockCorpusFactory());
+        mCorpora = new SearchableCorpora(mContext, sources, new MockCorpusFactory());
         mCorpora.update();
     }
 

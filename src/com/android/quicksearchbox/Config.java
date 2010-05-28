@@ -57,6 +57,7 @@ public class Config {
 
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
+    private HashSet<String> mHiddenCorpora;
 
     /**
      * Creates a new config that uses hard-coded default values.
@@ -77,17 +78,16 @@ public class Config {
     public void close() {
     }
 
-    private HashSet<String> loadDefaultCorpora() {
+    private HashSet<String> loadResourceStringSet(int res) {
         HashSet<String> defaultCorpora = new HashSet<String>();
         try {
-            // Get the list of default corpora from a resource, which allows vendor overlays.
-            String[] corpora = mContext.getResources().getStringArray(R.array.default_corpora);
+            String[] corpora = mContext.getResources().getStringArray(res);
             for (String corpus : corpora) {
                 defaultCorpora.add(corpus);
             }
             return defaultCorpora;
         } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load default corpora", ex);
+            Log.e(TAG, "Could not load resource string set", ex);
             return defaultCorpora;
         }
     }
@@ -97,9 +97,19 @@ public class Config {
      */
     public synchronized boolean isCorpusEnabledByDefault(String corpusName) {
         if (mDefaultCorpora == null) {
-            mDefaultCorpora = loadDefaultCorpora();
+            mDefaultCorpora = loadResourceStringSet(R.array.default_corpora);
         }
         return mDefaultCorpora.contains(corpusName);
+    }
+
+    /**
+     * Checks if the given corpus should be hidden from the corpus selection dialog.
+     */
+    public synchronized boolean isCorpusHidden(String corpusName) {
+        if (mHiddenCorpora == null) {
+            mHiddenCorpora = loadResourceStringSet(R.array.hidden_corpora);
+        }
+        return mHiddenCorpora.contains(corpusName);
     }
 
     /**

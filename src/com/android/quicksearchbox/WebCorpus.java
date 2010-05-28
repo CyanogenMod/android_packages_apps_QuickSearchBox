@@ -19,7 +19,6 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.Util;
 
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -43,9 +42,9 @@ public class WebCorpus extends MultiSourceCorpus {
 
     private final Source mBrowserSource;
 
-    public WebCorpus(Context context, Executor executor,
+    public WebCorpus(Context context, Config config, Executor executor,
             Source webSearchSource, Source browserSource) {
-        super(context, executor, webSearchSource, browserSource);
+        super(context, config, executor, webSearchSource, browserSource);
         mWebSearchSource = webSearchSource;
         mBrowserSource = browserSource;
     }

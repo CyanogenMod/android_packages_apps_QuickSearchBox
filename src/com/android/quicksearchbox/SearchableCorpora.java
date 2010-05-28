@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.text.TextUtils;
@@ -41,9 +40,7 @@ public class SearchableCorpora implements Corpora {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private final Context mContext;
-    private final Config mConfig;
     private final CorpusFactory mCorpusFactory;
-    private final SharedPreferences mPreferences;
 
     private Sources mSources;
     // Maps corpus names to corpora
@@ -59,12 +56,9 @@ public class SearchableCorpora implements Corpora {
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableCorpora(Context context, Config config, Sources sources,
-            CorpusFactory corpusFactory) {
+    public SearchableCorpora(Context context, Sources sources, CorpusFactory corpusFactory) {
         mContext = context;
-        mConfig = config;
         mCorpusFactory = corpusFactory;
-        mPreferences = SearchSettings.getSearchPreferences(context);
         mSources = sources;
     }
 
@@ -115,7 +109,7 @@ public class SearchableCorpora implements Corpora {
             for (Source source : corpus.getSources()) {
                 mCorporaBySource.put(source, corpus);
             }
-            if (isCorpusEnabled(corpus)) {
+            if (corpus.isCorpusEnabled()) {
                 mEnabledCorpora.add(corpus);
             }
             if (corpus.isWebCorpus()) {
@@ -131,18 +125,6 @@ public class SearchableCorpora implements Corpora {
         mEnabledCorpora = Collections.unmodifiableList(mEnabledCorpora);
 
         notifyDataSetChanged();
-    }
-
-    public boolean isCorpusEnabled(Corpus corpus) {
-        if (corpus == null) return false;
-        boolean defaultEnabled = isCorpusDefaultEnabled(corpus);
-        String sourceEnabledPref = SearchSettings.getCorpusEnabledPreference(corpus);
-        return mPreferences.getBoolean(sourceEnabledPref, defaultEnabled);
-    }
-
-    public boolean isCorpusDefaultEnabled(Corpus corpus) {
-        String name = corpus.getName();
-        return mConfig.isCorpusEnabledByDefault(name);
     }
 
     public void registerDataSetObserver(DataSetObserver observer) {

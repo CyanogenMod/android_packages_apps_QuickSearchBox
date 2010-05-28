@@ -35,10 +35,14 @@ public class SearchableCorpusFactory implements CorpusFactory {
 
     private final Context mContext;
 
+    private final Config mConfig;
+
     private final Factory<Executor> mWebCorpusExecutorFactory;
 
-    public SearchableCorpusFactory(Context context, Factory<Executor> webCorpusExecutorFactory) {
+    public SearchableCorpusFactory(Context context, Config config,
+            Factory<Executor> webCorpusExecutorFactory) {
         mContext = context;
+        mConfig = config;
         mWebCorpusExecutorFactory = webCorpusExecutorFactory;
     }
 
@@ -51,6 +55,10 @@ public class SearchableCorpusFactory implements CorpusFactory {
 
     protected Context getContext() {
         return mContext;
+    }
+
+    protected Config getConfig() {
+        return mConfig;
     }
 
     protected Executor createWebCorpusExecutor() {
@@ -106,17 +114,17 @@ public class SearchableCorpusFactory implements CorpusFactory {
             browserSource = null;
         }
         Executor executor = createWebCorpusExecutor();
-        return new WebCorpus(mContext, executor, webSource, browserSource);
+        return new WebCorpus(mContext, mConfig, executor, webSource, browserSource);
     }
 
     protected Corpus createAppsCorpus(Sources sources) {
         Source appsSource = getAppsSource(sources);
-        return new AppsCorpus(mContext, appsSource);
+        return new AppsCorpus(mContext, mConfig, appsSource);
     }
 
     protected Corpus createSingleSourceCorpus(Source source) {
         if (!source.canRead()) return null;
-        return new SingleSourceCorpus(mContext, source);
+        return new SingleSourceCorpus(mContext, mConfig, source);
     }
 
     protected Source getBrowserSource(Sources sources) {

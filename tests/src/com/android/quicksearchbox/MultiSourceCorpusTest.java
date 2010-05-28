@@ -25,7 +25,6 @@ import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import java.util.Collection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -41,9 +40,10 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
+        Config config = new Config(getContext());
         // Using a single thread to make the test deterministic
         Executor executor = Executors.newSingleThreadExecutor();
-        mCorpus = new SkeletonMultiSourceCorpus(getContext(), executor,
+        mCorpus = new SkeletonMultiSourceCorpus(getContext(), config, executor,
                 MockSource.SOURCE_1, MockSource.SOURCE_2);
     }
 
@@ -74,8 +74,9 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
 
     private static class SkeletonMultiSourceCorpus extends MultiSourceCorpus {
 
-        public SkeletonMultiSourceCorpus(Context context, Executor executor, Source... sources) {
-            super(context, executor, sources);
+        public SkeletonMultiSourceCorpus(Context context, Config config, Executor executor,
+                Source... sources) {
+            super(context, config, executor, sources);
         }
 
         public Intent createSearchIntent(String query, Bundle appData) {
