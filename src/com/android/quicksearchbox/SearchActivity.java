@@ -534,7 +534,7 @@ public class SearchActivity extends Activity {
      * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
      * and the selected corpus otherwise.
      */
-    private Corpus getSearchCorpus() {
+    protected Corpus getSearchCorpus() {
         if (mCorpus != null) {
             return mCorpus;
         } else {
