@@ -94,7 +94,12 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
     protected SuggestionCursor getShortcutsForQuery(String query, Corpus singleCorpus,
             int maxShortcuts) {
         if (mShortcutRepo == null) return null;
-        Collection<Corpus> allowedCorpora = mCorpora.getEnabledCorpora();
+        Collection<Corpus> allowedCorpora;
+        if (singleCorpus == null) {
+            allowedCorpora = mCorpora.getEnabledCorpora();
+        } else {
+            allowedCorpora = Collections.singletonList(singleCorpus);
+        }
         return mShortcutRepo.getShortcutsForQuery(query, allowedCorpora, maxShortcuts);
     }
 
