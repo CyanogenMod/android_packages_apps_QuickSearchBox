@@ -42,9 +42,13 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
 
         mSources = new ArrayList<Source>();
         for (Source source : sources) {
-            if (source != null) {
-                mSources.add(source);
-            }
+            addSource(source);
+        }
+    }
+
+    protected void addSource(Source source) {
+        if (source != null) {
+            mSources.add(source);
         }
     }
 
