@@ -99,7 +99,7 @@ public class AppsCorpus extends SingleSourceCorpus {
         if (ai != null) {
             return intent;
         } else {
-            Log.w(TAG, "Can't find app search acitivity " + name);
+            Log.w(TAG, "Can't find app search activity " + name);
             return null;
         }
     }

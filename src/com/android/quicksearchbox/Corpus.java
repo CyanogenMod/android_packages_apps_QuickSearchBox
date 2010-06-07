@@ -57,6 +57,9 @@ public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
      */
     CharSequence getHint();
 
+    /**
+     * @return The minimum query length for which this corpus should be queried.
+     */
     int getQueryThreshold();
 
     boolean queryAfterZeroResults();

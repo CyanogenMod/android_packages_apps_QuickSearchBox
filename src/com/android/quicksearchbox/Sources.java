@@ -1,6 +1,8 @@
 
 package com.android.quicksearchbox;
 
+import android.content.ComponentName;
+
 import java.util.Collection;
 
 /**
@@ -24,6 +26,13 @@ public interface Sources {
      * Gets the web search source.
      */
     Source getWebSearchSource();
+
+    /**
+     * Creates a new source for a specific component.
+     * @param component Name of the component to search
+     * @return a new {@code Source} corresponding to {@code component}.
+     */
+    Source createSourceFor(ComponentName component);
 
     /**
      * Updates the list of sources.

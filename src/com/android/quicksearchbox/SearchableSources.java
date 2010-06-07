@@ -129,4 +129,11 @@ public class SearchableSources implements Sources {
             return null;
         }
     }
+
+    public Source createSourceFor(ComponentName component) {
+        SearchableInfo info = mSearchManager.getSearchableInfo(component);
+        SearchableSource source = createSearchableSource(info);
+        if (DBG) Log.v(TAG, "SearchableSource for " + component + ": " + source);
+        return source;
+    }
 }
