@@ -487,7 +487,7 @@ public class SearchActivity extends Activity {
      * @return true if a search was performed as a result of this click, false otherwise.
      */
     protected boolean onSearchClicked(int method) {
-        String query = getQuery();
+        String query = ltrim(getQuery());
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
 
         // Don't do empty queries
