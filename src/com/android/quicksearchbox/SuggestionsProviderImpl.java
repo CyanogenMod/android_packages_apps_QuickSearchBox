@@ -153,7 +153,6 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
 
         int initialBatchSize = countDefaultCorpora(corporaToQuery);
-        initialBatchSize = Math.min(initialBatchSize, mConfig.getNumPromotedSources());
         if (initialBatchSize == 0) {
             initialBatchSize = mConfig.getNumPromotedSources();
         }
