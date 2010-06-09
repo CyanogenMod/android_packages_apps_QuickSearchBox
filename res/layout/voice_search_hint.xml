@@ -54,6 +54,7 @@
             android:paddingLeft="4dip"
             android:src="@android:drawable/btn_dialog"
             android:scaleType="centerInside"
+            android:focusable="true"
             />
 
 </LinearLayout>
