@@ -48,7 +48,6 @@ import android.widget.ImageButton;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * The main activity for Quick Search Box. Shows the search UI.
@@ -685,18 +684,19 @@ public class SearchActivity extends Activity {
     }
 
     private void updateSuggestions(String query) {
-        // Log start latency if this is the first suggestions update
-        if (mStarting) {
-            mStarting = false;
-            String source = getIntent().getStringExtra(Search.SOURCE);
-            List<Corpus> rankedCorpora = getCorpusRanker().getRankedCorpora();
-            int latency = mStartLatencyTracker.getLatency();
-            getLogger().logStart(latency, source, mCorpus, rankedCorpora);
-        }
 
         query = ltrim(query);
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
                 query, mCorpus, getMaxSuggestions());
+
+        // Log start latency if this is the first suggestions update
+        if (mStarting) {
+            mStarting = false;
+            String source = getIntent().getStringExtra(Search.SOURCE);
+            int latency = mStartLatencyTracker.getLatency();
+            getLogger().logStart(latency, source, mCorpus, suggestions.getExpectedCorpora());
+        }
+
         mSuggestionsAdapter.setSuggestions(suggestions);
     }
 

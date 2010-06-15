@@ -19,6 +19,8 @@ package com.android.quicksearchbox;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -29,10 +31,12 @@ import java.util.Set;
 public class SuggestionsTest extends AndroidTestCase {
 
     private Suggestions mSuggestions;
+    private List<Corpus> mExpectedCorpora;
 
     @Override
     protected void setUp() throws Exception {
-        mSuggestions = new Suggestions(null, 0, "foo", 2);
+        mExpectedCorpora = Arrays.asList(new Corpus[]{null,null});
+        mSuggestions = new Suggestions(null, 0, "foo", mExpectedCorpora);
     }
 
     @Override
@@ -42,7 +46,15 @@ public class SuggestionsTest extends AndroidTestCase {
     }
 
     public void testGetExpectedSourceCount() {
-        assertEquals(2, mSuggestions.getExpectedSourceCount());
+        assertEquals(mExpectedCorpora.size(), mSuggestions.getExpectedSourceCount());
+    }
+
+    public void testGetExpectedCorpora() {
+        List<Corpus> expectedCorpora = mSuggestions.getExpectedCorpora();
+        assertEquals(mExpectedCorpora.size(), expectedCorpora.size());
+        for (int i=0; i<mExpectedCorpora.size(); ++i) {
+            assertEquals(mExpectedCorpora.get(i), expectedCorpora.get(i));
+        }
     }
 
     public void testGetUserQuery() {

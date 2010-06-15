@@ -35,6 +35,13 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
 
     private final ArrayList<Source> mSources;
 
+    // calculated values based on properties of sources:
+    private boolean mSourcePropertiesValid;
+    private int mQueryThreshold;
+    private boolean mQueryAfterZeroResults;
+    private boolean mVoiceSearchEnabled;
+
+
     public MultiSourceCorpus(Context context, Config config,
             Executor executor, Source... sources) {
         super(context, config);
@@ -44,11 +51,14 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
         for (Source source : sources) {
             addSource(source);
         }
+
     }
 
     protected void addSource(Source source) {
         if (source != null) {
             mSources.add(source);
+            // invalidate calculated values:
+            mSourcePropertiesValid = false;
         }
     }
 
@@ -76,7 +86,49 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
      * @return The sources to query.
      */
     protected List<Source> getSourcesToQuery(String query) {
-        return mSources;
+        List<Source> sources = new ArrayList<Source>();
+        for (Source candidate : getSources()) {
+            if (candidate.getQueryThreshold() <= query.length()) {
+                sources.add(candidate);
+            }
+        }
+        return sources;
+    }
+
+    private void calculateSourceProperties() {
+        mQueryThreshold = Integer.MAX_VALUE;
+        mQueryAfterZeroResults = false;
+        mVoiceSearchEnabled = false;
+        for (Source s : getSources()) {
+            mQueryThreshold = Math.min(mQueryThreshold, s.getQueryThreshold());
+            mQueryAfterZeroResults |= s.queryAfterZeroResults();
+            mVoiceSearchEnabled |= s.voiceSearchEnabled();
+        }
+        if (mQueryThreshold == Integer.MAX_VALUE) {
+            mQueryThreshold = 0;
+        }
+        mSourcePropertiesValid = true;
+    }
+
+    public int getQueryThreshold() {
+        if (!mSourcePropertiesValid) {
+            calculateSourceProperties();
+        }
+        return mQueryThreshold;
+    }
+
+    public boolean queryAfterZeroResults() {
+        if (!mSourcePropertiesValid) {
+            calculateSourceProperties();
+        }
+        return mQueryAfterZeroResults;
+    }
+
+    public boolean voiceSearchEnabled() {
+        if (!mSourcePropertiesValid) {
+            calculateSourceProperties();
+        }
+        return mVoiceSearchEnabled;
     }
 
     public CorpusResult getSuggestions(String query, int queryLimit) {

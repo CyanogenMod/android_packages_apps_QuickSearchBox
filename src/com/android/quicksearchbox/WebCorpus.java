@@ -120,14 +120,17 @@ public class WebCorpus extends MultiSourceCorpus {
         return WEB_CORPUS_NAME;
     }
 
+    @Override
     public int getQueryThreshold() {
         return 0;
     }
 
+    @Override
     public boolean queryAfterZeroResults() {
         return true;
     }
 
+    @Override
     public boolean voiceSearchEnabled() {
         return true;
     }

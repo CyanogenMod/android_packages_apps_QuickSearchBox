@@ -140,7 +140,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         final Suggestions suggestions = new Suggestions(mPromoter,
                 maxSuggestions,
                 query,
-                corporaToQuery.size());
+                corporaToQuery);
         int maxShortcuts = mConfig.getMaxShortcutsReturned();
         SuggestionCursor shortcuts = getShortcutsForQuery(query, singleCorpus, maxShortcuts);
         if (shortcuts != null) {

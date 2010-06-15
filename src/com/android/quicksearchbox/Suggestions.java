@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,8 +39,8 @@ public class Suggestions {
 
     private final String mQuery;
 
-    /** The number of sources that are expected to report. */
-    private final int mExpectedCorpusCount;
+    /** The sources that are expected to report. */
+    private final List<Corpus> mExpectedCorpora;
 
     /**
      * The observers that want notifications of changes to the published suggestions.
@@ -56,7 +57,7 @@ public class Suggestions {
 
     private SuggestionCursor mShortcuts;
 
-    private MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
+    private final MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
 
     /** True if {@link Suggestions#close} has been called. */
     private boolean mClosed = false;
@@ -71,12 +72,12 @@ public class Suggestions {
      * @param expectedCorpusCount The number of sources that are expected to report.
      */
     public Suggestions(Promoter promoter, int maxPromoted,
-            String query, int expectedCorpusCount) {
+            String query, List<Corpus> expectedCorppra) {
         mPromoter = promoter;
         mMaxPromoted = maxPromoted;
         mQuery = query;
-        mExpectedCorpusCount = expectedCorpusCount;
-        mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpusCount);
+        mExpectedCorpora = expectedCorppra;
+        mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpora.size());
         mPromoted = null;  // will be set by updatePromoted()
     }
 
@@ -85,12 +86,16 @@ public class Suggestions {
         return mQuery;
     }
 
+    public List<Corpus> getExpectedCorpora() {
+        return mExpectedCorpora;
+    }
+
     /**
      * Gets the number of sources that are expected to report.
      */
     @VisibleForTesting
-    public int getExpectedSourceCount() {
-        return mExpectedCorpusCount;
+    int getExpectedSourceCount() {
+        return mExpectedCorpora.size();
     }
 
     /**
@@ -176,7 +181,7 @@ public class Suggestions {
      */
     public boolean isDone() {
         // TODO: Handle early completion because we have all the results we want.
-        return mCorpusResults.size() >= mExpectedCorpusCount;
+        return mCorpusResults.size() >= mExpectedCorpora.size();
     }
 
     /**
