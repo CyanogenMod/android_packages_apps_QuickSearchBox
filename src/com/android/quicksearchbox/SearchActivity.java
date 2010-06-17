@@ -19,7 +19,6 @@ package com.android.quicksearchbox;
 import com.android.common.Search;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
-import com.android.quicksearchbox.ui.SuggestionSelectionListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
 
@@ -55,7 +54,7 @@ import java.util.Collection;
  */
 public class SearchActivity extends Activity {
 
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
     private static final String TAG = "QSB.SearchActivity";
     private static final boolean TRACE = false;
 
@@ -71,7 +70,7 @@ public class SearchActivity extends Activity {
 
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_CORPUS = "corpus";
-    private static final String INSTANCE_KEY_USER_QUERY = "query";
+    private static final String INSTANCE_KEY_QUERY = "query";
 
     // Measures time from for last onCreate()/onNewIntent() call.
     private LatencyTracker mStartLatencyTracker;
@@ -102,8 +101,6 @@ public class SearchActivity extends Activity {
     private Corpus mCorpus;
     private Bundle mAppSearchData;
     private boolean mUpdateSuggestions;
-    private String mUserQuery;
-    private boolean mSelectAll;
 
     private final Handler mHandler = new Handler();
     private final Runnable mUpdateSuggestionsTask = new Runnable() {
@@ -132,7 +129,6 @@ public class SearchActivity extends Activity {
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
         mSuggestionsView.setSuggestionClickListener(new ClickHandler());
-        mSuggestionsView.addSuggestionSelectionListener(new SelectionHandler());
         mSuggestionsView.setOnScrollListener(new InputMethodCloser());
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
@@ -186,6 +182,7 @@ public class SearchActivity extends Activity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        if (DBG) Log.d(TAG, "onNewIntent()");
         recordStartTime();
         setIntent(intent);
         setupFromIntent(intent);
@@ -200,9 +197,9 @@ public class SearchActivity extends Activity {
     protected void restoreInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState == null) return;
         String corpusName = savedInstanceState.getString(INSTANCE_KEY_CORPUS);
-        String query = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
+        String query = savedInstanceState.getString(INSTANCE_KEY_QUERY);
         setCorpus(corpusName);
-        setUserQuery(query);
+        setQuery(query, false);
     }
 
     @Override
@@ -212,7 +209,7 @@ public class SearchActivity extends Activity {
         // from the intent and the user can't change it.
 
         outState.putString(INSTANCE_KEY_CORPUS, getCorpusName());
-        outState.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
+        outState.putString(INSTANCE_KEY_QUERY, getQuery());
     }
 
     private void setupFromIntent(Intent intent) {
@@ -220,10 +217,10 @@ public class SearchActivity extends Activity {
         String corpusName = getCorpusNameFromUri(intent.getData());
         String query = intent.getStringExtra(SearchManager.QUERY);
         Bundle appSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
+        boolean selectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
 
         setCorpus(corpusName);
-        setUserQuery(query);
-        mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
+        setQuery(query, selectAll);
         mAppSearchData = appSearchData;
 
         if (startedIntoCorpusSelectionDialog()) {
@@ -311,10 +308,6 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getSuggestionsProvider();
     }
 
-    private CorpusRanker getCorpusRanker() {
-        return getQsbApplication().getCorpusRanker();
-    }
-
     private CorpusViewFactory getCorpusViewFactory() {
         return getQsbApplication().getCorpusViewFactory();
     }
@@ -348,12 +341,15 @@ public class SearchActivity extends Activity {
     }
 
     @Override
+    protected void onRestart() {
+        if (DBG) Log.d(TAG, "onRestart()");
+        super.onRestart();
+    }
+
+    @Override
     protected void onResume() {
         if (DBG) Log.d(TAG, "onResume()");
         super.onResume();
-        setQuery(mUserQuery, mSelectAll);
-        // Only select everything the first time after creating the activity.
-        mSelectAll = false;
         updateSuggestionsBuffered();
         if (!isCorpusSelectionDialogShowing()) {
             mQueryTextView.requestFocus();
@@ -377,26 +373,9 @@ public class SearchActivity extends Activity {
         }
     }
 
-    /**
-     * Sets the query as typed by the user. Does not update the suggestions
-     * or the text in the query box.
-     */
-    protected void setUserQuery(String userQuery) {
-        if (userQuery == null) userQuery = "";
-        mUserQuery = userQuery;
-    }
-
     protected String getQuery() {
         CharSequence q = mQueryTextView.getText();
         return q == null ? "" : q.toString();
-    }
-
-    /** 
-     * Restores the query entered by the user.
-     */
-    private void restoreUserQuery() {
-        if (DBG) Log.d(TAG, "Restoring query to '" + mUserQuery + "'");
-        setQuery(mUserQuery, false);
     }
 
     /**
@@ -601,32 +580,7 @@ public class SearchActivity extends Activity {
             return launchSuggestion(position);
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_UP && position == 0) {
-            // Moved up from the top suggestion, restore the user query and focus query box
-            if (DBG) Log.d(TAG, "Up and out");
-            restoreUserQuery();
-            return false;  // let the framework handle the move
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-            // Moved left / right from a suggestion, keep current query, move
-            // focus to query box, and move cursor to far left / right
-            if (DBG) Log.d(TAG, "Left/right on a suggestion");
-            String query = getQuery();
-            int cursorPos = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 0 : query.length();
-            mQueryTextView.setSelection(cursorPos);
-            mQueryTextView.requestFocus();
-            updateSuggestions(query);
-            return true;
-        }
-
         return false;
-    }
-
-    protected void onSourceSelected() {
-        if (DBG) Log.d(TAG, "No suggestion selected");
-        restoreUserQuery();
     }
 
     protected int getSelectedPosition() {
@@ -737,8 +691,6 @@ public class SearchActivity extends Activity {
                 updateUi(empty);
             }
             if (mUpdateSuggestions) {
-                String query = s == null ? "" : s.toString();
-                setUserQuery(query);
                 updateSuggestionsBuffered();
             }
         }
@@ -783,7 +735,7 @@ public class SearchActivity extends Activity {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 int position = getSelectedPosition();
                 if (onSuggestionKeyDown(position, keyCode, event)) {
-                        return true;
+                    return true;
                 }
             }
             return forwardKeyToQueryTextView(keyCode, event);
@@ -818,32 +770,11 @@ public class SearchActivity extends Activity {
                String query = suggestions.getSuggestionQuery();
                if (!TextUtils.isEmpty(query)) {
                    query += " ";
-                   setUserQuery(query);
                    setQuery(query, false);
                    updateSuggestions(query);
                }
            }
        }
-    }
-
-    private class SelectionHandler implements SuggestionSelectionListener {
-        public void onSuggestionSelected(int position) {
-            SuggestionCursor suggestions = getCurrentSuggestions();
-            suggestions.moveTo(position);
-            String displayQuery = suggestions.getSuggestionDisplayQuery();
-            if (TextUtils.isEmpty(displayQuery)) {
-                restoreUserQuery();
-            } else {
-                setQuery(displayQuery, false);
-            }
-        }
-
-        public void onNothingSelected() {
-                // This happens when a suggestion has been selected with the
-                // dpad / trackball and then a different UI element is touched.
-                // Do nothing, since we want to keep the query of the selection
-                // in the search box.
-        }
     }
 
     /**

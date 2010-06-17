@@ -130,16 +130,6 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
     SuggestionCursor refreshShortcut(String shortcutId, String extraData);
 
     /**
-     * Checks whether the text in the query field should come from the suggestion intent data.
-     */
-    boolean shouldRewriteQueryFromData();
-
-    /**
-     * Checks whether the text in the query field should come from the suggestion title.
-     */
-    boolean shouldRewriteQueryFromText();
-
-    /**
      * Gets the default intent action for suggestions from this source.
      *
      * @return The default intent action, or {@code null}.

@@ -484,14 +484,6 @@ public class SearchableSource implements Source {
         return mSearchable.queryAfterZeroResults();
     }
 
-    public boolean shouldRewriteQueryFromData() {
-        return mSearchable.shouldRewriteQueryFromData();
-    }
-
-    public boolean shouldRewriteQueryFromText() {
-        return mSearchable.shouldRewriteQueryFromText();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o != null && o.getClass().equals(this.getClass())) {

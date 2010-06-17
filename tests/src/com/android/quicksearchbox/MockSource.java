@@ -171,14 +171,6 @@ public class MockSource implements Source {
         return false;
     }
 
-    public boolean shouldRewriteQueryFromData() {
-        return false;
-    }
-
-    public boolean shouldRewriteQueryFromText() {
-        return false;
-    }
-
     public Intent createSearchIntent(String query, Bundle appData) {
         return null;
     }

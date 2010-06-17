@@ -63,8 +63,6 @@ public class SuggestionCursorUtil extends Assert {
                 observed.getSuggestionIntentExtraData());
         assertEquals(message + ", query", expected.getSuggestionQuery(),
                 observed.getSuggestionQuery());
-        assertEquals(message + ", displayQuery", expected.getSuggestionDisplayQuery(),
-                observed.getSuggestionDisplayQuery());
         assertEquals(message + ", logType", expected.getSuggestionLogType(),
                 observed.getSuggestionLogType());
     }

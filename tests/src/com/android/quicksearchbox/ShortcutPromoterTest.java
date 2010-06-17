@@ -113,7 +113,5 @@ public class ShortcutPromoterTest extends AndroidTestCase {
 
     private static void assertSuggestionEquals(SuggestionPosition x, SuggestionPosition y) {
         assertEquals(x.current().getSuggestionKey(), y.current().getSuggestionKey());
-        assertEquals(x.current().getSuggestionDisplayQuery(),
-                y.current().getSuggestionDisplayQuery());
     }
 }

@@ -35,11 +35,6 @@ public abstract class AbstractSuggestionCursorWrapper extends AbstractSuggestion
         return current().getShortcutId();
     }
 
-    @Override
-    public String getSuggestionDisplayQuery() {
-        return current().getSuggestionDisplayQuery();
-    }
-
     public String getSuggestionFormat() {
         return current().getSuggestionFormat();
     }

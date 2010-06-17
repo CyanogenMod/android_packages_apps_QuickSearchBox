@@ -19,14 +19,11 @@ package com.android.quicksearchbox.ui;
 import com.android.quicksearchbox.SuggestionPosition;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
-import java.util.HashSet;
 
 /**
  * Holds a list of suggestions.
@@ -38,11 +35,8 @@ public class SuggestionsView extends ListView {
 
     private SuggestionClickListener mSuggestionClickListener;
 
-    private final HashSet<SuggestionSelectionListener> mSuggestionSelectionListener;
-
     public SuggestionsView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mSuggestionSelectionListener = new HashSet<SuggestionSelectionListener>();
     }
 
     @Override
@@ -50,22 +44,10 @@ public class SuggestionsView extends ListView {
         super.onFinishInflate();
         setOnItemClickListener(new ItemClickListener());
         setOnItemLongClickListener(new ItemLongClickListener());
-        setOnItemSelectedListener(new ItemSelectedListener());
     }
 
     public void setSuggestionClickListener(SuggestionClickListener listener) {
         mSuggestionClickListener = listener;
-    }
-
-    public void addSuggestionSelectionListener(SuggestionSelectionListener listener) {
-        if (listener == null) {
-            return;
-        }
-        mSuggestionSelectionListener.add(listener);
-    }
-
-    public void removeSuggestionSelectionListener(SuggestionSelectionListener listener) {
-        mSuggestionSelectionListener.remove(listener);
     }
 
     /**
@@ -86,49 +68,9 @@ public class SuggestionsView extends ListView {
         return (SuggestionPosition) getSelectedItem();
     }
 
-    @Override
-    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
-        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
-        if (DBG) {
-            Log.d(TAG, "Suggestions focus change, gainFocus: " + gainFocus
-                    + ", selected=" + getSelectedItemPosition());
-        }
-        // In non-touch mode, ListView does not clear the list selection when
-        // the ListView loses focus. And when it regains focus, onItemSelected() never gets
-        // called if the new selected position is the same as the old. We work around that
-        // by firing extra selection events on focus changes in non-touch mode.
-        // This implementation can result in duplicate selection events when the old selected
-        // item is not the same as the new.
-        if (!isInTouchMode()) {
-            if (gainFocus) {
-                int position = getSelectedPosition();
-                if (position != INVALID_POSITION) {
-                    fireSuggestionSelected(position);
-                }
-            } else {
-                fireNothingSelected();
-            }
-        }
-    }
-
-    private void fireSuggestionSelected(int position) {
-        if (DBG) Log.d(TAG, "fireSuggestionSelected(" + position + ")");
-        for (SuggestionSelectionListener listener : mSuggestionSelectionListener) {
-            listener.onSuggestionSelected(position);
-        }
-    }
-
-    private void fireNothingSelected() {
-        if (DBG) Log.d(TAG, "fireNothingSelected()");
-        for (SuggestionSelectionListener listener : mSuggestionSelectionListener) {
-            listener.onNothingSelected();
-        }
-    }
-
     private class ItemClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemClick(" + position + ")");
-            SuggestionView suggestionView = (SuggestionView) view;
             if (mSuggestionClickListener != null) {
                 mSuggestionClickListener.onSuggestionClicked(position);
             }
@@ -138,28 +80,10 @@ public class SuggestionsView extends ListView {
     private class ItemLongClickListener implements AdapterView.OnItemLongClickListener {
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG) Log.d(TAG, "onItemLongClick(" + position + ")");
-            SuggestionView suggestionView = (SuggestionView) view;
             if (mSuggestionClickListener != null) {
                 return mSuggestionClickListener.onSuggestionLongClicked(position);
             }
             return false;
-        }
-    }
-
-    private class ItemSelectedListener implements AdapterView.OnItemSelectedListener {
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            // Only fire suggestion selection events when the list has focus.
-            // This suppresses selection events caused by data set changes (as opposed
-            // to user action).
-            if (hasFocus()) {
-                fireSuggestionSelected(position);
-            } else {
-                if (DBG) Log.d(TAG, "Suppressed selection event for position " + position);
-            }
-        }
-
-        public void onNothingSelected(AdapterView<?> parent) {
-            fireNothingSelected();
         }
     }
 

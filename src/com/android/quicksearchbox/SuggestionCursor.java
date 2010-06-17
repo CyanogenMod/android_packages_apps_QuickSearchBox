@@ -155,8 +155,6 @@ public interface SuggestionCursor {
      */
     Intent getSuggestionIntent(Bundle appSearchData);
 
-    String getSuggestionDisplayQuery();
-
     /**
      * Gets a unique key that identifies this suggestion. This is used to avoid
      * duplicate suggestions in the promoted list. This key should be based on
