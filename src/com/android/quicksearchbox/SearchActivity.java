@@ -126,8 +126,7 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.search_activity);
-
+        setContentView();
         mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
 
         mQueryTextView = (EditText) findViewById(R.id.search_src_text);
@@ -173,6 +172,10 @@ public class SearchActivity extends Activity {
 
         mCorporaObserver = new CorporaObserver();
         getCorpora().registerDataSetObserver(mCorporaObserver);
+    }
+
+    protected void setContentView() {
+        setContentView(R.layout.search_activity);
     }
 
     private void startMethodTracing() {
@@ -683,7 +686,7 @@ public class SearchActivity extends Activity {
         mHandler.postDelayed(mUpdateSuggestionsTask, delay);
     }
 
-    private void updateSuggestions(String query) {
+    protected void updateSuggestions(String query) {
 
         query = ltrim(query);
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
