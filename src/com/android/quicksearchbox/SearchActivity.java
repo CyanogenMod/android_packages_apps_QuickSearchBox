@@ -604,6 +604,12 @@ public class SearchActivity extends Activity {
         }
     }
 
+    protected void onSuggestionListFocusChange(boolean focused) {
+    }
+
+    protected void onQueryTextViewFocusChange(boolean focused) {
+    }
+
     /**
      * Hides the input method when the suggestions get focus.
      */
@@ -614,6 +620,7 @@ public class SearchActivity extends Activity {
                 // The suggestions list got focus, hide the input method
                 hideInputMethod();
             }
+            onSuggestionListFocusChange(focused);
         }
     }
 
@@ -624,6 +631,7 @@ public class SearchActivity extends Activity {
                 // The query box got focus, show the input method
                 showInputMethodForQuery();
             }
+            onQueryTextViewFocusChange(focused);
         }
     }
 
