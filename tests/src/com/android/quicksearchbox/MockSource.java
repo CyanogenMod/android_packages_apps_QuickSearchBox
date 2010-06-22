@@ -105,7 +105,7 @@ public class MockSource implements Source {
         return true;
     }
 
-    public SourceResult getSuggestions(String query, int queryLimit) {
+    public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
         if (query.length() == 0) {
             return null;
         }

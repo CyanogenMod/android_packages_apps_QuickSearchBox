@@ -27,7 +27,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 @MediumTest
 public class SourceShortcutRefresherTest extends AndroidTestCase {
 
-    private String mQuery = "foo";
+    private final String mQuery = "foo";
 
     private MockNamedTaskExecutor mExecutor;
 
@@ -98,7 +98,7 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
         assertEquals(mSource1, mRefreshedSource);
         assertEquals("success", mRefreshedShortcutId);
         SuggestionCursor expected =
-                SuggestionCursorUtil.slice(mSource1.getSuggestions(mQuery, 1), 0, 1);
+                SuggestionCursorUtil.slice(mSource1.getSuggestions(mQuery, 1, true), 0, 1);
         SuggestionCursorUtil.assertSameSuggestions(expected, mRefreshedCursor);
     }
 
@@ -123,7 +123,7 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
             } else if ("empty_refresh".equals(shortcutId)) {
                 return new DataSuggestionCursor(mQuery);
             } else {
-                 SuggestionCursor suggestions = getSuggestions(mQuery, 1);
+                 SuggestionCursor suggestions = getSuggestions(mQuery, 1, true);
                  return SuggestionCursorUtil.slice(suggestions, 0, 1);
             }
         }

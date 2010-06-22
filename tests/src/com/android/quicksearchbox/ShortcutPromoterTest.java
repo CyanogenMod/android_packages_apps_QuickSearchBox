@@ -45,7 +45,7 @@ public class ShortcutPromoterTest extends AndroidTestCase {
         mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery, null, 8);
         mSuggestions = new ArrayList<CorpusResult>();
         for (Corpus corpus : corpora) {
-            mSuggestions.add(corpus.getSuggestions(mQuery, 10));
+            mSuggestions.add(corpus.getSuggestions(mQuery, 10, false));
         }
         mSuggestionCount = countSuggestions(mSuggestions);
     }

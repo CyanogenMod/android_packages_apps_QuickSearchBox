@@ -336,7 +336,7 @@ public class SearchableSource implements Source {
         return voiceIntent;
     }
 
-    public SourceResult getSuggestions(String query, int queryLimit) {
+    public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
         try {
             Cursor cursor = getSuggestions(mContext, mSearchable, query, queryLimit);
             if (DBG) Log.d(TAG, toString() + "[" + query + "] returned.");

@@ -164,7 +164,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
         QueryTask.startQueries(query, maxResultsPerSource, corporaToQuery, mBatchingExecutor,
-                mPublishThread, receiver);
+                mPublishThread, receiver, singleCorpus != null);
         mBatchingExecutor.executeNextBatch(initialBatchSize);
 
         return suggestions;

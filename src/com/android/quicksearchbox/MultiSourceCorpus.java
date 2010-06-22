@@ -80,12 +80,13 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
     }
 
     /**
-     * Gets the sources to query for the given input.
+     * Gets the sources to query for suggestions for the given input.
      *
      * @param query The current input.
+     * @param onlyCorpus If true, this is the only corpus being queried.
      * @return The sources to query.
      */
-    protected List<Source> getSourcesToQuery(String query) {
+    protected List<Source> getSourcesToQuery(String query, boolean onlyCorpus) {
         List<Source> sources = new ArrayList<Source>();
         for (Source candidate : getSources()) {
             if (candidate.getQueryThreshold() <= query.length()) {
@@ -131,14 +132,15 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
         return mVoiceSearchEnabled;
     }
 
-    public CorpusResult getSuggestions(String query, int queryLimit) {
+    public CorpusResult getSuggestions(String query, int queryLimit, boolean onlyCorpus) {
         LatencyTracker latencyTracker = new LatencyTracker();
-        List<Source> sources = getSourcesToQuery(query);
+        List<Source> sources = getSourcesToQuery(query, onlyCorpus);
         BarrierConsumer<SourceResult> consumer =
                 new BarrierConsumer<SourceResult>(sources.size());
+        boolean onlySource = sources.size() == 1;
         for (Source source : sources) {
             QueryTask<SourceResult> task = new QueryTask<SourceResult>(query, queryLimit,
-                    source, null, consumer);
+                    source, null, consumer, onlySource);
             mExecutor.execute(task);
         }
         ArrayList<SourceResult> results = consumer.getValues();

@@ -22,6 +22,8 @@ import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.os.Handler;
 
+import java.util.Iterator;
+
 /**
  * A task that gets suggestions from a corpus.
  */
@@ -31,6 +33,7 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
     private final SuggestionCursorProvider<C> mProvider;
     private final Handler mHandler;
     private final Consumer<C> mConsumer;
+    private final boolean mTheOnlyOne;
 
     /**
      * Creates a new query task.
@@ -41,14 +44,16 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
      * @param handler Handler that {@link Consumer#consume} will
      *        get called on. If null, the method is called on the query thread.
      * @param consumer Consumer to notify when the suggestions have been returned.
+     * @param onlyTask Indicates if this is the only task within a batch.
      */
     public QueryTask(String query, int queryLimit, SuggestionCursorProvider<C> provider,
-            Handler handler, Consumer<C> consumer) {
+            Handler handler, Consumer<C> consumer, boolean onlyTask) {
         mQuery = query;
         mQueryLimit = queryLimit;
         mProvider = provider;
         mHandler = handler;
         mConsumer = consumer;
+        mTheOnlyOne = onlyTask;
     }
 
     public String getName() {
@@ -56,7 +61,7 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
     }
 
     public void run() {
-        final C cursor = mProvider.getSuggestions(mQuery, mQueryLimit);
+        final C cursor = mProvider.getSuggestions(mQuery, mQueryLimit, mTheOnlyOne);
         if (mHandler == null) {
             mConsumer.consume(cursor);
         } else {
@@ -80,11 +85,16 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
             int maxResultsPerProvider,
             Iterable<? extends SuggestionCursorProvider<C>> providers,
             NamedTaskExecutor executor, Handler handler,
-            Consumer<C> consumer) {
+            Consumer<C> consumer, boolean onlyOneProvider) {
+
+        boolean onlyOneProvider = true;
+        Iterator<?> it = providers.iterator();
+        if (it.hasNext()) it.next();
+        if (it.hasNext()) onlyOneProvider = false;
 
         for (SuggestionCursorProvider<C> provider : providers) {
             QueryTask<C> task = new QueryTask<C>(query, maxResultsPerProvider, provider, handler,
-                    consumer);
+                    consumer, onlyOneProvider);
             executor.execute(task);
         }
     }

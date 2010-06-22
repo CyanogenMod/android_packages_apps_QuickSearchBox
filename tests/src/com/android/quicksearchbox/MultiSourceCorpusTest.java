@@ -54,9 +54,9 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
 
     public void testGetSuggestions() {
         ListSuggestionCursor expected = concatSuggestionCursors("foo",
-                MockSource.SOURCE_1.getSuggestions("foo", 50),
-                MockSource.SOURCE_2.getSuggestions("foo", 50));
-        CorpusResult observed = mCorpus.getSuggestions("foo", 50);
+                MockSource.SOURCE_1.getSuggestions("foo", 50, false),
+                MockSource.SOURCE_2.getSuggestions("foo", 50, false));
+        CorpusResult observed = mCorpus.getSuggestions("foo", 50, false);
         SuggestionCursorUtil.assertSameSuggestions(expected, observed);
     }
 
@@ -107,6 +107,7 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
             return null;
         }
 
+        @Override
         public int getQueryThreshold() {
             return 0;
         }
@@ -119,10 +120,12 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
             return false;
         }
 
+        @Override
         public boolean queryAfterZeroResults() {
             return false;
         }
 
+        @Override
         public boolean voiceSearchEnabled() {
             return false;
         }

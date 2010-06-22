@@ -115,9 +115,10 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      *
      * @param query The user query.
      * @param queryLimit An advisory maximum number of results that the source should return.
+     * @param onlySource Indicates if this is the only source being queried.
      * @return The suggestion results.
      */
-    SourceResult getSuggestions(String query, int queryLimit);
+    SourceResult getSuggestions(String query, int queryLimit, boolean onlySource);
 
     /**
      * Updates a shorcut.

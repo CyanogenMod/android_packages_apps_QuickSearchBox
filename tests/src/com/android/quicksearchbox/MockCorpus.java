@@ -94,8 +94,8 @@ public class MockCorpus implements Corpus {
         return null;
     }
 
-    public CorpusResult getSuggestions(String query, int queryLimit) {
-        return new Result(query, mSource.getSuggestions(query, queryLimit));
+    public CorpusResult getSuggestions(String query, int queryLimit, boolean onlyCorpus) {
+        return new Result(query, mSource.getSuggestions(query, queryLimit, true));
     }
 
     @Override

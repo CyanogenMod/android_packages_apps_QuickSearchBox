@@ -71,7 +71,7 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     private ArrayList<CorpusResult> getSuggestions(String query) {
         ArrayList<CorpusResult> suggestions = new ArrayList<CorpusResult>();
         for (Corpus corpus : getRankedCorpora()) {
-            suggestions.add(corpus.getSuggestions(query, 10));
+            suggestions.add(corpus.getSuggestions(query, 10, false));
         }
         return suggestions;
     }
