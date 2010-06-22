@@ -87,11 +87,6 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
             NamedTaskExecutor executor, Handler handler,
             Consumer<C> consumer, boolean onlyOneProvider) {
 
-        boolean onlyOneProvider = true;
-        Iterator<?> it = providers.iterator();
-        if (it.hasNext()) it.next();
-        if (it.hasNext()) onlyOneProvider = false;
-
         for (SuggestionCursorProvider<C> provider : providers) {
             QueryTask<C> task = new QueryTask<C>(query, maxResultsPerProvider, provider, handler,
                     consumer, onlyOneProvider);
