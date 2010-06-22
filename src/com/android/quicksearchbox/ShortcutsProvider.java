@@ -33,7 +33,7 @@ import android.util.Log;
  */
 public class ShortcutsProvider extends ContentProvider {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "QSB.ExternalShortcutReceiver";
 
     public static final String EXTRA_SHORTCUT_SOURCE = "shortcut_source";

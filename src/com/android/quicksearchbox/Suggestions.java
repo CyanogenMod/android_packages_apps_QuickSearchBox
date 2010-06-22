@@ -23,6 +23,7 @@ import android.database.DataSetObserver;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class Suggestions {
     private final String mQuery;
 
     /** The sources that are expected to report. */
-    private final List<Corpus> mExpectedCorpora;
+    private List<Corpus> mExpectedCorpora;
 
     /**
      * The observers that want notifications of changes to the published suggestions.
@@ -53,7 +54,7 @@ public class Suggestions {
      * in the order that they were published.
      * This object may only be accessed on the UI thread.
      * */
-    private final ArrayList<CorpusResult> mCorpusResults;
+    private ArrayList<CorpusResult> mCorpusResults;
 
     private SuggestionCursor mShortcuts;
 
@@ -69,14 +70,14 @@ public class Suggestions {
     /**
      * Creates a new empty Suggestions.
      *
-     * @param expectedCorpusCount The number of sources that are expected to report.
+     * @param expectedCorpora The sources that are expected to report.
      */
     public Suggestions(Promoter promoter, int maxPromoted,
-            String query, List<Corpus> expectedCorppra) {
+            String query, List<Corpus> expectedCorpora) {
         mPromoter = promoter;
         mMaxPromoted = maxPromoted;
         mQuery = query;
-        mExpectedCorpora = expectedCorppra;
+        mExpectedCorpora = expectedCorpora;
         mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpora.size());
         mPromoted = null;  // will be set by updatePromoted()
     }
@@ -233,6 +234,35 @@ public class Suggestions {
             throw new IllegalStateException("Called getSourceCount() when closed.");
         }
         return mCorpusResults == null ? 0 : mCorpusResults.size();
+    }
+
+    public void filterByCorpus(Corpus singleCorpus) {
+        if ((mExpectedCorpora.size() == 1) && (mExpectedCorpora.get(0) == this)) {
+            return;
+        }
+        boolean haveCorpus = false;
+        for (Corpus corpus : mExpectedCorpora) {
+            if (corpus == singleCorpus) {
+                haveCorpus = true;
+            }
+        }
+        if (!haveCorpus) {
+            mExpectedCorpora = Collections.emptyList();
+            mPromoted = null;
+            mCorpusResults.clear();
+            notifyDataSetChanged();
+            return;
+        }
+        mExpectedCorpora = Collections.singletonList(singleCorpus);
+        ArrayList<CorpusResult> filteredResults = new ArrayList<CorpusResult>(1);
+        for (CorpusResult result : mCorpusResults) {
+            if (result.getCorpus() == singleCorpus) {
+                filteredResults.add(result);
+            }
+        }
+        mCorpusResults = filteredResults;
+        mPromoted = null;
+        notifyDataSetChanged();
     }
 
     private class MyShortcutsObserver extends DataSetObserver {
