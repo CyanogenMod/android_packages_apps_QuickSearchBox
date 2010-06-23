@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
@@ -79,7 +78,7 @@ public class SearchableItemsSettings extends PreferenceActivity
      * Adds a suggestion source to the list of suggestion source checkbox preferences.
      */
     private Preference createCorpusPreference(Corpus corpus) {
-        CheckBoxPreference sourcePref = new CheckBoxPreference(this);
+        SearchableItemPreference sourcePref = new SearchableItemPreference(this);
         sourcePref.setKey(SearchSettings.getCorpusEnabledPreference(corpus));
         // Put web corpus first. The rest are alphabetical.
         if (corpus.isWebCorpus()) {
@@ -92,6 +91,7 @@ public class SearchableItemsSettings extends PreferenceActivity
         CharSequence description = corpus.getSettingsDescription();
         sourcePref.setSummaryOn(description);
         sourcePref.setSummaryOff(description);
+        sourcePref.setIcon(corpus.getCorpusIcon());
         return sourcePref;
     }
 
