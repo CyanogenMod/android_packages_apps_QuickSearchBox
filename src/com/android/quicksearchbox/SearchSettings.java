@@ -60,7 +60,7 @@ public class SearchSettings extends PreferenceActivity
     private static final String SEARCH_ENGINE_SETTINGS_PREF = "search_engine_settings";
     private static final String SEARCH_CORPORA_PREF = "search_corpora";
 
-    // Preifx of per-corpus enable preference
+    // Prefix of per-corpus enable preference
     private static final String CORPUS_ENABLED_PREF_PREFIX = "enable_corpus_";
     private static final String VOICE_SEARCH_HINTS_ENABLED_PREF = "voice_search_hints_enabled";
 
