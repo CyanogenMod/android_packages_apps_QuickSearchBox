@@ -402,7 +402,7 @@ public class SearchActivity extends Activity {
 
     private void updateQueryTextView(boolean queryEmpty) {
         if (queryEmpty) {
-            if (mCorpus == null || mCorpus.isWebCorpus()) {
+            if (isSearchCorpusWeb()) {
                 mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty_google);
                 mQueryTextView.setHint(null);
             } else {
@@ -662,7 +662,6 @@ public class SearchActivity extends Activity {
     protected void updateInputMethodSuggestions() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm == null || !imm.isFullscreenMode()) return;
-        if (!isSearchCorpusWeb()) return;
         Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
         if (suggestions == null) return;
         SuggestionCursor cursor = suggestions.getPromoted();
@@ -675,9 +674,10 @@ public class SearchActivity extends Activity {
     private CompletionInfo[] webSuggestionsToCompletions(SuggestionCursor cursor) {
         int count = cursor.getCount();
         ArrayList<CompletionInfo> completions = new ArrayList<CompletionInfo>(count);
+        boolean usingWebCorpus = isSearchCorpusWeb();
         for (int i = 0; i < count; i++) {
             cursor.moveTo(i);
-            if (cursor.isWebSearchSuggestion()) {
+            if (!usingWebCorpus || cursor.isWebSearchSuggestion()) {
                 String text1 = cursor.getSuggestionText1();
                 completions.add(new CompletionInfo(i, i, text1));
             }
