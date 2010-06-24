@@ -77,4 +77,8 @@ public abstract class AbstractSuggestionCursor implements SuggestionCursor {
         return intent;
     }
 
+    public boolean isWebSearchSuggestion() {
+        return Intent.ACTION_WEB_SEARCH.equals(getSuggestionIntentAction());
+    }
+
 }

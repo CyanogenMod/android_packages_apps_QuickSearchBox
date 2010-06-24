@@ -173,4 +173,9 @@ public interface SuggestionCursor {
      * Checks if this suggestion is a shortcut.
      */
     boolean isSuggestionShortcut();
+
+    /**
+     * Checks if this is a web search suggestion.
+     */
+    boolean isWebSearchSuggestion();
 }

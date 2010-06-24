@@ -106,7 +106,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
 
     protected void updateRefinable(SuggestionCursor suggestion) {
         boolean refinable = 
-                Intent.ACTION_WEB_SEARCH.equals(suggestion.getSuggestionIntentAction())
+                suggestion.isWebSearchSuggestion()
                 && mIcon2.getDrawable() == null
                 && !TextUtils.isEmpty(suggestion.getSuggestionQuery());
         setRefinable(suggestion, refinable);

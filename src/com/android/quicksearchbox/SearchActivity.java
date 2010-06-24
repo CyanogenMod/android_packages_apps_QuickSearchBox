@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.common.Search;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
+import com.android.quicksearchbox.ui.QueryTextView;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
@@ -40,12 +41,14 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
-import android.widget.EditText;
 import android.widget.ImageButton;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -86,7 +89,7 @@ public class SearchActivity extends Activity {
 
     private CorporaObserver mCorporaObserver;
 
-    protected EditText mQueryTextView;
+    protected QueryTextView mQueryTextView;
     // True if the query was empty on the previous call to updateQuery()
     protected boolean mQueryWasEmpty = true;
 
@@ -126,7 +129,7 @@ public class SearchActivity extends Activity {
         setContentView();
         mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
 
-        mQueryTextView = (EditText) findViewById(R.id.search_src_text);
+        mQueryTextView = (QueryTextView) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
         mSuggestionsView.setSuggestionClickListener(new ClickHandler());
         mSuggestionsView.setOnScrollListener(new InputMethodCloser());
@@ -142,6 +145,7 @@ public class SearchActivity extends Activity {
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
+        mQueryTextView.setSuggestionClickListener(new ClickHandler());
 
         mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
 
@@ -161,6 +165,8 @@ public class SearchActivity extends Activity {
         setupFromIntent(intent);
         // Then restore any saved instance state
         restoreInstanceState(savedInstanceState);
+
+        mSuggestionsAdapter.registerDataSetObserver(new SuggestionsObserver());
 
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
@@ -379,31 +385,13 @@ public class SearchActivity extends Activity {
     }
 
     /**
-     * Sets the text in the query box. Does not update the suggestions,
-     * and does not change the saved user-entered query.
-     * {@link #restoreUserQuery()} will restore the query to the last
-     * user-entered query.
+     * Sets the text in the query box. Does not update the suggestions.
      */
     private void setQuery(String query, boolean selectAll) {
         mUpdateSuggestions = false;
         mQueryTextView.setText(query);
-        setTextSelection(selectAll);
+        mQueryTextView.setTextSelection(selectAll);
         mUpdateSuggestions = true;
-    }
-
-    /**
-     * Sets the text selection in the query text view.
-     *
-     * @param selectAll If {@code true}, selects the entire query.
-     *        If {@false}, no characters are selected, and the cursor is placed
-     *        at the end of the query.
-     */
-    private void setTextSelection(boolean selectAll) {
-        if (selectAll) {
-            mQueryTextView.selectAll();
-        } else {
-            mQueryTextView.setSelection(mQueryTextView.length());
-        }
     }
 
     protected void updateUi(boolean queryEmpty) {
@@ -527,6 +515,14 @@ public class SearchActivity extends Activity {
         }
     }
 
+    /**
+     * Checks if the corpus used for typed searchs is the web corpus.
+     */
+    protected boolean isSearchCorpusWeb() {
+        Corpus corpus = getSearchCorpus();
+        return corpus != null && corpus.isWebCorpus();
+    }
+
     protected SuggestionCursor getCurrentSuggestions() {
         return mSuggestionsAdapter.getCurrentSuggestions();
     }
@@ -591,17 +587,11 @@ public class SearchActivity extends Activity {
      * Hides the input method.
      */
     protected void hideInputMethod() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(mQueryTextView.getWindowToken(), 0);
-        }
+        mQueryTextView.hideInputMethod();
     }
 
     protected void showInputMethodForQuery() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.showSoftInput(mQueryTextView, 0);
-        }
+        mQueryTextView.showInputMethod();
     }
 
     protected void onSuggestionListFocusChange(boolean focused) {
@@ -663,6 +653,36 @@ public class SearchActivity extends Activity {
         }
 
         mSuggestionsAdapter.setSuggestions(suggestions);
+    }
+
+    /**
+     * If the input method is in fullscreen mode, and the selector corpus
+     * is All or Web, use the web search suggestions as completions.
+     */
+    protected void updateInputMethodSuggestions() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm == null || !imm.isFullscreenMode()) return;
+        if (!isSearchCorpusWeb()) return;
+        Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
+        if (suggestions == null) return;
+        SuggestionCursor cursor = suggestions.getPromoted();
+        if (cursor == null) return;
+        CompletionInfo[] completions = webSuggestionsToCompletions(cursor);
+        if (DBG) Log.d(TAG, "displayCompletions(" + Arrays.toString(completions) + ")");
+        imm.displayCompletions(mQueryTextView, completions);
+    }
+
+    private CompletionInfo[] webSuggestionsToCompletions(SuggestionCursor cursor) {
+        int count = cursor.getCount();
+        ArrayList<CompletionInfo> completions = new ArrayList<CompletionInfo>(count);
+        for (int i = 0; i < count; i++) {
+            cursor.moveTo(i);
+            if (cursor.isWebSearchSuggestion()) {
+                String text1 = cursor.getSuggestionText1();
+                completions.add(new CompletionInfo(i, i, text1));
+            }
+        }
+        return completions.toArray(new CompletionInfo[completions.size()]);
     }
 
     private boolean forwardKeyToQueryTextView(int keyCode, KeyEvent event) {
@@ -834,6 +854,13 @@ public class SearchActivity extends Activity {
         public void onChanged() {
             setCorpus(getCorpusName());
             updateSuggestions(getQuery());
+        }
+    }
+
+    private class SuggestionsObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            updateInputMethodSuggestions();
         }
     }
 
