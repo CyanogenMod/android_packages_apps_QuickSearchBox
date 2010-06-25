@@ -34,8 +34,9 @@ public class Suggestions {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.Suggestions";
-    private static int id = 0;
-    private int mId;
+    private static int sId = 0;
+    // Object ID for debugging
+    private final int mId;
 
     private final int mMaxPromoted;
 
@@ -83,12 +84,10 @@ public class Suggestions {
         mExpectedCorpora = expectedCorpora;
         mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpora.size());
         mPromoted = null;  // will be set by updatePromoted()
+        mId = sId++;
         if (DBG) {
-            mId = id++;
-            Log.v(TAG, "new Suggestions [" + mId + "] query \"" + query + "\" expected corpora:");
-            for(Corpus c : mExpectedCorpora) {
-                Log.v(TAG, "  " + c.getName());
-            }
+            Log.d(TAG, "new Suggestions [" + mId + "] query \"" + query
+                    + "\" expected corpora: " + mExpectedCorpora);
         }
     }
 
@@ -249,16 +248,20 @@ public class Suggestions {
                         + mMaxPromoted + ") = " + mPromoted);
             }
         } else {
-            mPromoted = null;
-            for (CorpusResult result : mCorpusResults) {
-                if (result.getCorpus() == mSingleCorpusFilter) {
-                    mPromoted = result;
-                }
-            }
+            mPromoted = getCorpusResult(mSingleCorpusFilter);
             if (mPromoted == null) {
                 mPromoted = new ListSuggestionCursor(mQuery);
             }
         }
+    }
+
+    private CorpusResult getCorpusResult(Corpus corpus) {
+        for (CorpusResult result : mCorpusResults) {
+            if (result.getCorpus().equals(mSingleCorpusFilter)) {
+                return result;
+            }
+        }
+        return null;
     }
 
     /**
