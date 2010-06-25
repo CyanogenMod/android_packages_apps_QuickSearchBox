@@ -159,7 +159,7 @@ public class SuggestionsAdapter extends BaseAdapter {
     }
 
     protected void onSuggestionsChanged() {
-        if (DBG) Log.d(TAG, "onSuggestionsChanged(), mSuggestions=" + mSuggestions);
+        if (DBG) Log.d(TAG, "onSuggestionsChanged(" + mSuggestions + ")");
         SuggestionCursor cursor = getCorpusCursor(mSuggestions, mCorpus);
         changeCursor(cursor);
     }

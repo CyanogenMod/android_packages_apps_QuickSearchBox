@@ -159,8 +159,10 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
         mBatchingExecutor = new BatchingNamedTaskExecutor(mQueryExecutor);
 
+        long publishResultDelayMillis = mConfig.getPublishResultDelayMillis();
         SuggestionCursorReceiver receiver = new SuggestionCursorReceiver(
-                mBatchingExecutor, suggestions, initialBatchSize);
+                mBatchingExecutor, suggestions, initialBatchSize,
+                publishResultDelayMillis);
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
         QueryTask.startQueries(query, maxResultsPerSource, corporaToQuery, mBatchingExecutor,
@@ -183,19 +185,44 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
     private class SuggestionCursorReceiver implements Consumer<CorpusResult> {
         private final BatchingNamedTaskExecutor mExecutor;
         private final Suggestions mSuggestions;
+        private final long mResultPublishDelayMillis;
+        private final ArrayList<CorpusResult> mPendingResults;
+        private final Runnable mResultPublishTask = new Runnable () {
+            public void run() {
+                if (DBG) Log.d(TAG, "Publishing delayed results");
+                publishPendingResults();
+            }
+        };
 
         private int mCountAtWhichToExecuteNextBatch;
 
         public SuggestionCursorReceiver(BatchingNamedTaskExecutor executor,
-                Suggestions suggestions, int initialBatchSize) {
+                Suggestions suggestions, int initialBatchSize,
+                long publishResultDelayMillis) {
             mExecutor = executor;
             mSuggestions = suggestions;
             mCountAtWhichToExecuteNextBatch = initialBatchSize;
+            mResultPublishDelayMillis = publishResultDelayMillis;
+            mPendingResults = new ArrayList<CorpusResult>();
         }
 
         public boolean consume(CorpusResult cursor) {
             updateShouldQueryStrategy(cursor);
-            mSuggestions.addCorpusResult(cursor);
+            mPendingResults.add(cursor);
+            if (mResultPublishDelayMillis > 0
+                    && !mSuggestions.isClosed()
+                    && mSuggestions.getResultCount() + mPendingResults.size()
+                            < mCountAtWhichToExecuteNextBatch) {
+                // This is not the last result of the batch, delay publishing
+                if (DBG) Log.d(TAG, "Delaying result by " + mResultPublishDelayMillis + " ms");
+                mPublishThread.removeCallbacks(mResultPublishTask);
+                mPublishThread.postDelayed(mResultPublishTask, mResultPublishDelayMillis);
+            } else {
+                // This is the last result, publish immediately
+                if (DBG) Log.d(TAG, "Publishing result immediately");
+                mPublishThread.removeCallbacks(mResultPublishTask);
+                publishPendingResults();
+            }
             if (!mSuggestions.isClosed()) {
                 executeNextBatchIfNeeded();
             }
@@ -205,8 +232,13 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
             return true;
         }
 
+        private void publishPendingResults() {
+            mSuggestions.addCorpusResults(mPendingResults);
+            mPendingResults.clear();
+        }
+
         private void executeNextBatchIfNeeded() {
-            if (mSuggestions.getSourceCount() == mCountAtWhichToExecuteNextBatch) {
+            if (mSuggestions.getResultCount() == mCountAtWhichToExecuteNextBatch) {
                 // We've just finished one batch
                 if (mSuggestions.getPromoted().getCount() < mConfig.getMaxPromotedSuggestions()) {
                     // But we still don't have enough results, ask for more

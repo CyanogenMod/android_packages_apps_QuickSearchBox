@@ -17,11 +17,9 @@
 package com.android.quicksearchbox;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
- * A simple promoter that concatenations the source results and ignores the shortcuts.
- *
+ * A simple promoter that concatenates the source results and ignores the shortcuts.
  */
 public class ConcatPromoter implements Promoter {
 

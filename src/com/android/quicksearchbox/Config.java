@@ -54,6 +54,7 @@ public class Config {
     private static final int LATENCY_LOG_FREQUENCY = 1000;
 
     private static final long TYPING_SUGGESTIONS_UPDATE_DELAY_MILLIS = 100;
+    private static final long PUBLISH_RESULT_DELAY_MILLIS = 200;
 
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
@@ -204,4 +205,13 @@ public class Config {
     public long getTypingUpdateSuggestionsDelayMillis() {
         return TYPING_SUGGESTIONS_UPDATE_DELAY_MILLIS;
     }
+
+    /**
+     * The delay in milliseconds before corpus results are published.
+     * If a new result arrives before this timeout expires, the timeout is reset.
+     */
+    public long getPublishResultDelayMillis() {
+        return PUBLISH_RESULT_DELAY_MILLIS;
+    }
+
 }
