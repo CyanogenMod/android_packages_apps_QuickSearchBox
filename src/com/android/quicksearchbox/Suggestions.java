@@ -23,7 +23,6 @@ import android.database.DataSetObserver;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,13 +34,17 @@ public class Suggestions {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.Suggestions";
+    private static int id = 0;
+    private int mId;
 
     private final int mMaxPromoted;
 
     private final String mQuery;
 
     /** The sources that are expected to report. */
-    private List<Corpus> mExpectedCorpora;
+    private final List<Corpus> mExpectedCorpora;
+
+    private Corpus mSingleCorpusFilter;
 
     /**
      * The observers that want notifications of changes to the published suggestions.
@@ -54,7 +57,7 @@ public class Suggestions {
      * in the order that they were published.
      * This object may only be accessed on the UI thread.
      * */
-    private ArrayList<CorpusResult> mCorpusResults;
+    private final ArrayList<CorpusResult> mCorpusResults;
 
     private SuggestionCursor mShortcuts;
 
@@ -65,7 +68,7 @@ public class Suggestions {
 
     private final Promoter mPromoter;
 
-    private ListSuggestionCursor mPromoted;
+    private SuggestionCursor mPromoted;
 
     /**
      * Creates a new empty Suggestions.
@@ -80,6 +83,13 @@ public class Suggestions {
         mExpectedCorpora = expectedCorpora;
         mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpora.size());
         mPromoted = null;  // will be set by updatePromoted()
+        if (DBG) {
+            mId = id++;
+            Log.v(TAG, "new Suggestions [" + mId + "] query \"" + query + "\" expected corpora:");
+            for(Corpus c : mExpectedCorpora) {
+                Log.v(TAG, "  " + c.getName());
+            }
+        }
     }
 
     @VisibleForTesting
@@ -149,7 +159,7 @@ public class Suggestions {
      * Closes all the source results and unregisters all observers.
      */
     public void close() {
-        if (DBG) Log.d(TAG, "close()");
+        if (DBG) Log.d(TAG, "close() [" + mId + "]");
         if (mClosed) {
             throw new IllegalStateException("Double close()");
         }
@@ -212,6 +222,10 @@ public class Suggestions {
         }
 
         for (CorpusResult corpusResult : corpusResults) {
+            if (DBG) {
+                Log.v(TAG, "addCorpusResult["+ mId + "] corpus:" +
+                        corpusResult.getCorpus().getName() + " results:" + corpusResult.getCount());
+            }
             if (!mQuery.equals(corpusResult.getUserQuery())) {
               throw new IllegalArgumentException("Got result for wrong query: "
                     + mQuery + " != " + corpusResult.getUserQuery());
@@ -223,14 +237,27 @@ public class Suggestions {
     }
 
     private void updatePromoted() {
-        mPromoted = new ListSuggestionCursorNoDuplicates(mQuery);
-        if (mPromoter == null) {
-            return;
-        }
-        mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted);
-        if (DBG) {
-            Log.d(TAG, "pickPromoted(" + mShortcuts + "," + mCorpusResults + ","
-                    + mMaxPromoted + ") = " + mPromoted);
+        if (mSingleCorpusFilter == null) {
+            ListSuggestionCursor promoted = new ListSuggestionCursorNoDuplicates(mQuery);
+            mPromoted = promoted;
+            if (mPromoter == null) {
+                return;
+            }
+            mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, promoted);
+            if (DBG) {
+                Log.d(TAG, "pickPromoted(" + mShortcuts + "," + mCorpusResults + ","
+                        + mMaxPromoted + ") = " + mPromoted);
+            }
+        } else {
+            mPromoted = null;
+            for (CorpusResult result : mCorpusResults) {
+                if (result.getCorpus() == mSingleCorpusFilter) {
+                    mPromoted = result;
+                }
+            }
+            if (mPromoted == null) {
+                mPromoted = new ListSuggestionCursor(mQuery);
+            }
         }
     }
 
@@ -246,31 +273,14 @@ public class Suggestions {
     }
 
     public void filterByCorpus(Corpus singleCorpus) {
-        if ((mExpectedCorpora.size() == 1) && (mExpectedCorpora.get(0) == this)) {
+        if (mSingleCorpusFilter == singleCorpus) {
             return;
         }
-        boolean haveCorpus = false;
-        for (Corpus corpus : mExpectedCorpora) {
-            if (corpus == singleCorpus) {
-                haveCorpus = true;
-            }
-        }
-        if (!haveCorpus) {
-            mExpectedCorpora = Collections.emptyList();
-            mPromoted = null;
-            mCorpusResults.clear();
-            notifyDataSetChanged();
+        mSingleCorpusFilter = singleCorpus;
+        if ((mExpectedCorpora.size() == 1) && (mExpectedCorpora.get(0) == singleCorpus)) {
             return;
         }
-        mExpectedCorpora = Collections.singletonList(singleCorpus);
-        ArrayList<CorpusResult> filteredResults = new ArrayList<CorpusResult>(1);
-        for (CorpusResult result : mCorpusResults) {
-            if (result.getCorpus() == singleCorpus) {
-                filteredResults.add(result);
-            }
-        }
-        mCorpusResults = filteredResults;
-        mPromoted = null;
+        updatePromoted();
         notifyDataSetChanged();
     }
 
