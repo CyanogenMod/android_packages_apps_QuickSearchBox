@@ -92,10 +92,10 @@ public class Suggestions {
     }
 
     /**
-     * Gets the number of sources that are expected to report.
+     * Gets the number of corpora that are expected to report.
      */
     @VisibleForTesting
-    int getExpectedSourceCount() {
+    int getExpectedResultCount() {
         return mExpectedCorpora.size();
     }
 
@@ -200,19 +200,24 @@ public class Suggestions {
     }
 
     /**
-     * Adds a corpus result. Must be called on the UI thread, or before this
+     * Adds a list of corpus results. Must be called on the UI thread, or before this
      * object is seen by the UI thread.
      */
-    public void addCorpusResult(CorpusResult corpusResult) {
+    public void addCorpusResults(List<CorpusResult> corpusResults) {
         if (mClosed) {
-            corpusResult.close();
+            for (CorpusResult corpusResult : corpusResults) {
+                corpusResult.close();
+            }
             return;
         }
-        if (!mQuery.equals(corpusResult.getUserQuery())) {
-          throw new IllegalArgumentException("Got result for wrong query: "
-                + mQuery + " != " + corpusResult.getUserQuery());
+
+        for (CorpusResult corpusResult : corpusResults) {
+            if (!mQuery.equals(corpusResult.getUserQuery())) {
+              throw new IllegalArgumentException("Got result for wrong query: "
+                    + mQuery + " != " + corpusResult.getUserQuery());
+            }
+            mCorpusResults.add(corpusResult);
         }
-        mCorpusResults.add(corpusResult);
         mPromoted = null;
         notifyDataSetChanged();
     }
@@ -223,13 +228,17 @@ public class Suggestions {
             return;
         }
         mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, mPromoted);
+        if (DBG) {
+            Log.d(TAG, "pickPromoted(" + mShortcuts + "," + mCorpusResults + ","
+                    + mMaxPromoted + ") = " + mPromoted);
+        }
     }
 
     /**
      * Gets the number of source results.
      * Must be called on the UI thread, or before this object is seen by the UI thread.
      */
-    public int getSourceCount() {
+    public int getResultCount() {
         if (mClosed) {
             throw new IllegalStateException("Called getSourceCount() when closed.");
         }
@@ -263,6 +272,12 @@ public class Suggestions {
         mCorpusResults = filteredResults;
         mPromoted = null;
         notifyDataSetChanged();
+    }
+
+    @Override
+    public String toString() {
+        return "Suggestions{expectedCorpora=" + mExpectedCorpora
+                + ",mCorpusResults.size()=" + mCorpusResults.size() + "}";
     }
 
     private class MyShortcutsObserver extends DataSetObserver {

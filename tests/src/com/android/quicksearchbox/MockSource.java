@@ -114,11 +114,11 @@ public class MockSource implements Source {
         SuggestionData s1 = new SuggestionData(this)
                 .setText1(query + "_1")
                 .setIntentAction(Intent.ACTION_VIEW)
-                .setIntentData("content://" + getClass().getName() + "/1");
+                .setIntentData("content://" + mName + "/1");
         SuggestionData s2 = new SuggestionData(this)
                 .setText1(query + "_2")
                 .setIntentAction(Intent.ACTION_VIEW)
-                .setIntentData("content://" + getClass().getName() + "/2");
+                .setIntentData("content://" + mName + "/2");
         cursor.add(s1);
         cursor.add(s2);
         return new Result(query, cursor);
