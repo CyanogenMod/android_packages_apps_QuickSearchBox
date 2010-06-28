@@ -59,6 +59,7 @@ public class SearchSettings extends PreferenceActivity
     private static final String CLEAR_SHORTCUTS_PREF = "clear_shortcuts";
     private static final String SEARCH_ENGINE_SETTINGS_PREF = "search_engine_settings";
     private static final String SEARCH_CORPORA_PREF = "search_corpora";
+    private static final String VOICE_SEARCH_CATEGORY = "voice_search_settings_category";
 
     // Prefix of per-corpus enable preference
     private static final String CORPUS_ENABLED_PREF_PREFIX = "enable_corpus_";
@@ -90,7 +91,14 @@ public class SearchSettings extends PreferenceActivity
         corporaPreference.setIntent(getSearchableItemsIntent(this));
 
         mClearShortcutsPreference.setOnPreferenceClickListener(this);
-        mVoiceSearchHintsPreference.setOnPreferenceClickListener(this);
+
+        if (getConfig().allowVoiceSearchHints()) {
+            mVoiceSearchHintsPreference.setOnPreferenceClickListener(this);
+        } else {
+            preferenceScreen.removePreference(
+                    preferenceScreen.findPreference(VOICE_SEARCH_CATEGORY));
+            mVoiceSearchHintsPreference = null;
+        }
 
         updateClearShortcutsPreference();
         populateSearchEnginePreference();
@@ -125,12 +133,12 @@ public class SearchSettings extends PreferenceActivity
         return context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
     }
 
-    private QsbApplication getQsbApplication() {
-        return (QsbApplication) getApplication();
+    private ShortcutRepository getShortcuts() {
+        return QsbApplication.get(this).getShortcutRepository();
     }
 
-    private ShortcutRepository getShortcuts() {
-        return getQsbApplication().getShortcutRepository();
+    private Config getConfig() {
+        return QsbApplication.get(this).getConfig();
     }
 
     /**

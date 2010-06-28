@@ -22,8 +22,6 @@ import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.os.Handler;
 
-import java.util.Iterator;
-
 /**
  * A task that gets suggestions from a corpus.
  */

@@ -88,6 +88,9 @@
          Home/res/values/strings.xml -->
     <string name="google_search_hint">Google Search</string>
 
+    <!-- Search settings description for the Google search source. -->
+    <string name="google_search_description">Google search suggestions</string>
+
     <!-- Settings category title for 'Google search settings' settings activity -->
     <string name="google_search_settings">Google search</string>
 

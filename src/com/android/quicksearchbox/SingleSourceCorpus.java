@@ -97,6 +97,10 @@ public class SingleSourceCorpus extends AbstractCorpus {
         return false;
     }
 
+    public boolean isLocationAware() {
+        return mSource.isLocationAware();
+    }
+
     public Collection<Source> getSources() {
         return Collections.singletonList(mSource);
     }

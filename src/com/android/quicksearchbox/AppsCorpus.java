@@ -93,7 +93,7 @@ public class AppsCorpus extends SingleSourceCorpus {
     private Intent createAppSearchIntent(String query, Bundle appData) {
         ComponentName name = getComponentName(getContext(), R.string.apps_search_activity);
         if (name == null) return null;
-        Intent intent = SearchableSource.createSourceSearchIntent(name, query, appData);
+        Intent intent = AbstractSource.createSourceSearchIntent(name, query, appData);
         if (intent == null) return null;
         ActivityInfo ai = intent.resolveActivityInfo(getContext().getPackageManager(), 0);
         if (ai != null) {

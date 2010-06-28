@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.google.GoogleClient;
+import com.android.quicksearchbox.google.GoogleSuggestClient;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
@@ -29,7 +31,10 @@ import com.android.quicksearchbox.util.PriorityThreadFactory;
 import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
 import com.google.common.util.concurrent.NamingThreadFactory;
 
-import android.app.Application;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
@@ -38,8 +43,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class QsbApplication extends Application {
+public class QsbApplication {
 
+    private final Context mContext;
+
+    private int mVersionCode;
     private Handler mUiThreadHandler;
     private Config mConfig;
     private Corpora mCorpora;
@@ -51,12 +59,39 @@ public class QsbApplication extends Application {
     private SuggestionsProvider mSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
+    private GoogleClient mGoogleClient;
+    private VoiceSearch mVoiceSearch;
     private Logger mLogger;
 
-    @Override
-    public void onTerminate() {
-        close();
-        super.onTerminate();
+    public QsbApplication(Context context) {
+        mContext = context;
+    }
+
+    public static boolean isFroyoOrLater() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
+    }
+
+    public static QsbApplication get(Context context) {
+        return ((QsbApplicationWrapper) context.getApplicationContext()).getApp();
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    public int getVersionCode() {
+        if (mVersionCode == 0) {
+            try {
+                PackageManager pm = getContext().getPackageManager();
+                PackageInfo pkgInfo = pm.getPackageInfo(getContext().getPackageName(), 0);
+                mVersionCode = pkgInfo.versionCode;
+            } catch (PackageManager.NameNotFoundException ex) {
+                // The current package should always exist, how else could we
+                // run code from it?
+                throw new RuntimeException(ex);
+            }
+        }
+        return mVersionCode;
     }
 
     protected void checkThread() {
@@ -109,7 +144,7 @@ public class QsbApplication extends Application {
     }
 
     protected Config createConfig() {
-        return new Config(this);
+        return new Config(getContext());
     }
 
     /**
@@ -125,7 +160,7 @@ public class QsbApplication extends Application {
     }
 
     protected Corpora createCorpora() {
-        SearchableCorpora corpora = new SearchableCorpora(this, createSources(),
+        SearchableCorpora corpora = new SearchableCorpora(getContext(), createSources(),
                 createCorpusFactory());
         corpora.update();
         return corpora;
@@ -143,12 +178,12 @@ public class QsbApplication extends Application {
     }
 
     protected Sources createSources() {
-        return new SearchableSources(this);
+        return new SearchableSources(getContext());
     }
 
     protected CorpusFactory createCorpusFactory() {
         int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
-        return new SearchableCorpusFactory(this, getConfig(),
+        return new SearchableCorpusFactory(getContext(), getConfig(),
                 createExecutorFactory(numWebCorpusThreads));
     }
 
@@ -193,7 +228,7 @@ public class QsbApplication extends Application {
         ThreadFactory logThreadFactory = new NamingThreadFactory("ShortcutRepositoryWriter #%d",
                 new PriorityThreadFactory(Process.THREAD_PRIORITY_BACKGROUND));
         Executor logExecutor = Executors.newSingleThreadExecutor(logThreadFactory);
-        return ShortcutRepositoryImplLog.create(this, getConfig(), getCorpora(),
+        return ShortcutRepositoryImplLog.create(getContext(), getConfig(), getCorpora(),
             getShortcutRefresher(), getMainThreadHandler(), logExecutor);
     }
 
@@ -227,7 +262,6 @@ public class QsbApplication extends Application {
     }
 
     protected NamedTaskExecutor createSourceTaskExecutor() {
-        Config config = getConfig();
         ThreadFactory queryThreadFactory = getQueryThreadFactory();
         return new PerNameExecutor(SingleThreadNamedTaskExecutor.factory(queryThreadFactory));
     }
@@ -290,7 +324,7 @@ public class QsbApplication extends Application {
     }
 
     protected SuggestionViewFactory createSuggestionViewFactory() {
-        return new SuggestionViewInflater(this);
+        return new SuggestionViewInflater(getContext());
     }
 
     /**
@@ -306,7 +340,7 @@ public class QsbApplication extends Application {
     }
 
     protected CorpusViewFactory createCorpusViewFactory() {
-        return new CorpusViewInflater(this);
+        return new CorpusViewInflater(getContext());
     }
 
     /**
@@ -314,10 +348,40 @@ public class QsbApplication extends Application {
      * May only be called from the main thread.
      */
     public SuggestionsAdapter createSuggestionsAdapter() {
-        Config config = getConfig();
         SuggestionViewFactory viewFactory = getSuggestionViewFactory();
         DelayingSuggestionsAdapter adapter = new DelayingSuggestionsAdapter(viewFactory);
         return adapter;
+    }
+
+    /**
+     * Gets the Google client.
+     * May only be called from the main thread.
+     */
+    public GoogleClient getGoogleClient() {
+        checkThread();
+        if (mGoogleClient == null) {
+            mGoogleClient = createGoogleClient();
+        }
+        return mGoogleClient;
+    }
+
+    protected GoogleClient createGoogleClient() {
+        return new GoogleSuggestClient(getContext());
+    }
+
+    /**
+     * Gets Voice Search utilities.
+     */
+    public VoiceSearch getVoiceSearch() {
+        checkThread();
+        if (mVoiceSearch == null) {
+            mVoiceSearch = createVoiceSearch();
+        }
+        return mVoiceSearch;
+    }
+
+    protected VoiceSearch createVoiceSearch() {
+        return new VoiceSearch(getContext());
     }
 
     /**
@@ -333,6 +397,6 @@ public class QsbApplication extends Application {
     }
 
     protected Logger createLogger() {
-        return new EventLogLogger(this, getConfig());
+        return new EventLogLogger(getContext(), getConfig());
     }
 }

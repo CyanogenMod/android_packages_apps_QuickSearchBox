@@ -52,12 +52,8 @@ public class SearchableItemsSettings extends PreferenceActivity
         populateSourcePreference();
     }
 
-    private QsbApplication getQsbApplication() {
-        return (QsbApplication) getApplication();
-    }
-
     private Corpora getCorpora() {
-        return getQsbApplication().getCorpora();
+        return QsbApplication.get(this).getCorpora();
     }
 
     /**

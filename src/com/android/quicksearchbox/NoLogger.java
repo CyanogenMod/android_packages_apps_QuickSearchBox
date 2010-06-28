@@ -20,11 +20,11 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Mock {@link Logger} implementation.
+ * Dummy {@link Logger} implementation.
  */
-public class MockLogger implements Logger {
+public class NoLogger implements Logger {
 
-    public MockLogger() {
+    public NoLogger() {
     }
 
     public void logStart(int latency, String intentSource, Corpus corpus,

@@ -16,12 +16,12 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.google.GoogleSource;
+
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
@@ -54,6 +54,14 @@ public class SearchableSources implements Sources {
     public SearchableSources(Context context) {
         mContext = context;
         mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    protected SearchManager getSearchManager() {
+        return mSearchManager;
     }
 
     public Collection<Source> getSources() {
@@ -100,24 +108,8 @@ public class SearchableSources implements Sources {
         mSources.put(source.getName(), source);
     }
 
-    private Source createWebSearchSource() {
-        ComponentName name = getWebSearchComponent();
-        SearchableInfo webSearchable = mSearchManager.getSearchableInfo(name);
-        if (webSearchable == null) {
-            Log.e(TAG, "Web search source " + name + " is not searchable.");
-            return null;
-        }
-        return createSearchableSource(webSearchable);
-    }
-
-    private ComponentName getWebSearchComponent() {
-        // Looks for an activity in the current package that handles ACTION_WEB_SEARCH.
-        // This indirect method is used to allow easy replacement of the web
-        // search activity when extending this package.
-        Intent webSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
-        webSearchIntent.setPackage(mContext.getPackageName());
-        PackageManager pm = mContext.getPackageManager();
-        return webSearchIntent.resolveActivity(pm);
+    protected Source createWebSearchSource() {
+        return new GoogleSource(getContext());
     }
 
     private SearchableSource createSearchableSource(SearchableInfo searchable) {

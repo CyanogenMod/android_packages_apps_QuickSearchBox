@@ -43,6 +43,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:key="voice_search_settings_category"
             android:title="@string/voice_search_category_title">
 
         <CheckBoxPreference

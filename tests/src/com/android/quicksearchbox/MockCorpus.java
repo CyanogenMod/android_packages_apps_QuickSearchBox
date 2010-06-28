@@ -155,4 +155,8 @@ public class MockCorpus implements Corpus {
         return false;
     }
 
+    public boolean isLocationAware() {
+        return false;
+    }
+
 }

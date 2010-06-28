@@ -101,6 +101,8 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
 
     boolean voiceSearchEnabled();
 
+    boolean isLocationAware();
+
     Intent createSearchIntent(String query, Bundle appData);
 
     Intent createVoiceSearchIntent(Bundle appData);

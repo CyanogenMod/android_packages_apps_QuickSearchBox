@@ -182,7 +182,7 @@ public class ShortcutsProvider extends ContentProvider {
     }
 
     private QsbApplication getQsbApplication() {
-        return (QsbApplication) getContext().getApplicationContext();
+        return QsbApplication.get(getContext());
     }
 
     private ShortcutRepository getShortcutRepository() {

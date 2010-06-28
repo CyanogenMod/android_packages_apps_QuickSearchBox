@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.speech.RecognizerIntent;
@@ -186,7 +187,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static Intent getVoiceSearchIntent(Context context, Corpus corpus,
             Bundle widgetAppData) {
-        VoiceSearch voiceSearch = new VoiceSearch(context);
+        VoiceSearch voiceSearch = QsbApplication.get(context).getVoiceSearch();
         if (!voiceSearch.shouldShowVoiceSearch(corpus)) return null;
         if (corpus == null) {
             return voiceSearch.createVoiceWebSearchIntent(widgetAppData);
@@ -224,13 +225,18 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         return spannedHint;
     }
 
+    private static boolean areVoiceSearchHintsEnabled(Context context) {
+        return getConfig(context).allowVoiceSearchHints()
+                && SearchSettings.areVoiceSearchHintsEnabled(context);
+    }
+
     public static void scheduleVoiceSearchHintUpdates(Context context, boolean enabled) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(ACTION_NEXT_VOICE_SEARCH_HINT);
         intent.setComponent(myComponentName(context));
         PendingIntent updateHint = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmManager.cancel(updateHint);
-        if (enabled && SearchSettings.areVoiceSearchHintsEnabled(context)) {
+        if (enabled && areVoiceSearchHintsEnabled(context)) {
             // Do one update immediately, and then at VOICE_SEARCH_HINT_UPDATE_INTERVAL intervals
             getHintsFromVoiceSearch(context);
             long period = VOICE_SEARCH_HINT_UPDATE_INTERVAL;
@@ -243,7 +249,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
      * Requests an asynchronous update of the voice search hints.
      */
     private static void getHintsFromVoiceSearch(Context context) {
-        if (!SearchSettings.areVoiceSearchHintsEnabled(context)) return;
+        if (!areVoiceSearchHintsEnabled(context)) return;
         Intent intent = new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
         intent.putExtra(Recognition.EXTRA_HINT_CONTEXT, Recognition.HINT_CONTEXT_LAUNCHER);
         if (DBG) Log.d(TAG, "Broadcasting " + intent);
@@ -290,16 +296,16 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         return i;
     }
 
-    private static QsbApplication getQsbApplication(Context context) {
-        return (QsbApplication) context.getApplicationContext();
+    private static Config getConfig(Context context) {
+        return QsbApplication.get(context).getConfig();
     }
 
     private static Corpora getCorpora(Context context) {
-        return getQsbApplication(context).getCorpora();
+        return QsbApplication.get(context).getCorpora();
     }
 
     private static CorpusViewFactory getCorpusViewFactory(Context context) {
-        return getQsbApplication(context).getCorpusViewFactory();
+        return QsbApplication.get(context).getCorpusViewFactory();
     }
 
     private static class SearchWidgetState {
@@ -356,13 +362,19 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         public void updateWidget(Context context, AppWidgetManager appWidgetManager) {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
             // Corpus indicator
-            views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
+            // Before Froyo, android.resource URI could not be used in ImageViews.
+            if (QsbApplication.isFroyoOrLater()) {
+                views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
+            }
             setOnClickActivityIntent(context, views, R.id.corpus_indicator,
                     mCorpusIndicatorIntent);
             // Query TextView
             views.setCharSequence(R.id.search_widget_text, "setHint", mQueryTextViewHint);
-            views.setInt(R.id.search_widget_text, "setBackgroundResource",
-                    mQueryTextViewBackgroundResource);
+            // setBackgroundResource did not have @RemotableViewMethod before Froyo
+            if (QsbApplication.isFroyoOrLater()) {
+                views.setInt(R.id.search_widget_text, "setBackgroundResource",
+                        mQueryTextViewBackgroundResource);
+            }
             setOnClickActivityIntent(context, views, R.id.search_widget_text,
                     mQueryTextViewIntent);
             // Voice Search button

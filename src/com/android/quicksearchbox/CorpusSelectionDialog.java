@@ -169,7 +169,7 @@ public class CorpusSelectionDialog extends Dialog {
     }
 
     private QsbApplication getQsbApplication() {
-        return (QsbApplication) getContext().getApplicationContext();
+        return QsbApplication.get(getContext());
     }
 
     private CorpusRanker getCorpusRanker() {

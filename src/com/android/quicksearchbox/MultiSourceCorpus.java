@@ -40,7 +40,7 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
     private int mQueryThreshold;
     private boolean mQueryAfterZeroResults;
     private boolean mVoiceSearchEnabled;
-
+    private boolean mIsLocationAware;
 
     public MultiSourceCorpus(Context context, Config config,
             Executor executor, Source... sources) {
@@ -96,14 +96,17 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
         return sources;
     }
 
-    private void calculateSourceProperties() {
+    private void updateSourceProperties() {
+        if (mSourcePropertiesValid) return;
         mQueryThreshold = Integer.MAX_VALUE;
         mQueryAfterZeroResults = false;
         mVoiceSearchEnabled = false;
+        mIsLocationAware = false;
         for (Source s : getSources()) {
             mQueryThreshold = Math.min(mQueryThreshold, s.getQueryThreshold());
             mQueryAfterZeroResults |= s.queryAfterZeroResults();
             mVoiceSearchEnabled |= s.voiceSearchEnabled();
+            mIsLocationAware |= s.isLocationAware();
         }
         if (mQueryThreshold == Integer.MAX_VALUE) {
             mQueryThreshold = 0;
@@ -112,24 +115,23 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
     }
 
     public int getQueryThreshold() {
-        if (!mSourcePropertiesValid) {
-            calculateSourceProperties();
-        }
+        updateSourceProperties();
         return mQueryThreshold;
     }
 
     public boolean queryAfterZeroResults() {
-        if (!mSourcePropertiesValid) {
-            calculateSourceProperties();
-        }
+        updateSourceProperties();
         return mQueryAfterZeroResults;
     }
 
     public boolean voiceSearchEnabled() {
-        if (!mSourcePropertiesValid) {
-            calculateSourceProperties();
-        }
+        updateSourceProperties();
         return mVoiceSearchEnabled;
+    }
+
+    public boolean isLocationAware() {
+        updateSourceProperties();
+        return mIsLocationAware;
     }
 
     public CorpusResult getSuggestions(String query, int queryLimit, boolean onlyCorpus) {

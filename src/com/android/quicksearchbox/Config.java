@@ -214,4 +214,7 @@ public class Config {
         return PUBLISH_RESULT_DELAY_MILLIS;
     }
 
+    public boolean allowVoiceSearchHints() {
+        return false;
+    }
 }

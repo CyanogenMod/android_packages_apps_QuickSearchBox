@@ -93,4 +93,9 @@ public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
      * Checks if this corpus should be hidden from the corpus selector.
      */
     boolean isCorpusHidden();
+
+    /**
+     * Checks if this corpus is location aware.
+     */
+    boolean isLocationAware();
 }

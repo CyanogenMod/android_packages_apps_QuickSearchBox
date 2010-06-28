@@ -21,7 +21,6 @@ import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SuggestionCursor;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
@@ -140,14 +139,15 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
 
     public Drawable getSuggestionDrawableIcon1(SuggestionCursor suggestion) {
         Source source = suggestion.getSuggestionSource();
-        String icon1Id = suggestion.getSuggestionIcon1();
-        Drawable icon1 = source.getIcon(icon1Id);
+        String iconId = suggestion.getSuggestionIcon1();
+        Drawable icon1 = iconId == null ? null : source.getIcon(iconId);
         return icon1 == null ? source.getSourceIcon() : icon1;
     }
 
     public Drawable getSuggestionDrawableIcon2(SuggestionCursor suggestion) {
         Source source = suggestion.getSuggestionSource();
-        return source.getIcon(suggestion.getSuggestionIcon2());
+        String iconId = suggestion.getSuggestionIcon2();
+        return iconId == null ? null : source.getIcon(iconId);
     }
 
     private CharSequence formatText(String str, String format) {

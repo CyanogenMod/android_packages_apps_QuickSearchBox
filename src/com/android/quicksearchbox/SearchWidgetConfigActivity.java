@@ -54,6 +54,12 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
         }
+
+        // If there is only All, or only All and one other corpus, there is no
+        // point in asking the user to select a corpus.
+        if (getCorpusRanker().getRankedCorpora().size() <= 1) {
+            selectCorpus(null);
+        }
     }
 
     @Override
@@ -106,16 +112,12 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         return prefs.getString(getCorpusPrefKey(appWidgetId), null);
     }
 
-    private QsbApplication getQsbApplication() {
-        return (QsbApplication) getApplication();
-    }
-
     private CorpusRanker getCorpusRanker() {
-        return getQsbApplication().getCorpusRanker();
+        return QsbApplication.get(this).getCorpusRanker();
     }
 
     private CorpusViewFactory getViewFactory() {
-        return getQsbApplication().getCorpusViewFactory();
+        return QsbApplication.get(this).getCorpusViewFactory();
     }
 
     private class SourceClickListener implements AdapterView.OnItemClickListener {

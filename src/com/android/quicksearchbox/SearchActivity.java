@@ -99,8 +99,6 @@ public class SearchActivity extends Activity {
     protected ImageButton mVoiceSearchButton;
     protected ImageButton mCorpusIndicator;
 
-    private VoiceSearch mVoiceSearch;
-
     private Corpus mCorpus;
     private Bundle mAppSearchData;
     private boolean mUpdateSuggestions;
@@ -139,8 +137,6 @@ public class SearchActivity extends Activity {
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
         mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
-
-        mVoiceSearch = new VoiceSearch(this);
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
@@ -295,7 +291,7 @@ public class SearchActivity extends Activity {
     }
 
     private QsbApplication getQsbApplication() {
-        return (QsbApplication) getApplication();
+        return QsbApplication.get(this);
     }
 
     private Config getConfig() {
@@ -316,6 +312,10 @@ public class SearchActivity extends Activity {
 
     private CorpusViewFactory getCorpusViewFactory() {
         return getQsbApplication().getCorpusViewFactory();
+    }
+
+    private VoiceSearch getVoiceSearch() {
+        return QsbApplication.get(this).getVoiceSearch();
     }
 
     private Logger getLogger() {
@@ -423,7 +423,7 @@ public class SearchActivity extends Activity {
     }
 
     protected void updateVoiceSearchButton(boolean queryEmpty) {
-        if (queryEmpty && mVoiceSearch.shouldShowVoiceSearch(mCorpus)) {
+        if (queryEmpty && getVoiceSearch().shouldShowVoiceSearch(mCorpus)) {
             mVoiceSearchButton.setVisibility(View.VISIBLE);
             mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
         } else {

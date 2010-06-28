@@ -101,7 +101,11 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     public Intent createVoiceSearchIntent(Bundle appData) {
-        return new VoiceSearch(getContext()).createVoiceWebSearchIntent(appData);
+        if (mWebSearchSource != null){
+            return mWebSearchSource.createVoiceSearchIntent(appData);
+        } else {
+            return null;
+        }
     }
 
     private int getCorpusIconResource() {

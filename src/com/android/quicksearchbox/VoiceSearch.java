@@ -34,6 +34,10 @@ public class VoiceSearch {
         mContext = context;
     }
 
+    protected Context getContext() {
+        return mContext;
+    }
+
     public boolean shouldShowVoiceSearch(Corpus corpus) {
         if (corpus != null && !corpus.voiceSearchEnabled()) {
             return false;

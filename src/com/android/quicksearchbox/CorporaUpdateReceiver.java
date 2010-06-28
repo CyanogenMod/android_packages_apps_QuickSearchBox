@@ -42,11 +42,7 @@ public class CorporaUpdateReceiver extends BroadcastReceiver {
     }
 
     private void updateCorpora(Context context) {
-        getQsbApplication(context).updateCorpora();
-    }
-
-    private QsbApplication getQsbApplication(Context context) {
-        return (QsbApplication) context.getApplicationContext();
+        QsbApplication.get(context).updateCorpora();
     }
 
 }

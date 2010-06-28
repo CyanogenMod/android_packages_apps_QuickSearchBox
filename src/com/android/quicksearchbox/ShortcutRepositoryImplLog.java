@@ -293,6 +293,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         if (refreshed == null || refreshed.getCount() == 0) {
             shortcut = null;
         } else {
+            refreshed.moveTo(0);
             shortcut = makeShortcutRow(refreshed);
         }
 

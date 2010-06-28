@@ -43,7 +43,7 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
         mCorpora.addCorpus(MockCorpus.CORPUS_1);
         mCorpora.addCorpus(MockCorpus.CORPUS_2);
         CorpusRanker corpusRanker = new LexicographicalCorpusRanker(mCorpora);
-        Logger logger = new MockLogger();
+        Logger logger = new NoLogger();
         mProvider = new SuggestionsProviderImpl(config,
                 mTaskExecutor,
                 publishThread,
