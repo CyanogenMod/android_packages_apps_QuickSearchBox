@@ -105,12 +105,12 @@ public class SuggestionsAdapter extends BaseAdapter {
             if ((mCorpus == null) && (corpus != null)) {
                 // we've just switched from the 'All' corpus to a specific corpus
                 // we can filter the existing results immediately.
-                if (DBG) Log.v(TAG, "setCorpus(" + corpus.getName() + ") Filter suggestions");
+                if (DBG) Log.d(TAG, "setCorpus(" + corpus.getName() + ") Filter suggestions");
                 mSuggestions.filterByCorpus(corpus);
             } else if (corpus != null) {
                 // Note, when switching from a specific corpus to 'All' we do not change the
                 // suggestions, since they're still relevant for 'All'. Hence 'corpus != null'
-                if (DBG) Log.v(TAG, "setCorpus(" + corpus.getName() + ") Clear suggestions");
+                if (DBG) Log.d(TAG, "setCorpus(" + corpus.getName() + ") Clear suggestions");
                 mSuggestions.unregisterDataSetObserver(mDataSetObserver);
                 mSuggestions.close();
                 mSuggestions = null;

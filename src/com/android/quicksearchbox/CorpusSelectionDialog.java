@@ -191,7 +191,7 @@ public class CorpusSelectionDialog extends Dialog {
     private class CorpusClickListener implements AdapterView.OnItemClickListener {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Corpus corpus = (Corpus) parent.getItemAtPosition(position);
-            if (DBG) Log.v(TAG, "Corpus selected: " + corpus);
+            if (DBG) Log.d(TAG, "Corpus selected: " + corpus);
             selectCorpus(corpus);
         }
     }

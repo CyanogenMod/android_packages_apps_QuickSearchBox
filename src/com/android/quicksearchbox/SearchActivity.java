@@ -641,7 +641,7 @@ public class SearchActivity extends Activity {
     protected void updateSuggestions(String query) {
 
         query = ltrim(query);
-        if (DBG) Log.v(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
+        if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
                 query, mCorpus, getMaxSuggestions());
 

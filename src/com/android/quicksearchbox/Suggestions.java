@@ -222,7 +222,7 @@ public class Suggestions {
 
         for (CorpusResult corpusResult : corpusResults) {
             if (DBG) {
-                Log.v(TAG, "addCorpusResult["+ mId + "] corpus:" +
+                Log.d(TAG, "addCorpusResult["+ mId + "] corpus:" +
                         corpusResult.getCorpus().getName() + " results:" + corpusResult.getCount());
             }
             if (!mQuery.equals(corpusResult.getUserQuery())) {
