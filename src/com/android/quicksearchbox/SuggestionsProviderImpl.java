@@ -109,12 +109,17 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
     private List<Corpus> getCorporaToQuery(String query, Corpus singleCorpus) {
         if (singleCorpus != null) return Collections.singletonList(singleCorpus);
         List<Corpus> orderedCorpora = mCorpusRanker.getRankedCorpora();
+        if (DBG) Log.d(TAG, "getCorporaToQuery query='"+query+"' orderedCorpora="+orderedCorpora);
         ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(orderedCorpora.size());
         for (Corpus corpus : orderedCorpora) {
             if (shouldQueryCorpus(corpus, query)) {
+                if (DBG) Log.d(TAG, "should query corpus " + corpus);
                 corporaToQuery.add(corpus);
+            } else {
+                if (DBG) Log.d(TAG, "should NOT query corpus " + corpus);
             }
         }
+        if (DBG) Log.d(TAG, "getCorporaToQuery corporaToQuery=" + corporaToQuery);
         return corporaToQuery;
     }
 
