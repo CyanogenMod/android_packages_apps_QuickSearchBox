@@ -198,11 +198,10 @@ public class SearchableSource extends AbstractSource {
 
     public Drawable getSourceIcon() {
         if (mSourceIcon == null) {
-            // Load icon lazily
-            int iconRes = getSourceIconResource();
-            PackageManager pm = getContext().getPackageManager();
-            Drawable icon = pm.getDrawable(mActivityInfo.packageName, iconRes,
-                    mActivityInfo.applicationInfo);
+            Drawable icon = loadSourceIcon();
+            if (icon == null) {
+                icon = getContext().getResources().getDrawable(R.drawable.corpus_icon_default);
+            }
             // Can't share Drawable instances, save constant state instead.
             mSourceIcon = (icon != null) ? icon.getConstantState() : null;
             // Optimization, return the Drawable the first time
@@ -211,14 +210,25 @@ public class SearchableSource extends AbstractSource {
         return (mSourceIcon != null) ? mSourceIcon.newDrawable() : null;
     }
 
+    private Drawable loadSourceIcon() {
+        int iconRes = getSourceIconResource();
+        if (iconRes == 0) return null;
+        PackageManager pm = getContext().getPackageManager();
+        return pm.getDrawable(mActivityInfo.packageName, iconRes,
+                mActivityInfo.applicationInfo);
+    }
+
     public Uri getSourceIconUri() {
         int resourceId = getSourceIconResource();
-        return Util.getResourceUri(getContext(), mActivityInfo.applicationInfo, resourceId);
+        if (resourceId == 0) {
+            return Util.getResourceUri(getContext(), R.drawable.corpus_icon_default);
+        } else {
+            return Util.getResourceUri(getContext(), mActivityInfo.applicationInfo, resourceId);
+        }
     }
 
     private int getSourceIconResource() {
-        int icon = mActivityInfo.getIconResource();
-        return (icon != 0) ? icon : android.R.drawable.sym_def_app_icon;
+        return mActivityInfo.getIconResource();
     }
 
     public boolean voiceSearchEnabled() {

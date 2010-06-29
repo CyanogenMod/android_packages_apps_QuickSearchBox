@@ -54,13 +54,12 @@ public class AppsCorpus extends SingleSourceCorpus {
 
     @Override
     public Drawable getCorpusIcon() {
-        // TODO: Should we have a different icon for the apps corpus?
-        return getContext().getResources().getDrawable(android.R.drawable.sym_def_app_icon);
+        return getContext().getResources().getDrawable(R.drawable.corpus_icon_apps);
     }
 
     @Override
     public Uri getCorpusIconUri() {
-        return Util.getResourceUri(getContext(), android.R.drawable.sym_def_app_icon);
+        return Util.getResourceUri(getContext(), R.drawable.corpus_icon_apps);
     }
 
     @Override

@@ -250,7 +250,7 @@ public class SearchSettings extends PreferenceActivity
         // e.g. from different QSB implementations.
         settings.setPackage(context.getPackageName());
         menu.add(Menu.NONE, Menu.NONE, 0, R.string.menu_settings)
-                .setIcon(android.R.drawable.ic_menu_preferences).setAlphabeticShortcut('P')
+                .setIcon(R.drawable.ic_menu_preferences).setAlphabeticShortcut('P')
                 .setIntent(settings);
     }
 }

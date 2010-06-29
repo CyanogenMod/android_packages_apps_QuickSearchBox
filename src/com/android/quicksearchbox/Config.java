@@ -215,6 +215,6 @@ public class Config {
     }
 
     public boolean allowVoiceSearchHints() {
-        return false;
+        return true;
     }
 }

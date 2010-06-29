@@ -52,7 +52,7 @@
             android:layout_height="24dip"
             android:layout_weight="0.0"
             android:paddingLeft="4dip"
-            android:src="@android:drawable/btn_dialog"
+            android:src="@drawable/btn_dialog"
             android:scaleType="centerInside"
             android:focusable="true"
             />
