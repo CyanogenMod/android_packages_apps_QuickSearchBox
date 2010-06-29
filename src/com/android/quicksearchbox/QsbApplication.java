@@ -33,6 +33,7 @@ import com.google.common.util.concurrent.NamingThreadFactory;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -61,6 +62,7 @@ public class QsbApplication {
     private GoogleSource mGoogleSource;
     private VoiceSearch mVoiceSearch;
     private Logger mLogger;
+    private SuggestionFormatter mSuggestionFormatter;
 
     public QsbApplication(Context context) {
         mContext = context;
@@ -397,5 +399,17 @@ public class QsbApplication {
 
     protected Logger createLogger() {
         return new EventLogLogger(getContext(), getConfig());
+    }
+
+    public SuggestionFormatter getSuggestionFormatter() {
+        if (mSuggestionFormatter == null) {
+            mSuggestionFormatter = createSuggestionFormatter();
+            mSuggestionFormatter.setSuggestedTextFormat(Typeface.BOLD, 0);
+        }
+        return mSuggestionFormatter;
+    }
+
+    protected SuggestionFormatter createSuggestionFormatter() {
+        return new LevenshteinSuggestionFormatter();
     }
 }
