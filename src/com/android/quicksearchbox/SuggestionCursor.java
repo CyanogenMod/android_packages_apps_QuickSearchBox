@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox;
 
-import android.content.Intent;
 import android.database.DataSetObserver;
-import android.os.Bundle;
-
 
 /**
  * A sequence of suggestions, with a current position.
  */
-public interface SuggestionCursor {
+public interface SuggestionCursor extends Suggestion {
+
+    /**
+     * Gets the query that the user typed to get this suggestion.
+     */
+    String getUserQuery();
 
     /**
      * Gets the number of suggestions in this result.
@@ -72,110 +73,4 @@ public interface SuggestionCursor {
      * @param observer the observer to unregister.
      */
     void unregisterDataSetObserver(DataSetObserver observer);
-
-    /**
-     * Gets the source that produced the current suggestion.
-     */
-    Source getSuggestionSource();
-
-    /**
-     * Gets the query that the user typed to get this suggestion.
-     */
-    String getUserQuery();
-
-    /**
-     * Gets the shortcut ID of the current suggestion.
-     */
-    String getShortcutId();
-
-    /**
-     * Whether to show a spinner while refreshing this shortcut.
-     */
-    boolean isSpinnerWhileRefreshing();
-
-    /**
-     * Gets the format of the text returned by {@link #getSuggestionText1()}
-     * and {@link #getSuggestionText2()}.
-     *
-     * @return {@code null} or "html"
-     */
-    String getSuggestionFormat();
-
-    /**
-     * Gets the first text line for the current suggestion.
-     */
-    String getSuggestionText1();
-
-    /**
-     * Gets the second text line for the current suggestion.
-     */
-    String getSuggestionText2();
-
-    /**
-     * Gets the second text line URL for the current suggestion.
-     */
-    String getSuggestionText2Url();
-
-    /**
-     * Gets the left-hand-side icon for the current suggestion.
-     *
-     * @return A string that can be passed to {@link Source#getIcon(String)}.
-     */
-    String getSuggestionIcon1();
-
-    /**
-     * Gets the right-hand-side icon for the current suggestion.
-     *
-     * @return A string that can be passed to {@link Source#getIcon(String)}.
-     */
-    String getSuggestionIcon2();
-
-    /**
-     * Gets the intent action for the current suggestion.
-     */
-    String getSuggestionIntentAction();
-
-    /**
-     * Gets the extra data associated with this suggestion's intent.
-     */
-    String getSuggestionIntentExtraData();
-
-    /**
-     * Gets the data associated with this suggestion's intent.
-     */
-    String getSuggestionIntentDataString();
-
-    /**
-     * Gets the query associated with this suggestion's intent.
-     */
-    String getSuggestionQuery();
-
-    /**
-     * Gets the intent launched by this suggestion.
-     */
-    Intent getSuggestionIntent(Bundle appSearchData);
-
-    /**
-     * Gets a unique key that identifies this suggestion. This is used to avoid
-     * duplicate suggestions in the promoted list. This key should be based on
-     * the intent of the suggestion.
-     */
-    String getSuggestionKey();
-
-    /**
-     * Gets the suggestion log type for the current suggestion. This is logged together
-     * with the value returned from {@link Source#getName()}.
-     * The value is source-specific. Most sources return {@code null}.
-     */
-    String getSuggestionLogType();
-
-    /**
-     * Checks if this suggestion is a shortcut.
-     */
-    boolean isSuggestionShortcut();
-
-    /**
-     * Checks if this is a web search suggestion.
-     */
-    boolean isWebSearchSuggestion();
 }

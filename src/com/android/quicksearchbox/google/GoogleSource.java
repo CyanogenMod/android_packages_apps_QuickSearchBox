@@ -17,7 +17,6 @@ package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.AbstractSource;
 import com.android.quicksearchbox.CursorBackedSourceResult;
-import com.android.quicksearchbox.IconLoader;
 import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.SourceResult;
@@ -26,7 +25,6 @@ import com.android.quicksearchbox.SuggestionCursor;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,7 +40,11 @@ public class GoogleSource extends AbstractSource {
 
     public GoogleSource(Context context) {
         super(context);
-        mClient = QsbApplication.get(context).getGoogleClient();
+        mClient = createGoogleClient();
+    }
+
+    protected GoogleClient createGoogleClient() {
+        return new GoogleSuggestClient(getContext(), this);
     }
 
     public boolean canRead() {
@@ -104,8 +106,13 @@ public class GoogleSource extends AbstractSource {
     }
 
     public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
-        Cursor cursor = mClient.query(query);
-        return new CursorBackedSourceResult(this, query, cursor);
+        SourceResult result = mClient.query(query);
+        if (result == null) {
+            // getSuggestions() should never return null
+            return new CursorBackedSourceResult(this, query);
+        } else {
+            return result;
+        }
     }
 
     public int getVersionCode() {
@@ -117,8 +124,7 @@ public class GoogleSource extends AbstractSource {
     }
 
     public SuggestionCursor refreshShortcut(String shortcutId, String extraData) {
-        Cursor cursor = mClient.refreshShortcut(shortcutId, extraData);
-        return new CursorBackedSourceResult(this, null, cursor);
+        return mClient.refreshShortcut(shortcutId, extraData);
     }
 
     public boolean voiceSearchEnabled() {
@@ -130,7 +136,7 @@ public class GoogleSource extends AbstractSource {
     }
 
     public boolean isLocationAware() {
-        return true;
+        return mClient.isLocationAware();
     }
 
 }

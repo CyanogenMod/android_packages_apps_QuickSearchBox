@@ -70,7 +70,7 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
     public void testRefreshNull() {
         SuggestionData shortcut1 = new SuggestionData(mSource1)
                 .setShortcutId("null_refresh");
-        DataSuggestionCursor shortcuts = new DataSuggestionCursor(mQuery, shortcut1);
+        ListSuggestionCursor shortcuts = new ListSuggestionCursor(mQuery, shortcut1);
         mRefresher.refresh(shortcuts, mListener);
         assertTrue(mExecutor.runNext());
         assertEquals(mSource1, mRefreshedSource);
@@ -81,7 +81,7 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
     public void testRefreshEmpty() {
         SuggestionData shortcut1 = new SuggestionData(mSource1)
                 .setShortcutId("empty_refresh");
-        DataSuggestionCursor shortcuts = new DataSuggestionCursor(mQuery, shortcut1);
+        ListSuggestionCursor shortcuts = new ListSuggestionCursor(mQuery, shortcut1);
         mRefresher.refresh(shortcuts, mListener);
         assertTrue(mExecutor.runNext());
         assertEquals(mSource1, mRefreshedSource);
@@ -92,7 +92,7 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
     public void testRefreshSuccess() {
         SuggestionData shortcut1 = new SuggestionData(mSource1)
                 .setShortcutId("success");
-        DataSuggestionCursor shortcuts = new DataSuggestionCursor(mQuery, shortcut1);
+        ListSuggestionCursor shortcuts = new ListSuggestionCursor(mQuery, shortcut1);
         mRefresher.refresh(shortcuts, mListener);
         assertTrue(mExecutor.runNext());
         assertEquals(mSource1, mRefreshedSource);
@@ -121,7 +121,7 @@ public class SourceShortcutRefresherTest extends AndroidTestCase {
             if ("null_refresh".equals(shortcutId)) {
                 return null;
             } else if ("empty_refresh".equals(shortcutId)) {
-                return new DataSuggestionCursor(mQuery);
+                return new ListSuggestionCursor(mQuery);
             } else {
                  SuggestionCursor suggestions = getSuggestions(mQuery, 1, true);
                  return SuggestionCursorUtil.slice(suggestions, 0, 1);

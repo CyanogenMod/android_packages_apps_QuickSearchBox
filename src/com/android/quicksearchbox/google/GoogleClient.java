@@ -15,8 +15,10 @@
  */
 package com.android.quicksearchbox.google;
 
+import com.android.quicksearchbox.SourceResult;
+import com.android.quicksearchbox.SuggestionCursor;
+
 import android.content.ComponentName;
-import android.database.Cursor;
 
 /**
  * Interface for Google suggestion clients.
@@ -25,8 +27,10 @@ public interface GoogleClient {
 
     public ComponentName getIntentComponent();
 
-    public Cursor query(String query);
+    public boolean isLocationAware();
 
-    public Cursor refreshShortcut(String shortcutId, String oldExtraData);
+    public SourceResult query(String query);
+
+    public SuggestionCursor refreshShortcut(String shortcutId, String oldExtraData);
 
 }

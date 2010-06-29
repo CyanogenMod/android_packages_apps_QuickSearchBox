@@ -416,7 +416,9 @@ public class SearchableSource extends AbstractSource {
     }
 
     public String getDefaultIntentAction() {
-        return mSearchable.getSuggestIntentAction();
+        String action = mSearchable.getSuggestIntentAction();
+        if (action != null) return action;
+        return Intent.ACTION_SEARCH;
     }
 
     public String getDefaultIntentData() {

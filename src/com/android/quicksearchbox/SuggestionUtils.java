@@ -21,37 +21,22 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-
 /**
- * Base class for suggestion cursors.
+ * Some utilities for suggestions.
  */
-public abstract class AbstractSuggestionCursor implements SuggestionCursor {
+public class SuggestionUtils {
 
-    private final String mUserQuery;
-
-    public AbstractSuggestionCursor(String userQuery) {
-        mUserQuery = userQuery;
+    private SuggestionUtils() {
     }
 
-    public String getUserQuery() {
-        return mUserQuery;
-    }
+    public static Intent getSuggestionIntent(SuggestionCursor suggestion, Bundle appSearchData) {
+        Source source = suggestion.getSuggestionSource();
+        String action = suggestion.getSuggestionIntentAction();
 
-    protected String getSuggestionIntentAction(String action) {
-        if (action != null) return action;
-        String defaultAction = getSuggestionSource().getDefaultIntentAction();
-        if (defaultAction != null) return defaultAction;
-        return Intent.ACTION_SEARCH;
-    }
-
-    public Intent getSuggestionIntent(Bundle appSearchData) {
-        Source source = getSuggestionSource();
-        String action = getSuggestionIntentAction();
-
-        String data = getSuggestionIntentDataString();
-        String query = getSuggestionQuery();
-        String userQuery = getUserQuery();
-        String extraData = getSuggestionIntentExtraData();
+        String data = suggestion.getSuggestionIntentDataString();
+        String query = suggestion.getSuggestionQuery();
+        String userQuery = suggestion.getUserQuery();
+        String extraData = suggestion.getSuggestionIntentExtraData();
 
         // Now build the Intent
         Intent intent = new Intent(action);
@@ -75,10 +60,6 @@ public abstract class AbstractSuggestionCursor implements SuggestionCursor {
 
         intent.setComponent(source.getIntentComponent());
         return intent;
-    }
-
-    public boolean isWebSearchSuggestion() {
-        return Intent.ACTION_WEB_SEARCH.equals(getSuggestionIntentAction());
     }
 
 }

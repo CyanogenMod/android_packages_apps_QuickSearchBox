@@ -16,8 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.google.GoogleClient;
-import com.android.quicksearchbox.google.GoogleSuggestClient;
+import com.android.quicksearchbox.google.GoogleSource;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
@@ -59,7 +58,7 @@ public class QsbApplication {
     private SuggestionsProvider mSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
-    private GoogleClient mGoogleClient;
+    private GoogleSource mGoogleSource;
     private VoiceSearch mVoiceSearch;
     private Logger mLogger;
 
@@ -354,19 +353,19 @@ public class QsbApplication {
     }
 
     /**
-     * Gets the Google client.
+     * Gets the Google source.
      * May only be called from the main thread.
      */
-    public GoogleClient getGoogleClient() {
+    public GoogleSource getGoogleSource() {
         checkThread();
-        if (mGoogleClient == null) {
-            mGoogleClient = createGoogleClient();
+        if (mGoogleSource == null) {
+            mGoogleSource = createGoogleSource();
         }
-        return mGoogleClient;
+        return mGoogleSource;
     }
 
-    protected GoogleClient createGoogleClient() {
-        return new GoogleSuggestClient(getContext());
+    protected GoogleSource createGoogleSource() {
+        return new GoogleSource(getContext());
     }
 
     /**

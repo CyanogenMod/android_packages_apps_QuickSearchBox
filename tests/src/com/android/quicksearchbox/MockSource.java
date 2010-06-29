@@ -62,7 +62,7 @@ public class MockSource implements Source {
     }
 
     public String getDefaultIntentAction() {
-        return null;
+        return Intent.ACTION_SEARCH;
     }
 
     public String getDefaultIntentData() {
@@ -113,7 +113,7 @@ public class MockSource implements Source {
         if (query.length() == 0) {
             return null;
         }
-        DataSuggestionCursor cursor = new DataSuggestionCursor(query);
+        ListSuggestionCursor cursor = new ListSuggestionCursor(query);
         Intent i1 = new Intent(Intent.ACTION_VIEW);
         SuggestionData s1 = new SuggestionData(this)
                 .setText1(query + "_1")

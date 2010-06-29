@@ -17,7 +17,7 @@
 package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.QsbApplication;
-import com.android.quicksearchbox.google.GoogleClient;
+import com.android.quicksearchbox.SuggestionCursorBackedCursor;
 
 import android.app.SearchManager;
 import android.content.ContentProvider;
@@ -39,11 +39,11 @@ public class GoogleSuggestionProvider extends ContentProvider {
 
     private UriMatcher mUriMatcher;
 
-    private GoogleClient mClient;
+    private GoogleSource mSource;
 
     @Override
     public boolean onCreate() {
-        mClient = QsbApplication.get(getContext()).getGoogleClient();
+        mSource = QsbApplication.get(getContext()).getGoogleSource();
         mUriMatcher = buildUriMatcher(getContext());
         return true;
     }
@@ -65,12 +65,12 @@ public class GoogleSuggestionProvider extends ContentProvider {
 
         if (match == SEARCH_SUGGEST) {
             String query = getQuery(uri);
-            return mClient.query(query);
+            return new SuggestionCursorBackedCursor(mSource.getSuggestions(query, 0, true));
         } else if (match == SEARCH_SHORTCUT) {
-            String query = getQuery(uri);
+            String shortcutId = getQuery(uri);
             String extraData =
                 uri.getQueryParameter(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
-            return mClient.refreshShortcut(query, extraData);
+            return new SuggestionCursorBackedCursor(mSource.refreshShortcut(shortcutId, extraData));
         } else {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }

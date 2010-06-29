@@ -473,7 +473,7 @@ public class SearchActivity extends Activity {
         // Create shortcut
         SuggestionData searchShortcut = searchCorpus.createSearchShortcut(query);
         if (searchShortcut != null) {
-            DataSuggestionCursor cursor = new DataSuggestionCursor(query);
+            ListSuggestionCursor cursor = new ListSuggestionCursor(query);
             cursor.add(searchShortcut);
             getShortcutRepository().reportClick(cursor, 0);
         }
@@ -559,7 +559,7 @@ public class SearchActivity extends Activity {
 
         // Launch intent
         suggestions.moveTo(position);
-        Intent intent = suggestions.getSuggestionIntent(mAppSearchData);
+        Intent intent = SuggestionUtils.getSuggestionIntent(suggestions, mAppSearchData);
         launchIntent(intent);
 
         return true;

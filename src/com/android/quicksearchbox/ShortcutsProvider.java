@@ -128,7 +128,7 @@ public class ShortcutsProvider extends ContentProvider {
         String userQuery = shortcut.getAsString(SearchManager.USER_QUERY);
         if (userQuery == null) userQuery = "";
 
-        DataSuggestionCursor cursor = new DataSuggestionCursor(userQuery);
+        ListSuggestionCursor cursor = new ListSuggestionCursor(userQuery);
         cursor.add(makeSuggestion(source, shortcut));
         getShortcutRepository().reportClick(cursor, 0);
     }

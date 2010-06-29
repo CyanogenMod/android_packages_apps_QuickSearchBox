@@ -17,6 +17,9 @@
 package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.Source;
+import com.android.quicksearchbox.SourceResult;
+import com.android.quicksearchbox.SuggestionCursor;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -28,11 +31,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.database.AbstractCursor;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
@@ -58,29 +58,13 @@ public class GoogleSuggestClient implements GoogleClient {
     // TODO: this should be defined somewhere
     private static final String HTTP_TIMEOUT = "http.connection-manager.timeout";
 
-    // Indexes into COLUMNS
-    private static final int COL_ID = 0;
-    private static final int COL_TEXT_1 = 1;
-    private static final int COL_TEXT_2 = 2;
-    private static final int COL_ICON_1 = 3;
-    private static final int COL_ICON_2 = 4;
-    private static final int COL_QUERY = 5;
+    private final Context mContext;
+    private final Source mSource;
+    private final HttpClient mHttpClient;
 
-    /* The suggestion columns used */
-    private static final String[] COLUMNS = new String[] {
-        "_id",
-        SearchManager.SUGGEST_COLUMN_TEXT_1,
-        SearchManager.SUGGEST_COLUMN_TEXT_2,
-        SearchManager.SUGGEST_COLUMN_ICON_1,
-        SearchManager.SUGGEST_COLUMN_ICON_2,
-        SearchManager.SUGGEST_COLUMN_QUERY
-    };
-
-    private Context mContext;
-    private HttpClient mHttpClient;
-
-    public GoogleSuggestClient(Context context) {
+    public GoogleSuggestClient(Context context, Source source) {
         mContext = context;
+        mSource = source;
         mHttpClient = new DefaultHttpClient();
         HttpParams params = mHttpClient.getParams();
         HttpProtocolParams.setUserAgent(params, USER_AGENT);
@@ -99,11 +83,15 @@ public class GoogleSuggestClient implements GoogleClient {
         return new ComponentName(getContext(), GoogleSearch.class);
     }
 
+    public boolean isLocationAware() {
+        return false;
+    }
+
     /**
      * Queries for a given search term and returns a cursor containing
      * suggestions ordered by best match.
      */
-    public Cursor query(String query) {
+    public SourceResult query(String query) {
         if (TextUtils.isEmpty(query)) {
             return null;
         }
@@ -160,7 +148,7 @@ public class GoogleSuggestClient implements GoogleClient {
                 JSONArray suggestions = results.getJSONArray(1);
                 JSONArray popularity = results.getJSONArray(2);
                 if (DBG) Log.d(LOG_TAG, "Got " + suggestions.length() + " results");
-                return new SuggestionsCursor(suggestions, popularity);
+                return new GoogleSuggestCursor(mSource, query, suggestions, popularity);
             } else {
                 if (DBG) Log.d(LOG_TAG, "Request failed " + response.getStatusLine());
             }
@@ -174,7 +162,7 @@ public class GoogleSuggestClient implements GoogleClient {
         return null;
     }
 
-    public Cursor refreshShortcut(String shortcutId, String oldExtraData) {
+    public SuggestionCursor refreshShortcut(String shortcutId, String oldExtraData) {
         return null;
     }
 
@@ -192,16 +180,19 @@ public class GoogleSuggestClient implements GoogleClient {
         return connectivity.getActiveNetworkInfo();
     }
 
-    private static class SuggestionsCursor extends AbstractCursor {
+    private static class GoogleSuggestCursor extends AbstractGoogleSourceResult {
 
         /* Contains the actual suggestions */
-        final JSONArray mSuggestions;
+        private final JSONArray mSuggestions;
 
         /* This contains the popularity of each suggestion
          * i.e. 165,000 results. It's not related to sorting.
          */
-        final JSONArray mPopularity;
-        public SuggestionsCursor(JSONArray suggestions, JSONArray popularity) {
+        private final JSONArray mPopularity;
+
+        public GoogleSuggestCursor(Source source, String userQuery,
+                JSONArray suggestions, JSONArray popularity) {
+            super(source, userQuery);
             mSuggestions = suggestions;
             mPopularity = popularity;
         }
@@ -212,68 +203,23 @@ public class GoogleSuggestClient implements GoogleClient {
         }
 
         @Override
-        public String[] getColumnNames() {
-            return COLUMNS;
-        }
-
-        @Override
-        public String getString(int column) {
-            if (mPos == -1) return null;
+        public String getSuggestionQuery() {
             try {
-                switch (column) {
-                    case COL_ID:
-                        return String.valueOf(mPos);
-                    case COL_TEXT_1:
-                    case COL_QUERY:
-                        return mSuggestions.getString(mPos);
-                    case COL_TEXT_2:
-                        return mPopularity.getString(mPos);
-                    case COL_ICON_1:
-                        return String.valueOf(R.drawable.magnifying_glass);
-                    case COL_ICON_2:
-                        return null;
-                    default:
-                        Log.w(LOG_TAG, "Bad column: " + column);
-                        return null;
-                }
+                return mSuggestions.getString(getPosition());
             } catch (JSONException e) {
                 Log.w(LOG_TAG, "Error parsing response: " + e);
                 return null;
             }
-
         }
 
         @Override
-        public double getDouble(int column) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public float getFloat(int column) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int getInt(int column) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public long getLong(int column) {
-            if (column == COL_ID) {
-                return mPos;        // use row# as the _Id
+        public String getSuggestionText2() {
+            try {
+                return mPopularity.getString(getPosition());
+            } catch (JSONException e) {
+                Log.w(LOG_TAG, "Error parsing response: " + e);
+                return null;
             }
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public short getShort(int column) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean isNull(int column) {
-            throw new UnsupportedOperationException();
         }
     }
 }

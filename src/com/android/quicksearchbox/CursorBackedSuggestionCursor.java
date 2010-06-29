@@ -17,17 +17,20 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchManager;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.util.Log;
 
-public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCursor {
+public abstract class CursorBackedSuggestionCursor implements SuggestionCursor {
 
     private static final boolean DBG = false;
     protected static final String TAG = "QSB.CursorBackedSuggestionCursor";
 
     public static final String SUGGEST_COLUMN_LOG_TYPE = "suggest_log_type";
+
+    private final String mUserQuery;
 
     /** The suggestions, or {@code null} if the suggestions query failed. */
     protected final Cursor mCursor;
@@ -59,7 +62,7 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
     private boolean mClosed = false;
 
     public CursorBackedSuggestionCursor(String userQuery, Cursor cursor) {
-        super(userQuery);
+        mUserQuery = userQuery;
         mCursor = cursor;
         mFormatCol = getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
         mText1Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
@@ -68,6 +71,10 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
         mIcon1Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
         mIcon2Col = getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
         mRefreshSpinnerCol = getColumnIndex(SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING);
+    }
+
+    public String getUserQuery() {
+        return mUserQuery;
     }
 
     public abstract Source getSuggestionSource();
@@ -189,8 +196,9 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
      * Gets the intent action for the current suggestion.
      */
     public String getSuggestionIntentAction() {
-        return getSuggestionIntentAction(
-                getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_ACTION));
+        String action = getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
+        if (action != null) return action;
+        return getSuggestionSource().getDefaultIntentAction();
     }
 
     /**
@@ -221,6 +229,10 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
      */
     public String getSuggestionIntentExtraData() {
         return getStringOrNull(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
+    }
+
+    public boolean isWebSearchSuggestion() {
+        return Intent.ACTION_WEB_SEARCH.equals(getSuggestionIntentAction());
     }
 
     /**
@@ -268,42 +280,6 @@ public abstract class CursorBackedSuggestionCursor extends AbstractSuggestionCur
     protected String getStringOrNull(String colName) {
         int col = getColumnIndex(colName);
         return getStringOrNull(col);
-    }
-
-    private String makeKeyComponent(String str) {
-        return str == null ? "" : str;
-    }
-
-    public String getSuggestionKey() {
-        String action = makeKeyComponent(getSuggestionIntentAction());
-        String data = makeKeyComponent(normalizeUrl(getSuggestionIntentDataString()));
-        String query = makeKeyComponent(normalizeUrl(getSuggestionQuery()));
-        // calculating accurate size of string builder avoids an allocation vs starting with
-        // the default size and having to expand.
-        int size = action.length() + 2 + data.length() + query.length();
-        return new StringBuilder(size)
-                .append(action)
-                .append('#')
-                .append(data)
-                .append('#')
-                .append(query)
-                .toString();
-    }
-
-    /** Simple url normalization that strips http:// and empty paths, i.e.,
-     *  http://www.google.com/ -> www.google.com.  Used to prevent obvious
-     * duplication of nav suggestions, bookmarks and urls entered by the user.
-     */
-    private static String normalizeUrl(String url) {
-        if (url != null && url.startsWith("http://")) {
-            int start = 7;   // length of http://
-            int end = url.length();
-            if (url.indexOf('/', start) == end - 1) {
-                end--;
-            }
-            return url.substring(start, end);
-        }
-        return url;
     }
 
     public void registerDataSetObserver(DataSetObserver observer) {

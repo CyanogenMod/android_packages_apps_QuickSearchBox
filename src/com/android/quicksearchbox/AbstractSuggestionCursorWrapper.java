@@ -13,85 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox;
 
 /**
- * A SuggestionCursor that delegates all suggestions-specific calls to one or more
- * other suggestion cursors.
+ * A SuggestionCursor that delegates all calls to other suggestions.
  */
-public abstract class AbstractSuggestionCursorWrapper extends AbstractSuggestionCursor {
+public abstract class AbstractSuggestionCursorWrapper extends AbstractSuggestionWrapper
+        implements SuggestionCursor {
+
+    private final String mUserQuery;
 
     public AbstractSuggestionCursorWrapper(String userQuery) {
-        super(userQuery);
+        mUserQuery = userQuery;
     }
 
-    /**
-     * Gets the SuggestionCursor to use for the current suggestion.
-     */
-    protected abstract SuggestionCursor current();
-
-    public String getShortcutId() {
-        return current().getShortcutId();
-    }
-
-    public String getSuggestionFormat() {
-        return current().getSuggestionFormat();
-    }
-
-    public String getSuggestionIcon1() {
-        return current().getSuggestionIcon1();
-    }
-
-    public String getSuggestionIcon2() {
-        return current().getSuggestionIcon2();
-    }
-
-    public String getSuggestionIntentAction() {
-        return current().getSuggestionIntentAction();
-    }
-
-    public String getSuggestionIntentDataString() {
-        return current().getSuggestionIntentDataString();
-    }
-
-    public String getSuggestionIntentExtraData() {
-        return current().getSuggestionIntentExtraData();
-    }
-
-    public String getSuggestionKey() {
-        return current().getSuggestionKey();
-    }
-
-    public String getSuggestionLogType() {
-        return current().getSuggestionLogType();
-    }
-
-    public String getSuggestionQuery() {
-        return current().getSuggestionQuery();
-    }
-
-    public Source getSuggestionSource() {
-        return current().getSuggestionSource();
-    }
-
-    public String getSuggestionText1() {
-        return current().getSuggestionText1();
-    }
-
-    public String getSuggestionText2() {
-        return current().getSuggestionText2();
-    }
-
-    public String getSuggestionText2Url() {
-        return current().getSuggestionText2Url();
-    }
-
-    public boolean isSpinnerWhileRefreshing() {
-        return current().isSpinnerWhileRefreshing();
-    }
-
-    public boolean isSuggestionShortcut() {
-        return current().isSuggestionShortcut();
+    public String getUserQuery() {
+        return mUserQuery;
     }
 }

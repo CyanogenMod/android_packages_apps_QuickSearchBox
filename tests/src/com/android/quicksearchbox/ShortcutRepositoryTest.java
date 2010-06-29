@@ -78,8 +78,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected ShortcutRepositoryImplLog mRepo;
 
-    protected DataSuggestionCursor mAppSuggestions;
-    protected DataSuggestionCursor mContactSuggestions;
+    protected ListSuggestionCursor mAppSuggestions;
+    protected ListSuggestionCursor mContactSuggestions;
 
     protected SuggestionData mApp1;
     protected SuggestionData mApp2;
@@ -111,7 +111,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         mApp1 = makeApp("app1");
         mApp2 = makeApp("app2");
         mApp3 = makeApp("app3");
-        mAppSuggestions = new DataSuggestionCursor("foo", mApp1, mApp2, mApp3);
+        mAppSuggestions = new ListSuggestionCursor("foo", mApp1, mApp2, mApp3);
 
         mContact1 = new SuggestionData(CONTACTS_SOURCE)
                 .setText1("Joe Blow")
@@ -124,7 +124,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setIntentData("contacts/mikeJ")
                 .setShortcutId("mo-jo");
 
-        mContactSuggestions = new DataSuggestionCursor("foo", mContact1, mContact2);
+        mContactSuggestions = new ListSuggestionCursor("foo", mContact1, mContact2);
     }
 
     private SuggestionData makeApp(String name) {
@@ -644,7 +644,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     public void testAppUpgradePromotesLowerRanked() {
         int maxShortcuts = mConfig.getMaxShortcutsReturned();
 
-        DataSuggestionCursor expected = new DataSuggestionCursor("a");
+        ListSuggestionCursor expected = new ListSuggestionCursor("a");
         for (int i = 0; i < maxShortcuts + 1; i++) {
             reportClick("app", mApp1, NOW);
         }
@@ -693,8 +693,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     // Utilities
 
-    protected DataSuggestionCursor makeCursor(String query, SuggestionData... suggestions) {
-        DataSuggestionCursor cursor = new DataSuggestionCursor(query);
+    protected ListSuggestionCursor makeCursor(String query, SuggestionData... suggestions) {
+        ListSuggestionCursor cursor = new ListSuggestionCursor(query);
         for (SuggestionData suggestion : suggestions) {
             cursor.add(suggestion);
         }
@@ -702,11 +702,11 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     protected void reportClick(String query, SuggestionData suggestion) {
-        reportClick(new DataSuggestionCursor(query, suggestion), 0);
+        reportClick(new ListSuggestionCursor(query, suggestion), 0);
     }
 
     protected void reportClick(String query, SuggestionData suggestion, long now) {
-        reportClickAtTime(new DataSuggestionCursor(query, suggestion), 0, now);
+        reportClickAtTime(new ListSuggestionCursor(query, suggestion), 0, now);
     }
 
     protected void reportClick(SuggestionCursor suggestions, int position) {
@@ -724,7 +724,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected void refreshShortcut(Source source, String shortcutId, SuggestionData suggestion) {
         SuggestionCursor refreshed =
-                suggestion == null ? null : new DataSuggestionCursor(null, suggestion);
+                suggestion == null ? null : new ListSuggestionCursor(null, suggestion);
         mRepo.refreshShortcut(source, shortcutId, refreshed);
         mLogExecutor.runNext();
     }
@@ -787,7 +787,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora,
                 mConfig.getMaxShortcutsReturned(), NOW);
         try {
-            SuggestionCursor expectedCursor = new DataSuggestionCursor(query, expected);
+            SuggestionCursor expectedCursor = new ListSuggestionCursor(query, expected);
             SuggestionCursorUtil.assertSameSuggestion(message, position, expectedCursor, cursor);
         } finally {
             if (cursor != null) cursor.close();
@@ -817,7 +817,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
             SuggestionData... expected) {
-        assertShortcuts(message, query, allowedCorpora, new DataSuggestionCursor(query, expected));
+        assertShortcuts(message, query, allowedCorpora, new ListSuggestionCursor(query, expected));
     }
 
     void assertShortcuts(String message, String query, SuggestionData... expected) {

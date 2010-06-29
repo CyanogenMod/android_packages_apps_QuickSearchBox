@@ -239,7 +239,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
 // -------------------------- end ShortcutRepository --------------------------
 
-    private boolean shouldRefresh(SuggestionCursor suggestion) {
+    private boolean shouldRefresh(Suggestion suggestion) {
         return mRefresher.shouldRefresh(suggestion.getSuggestionSource(),
                 suggestion.getShortcutId());
     }
@@ -423,7 +423,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         }
     }
 
-    private ContentValues makeShortcutRow(SuggestionCursor suggestion) {
+    private ContentValues makeShortcutRow(Suggestion suggestion) {
         String intentAction = suggestion.getSuggestionIntentAction();
         String intentData = suggestion.getSuggestionIntentDataString();
         String intentQuery = suggestion.getSuggestionQuery();
