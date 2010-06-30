@@ -16,19 +16,29 @@
 
 package com.android.quicksearchbox;
 
+import android.content.Context;
+import android.text.style.TextAppearanceSpan;
 
 /**
- * Basic SuggestionFormatter that does no formatting.
+ * Factory class for text appearances.
  */
-public class SuggestionNonFormatter extends SuggestionFormatter {
+public class TextAppearanceFactory {
+    private final Context mContext;
 
-    public SuggestionNonFormatter(TextAppearanceFactory spanFactory) {
-        super(spanFactory);
+    public TextAppearanceFactory(Context context) {
+        mContext = context;
     }
 
-    @Override
-    public CharSequence formatSuggestion(CharSequence query, CharSequence suggestion) {
-        return suggestion;
+    public Object[] createSuggestionQueryTextAppearance() {
+        return new Object[]{
+                new TextAppearanceSpan(mContext, R.style.SuggestionQueryTextAppearance)
+        };
+    }
+
+    public Object[] createSuggestionSuggestedTextAppearance() {
+        return new Object[]{
+                new TextAppearanceSpan(mContext, R.style.SuggestionSuggestedTextAppearance)
+        };
     }
 
 }

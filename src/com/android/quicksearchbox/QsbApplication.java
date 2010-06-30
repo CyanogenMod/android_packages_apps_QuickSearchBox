@@ -33,7 +33,6 @@ import com.google.common.util.concurrent.NamingThreadFactory;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -63,6 +62,7 @@ public class QsbApplication {
     private VoiceSearch mVoiceSearch;
     private Logger mLogger;
     private SuggestionFormatter mSuggestionFormatter;
+    private TextAppearanceFactory mTextAppearanceFactory;
 
     public QsbApplication(Context context) {
         mContext = context;
@@ -411,12 +411,22 @@ public class QsbApplication {
     public SuggestionFormatter getSuggestionFormatter() {
         if (mSuggestionFormatter == null) {
             mSuggestionFormatter = createSuggestionFormatter();
-            mSuggestionFormatter.setSuggestedTextFormat(Typeface.BOLD, 0);
         }
         return mSuggestionFormatter;
     }
 
     protected SuggestionFormatter createSuggestionFormatter() {
-        return new LevenshteinSuggestionFormatter();
+        return new LevenshteinSuggestionFormatter(getTextAppearanceFactory());
+    }
+
+    public TextAppearanceFactory getTextAppearanceFactory() {
+        if (mTextAppearanceFactory == null) {
+            mTextAppearanceFactory = createTextAppearanceFactory();
+        }
+        return mTextAppearanceFactory;
+    }
+
+    protected TextAppearanceFactory createTextAppearanceFactory() {
+        return new TextAppearanceFactory(getContext());
     }
 }

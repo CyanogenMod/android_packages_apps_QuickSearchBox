@@ -34,6 +34,10 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.LevenshteinSuggestionFormatter";
 
+    public LevenshteinSuggestionFormatter(TextAppearanceFactory spanFactory) {
+        super(spanFactory);
+    }
+
     @Override
     public Spanned formatSuggestion(CharSequence query, CharSequence suggestion) {
         if (DBG) Log.d(TAG, "formatSuggestion('" + query + "', '" + suggestion + "')");

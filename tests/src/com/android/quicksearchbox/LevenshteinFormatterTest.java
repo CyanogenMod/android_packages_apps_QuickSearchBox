@@ -16,10 +16,10 @@
 
 package com.android.quicksearchbox;
 
-import android.graphics.Typeface;
+import com.android.quicksearchbox.MockTextAppearanceFactory.MockStyleSpan;
+
 import android.test.AndroidTestCase;
 import android.text.Spanned;
-import android.text.style.StyleSpan;
 
 import java.util.List;
 
@@ -34,11 +34,9 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        mFormatter = new LevenshteinSuggestionFormatter();
-        mSuggestedStyle = Typeface.BOLD;
-        mQueryStyle = Typeface.ITALIC;
-        mFormatter.setSuggestedTextFormat(mSuggestedStyle, 0);
-        mFormatter.setQueryTextFormat(mQueryStyle, 0);
+        mFormatter = new LevenshteinSuggestionFormatter(new MockTextAppearanceFactory());
+        mSuggestedStyle = MockTextAppearanceFactory.ID_SUGGESTED_TEXT;
+        mQueryStyle = MockTextAppearanceFactory.ID_QUERY_TEXT;
     }
 
     private void verifyTokenizeResult(String input, String... output) {
@@ -351,10 +349,10 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
         public void verify(Spanned spanned) {
             String spannedText = spanned.subSequence(mStart, mEnd).toString();
             assertEquals("Test error", mExpectedText, spannedText);
-            StyleSpan[] spans = spanned.getSpans(mStart, mEnd, StyleSpan.class);
+            MockStyleSpan[] spans = spanned.getSpans(mStart, mEnd, MockStyleSpan.class);
             assertEquals("Wrong number of spans in '" + spannedText + "'", 1, spans.length);
             assertEquals("Wrong style for '" + spannedText + "' at position " + mStart,
-                    mStyle, spans[0].getStyle());
+                    mStyle, spans[0].getId());
         }
     }
 

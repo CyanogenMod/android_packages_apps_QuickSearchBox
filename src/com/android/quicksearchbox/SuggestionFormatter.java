@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.text.Spannable;
-import android.text.style.StyleSpan;
 
 /**
  * Suggestion formatter interface. This is used to bold (or otherwise highlight) portions of a
@@ -25,14 +24,10 @@ import android.text.style.StyleSpan;
  */
 public abstract class SuggestionFormatter {
 
-    private int mQueryTextStyle;
-    private int mQueryStyleFlags;
+    private final TextAppearanceFactory mSpanFactory;
 
-    private int mSuggestedTextStyle;
-    private int mSuggestedStyleFlags;
-
-
-    protected SuggestionFormatter() {
+    protected SuggestionFormatter(TextAppearanceFactory spanFactory) {
+        mSpanFactory = spanFactory;
     }
 
     /**
@@ -44,43 +39,20 @@ public abstract class SuggestionFormatter {
      */
     public abstract CharSequence formatSuggestion(CharSequence query, CharSequence suggestion);
 
-    /**
-     * Sets the text format to use for portions of a suggestions which form a part of the original
-     * used query.
-     *
-     * @param style Style for query text. Values are constants defined in
-     *      {@link android.graphics.Typeface}
-     * @param flags Flags  to determine how the span will behave when text is inserted at the start
-     *      or end of the span's range.
-     */
-    public void setQueryTextFormat(int style, int flags) {
-        mQueryTextStyle = style;
-        mQueryStyleFlags = flags;
-    }
-
-    /**
-     * Sets the text format to use for portions of a suggestion which are new.
-     *
-     * @param style Style for suggested text. Values are constants defined in
-     *      {@link android.graphics.Typeface}
-     * @param flags Flags to determine how the span will behave when text is inserted at the start
-     *      or end of the span's range.
-     */
-    public void setSuggestedTextFormat(int style, int flags) {
-        mSuggestedTextStyle = style;
-        mSuggestedStyleFlags = flags;
-    }
-
     protected void applyQueryTextStyle(Spannable text, int start, int end) {
         if (start == end) return;
-        StyleSpan style = new StyleSpan(mQueryTextStyle);
-        text.setSpan(style, start, end, mQueryStyleFlags);
+        setSpans(text, start, end, mSpanFactory.createSuggestionQueryTextAppearance());
     }
 
     protected void applySuggestedTextStyle(Spannable text, int start, int end) {
         if (start == end) return;
-        StyleSpan style = new StyleSpan(mSuggestedTextStyle);
-        text.setSpan(style, start, end, mSuggestedStyleFlags);
+        setSpans(text, start, end, mSpanFactory.createSuggestionSuggestedTextAppearance());
+    }
+
+    private void setSpans(Spannable text, int start, int end, Object[] spans) {
+        for (Object span : spans) {
+            text.setSpan(span, start, end, 0);
+        }
     }
 
 }
