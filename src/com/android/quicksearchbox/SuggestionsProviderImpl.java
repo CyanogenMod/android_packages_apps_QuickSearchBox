@@ -45,7 +45,9 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private final Handler mPublishThread;
 
-    private final Promoter mPromoter;
+    private Promoter mAllPromoter;
+
+    private Promoter mSingleCorpusPromoter;
 
     private final ShortcutRepository mShortcutRepo;
 
@@ -62,7 +64,6 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
     public SuggestionsProviderImpl(Config config,
             NamedTaskExecutor queryExecutor,
             Handler publishThread,
-            Promoter promoter,
             ShortcutRepository shortcutRepo,
             Corpora corpora,
             CorpusRanker corpusRanker,
@@ -70,11 +71,24 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         mConfig = config;
         mQueryExecutor = queryExecutor;
         mPublishThread = publishThread;
-        mPromoter = promoter;
         mShortcutRepo = shortcutRepo;
         mCorpora = corpora;
         mCorpusRanker = corpusRanker;
         mLogger = logger;
+    }
+
+    /**
+     * Sets the promoter used in All mode.
+     */
+    public void setAllPromoter(Promoter promoter) {
+        mAllPromoter = promoter;
+    }
+
+    /**
+     * Sets the promoter used in single corpus mode.
+     */
+    public void setSingleCorpusPromoter(Promoter promoter) {
+        mSingleCorpusPromoter = promoter;
     }
 
     public void close() {
@@ -142,7 +156,8 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
         List<Corpus> corporaToQuery = getCorporaToQuery(query, singleCorpus);
-        final Suggestions suggestions = new Suggestions(mPromoter,
+        Promoter promoter = singleCorpus == null ? mAllPromoter : mSingleCorpusPromoter;
+        final Suggestions suggestions = new Suggestions(promoter,
                 maxSuggestions,
                 query,
                 corporaToQuery);

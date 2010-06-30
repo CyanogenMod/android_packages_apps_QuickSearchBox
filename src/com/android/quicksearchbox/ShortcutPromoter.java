@@ -23,15 +23,11 @@ import java.util.ArrayList;
 /**
  * A promoter that first promotes any shortcuts, and then delegates to another
  * promoter.
- *
  */
-public class ShortcutPromoter implements Promoter {
+public class ShortcutPromoter extends PromoterWrapper {
 
     private static final String TAG = "QSB.ShortcutPromoter";
     private static final boolean DBG = false;
-
-    /** The promoter to use when there are no more shortcuts. */
-    private final Promoter mNextPromoter;
 
     /**
      * Creates a new ShortcutPromoter.
@@ -40,9 +36,10 @@ public class ShortcutPromoter implements Promoter {
      *        May be {@code null}.
      */
     public ShortcutPromoter(Promoter nextPromoter) {
-        mNextPromoter = nextPromoter;
+        super(nextPromoter);
     }
 
+    @Override
     public void pickPromoted(SuggestionCursor shortcuts,
             ArrayList<CorpusResult> suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
@@ -57,9 +54,7 @@ public class ShortcutPromoter implements Promoter {
             promoted.add(new SuggestionPosition(shortcuts, i));
         }
 
-        if (promoted.getCount() < maxPromoted && mNextPromoter != null) {
-            mNextPromoter.pickPromoted(null, suggestions, maxPromoted, promoted);
-        }
+        super.pickPromoted(null, suggestions, maxPromoted, promoted);
     }
 
 }

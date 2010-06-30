@@ -37,7 +37,6 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
         Config config = new Config(getContext());
         mTaskExecutor = new MockNamedTaskExecutor();
         Handler publishThread = new MockHandler();
-        Promoter promoter = new ConcatPromoter();
         ShortcutRepository shortcutRepo = new MockShortcutRepository();
         mCorpora = new MockCorpora();
         mCorpora.addCorpus(MockCorpus.CORPUS_1);
@@ -47,11 +46,12 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
         mProvider = new SuggestionsProviderImpl(config,
                 mTaskExecutor,
                 publishThread,
-                promoter,
                 shortcutRepo,
                 mCorpora,
                 corpusRanker,
                 logger);
+        mProvider.setAllPromoter(new ConcatPromoter());
+        mProvider.setSingleCorpusPromoter(new ConcatPromoter());
     }
 
     public void testSingleCorpus() {

@@ -26,6 +26,8 @@ import java.util.ArrayList;
  */
 public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
 
+    private static final int DEFAULT_CAPACITY = 16;
+
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private final ArrayList<Suggestion> mSuggestions;
@@ -33,16 +35,19 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
     private int mPos = 0;
 
     public ListSuggestionCursor(String userQuery) {
-        super(userQuery);
-        mSuggestions = new ArrayList<Suggestion>();
+        this(userQuery, DEFAULT_CAPACITY);
     }
 
     public ListSuggestionCursor(String userQuery, Suggestion...suggestions) {
-        super(userQuery);
-        mSuggestions = new ArrayList<Suggestion>(suggestions.length);
+        this(userQuery, suggestions.length);
         for (Suggestion suggestion : suggestions) {
             mSuggestions.add(suggestion);
         }
+    }
+
+    public ListSuggestionCursor(String userQuery, int capacity) {
+        super(userQuery);
+        mSuggestions = new ArrayList<Suggestion>(capacity);
     }
 
     /**

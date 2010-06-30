@@ -40,6 +40,8 @@ public class Config {
     private static final int NUM_PROMOTED_SOURCES = 3;
     private static final int MAX_PROMOTED_SUGGESTIONS = 8;
     private static final int MAX_RESULTS_PER_SOURCE = 50;
+    private static final int MAX_SHORTCUTS_PER_WEB_SOURCE = MAX_PROMOTED_SUGGESTIONS;
+    private static final int MAX_SHORTCUTS_PER_NON_WEB_SOURCE = 2;
     private static final long SOURCE_TIMEOUT_MILLIS = 10000;
 
     private static final int QUERY_THREAD_PRIORITY =
@@ -145,6 +147,20 @@ public class Config {
      */
     public int getMaxResultsPerSource() {
         return MAX_RESULTS_PER_SOURCE;
+    }
+
+    /**
+     * The maximum number of shortcuts to show for the web source in All mode.
+     */
+    public int getMaxShortcutsPerWebSource() {
+        return MAX_SHORTCUTS_PER_WEB_SOURCE;
+    }
+
+    /**
+     * The maximum number of shortcuts to show for each non-web source in All mode.
+     */
+    public int getMaxShortcutsPerNonWebSource() {
+        return MAX_SHORTCUTS_PER_NON_WEB_SOURCE;
     }
 
     /**

@@ -299,16 +299,23 @@ public class QsbApplication {
     }
 
     protected SuggestionsProvider createSuggestionsProvider() {
-        Promoter promoter =  new ShortcutPromoter(
-                new RankAwarePromoter(getConfig(), getCorpora()));
-        SuggestionsProvider provider = new SuggestionsProviderImpl(getConfig(),
+        int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
+        int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
+        Promoter allPromoter = new ShortcutLimitingPromoter(
+                maxShortcutsPerWebSource,
+                maxShortcutsPerNonWebSource,
+                new ShortcutPromoter(
+                        new RankAwarePromoter(getConfig(), getCorpora())));
+        Promoter singleCorpusPromoter = new ShortcutPromoter(new ConcatPromoter());
+        SuggestionsProviderImpl provider = new SuggestionsProviderImpl(getConfig(),
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
-                promoter,
                 getShortcutRepository(),
                 getCorpora(),
                 getCorpusRanker(),
                 getLogger());
+        provider.setAllPromoter(allPromoter);
+        provider.setSingleCorpusPromoter(singleCorpusPromoter);
         return provider;
     }
 
