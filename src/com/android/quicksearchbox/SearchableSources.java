@@ -16,8 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.google.GoogleSource;
-
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;

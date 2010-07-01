@@ -32,7 +32,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.speech.RecognizerIntent;
@@ -188,8 +187,8 @@ public class SearchWidgetProvider extends BroadcastReceiver {
     private static Intent getVoiceSearchIntent(Context context, Corpus corpus,
             Bundle widgetAppData) {
         VoiceSearch voiceSearch = QsbApplication.get(context).getVoiceSearch();
-        if (!voiceSearch.shouldShowVoiceSearch(corpus)) return null;
-        if (corpus == null) {
+
+        if (corpus == null || !voiceSearch.isVoiceSearchAvailable()) {
             return voiceSearch.createVoiceWebSearchIntent(widgetAppData);
         } else {
             return corpus.createVoiceSearchIntent(widgetAppData);

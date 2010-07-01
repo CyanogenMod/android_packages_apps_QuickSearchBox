@@ -39,21 +39,27 @@ public class VoiceSearch {
     }
 
     public boolean shouldShowVoiceSearch(Corpus corpus) {
-        if (corpus != null && !corpus.voiceSearchEnabled()) {
-            return false;
-        }
-        return isVoiceSearchAvailable();
+        return corpusSupportsVoiceSearch(corpus) && isVoiceSearchAvailable();
     }
 
-    private boolean isVoiceSearchAvailable() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+    protected boolean corpusSupportsVoiceSearch(Corpus corpus) {
+        return (corpus == null || corpus.voiceSearchEnabled());
+    }
+
+    protected Intent createVoiceSearchIntent() {
+        return new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+    }
+
+    public boolean isVoiceSearchAvailable() {
+        Intent intent = createVoiceSearchIntent();
         ResolveInfo ri = mContext.getPackageManager().
                 resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
         return ri != null;
     }
 
     public Intent createVoiceWebSearchIntent(Bundle appData) {
-        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        if (!isVoiceSearchAvailable()) return null;
+        Intent intent = createVoiceSearchIntent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
