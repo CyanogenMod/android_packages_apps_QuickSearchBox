@@ -17,15 +17,11 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/refine_query_default" />
+        android:drawable="@drawable/edit_query_background_normal" />
 
     <item android:state_pressed="true"
-        android:drawable="@drawable/refine_query_pressed" />
+        android:drawable="@drawable/edit_query_background_pressed" />
 
-    <item android:state_enabled="true" android:state_focused="true"
-        android:drawable="@drawable/refine_query_focused" />
-
-    <item android:drawable="@drawable/refine_query_default" />
+    <item android:drawable="@drawable/edit_query_background_normal" />
 
 </selector>
-
