@@ -43,13 +43,13 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:key="voice_search_settings_category"
-            android:title="@string/voice_search_category_title">
+            android:key="search_widget_settings_category"
+            android:title="@string/search_widget_category_title">
 
         <CheckBoxPreference
-                android:key="voice_search_hints_enabled"
-                android:title="@string/voice_search_hints_enabled_title"
-                android:summary="@string/voice_search_hints_enabled_summary"
+                android:key="search_widget_hints_enabled"
+                android:title="@string/search_widget_hints_enabled_title"
+                android:summary="@string/search_widget_hints_enabled_summary"
                 android:defaultValue="true"
                 />
 
