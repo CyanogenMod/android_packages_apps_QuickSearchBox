@@ -127,8 +127,10 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
                     suggestions.onIcon2Clicked(position);
                 }
             });
-            Drawable icon2 = getContext().getResources().getDrawable(R.drawable.refine_query);
-            setIcon2(icon2);
+            Drawable icon2 = getContext().getResources().getDrawable(R.drawable.edit_query);
+            Drawable background =
+                    getContext().getResources().getDrawable(R.drawable.edit_query_background);
+            setIcon2(icon2, background);
         } else {
             mIcon2.setOnClickListener(null);
         }
@@ -209,6 +211,14 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
      */
     private void setIcon2(Drawable icon) {
         setViewDrawable(mIcon2, icon);
+    }
+
+    /**
+     * Sets the right-hand-side icon and its background.
+     */
+    private void setIcon2(Drawable icon, Drawable background) {
+        setViewDrawable(mIcon2, icon);
+        mIcon2.setBackgroundDrawable(background);
     }
 
     /**
