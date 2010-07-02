@@ -59,11 +59,11 @@ public class SearchSettings extends PreferenceActivity
     private static final String CLEAR_SHORTCUTS_PREF = "clear_shortcuts";
     private static final String SEARCH_ENGINE_SETTINGS_PREF = "search_engine_settings";
     private static final String SEARCH_CORPORA_PREF = "search_corpora";
-    private static final String VOICE_SEARCH_CATEGORY = "voice_search_settings_category";
+    private static final String SEARCH_WIDGET_CATEGORY = "search_widget_settings_category";
 
     // Prefix of per-corpus enable preference
     private static final String CORPUS_ENABLED_PREF_PREFIX = "enable_corpus_";
-    private static final String VOICE_SEARCH_HINTS_ENABLED_PREF = "voice_search_hints_enabled";
+    private static final String SEARCH_WIDGET_HINTS_ENABLED_PREF = "search_widget_hints_enabled";
 
     // References to the top-level preference objects
     private Preference mClearShortcutsPreference;
@@ -86,7 +86,7 @@ public class SearchSettings extends PreferenceActivity
         mSearchEngineSettingsPreference = (PreferenceScreen) preferenceScreen.findPreference(
                 SEARCH_ENGINE_SETTINGS_PREF);
         mVoiceSearchHintsPreference = (CheckBoxPreference)
-                preferenceScreen.findPreference(VOICE_SEARCH_HINTS_ENABLED_PREF);
+                preferenceScreen.findPreference(SEARCH_WIDGET_HINTS_ENABLED_PREF);
         Preference corporaPreference = preferenceScreen.findPreference(SEARCH_CORPORA_PREF);
         corporaPreference.setIntent(getSearchableItemsIntent(this));
 
@@ -96,7 +96,7 @@ public class SearchSettings extends PreferenceActivity
             mVoiceSearchHintsPreference.setOnPreferenceClickListener(this);
         } else {
             preferenceScreen.removePreference(
-                    preferenceScreen.findPreference(VOICE_SEARCH_CATEGORY));
+                    preferenceScreen.findPreference(SEARCH_WIDGET_CATEGORY));
             mVoiceSearchHintsPreference = null;
         }
 
@@ -120,12 +120,12 @@ public class SearchSettings extends PreferenceActivity
     }
 
     public static boolean areVoiceSearchHintsEnabled(Context context) {
-        return getSearchPreferences(context).getBoolean(VOICE_SEARCH_HINTS_ENABLED_PREF, true);
+        return getSearchPreferences(context).getBoolean(SEARCH_WIDGET_HINTS_ENABLED_PREF, true);
     }
 
     public static void setVoiceSearchHintsEnabled(Context context, boolean enabled) {
         getSearchPreferences(context)
-                .edit().putBoolean(VOICE_SEARCH_HINTS_ENABLED_PREF, enabled).commit();
+                .edit().putBoolean(SEARCH_WIDGET_HINTS_ENABLED_PREF, enabled).commit();
         SearchWidgetProvider.updateSearchWidgets(context);
     }
 
