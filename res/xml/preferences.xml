@@ -42,17 +42,4 @@
                 
     </PreferenceCategory>
 
-    <PreferenceCategory
-            android:key="search_widget_settings_category"
-            android:title="@string/search_widget_category_title">
-
-        <CheckBoxPreference
-                android:key="search_widget_hints_enabled"
-                android:title="@string/search_widget_hints_enabled_title"
-                android:summary="@string/search_widget_hints_enabled_summary"
-                android:defaultValue="true"
-                />
-
-    </PreferenceCategory>
-
 </PreferenceScreen>

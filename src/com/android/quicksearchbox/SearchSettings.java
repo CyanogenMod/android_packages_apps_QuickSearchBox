@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
@@ -59,16 +58,13 @@ public class SearchSettings extends PreferenceActivity
     private static final String CLEAR_SHORTCUTS_PREF = "clear_shortcuts";
     private static final String SEARCH_ENGINE_SETTINGS_PREF = "search_engine_settings";
     private static final String SEARCH_CORPORA_PREF = "search_corpora";
-    private static final String SEARCH_WIDGET_CATEGORY = "search_widget_settings_category";
 
     // Prefix of per-corpus enable preference
     private static final String CORPUS_ENABLED_PREF_PREFIX = "enable_corpus_";
-    private static final String SEARCH_WIDGET_HINTS_ENABLED_PREF = "search_widget_hints_enabled";
 
     // References to the top-level preference objects
     private Preference mClearShortcutsPreference;
     private PreferenceScreen mSearchEngineSettingsPreference;
-    private CheckBoxPreference mVoiceSearchHintsPreference;
 
     // Dialog ids
     private static final int CLEAR_SHORTCUTS_CONFIRM_DIALOG = 0;
@@ -85,20 +81,10 @@ public class SearchSettings extends PreferenceActivity
         mClearShortcutsPreference = preferenceScreen.findPreference(CLEAR_SHORTCUTS_PREF);
         mSearchEngineSettingsPreference = (PreferenceScreen) preferenceScreen.findPreference(
                 SEARCH_ENGINE_SETTINGS_PREF);
-        mVoiceSearchHintsPreference = (CheckBoxPreference)
-                preferenceScreen.findPreference(SEARCH_WIDGET_HINTS_ENABLED_PREF);
         Preference corporaPreference = preferenceScreen.findPreference(SEARCH_CORPORA_PREF);
         corporaPreference.setIntent(getSearchableItemsIntent(this));
 
         mClearShortcutsPreference.setOnPreferenceClickListener(this);
-
-        if (getConfig().allowVoiceSearchHints()) {
-            mVoiceSearchHintsPreference.setOnPreferenceClickListener(this);
-        } else {
-            preferenceScreen.removePreference(
-                    preferenceScreen.findPreference(SEARCH_WIDGET_CATEGORY));
-            mVoiceSearchHintsPreference = null;
-        }
 
         updateClearShortcutsPreference();
         populateSearchEnginePreference();
@@ -117,16 +103,6 @@ public class SearchSettings extends PreferenceActivity
      */
     public static String getCorpusEnabledPreference(Corpus corpus) {
         return CORPUS_ENABLED_PREF_PREFIX + corpus.getName();
-    }
-
-    public static boolean areVoiceSearchHintsEnabled(Context context) {
-        return getSearchPreferences(context).getBoolean(SEARCH_WIDGET_HINTS_ENABLED_PREF, true);
-    }
-
-    public static void setVoiceSearchHintsEnabled(Context context, boolean enabled) {
-        getSearchPreferences(context)
-                .edit().putBoolean(SEARCH_WIDGET_HINTS_ENABLED_PREF, enabled).commit();
-        SearchWidgetProvider.updateSearchWidgets(context);
     }
 
     public static SharedPreferences getSearchPreferences(Context context) {
@@ -181,9 +157,6 @@ public class SearchSettings extends PreferenceActivity
     public synchronized boolean onPreferenceClick(Preference preference) {
         if (preference == mClearShortcutsPreference) {
             showDialog(CLEAR_SHORTCUTS_CONFIRM_DIALOG);
-            return true;
-        } else if (preference == mVoiceSearchHintsPreference) {
-            SearchWidgetProvider.updateSearchWidgets(this);
             return true;
         }
         return false;

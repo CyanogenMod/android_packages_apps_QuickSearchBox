@@ -30,6 +30,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,6 +45,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Search widget provider.
@@ -62,60 +64,185 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             "com.android.quicksearchbox.action.NEXT_VOICE_SEARCH_HINT";
 
     /**
-     * Broadcast intent action for disabling voice search hints.
+     * Broadcast intent action for hiding voice search hints.
      */
-    private static final String ACTION_CLOSE_VOICE_SEARCH_HINT =
-            "com.android.quicksearchbox.action.CLOSE_VOICE_SEARCH_HINT";
+    private static final String ACTION_HIDE_VOICE_SEARCH_HINT =
+        "com.android.quicksearchbox.action.HIDE_VOICE_SEARCH_HINT";
 
     /**
-     * Voice search hint update interval in milliseconds.
+     * Broadcast intent action for updating voice search hint display. Voice search hints will
+     * only be displayed with some probability.
      */
-    private static final long VOICE_SEARCH_HINT_UPDATE_INTERVAL
-            = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+    private static final String ACTION_CONSIDER_VOICE_SEARCH_HINT =
+            "com.android.quicksearchbox.action.CONSIDER_VOICE_SEARCH_HINT";
 
     /**
-     * Preference key used for storing the index of the next vocie search hint to show.
+     * Preference key used for storing the index of the next voice search hint to show.
      */
     private static final String NEXT_VOICE_SEARCH_HINT_INDEX_PREF = "next_voice_search_hint";
+
+    /**
+     * Preference key used to store the time at which the first voice search hint was displayed.
+     */
+    private static final String FIRST_VOICE_HINT_DISPLAY_TIME = "first_voice_search_hint_time";
+
+    /**
+     * Preference key for the version of voice search we last got hints from.
+     */
+    private static final String LAST_SEEN_VOICE_SEARCH_VERSION = "voice_search_version";
 
     /**
      * The {@link Search#SOURCE} value used when starting searches from the search widget.
      */
     private static final String WIDGET_SEARCH_SOURCE = "launcher-widget";
 
+    private static Random sRandom;
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (DBG) Log.d(TAG, "onReceive(" + intent.toUri(0) + ")");
         String action = intent.getAction();
-        if (ACTION_NEXT_VOICE_SEARCH_HINT.equals(action)) {
-            getHintsFromVoiceSearch(context);
-        } else if (ACTION_CLOSE_VOICE_SEARCH_HINT.equals(action)) {
-            SearchSettings.setVoiceSearchHintsEnabled(context, false);
+        if (AppWidgetManager.ACTION_APPWIDGET_ENABLED.equals(action)) {
+            scheduleVoiceHintUpdates(context);
         } else if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
             updateSearchWidgets(context);
+        } else if (ACTION_CONSIDER_VOICE_SEARCH_HINT.equals(action)) {
+            considerShowingVoiceSearchHints(context);
+        } else if (ACTION_NEXT_VOICE_SEARCH_HINT.equals(action)) {
+            getHintsFromVoiceSearch(context);
+        } else if (ACTION_HIDE_VOICE_SEARCH_HINT.equals(action)) {
+            hideVoiceSearchHint(context);
         }
+    }
+
+    private static Random getRandom() {
+        if (sRandom == null) {
+            sRandom = new Random();
+        }
+        return sRandom;
+    }
+
+    private static boolean haveVoiceSearchHintsExpired(Context context) {
+        SharedPreferences prefs = SearchSettings.getSearchPreferences(context);
+        QsbApplication app = QsbApplication.get(context);
+        int currentVoiceSearchVersion = app.getVoiceSearch().getVersion();
+
+        if (currentVoiceSearchVersion != 0) {
+            long currentTime = System.currentTimeMillis();
+            int lastVoiceSearchVersion = prefs.getInt(LAST_SEEN_VOICE_SEARCH_VERSION, 0);
+            long firstHintTime = prefs.getLong(FIRST_VOICE_HINT_DISPLAY_TIME, 0);
+            if (firstHintTime == 0 || currentVoiceSearchVersion != lastVoiceSearchVersion) {
+                Editor e = prefs.edit();
+                e.putInt(LAST_SEEN_VOICE_SEARCH_VERSION, currentVoiceSearchVersion);
+                e.putLong(FIRST_VOICE_HINT_DISPLAY_TIME, currentTime);
+                e.commit();
+                firstHintTime = currentTime;
+            }
+            if (currentTime - firstHintTime > getConfig(context).getVoiceSearchHintActivePeriod()) {
+                if (DBG) Log.d(TAG, "Voice seach hint period expired; not showing hints.");
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (DBG) Log.d(TAG, "Could not determine voice search version; not showing hints.");
+            return true;
+        }
+    }
+
+    private static boolean shouldShowVoiceSearchHints(Context context) {
+        return (getConfig(context).allowVoiceSearchHints()
+                && !haveVoiceSearchHintsExpired(context));
+    }
+
+    private static SearchWidgetState[] getSearchWidgetStates
+            (Context context, boolean enableVoiceSearchHints) {
+
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(myComponentName(context));
+        SearchWidgetState[] states = new SearchWidgetState[appWidgetIds.length];
+        for (int i = 0; i<appWidgetIds.length; ++i) {
+            states[i] = getSearchWidgetState(context, appWidgetIds[i], enableVoiceSearchHints);
+        }
+        return states;
+    }
+
+    private static void considerShowingVoiceSearchHints(Context context) {
+        if (DBG) Log.d(TAG, "considerShowingVoiceSearchHints");
+        if (!shouldShowVoiceSearchHints(context)) return;
+        SearchWidgetState[] states = getSearchWidgetStates(context, true);
+        boolean needHint = false;
+        boolean changed = false;
+        for (SearchWidgetState state : states) {
+            changed |= state.considerShowingHint(context);
+            needHint |= state.isShowingHint();
+        }
+        if (changed) {
+            getHintsFromVoiceSearch(context);
+            sceduleNextVoiceSearchHint(context, true);
+        }
+    }
+
+    private void hideVoiceSearchHint(Context context) {
+        if (DBG) Log.d(TAG, "hideVoiceSearchHint");
+        SearchWidgetState[] states = getSearchWidgetStates(context, true);
+        boolean needHint = false;
+        for (SearchWidgetState state : states) {
+            if (state.isShowingHint()) {
+                state.hideVoiceSearchHint(context);
+                state.updateWidget(context, AppWidgetManager.getInstance(context));
+            }
+            needHint |= state.isShowingHint();
+        }
+        sceduleNextVoiceSearchHint(context, false);
+    }
+
+    private static void voiceSearchHintReceived(Context context, CharSequence hint) {
+        if (DBG) Log.d(TAG, "voiceSearchHintReceived('" + hint + "')");
+        CharSequence formatted = formatVoiceSearchHint(context, hint);
+        SearchWidgetState[] states = getSearchWidgetStates(context, true);
+        boolean needHint = false;
+        for (SearchWidgetState state : states) {
+            if (state.isShowingHint()) {
+                state.setVoiceSearchHint(formatted);
+                state.updateWidget(context, AppWidgetManager.getInstance(context));
+                needHint = true;
+            }
+        }
+        if (!needHint) {
+            sceduleNextVoiceSearchHint(context, false);
+        }
+    }
+
+    private static void scheduleVoiceHintUpdates(Context context) {
+        if (DBG) Log.d(TAG, "scheduleVoiceHintUpdates");
+        if (!shouldShowVoiceSearchHints(context)) return;
+        scheduleVoiceSearchHintUpdates(context, true);
     }
 
     /**
      * Updates all search widgets.
      */
     public static void updateSearchWidgets(Context context) {
-        updateSearchWidgets(context, true, null);
-    }
+        if (DBG) Log.d(TAG, "updateSearchWidgets");
+        boolean showVoiceSearchHints = shouldShowVoiceSearchHints(context);
+        SearchWidgetState[] states = getSearchWidgetStates(context, showVoiceSearchHints);
 
-    private static void updateSearchWidgets(Context context, boolean updateVoiceSearchHint,
-            CharSequence voiceSearchHint) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(myComponentName(context));
-
-        boolean needsVoiceSearchHint = false;
-        for (int appWidgetId : appWidgetIds) {
-            SearchWidgetState state = getSearchWidgetState(context, appWidgetId, voiceSearchHint);
-            state.updateWidget(context, appWidgetManager);
-            needsVoiceSearchHint |= state.shouldShowVoiceSearchHint();
+        boolean needVoiceSearchHint = false;
+        for (SearchWidgetState state : states) {
+            if (state.isShowingHint()) {
+                needVoiceSearchHint = true;
+                // widget update will occur when voice search hint received
+            } else {
+                state.updateWidget(context, AppWidgetManager.getInstance(context));
+            }
         }
-        if (updateVoiceSearchHint) {
-            scheduleVoiceSearchHintUpdates(context, needsVoiceSearchHint);
+        if (DBG) Log.d(TAG, "Need voice search hints=" + needVoiceSearchHint);
+        if (needVoiceSearchHint) {
+            getHintsFromVoiceSearch(context);
+        }
+        if (!showVoiceSearchHints) {
+            scheduleVoiceSearchHintUpdates(context, false);
         }
     }
 
@@ -129,14 +256,11 @@ public class SearchWidgetProvider extends BroadcastReceiver {
     }
 
     private static SearchWidgetState getSearchWidgetState(Context context, 
-            int appWidgetId, CharSequence voiceSearchHint) {
+            int appWidgetId, boolean enableVoiceSearchHints) {
         String corpusName =
-                SearchWidgetConfigActivity.readWidgetCorpusPref(context, appWidgetId);
+                SearchWidgetConfigActivity.getWidgetCorpusName(context, appWidgetId);
         Corpus corpus = corpusName == null ? null : getCorpora(context).getCorpus(corpusName);
-        if (DBG) {
-            Log.d(TAG, "Updating appwidget " + appWidgetId + ", corpus=" + corpus
-                    + ",VS hint=" + voiceSearchHint);
-        }
+        if (DBG) Log.d(TAG, "Creating appwidget state " + appWidgetId + ", corpus=" + corpus);
         SearchWidgetState state = new SearchWidgetState(appWidgetId);
 
         Bundle widgetAppData = new Bundle();
@@ -173,12 +297,19 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         state.setQueryTextViewIntent(qsbIntent);
 
         // Voice search button
-        Intent voiceSearchIntent = getVoiceSearchIntent(context, corpus, widgetAppData);
-        state.setVoiceSearchIntent(voiceSearchIntent);
-        if (voiceSearchIntent != null
-                && RecognizerIntent.ACTION_WEB_SEARCH.equals(voiceSearchIntent.getAction())) {
-            state.setShouldShowVoiceSearchHint(true);
-            state.setVoiceSearchHint(formatVoiceSearchHint(context, voiceSearchHint));
+        if (enableVoiceSearchHints) {
+            Intent voiceSearchIntent = getVoiceSearchIntent(context, corpus, widgetAppData);
+            state.setVoiceSearchIntent(voiceSearchIntent);
+            if (voiceSearchIntent != null
+                    && RecognizerIntent.ACTION_WEB_SEARCH.equals(voiceSearchIntent.getAction())) {
+                state.setVoiceSearchHintsEnabled(true);
+
+                boolean showingHint =
+                        SearchWidgetConfigActivity.getWidgetShowingHint(context, appWidgetId);
+                if (DBG) Log.d(TAG, "Widget " + appWidgetId + " showing hint: " + showingHint);
+                state.setShowingHint(showingHint);
+
+            }
         }
 
         return state;
@@ -224,33 +355,36 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         return spannedHint;
     }
 
-    private static boolean areVoiceSearchHintsEnabled(Context context) {
-        return getConfig(context).allowVoiceSearchHints()
-                && SearchSettings.areVoiceSearchHintsEnabled(context);
+    private static void rescheduleAction(Context context, boolean reshedule, String action, long period) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(action);
+        intent.setComponent(myComponentName(context));
+        PendingIntent pending = PendingIntent.getBroadcast(context, 0, intent, 0);
+        alarmManager.cancel(pending);
+        if (reshedule) {
+            if (DBG) Log.d(TAG, "Scheduling action " + action + " after period " + period);
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
+                    SystemClock.elapsedRealtime() + period, period, pending);
+        } else {
+            if (DBG) Log.d(TAG, "Cancelled action " + action);
+        }
     }
 
     public static void scheduleVoiceSearchHintUpdates(Context context, boolean enabled) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(ACTION_NEXT_VOICE_SEARCH_HINT);
-        intent.setComponent(myComponentName(context));
-        PendingIntent updateHint = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmManager.cancel(updateHint);
-        if (enabled && areVoiceSearchHintsEnabled(context)) {
-            // Do one update immediately, and then at VOICE_SEARCH_HINT_UPDATE_INTERVAL intervals
-            getHintsFromVoiceSearch(context);
-            long period = VOICE_SEARCH_HINT_UPDATE_INTERVAL;
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + period, period, updateHint);
-        }
+        rescheduleAction(context, enabled, ACTION_CONSIDER_VOICE_SEARCH_HINT,
+                getConfig(context).getVoiceSearchHintUpdatePeriod());
+    }
+
+    private static void sceduleNextVoiceSearchHint(Context context, boolean needUpdates) {
+        rescheduleAction(context, needUpdates, ACTION_NEXT_VOICE_SEARCH_HINT,
+                getConfig(context).getVoiceSearchHintChangePeriod());
     }
 
     /**
      * Requests an asynchronous update of the voice search hints.
      */
     private static void getHintsFromVoiceSearch(Context context) {
-        if (!areVoiceSearchHintsEnabled(context)) return;
         Intent intent = new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
-        intent.putExtra(Recognition.EXTRA_HINT_CONTEXT, Recognition.HINT_CONTEXT_LAUNCHER);
         if (DBG) Log.d(TAG, "Broadcasting " + intent);
         context.sendOrderedBroadcast(intent, null,
                 new HintReceiver(), null, Activity.RESULT_OK, null, null);
@@ -265,7 +399,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             ArrayList<CharSequence> hints = getResultExtras(true)
                     .getCharSequenceArrayList(Recognition.EXTRA_HINT_STRINGS);
             CharSequence hint = getNextHint(context, hints);
-            updateSearchWidgets(context, false, hint);
+            voiceSearchHintReceived(context, hint);
         }
     }
 
@@ -315,19 +449,28 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         private int mQueryTextViewBackgroundResource;
         private Intent mQueryTextViewIntent;
         private Intent mVoiceSearchIntent;
-        private boolean mShouldShowVoiceSearchHint;
+        private boolean mVoiceSearchHintsEnabled;
         private CharSequence mVoiceSearchHint;
+        private boolean mShowHint;
 
         public SearchWidgetState(int appWidgetId) {
             mAppWidgetId = appWidgetId;
         }
 
-        public boolean shouldShowVoiceSearchHint() {
-            return mShouldShowVoiceSearchHint;
+        public int getId() {
+            return mAppWidgetId;
         }
 
-        public void setShouldShowVoiceSearchHint(boolean shouldShowVoiceSearchHint) {
-            mShouldShowVoiceSearchHint = shouldShowVoiceSearchHint;
+        public void setVoiceSearchHintsEnabled(boolean enabled) {
+            mVoiceSearchHintsEnabled = enabled;
+        }
+
+        public void setShowingHint(boolean show) {
+            mShowHint = show;
+        }
+
+        public boolean isShowingHint() {
+            return mShowHint;
         }
 
         public void setCorpusIconUri(Uri corpusIconUri) {
@@ -358,7 +501,64 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             mVoiceSearchHint = voiceSearchHint;
         }
 
-        public void updateWidget(Context context, AppWidgetManager appWidgetManager) {
+        private boolean chooseToShowHint(Context context) {
+            // this is called every getConfig().getVoiceSearchHintUpdatePeriod() milliseconds
+            // we want to return true every getConfig().getVoiceSearchHintShowPeriod() milliseconds
+            // so:
+            Config cfg = getConfig(context);
+            float p = (float) cfg.getVoiceSearchHintUpdatePeriod()
+                    / (float) cfg.getVoiceSearchHintShowPeriod();
+            float f = getRandom().nextFloat();
+            // if p > 1 we won't return true as often as we should (we can't return more times than
+            // we're called!) but we will always return true.
+            boolean r = (f < p);
+            if (DBG) Log.d(TAG, "chooseToShowHint p=" + p +"; f=" + f + "; r=" + r);
+            return r;
+        }
+
+        private Intent createIntent(Context context, String action) {
+            Intent intent = new Intent(action);
+            intent.setComponent(myComponentName(context));
+            return intent;
+        }
+
+        private void sheduleHintHiding(Context context) {
+            Intent hideIntent = createIntent(context, ACTION_HIDE_VOICE_SEARCH_HINT);
+
+            AlarmManager alarmManager =
+                    (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            PendingIntent hideHint = PendingIntent.getBroadcast(context, 0, hideIntent, 0);
+
+            long period = getConfig(context).getVoiceSearchHintVisibleTime();
+            if (DBG) {
+                Log.d(TAG, "Scheduling action " + ACTION_HIDE_VOICE_SEARCH_HINT +
+                        " after period " + period);
+            }
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME,
+                    SystemClock.elapsedRealtime() + period, hideHint);
+
+        }
+
+        private void updateShowingHint(Context context) {
+            SearchWidgetConfigActivity.setWidgetShowingHint(context, mAppWidgetId, mShowHint);
+        }
+
+        public boolean considerShowingHint(Context context) {
+            if (!mVoiceSearchHintsEnabled || mShowHint) return false;
+            if (!chooseToShowHint(context)) return false;
+            sheduleHintHiding(context);
+            mShowHint = true;
+            updateShowingHint(context);
+            return true;
+        }
+
+        public void hideVoiceSearchHint(Context context) {
+            mShowHint = false;
+            updateShowingHint(context);
+        }
+
+        public void updateWidget(Context context,AppWidgetManager appWidgetMgr) {
+            if (DBG) Log.d(TAG, "Updating appwidget " + mAppWidgetId);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
             // Corpus indicator
             // Before Froyo, android.resource URI could not be used in ImageViews.
@@ -384,25 +584,23 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             } else {
                 views.setViewVisibility(R.id.search_widget_voice_btn, View.GONE);
             }
+
             // Voice Search hints
-            if (mShouldShowVoiceSearchHint && !TextUtils.isEmpty(mVoiceSearchHint)) {
+            if (mShowHint && !TextUtils.isEmpty(mVoiceSearchHint)) {
                 views.setTextViewText(R.id.voice_search_hint_text, mVoiceSearchHint);
 
-                Intent nextHintIntent = new Intent(ACTION_NEXT_VOICE_SEARCH_HINT);
-                nextHintIntent.setComponent(myComponentName(context));
-                setOnClickBroadcastIntent(context, views, R.id.voice_search_hint_text,
-                        nextHintIntent);
-
-                Intent closeHintIntent = new Intent(ACTION_CLOSE_VOICE_SEARCH_HINT);
-                closeHintIntent.setComponent(myComponentName(context));
+                Intent closeHintIntent = createIntent(context, ACTION_HIDE_VOICE_SEARCH_HINT);
                 setOnClickBroadcastIntent(context, views, R.id.voice_search_hint_close,
                         closeHintIntent);
+
+                setOnClickActivityIntent(context, views, R.id.voice_search_hint_text,
+                        mVoiceSearchIntent);
 
                 views.setViewVisibility(R.id.voice_search_hint, View.VISIBLE);
             } else {
                 views.setViewVisibility(R.id.voice_search_hint, View.GONE);
             }
-            appWidgetManager.updateAppWidget(mAppWidgetId, views);
+            appWidgetMgr.updateAppWidget(mAppWidgetId, views);
         }
 
         private void setOnClickBroadcastIntent(Context context, RemoteViews views, int viewId,

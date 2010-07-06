@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Process;
@@ -34,7 +35,9 @@ public class Config {
 
     private static final String TAG = "QSB.Config";
 
-    private static final long DAY_MILLIS = 86400000L;
+    protected static final long SECOND_MILLIS = 1000L;
+    protected static final long MINUTE_MILLIS = 60L * SECOND_MILLIS;
+    protected static final long DAY_MILLIS = 86400000L;
 
     private static final int NUM_SUGGESTIONS_ABOVE_KEYBOARD = 4;
     private static final int NUM_PROMOTED_SOURCES = 3;
@@ -57,6 +60,18 @@ public class Config {
 
     private static final long TYPING_SUGGESTIONS_UPDATE_DELAY_MILLIS = 100;
     private static final long PUBLISH_RESULT_DELAY_MILLIS = 200;
+
+    private static final long VOICE_SEARCH_HINT_ACTIVE_PERIOD = 7L * DAY_MILLIS;
+
+    private static final long VOICE_SEARCH_HINT_UPDATE_INTERVAL
+            = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+
+    private static final long VOICE_SEARCH_HINT_SHOW_PERIOD_MILLIS
+            = AlarmManager.INTERVAL_HOUR * 2;
+
+    private static final long VOICE_SEARCH_HINT_CHANGE_PERIOD = 2L * MINUTE_MILLIS;
+
+    private static final long VOICE_SEARCH_HINT_VISIBLE_PERIOD = 6L * MINUTE_MILLIS;
 
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
@@ -232,5 +247,45 @@ public class Config {
 
     public boolean allowVoiceSearchHints() {
         return true;
+    }
+
+    /**
+     * The period of time for which after installing voice search we should consider showing voice
+     * search hints.
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintActivePeriod() {
+        return VOICE_SEARCH_HINT_ACTIVE_PERIOD;
+    }
+
+    /**
+     * The time interval at which we should consider whether or not to show some voice search hints.
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintUpdatePeriod() {
+        return VOICE_SEARCH_HINT_UPDATE_INTERVAL;
+    }
+
+    /**
+     * The time interval at which, on average, voice search hints are displayed.
+     */
+    public long getVoiceSearchHintShowPeriod() {
+        return VOICE_SEARCH_HINT_SHOW_PERIOD_MILLIS;
+    }
+
+    /**
+     * The amount of time for which voice search hints are displayed in one go.
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintVisibleTime() {
+        return VOICE_SEARCH_HINT_VISIBLE_PERIOD;
+    }
+
+    /**
+     * The period that we change voice search hints at while they're being displayed.
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintChangePeriod() {
+        return VOICE_SEARCH_HINT_CHANGE_PERIOD;
     }
 }

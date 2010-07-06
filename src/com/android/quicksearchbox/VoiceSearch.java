@@ -18,15 +18,20 @@ package com.android.quicksearchbox;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.util.Log;
 
 /**
  * Voice Search integration.
  */
 public class VoiceSearch {
+
+    private static final String TAG = "QSB.VoiceSearch";
 
     private final Context mContext;
 
@@ -50,11 +55,15 @@ public class VoiceSearch {
         return new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
     }
 
-    public boolean isVoiceSearchAvailable() {
+    private ResolveInfo getResolveInfo() {
         Intent intent = createVoiceSearchIntent();
         ResolveInfo ri = mContext.getPackageManager().
                 resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return ri != null;
+        return ri;
+    }
+
+    public boolean isVoiceSearchAvailable() {
+        return getResolveInfo() != null;
     }
 
     public Intent createVoiceWebSearchIntent(Bundle appData) {
@@ -67,6 +76,22 @@ public class VoiceSearch {
             intent.putExtra(SearchManager.APP_DATA, appData);
         }
         return intent;
+    }
+
+    /**
+     * Gets the {@code versionCode} of the currently installed voice search package.
+     * @return The {@code versionCode} of voiceSearch, or 0 if none is installed.
+     */
+    public int getVersion() {
+        ResolveInfo ri = getResolveInfo();
+        if (ri == null) return 0;
+        ComponentInfo ci = ri.activityInfo != null ? ri.activityInfo : ri.serviceInfo;
+        try {
+            return getContext().getPackageManager().getPackageInfo(ci.packageName, 0).versionCode;
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Cannot find voice search package " + ci.packageName, e);
+            return 0;
+        }
     }
 
 }

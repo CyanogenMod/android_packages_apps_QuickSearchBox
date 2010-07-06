@@ -99,12 +99,6 @@
     <string name="google_show_web_suggestions_summary_enabled">Show suggestions from Google as you type</string>
     <string name="google_show_web_suggestions_summary_disabled">Don\'t show suggestions from Google as you type</string>
 
-    <!-- Title for 'Search Widget' category of search settings -->
-    <string name="search_widget_category_title">Search Widget</string>
-    <!-- Title and summary for 'Show hints' check box setting -->
-    <string name="search_widget_hints_enabled_title">Show hints</string>
-    <string name="search_widget_hints_enabled_summary">Show hints in the search widget</string>
-
     <!-- Title for Voice Search hints bubble -->
     <string name="voice_search_hint_title">Try saying:</string>
     <!-- Starting quotation marks of the voice search hint -->

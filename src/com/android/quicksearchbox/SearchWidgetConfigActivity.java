@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
@@ -32,10 +33,12 @@ import android.widget.ListAdapter;
  * The configuration screen for search widgets.
  */
 public class SearchWidgetConfigActivity extends ChoiceActivity {
-    static final String TAG = "QSB.SearchWidgetConfigActivity";
+    private static final boolean DBG = false;
+    private static final String TAG = "QSB.SearchWidgetConfigActivity";
 
     private static final String PREFS_NAME = "SearchWidgetConfig";
-    private static final String WIDGET_CORPUS_PREF_PREFIX = "widget_corpus_";
+    private static final String WIDGET_CORPUS_NAME_PREFIX = "widget_corpus_";
+    private static final String WIDGET_CORPUS_SHOWING_HINT_PREFIX = "widget_showing_hint_";
 
     private CorporaAdapter mAdapter;
 
@@ -83,7 +86,7 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
     }
 
     protected void selectCorpus(Corpus corpus) {
-        writeWidgetCorpusPref(mAppWidgetId, corpus);
+        setWidgetCorpusName(mAppWidgetId, corpus);
         SearchWidgetProvider.updateSearchWidgets(this);
 
         Intent result = new Intent();
@@ -96,20 +99,38 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         return context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     }
 
-    private static String getCorpusPrefKey(int appWidgetId) {
-        return WIDGET_CORPUS_PREF_PREFIX + appWidgetId;
+    private static String getCorpusNameKey(int appWidgetId) {
+        return WIDGET_CORPUS_NAME_PREFIX + appWidgetId;
     }
 
-    private void writeWidgetCorpusPref(int appWidgetId, Corpus corpus) {
+    private static String getShowingHintKey(int appWidgetId) {
+        return WIDGET_CORPUS_SHOWING_HINT_PREFIX + appWidgetId;
+    }
+
+    private void setWidgetCorpusName(int appWidgetId, Corpus corpus) {
         String corpusName = corpus == null ? null : corpus.getName();
         SharedPreferences.Editor prefs = getWidgetPreferences(this).edit();
-        prefs.putString(getCorpusPrefKey(appWidgetId), corpusName);
+        prefs.putString(getCorpusNameKey(appWidgetId), corpusName);
         prefs.commit();
     }
 
-    public static String readWidgetCorpusPref(Context context, int appWidgetId) {
+    public static String getWidgetCorpusName(Context context, int appWidgetId) {
         SharedPreferences prefs = getWidgetPreferences(context);
-        return prefs.getString(getCorpusPrefKey(appWidgetId), null);
+        return prefs.getString(getCorpusNameKey(appWidgetId), null);
+    }
+
+    public static void setWidgetShowingHint(Context context, int appWidgetId, boolean showing) {
+        SharedPreferences.Editor prefs = getWidgetPreferences(context).edit();
+        prefs.putBoolean(getShowingHintKey(appWidgetId), showing);
+        boolean c = prefs.commit();
+        if (DBG) Log.d(TAG, "Widget " + appWidgetId + " set showing hint " + showing + "("+c+")");
+    }
+
+    public static boolean getWidgetShowingHint(Context context, int appWidgetId) {
+        SharedPreferences prefs = getWidgetPreferences(context);
+        boolean r = prefs.getBoolean(getShowingHintKey(appWidgetId), false);
+        if (DBG) Log.d(TAG, "Widget " + appWidgetId + " showing hint: " + r);
+        return r;
     }
 
     private CorpusRanker getCorpusRanker() {
