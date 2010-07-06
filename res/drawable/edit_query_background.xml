@@ -22,6 +22,9 @@
     <item android:state_pressed="true"
         android:drawable="@drawable/edit_query_background_pressed" />
 
+    <item android:state_enabled="true" android:state_focused="true"
+        android:drawable="@drawable/edit_query_background_selected" />
+
     <item android:drawable="@drawable/edit_query_background_normal" />
 
 </selector>
