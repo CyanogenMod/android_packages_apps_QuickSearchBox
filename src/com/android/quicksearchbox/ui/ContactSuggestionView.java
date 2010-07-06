@@ -50,8 +50,8 @@ public class ContactSuggestionView extends DefaultSuggestionView {
     }
 
     @Override
-    public void bindAsSuggestion(SuggestionCursor suggestion) {
-        super.bindAsSuggestion(suggestion);
+    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionClickListener onClick) {
+        super.bindAsSuggestion(suggestion, onClick);
         mQuickContact.assignContactUri(Uri.parse(suggestion.getSuggestionIntentDataString()));
     }
 }

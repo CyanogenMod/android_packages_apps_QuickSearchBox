@@ -19,7 +19,8 @@
     class="com.android.quicksearchbox.ui.DefaultSuggestionView"
     android:layout_width="match_parent"
     android:background="@drawable/suggestion_background"
-    android:layout_height="56dip" >
+    android:layout_height="56dip"
+    android:focusable="true" >
 
     <!-- Icons come first in the layout, since their placement doesn't depend on
          the placement of the text views. -->

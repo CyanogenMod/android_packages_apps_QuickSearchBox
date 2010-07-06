@@ -125,14 +125,16 @@ public class SearchActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView();
+        SuggestListFocusListener suggestionFocusListener = new SuggestListFocusListener();
         mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
+        mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler());
+        mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
 
         mQueryTextView = (QueryTextView) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
-        mSuggestionsView.setSuggestionClickListener(new ClickHandler());
         mSuggestionsView.setOnScrollListener(new InputMethodCloser());
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
-        mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
+        mSuggestionsView.setOnFocusChangeListener(suggestionFocusListener);
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);

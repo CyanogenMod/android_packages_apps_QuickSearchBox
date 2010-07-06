@@ -25,6 +25,7 @@ import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnFocusChangeListener;
 import android.widget.BaseAdapter;
 
 /**
@@ -45,6 +46,9 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private Suggestions mSuggestions;
 
+    private SuggestionClickListener mSuggestionClickListener;
+    private OnFocusChangeListener mOnFocusChangeListener;
+
     private boolean mClosed = false;
 
     public SuggestionsAdapter(SuggestionViewFactory viewFactory) {
@@ -59,6 +63,14 @@ public class SuggestionsAdapter extends BaseAdapter {
         setSuggestions(null);
         mCorpus = null;
         mClosed = true;
+    }
+
+    public void setSuggestionClickListener(SuggestionClickListener listener) {
+        mSuggestionClickListener = listener;
+    }
+
+    public void setOnFocusChangeListener(OnFocusChangeListener l) {
+        mOnFocusChangeListener = l;
     }
 
     public void setSuggestions(Suggestions suggestions) {
@@ -154,8 +166,12 @@ public class SuggestionsAdapter extends BaseAdapter {
         mCursor.moveTo(position);
         int viewType = mViewFactory.getSuggestionViewType(mCursor);
         SuggestionView view = mViewFactory.getSuggestionView(viewType, convertView, parent);
-        view.bindAsSuggestion(mCursor);
-        return (View) view;
+        view.bindAsSuggestion(mCursor, mSuggestionClickListener);
+        View v = (View) view;
+        if (mOnFocusChangeListener != null) {
+            v.setOnFocusChangeListener(mOnFocusChangeListener);
+        }
+        return v;
     }
 
     protected void onSuggestionsChanged() {
@@ -200,6 +216,12 @@ public class SuggestionsAdapter extends BaseAdapter {
             notifyDataSetChanged();
         } else {
             notifyDataSetInvalidated();
+        }
+    }
+
+    public void onIcon2Clicked(int position) {
+        if (mSuggestionClickListener != null) {
+            mSuggestionClickListener.onSuggestionQueryRefineClicked(position);
         }
     }
 

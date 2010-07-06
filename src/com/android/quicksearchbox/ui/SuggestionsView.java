@@ -20,9 +20,6 @@ import com.android.quicksearchbox.SuggestionPosition;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 /**
@@ -33,8 +30,6 @@ public class SuggestionsView extends ListView {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsView";
 
-    private SuggestionClickListener mSuggestionClickListener;
-
     public SuggestionsView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -42,12 +37,7 @@ public class SuggestionsView extends ListView {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        setOnItemClickListener(new ItemClickListener());
-        setOnItemLongClickListener(new ItemLongClickListener());
-    }
-
-    public void setSuggestionClickListener(SuggestionClickListener listener) {
-        mSuggestionClickListener = listener;
+        setItemsCanFocus(true);
     }
 
     /**
@@ -66,31 +56,6 @@ public class SuggestionsView extends ListView {
      */
     public SuggestionPosition getSelectedSuggestion() {
         return (SuggestionPosition) getSelectedItem();
-    }
-
-    private class ItemClickListener implements AdapterView.OnItemClickListener {
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (DBG) Log.d(TAG, "onItemClick(" + position + ")");
-            if (mSuggestionClickListener != null) {
-                mSuggestionClickListener.onSuggestionClicked(position);
-            }
-        }
-    }
-
-    private class ItemLongClickListener implements AdapterView.OnItemLongClickListener {
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            if (DBG) Log.d(TAG, "onItemLongClick(" + position + ")");
-            if (mSuggestionClickListener != null) {
-                return mSuggestionClickListener.onSuggestionLongClicked(position);
-            }
-            return false;
-        }
-    }
-
-    public void onIcon2Clicked(int position) {
-        if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionQueryRefineClicked(position);
-        }
     }
 
 }

@@ -33,15 +33,16 @@ import android.text.TextUtils;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
  * View for the items in the suggestions list. This includes promoted suggestions,
  * sources, and suggestions under each source.
- *
  */
 public class DefaultSuggestionView extends RelativeLayout implements SuggestionView {
 
@@ -53,11 +54,15 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     private ImageView mIcon1;
     private ImageView mIcon2;
     private final SuggestionFormatter mSuggestionFormatter;
+    private boolean mRefineable;
+    private int mPosition;
+    private SuggestionClickListener mClickListener;
+    private KeyListener mKeyListener;
 
     public DefaultSuggestionView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mSuggestionFormatter = QsbApplication.get(context).getSuggestionFormatter();
-        }
+    }
 
     public DefaultSuggestionView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,9 +81,18 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         mText2 = (TextView) findViewById(R.id.text2);
         mIcon1 = (ImageView) findViewById(R.id.icon1);
         mIcon2 = (ImageView) findViewById(R.id.icon2);
+        // for some reason, creating mKeyListener inside the constructor causes it not to work.
+        mKeyListener = new KeyListener();
+
+        setOnKeyListener(mKeyListener);
     }
 
-    public void bindAsSuggestion(SuggestionCursor suggestion) {
+    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionClickListener onClick) {
+        setOnClickListener(new ClickListener());
+        setOnLongClickListener(new LongClickListener());
+        mPosition = suggestion.getPosition();
+        mClickListener = onClick;
+
         CharSequence text1 = formatText(suggestion.getSuggestionText1(), suggestion, true);
         CharSequence text2 = suggestion.getSuggestionText2Url();
         if (text2 != null) {
@@ -110,29 +124,32 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     }
 
     protected void updateRefinable(SuggestionCursor suggestion) {
-        boolean refinable = 
+        mRefineable =
                 suggestion.isWebSearchSuggestion()
                 && mIcon2.getDrawable() == null
                 && !TextUtils.isEmpty(suggestion.getSuggestionQuery());
-        setRefinable(suggestion, refinable);
+        setRefinable(suggestion, mRefineable);
     }
 
     protected void setRefinable(SuggestionCursor suggestion, boolean refinable) {
         if (refinable) {
-            final int position = suggestion.getPosition();
             mIcon2.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Log.d(TAG, "Clicked query refine");
-                    SuggestionsView suggestions = (SuggestionsView) getParent();
-                    suggestions.onIcon2Clicked(position);
+                    SuggestionsAdapter adapter =
+                            (SuggestionsAdapter) ((ListView) getParent()).getAdapter();
+                    adapter.onIcon2Clicked(mPosition);
                 }
             });
+            mIcon2.setFocusable(true);
+            mIcon2.setOnKeyListener(mKeyListener);
             Drawable icon2 = getContext().getResources().getDrawable(R.drawable.edit_query);
             Drawable background =
                     getContext().getResources().getDrawable(R.drawable.edit_query_background);
             setIcon2(icon2, background);
         } else {
             mIcon2.setOnClickListener(null);
+            mIcon2.setFocusable(false);
         }
     }
 
@@ -242,6 +259,42 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
             // about animated drawables in the future, see http://b/1878430.
             drawable.setVisible(false, false);
             drawable.setVisible(true, false);
+        }
+    }
+
+    private class ClickListener implements OnClickListener {
+        public void onClick(View v) {
+            if (DBG) Log.d(TAG, "onItemClick(" + mPosition + ")");
+            if (mClickListener != null) {
+                mClickListener.onSuggestionClicked(mPosition);
+            }
+        }
+    }
+
+    private class LongClickListener implements OnLongClickListener {
+        public boolean onLongClick(View v) {
+            if (DBG) Log.d(TAG, "onItemLongClick(" + mPosition + ")");
+            if (mClickListener != null) {
+                return mClickListener.onSuggestionLongClicked(mPosition);
+            }
+            return false;
+        }
+    }
+
+    private class KeyListener implements View.OnKeyListener {
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            boolean consumed = false;
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v != mIcon2) {
+                    consumed = mIcon2.requestFocus();
+                    if (DBG) Log.d(TAG, "onKey Icon2 accepted focus: " + consumed);
+                } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+                        && v != DefaultSuggestionView.this) {
+                    consumed = requestFocus();
+                    if (DBG) Log.d(TAG, "onKey SuggestionView accepted focus: " + consumed);
+                }
+            }
+            return consumed;
         }
     }
 

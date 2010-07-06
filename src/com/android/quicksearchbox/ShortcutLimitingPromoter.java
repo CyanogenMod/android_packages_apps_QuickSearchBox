@@ -29,7 +29,7 @@ import java.util.ArrayList;
 public class ShortcutLimitingPromoter extends PromoterWrapper {
 
     private static final String TAG = "QSB.ShortcutPromoter";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private final int mMaxShortcutsPerWebSource;
     private final int mMaxShortcutsPerNonWebSource;
