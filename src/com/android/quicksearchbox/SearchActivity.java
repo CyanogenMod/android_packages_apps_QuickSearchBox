@@ -803,6 +803,7 @@ public class SearchActivity extends Activity {
                    query += " ";
                    setQuery(query, false);
                    updateSuggestions(query);
+                   mQueryTextView.requestFocus();
                }
            }
        }
