@@ -44,7 +44,7 @@ public class CorpusSelectionDialog extends Dialog {
 
     private GridView mCorpusGrid;
 
-    private final int mGridColumns;
+    private TextView mEditItems;
 
     private OnCorpusSelectedListener mListener;
 
@@ -54,7 +54,6 @@ public class CorpusSelectionDialog extends Dialog {
 
     public CorpusSelectionDialog(Context context) {
         super(context, R.style.Theme_SelectSearchSource);
-        mGridColumns = context.getResources().getInteger(R.integer.corpus_selection_dialog_columns);
     }
 
     /**
@@ -80,8 +79,8 @@ public class CorpusSelectionDialog extends Dialog {
         // the list items unclickable.
         mCorpusGrid.setFocusable(true);
 
-        TextView editItems = (TextView) findViewById(R.id.corpus_edit_items);
-        editItems.setOnClickListener(new CorpusEditListener());
+        mEditItems = (TextView) findViewById(R.id.corpus_edit_items);
+        mEditItems.setOnClickListener(new CorpusEditListener());
 
         Window window = getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();
@@ -133,8 +132,7 @@ public class CorpusSelectionDialog extends Dialog {
         }
         // Dismiss dialog on up move when nothing, or an item on the top row, is selected.
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            int selectedRow = mCorpusGrid.getSelectedItemPosition() / mGridColumns;
-            if (selectedRow <= 0) {
+            if (mEditItems.isFocused()) {
                 cancel();
                 return true;
             }
