@@ -18,16 +18,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/voice_search_hint_bg"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:gravity="center_vertical|left"
         android:visibility="gone"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:focusable="true"
         >
 
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.0"
-            android:textColor="#88FFFFFF"
+            android:textColor="#88000000"
             android:textSize="14dip"
             android:gravity="left"
             android:singleLine="true"
@@ -40,21 +43,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="14dip"
             android:gravity="left"
             android:singleLine="true"
-            />
-
-    <ImageView
-            android:id="@+id/voice_search_hint_close"
-            android:layout_width="24dip"
-            android:layout_height="24dip"
-            android:layout_weight="0.0"
-            android:paddingLeft="4dip"
-            android:src="@drawable/btn_dialog"
-            android:scaleType="centerInside"
-            android:focusable="true"
             />
 
 </LinearLayout>

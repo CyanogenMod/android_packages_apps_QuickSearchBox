@@ -16,16 +16,22 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- We use a blank 9-patch here to work around a bug in the android framework. A subtle problem
+    in LayerDrawable means that if it is composed of simple drawable objects, it will reset the
+    padding of it's host view when set as the background. Using a 9-patch means that we can 'hard-
+    code' the padding we want into the 9 patch, so when it resets its host views padding it doesn't
+    actually change it. (drawable/corpus_indicator_bg uses layer drawables to composite an arrow
+    on top of these basic background). See bug 2826716. -->
     <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_arrow" />
+        android:drawable="@drawable/corpus_indicator_blank" />
 
     <item android:state_pressed="true"
-        android:drawable="@drawable/corpus_indicator_bg_pressed_arrow" />
+        android:drawable="@drawable/corpus_indicator_bg_pressed" />
 
     <item android:state_focused="true"
-        android:drawable="@drawable/corpus_indicator_bg_focused_arrow" />
+        android:drawable="@drawable/corpus_indicator_bg_focused" />
 
     <item android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_arrow" />
+        android:drawable="@drawable/corpus_indicator_blank" />
 
 </selector>

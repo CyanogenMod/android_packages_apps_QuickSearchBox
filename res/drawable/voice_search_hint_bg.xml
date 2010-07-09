@@ -17,15 +17,15 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_arrow" />
+        android:drawable="@drawable/voice_search_hint_bg_normal" />
 
     <item android:state_pressed="true"
-        android:drawable="@drawable/corpus_indicator_bg_pressed_arrow" />
+        android:drawable="@drawable/voice_search_hint_bg_pressed" />
 
     <item android:state_focused="true"
-        android:drawable="@drawable/corpus_indicator_bg_focused_arrow" />
+        android:drawable="@drawable/voice_search_hint_bg_selected" />
 
     <item android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_arrow" />
+        android:drawable="@drawable/voice_search_hint_bg_normal" />
 
 </selector>

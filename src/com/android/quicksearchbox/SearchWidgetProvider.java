@@ -77,6 +77,13 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             "com.android.quicksearchbox.action.CONSIDER_VOICE_SEARCH_HINT";
 
     /**
+     * Broadcast intent action for displaying voice search hints immediately. This will only have
+     * any effect when {@link #DBG} is true.
+     */
+    private static final String ACTION_SHOW_VOICE_SEARCH_HINT_NOW =
+            "com.android.quicksearchbox.action.SHOW_VOICE_SEARCH_HINT_NOW";
+
+    /**
      * Preference key used for storing the index of the next voice search hint to show.
      */
     private static final String NEXT_VOICE_SEARCH_HINT_INDEX_PREF = "next_voice_search_hint";
@@ -112,6 +119,8 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             getHintsFromVoiceSearch(context);
         } else if (ACTION_HIDE_VOICE_SEARCH_HINT.equals(action)) {
             hideVoiceSearchHint(context);
+        } else if (DBG && ACTION_SHOW_VOICE_SEARCH_HINT_NOW.equals(action)) {
+            showVoiceSearchHintNow(context);
         }
     }
 
@@ -179,8 +188,19 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         }
         if (changed) {
             getHintsFromVoiceSearch(context);
-            sceduleNextVoiceSearchHint(context, true);
+            scheduleNextVoiceSearchHint(context, true);
         }
+    }
+
+    private static void showVoiceSearchHintNow(Context context) {
+        if (DBG) Log.d(TAG, "showVoiceSearchHintNow");
+        SearchWidgetState[] states = getSearchWidgetStates(context, true);
+        for (SearchWidgetState state : states) {
+            state.setShowingHint(true);
+            state.updateShowingHint(context);
+        }
+        getHintsFromVoiceSearch(context);
+        scheduleNextVoiceSearchHint(context, true);
     }
 
     private void hideVoiceSearchHint(Context context) {
@@ -194,7 +214,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             }
             needHint |= state.isShowingHint();
         }
-        sceduleNextVoiceSearchHint(context, false);
+        scheduleNextVoiceSearchHint(context, false);
     }
 
     private static void voiceSearchHintReceived(Context context, CharSequence hint) {
@@ -210,7 +230,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             }
         }
         if (!needHint) {
-            sceduleNextVoiceSearchHint(context, false);
+            scheduleNextVoiceSearchHint(context, false);
         }
     }
 
@@ -326,6 +346,11 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         }
     }
 
+    private static Intent getVoiceSearchHelpIntent(Context context) {
+        VoiceSearch voiceSearch = QsbApplication.get(context).getVoiceSearch();
+        return voiceSearch.createVoiceSearchHelpIntent();
+    }
+
     private static Uri getCorpusIconUri(Context context, Corpus corpus) {
         if (corpus == null) {
             return getCorpusViewFactory(context).getGlobalSearchIconUri();
@@ -355,13 +380,13 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         return spannedHint;
     }
 
-    private static void rescheduleAction(Context context, boolean reshedule, String action, long period) {
+    private static void rescheduleAction(Context context, boolean reschedule, String action, long period) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(action);
         intent.setComponent(myComponentName(context));
         PendingIntent pending = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmManager.cancel(pending);
-        if (reshedule) {
+        if (reschedule) {
             if (DBG) Log.d(TAG, "Scheduling action " + action + " after period " + period);
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
                     SystemClock.elapsedRealtime() + period, period, pending);
@@ -375,7 +400,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
                 getConfig(context).getVoiceSearchHintUpdatePeriod());
     }
 
-    private static void sceduleNextVoiceSearchHint(Context context, boolean needUpdates) {
+    private static void scheduleNextVoiceSearchHint(Context context, boolean needUpdates) {
         rescheduleAction(context, needUpdates, ACTION_NEXT_VOICE_SEARCH_HINT,
                 getConfig(context).getVoiceSearchHintChangePeriod());
     }
@@ -522,7 +547,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             return intent;
         }
 
-        private void sheduleHintHiding(Context context) {
+        private void scheduleHintHiding(Context context) {
             Intent hideIntent = createIntent(context, ACTION_HIDE_VOICE_SEARCH_HINT);
 
             AlarmManager alarmManager =
@@ -539,14 +564,14 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
         }
 
-        private void updateShowingHint(Context context) {
+        public void updateShowingHint(Context context) {
             SearchWidgetConfigActivity.setWidgetShowingHint(context, mAppWidgetId, mShowHint);
         }
 
         public boolean considerShowingHint(Context context) {
             if (!mVoiceSearchHintsEnabled || mShowHint) return false;
             if (!chooseToShowHint(context)) return false;
-            sheduleHintHiding(context);
+            scheduleHintHiding(context);
             mShowHint = true;
             updateShowingHint(context);
             return true;
@@ -565,15 +590,10 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             if (QsbApplication.isFroyoOrLater()) {
                 views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
             }
-            setOnClickActivityIntent(context, views, R.id.corpus_indicator,
-                    mCorpusIndicatorIntent);
             // Query TextView
             views.setCharSequence(R.id.search_widget_text, "setHint", mQueryTextViewHint);
-            // setBackgroundResource did not have @RemotableViewMethod before Froyo
-            if (QsbApplication.isFroyoOrLater()) {
-                views.setInt(R.id.search_widget_text, "setBackgroundResource",
-                        mQueryTextViewBackgroundResource);
-            }
+            setBackgroundResource(views, R.id.search_widget_text, mQueryTextViewBackgroundResource);
+
             setOnClickActivityIntent(context, views, R.id.search_widget_text,
                     mQueryTextViewIntent);
             // Voice Search button
@@ -589,18 +609,33 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             if (mShowHint && !TextUtils.isEmpty(mVoiceSearchHint)) {
                 views.setTextViewText(R.id.voice_search_hint_text, mVoiceSearchHint);
 
-                Intent closeHintIntent = createIntent(context, ACTION_HIDE_VOICE_SEARCH_HINT);
-                setOnClickBroadcastIntent(context, views, R.id.voice_search_hint_close,
-                        closeHintIntent);
-
-                setOnClickActivityIntent(context, views, R.id.voice_search_hint_text,
-                        mVoiceSearchIntent);
+                Intent voiceSearchHelp = getVoiceSearchHelpIntent(context);
+                if (voiceSearchHelp == null) voiceSearchHelp = mVoiceSearchIntent;
+                setOnClickActivityIntent(context, views, R.id.voice_search_hint,
+                        voiceSearchHelp);
 
                 views.setViewVisibility(R.id.voice_search_hint, View.VISIBLE);
+                views.setViewVisibility(R.id.search_widget_text, View.GONE);
+
+                setBackgroundResource(views, R.id.corpus_indicator,
+                        R.drawable.corpus_indicator_bg_noarrow);
+                setOnClickBroadcastIntent(context, views, R.id.corpus_indicator,
+                        createIntent(context, ACTION_HIDE_VOICE_SEARCH_HINT));
             } else {
                 views.setViewVisibility(R.id.voice_search_hint, View.GONE);
+                views.setViewVisibility(R.id.search_widget_text, View.VISIBLE);
+                setBackgroundResource(views, R.id.corpus_indicator, R.drawable.corpus_indicator_bg);
+                setOnClickActivityIntent(context, views, R.id.corpus_indicator,
+                        mCorpusIndicatorIntent);
             }
             appWidgetMgr.updateAppWidget(mAppWidgetId, views);
+        }
+
+        private void setBackgroundResource(RemoteViews views, int viewId, int bgResource) {
+            // setBackgroundResource did not have @RemotableViewMethod before Froyo
+            if (QsbApplication.isFroyoOrLater()) {
+                views.setInt(viewId, "setBackgroundResource", bgResource);
+            }
         }
 
         private void setOnClickBroadcastIntent(Context context, RemoteViews views, int viewId,

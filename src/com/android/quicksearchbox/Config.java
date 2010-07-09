@@ -252,6 +252,7 @@ public class Config {
     /**
      * The period of time for which after installing voice search we should consider showing voice
      * search hints.
+     *
      * @return The period in milliseconds.
      */
     public long getVoiceSearchHintActivePeriod() {
@@ -260,6 +261,7 @@ public class Config {
 
     /**
      * The time interval at which we should consider whether or not to show some voice search hints.
+     *
      * @return The period in milliseconds.
      */
     public long getVoiceSearchHintUpdatePeriod() {
@@ -268,6 +270,8 @@ public class Config {
 
     /**
      * The time interval at which, on average, voice search hints are displayed.
+     *
+     * @return The period in milliseconds.
      */
     public long getVoiceSearchHintShowPeriod() {
         return VOICE_SEARCH_HINT_SHOW_PERIOD_MILLIS;
@@ -275,6 +279,7 @@ public class Config {
 
     /**
      * The amount of time for which voice search hints are displayed in one go.
+     *
      * @return The period in milliseconds.
      */
     public long getVoiceSearchHintVisibleTime() {
@@ -283,6 +288,7 @@ public class Config {
 
     /**
      * The period that we change voice search hints at while they're being displayed.
+     *
      * @return The period in milliseconds.
      */
     public long getVoiceSearchHintChangePeriod() {

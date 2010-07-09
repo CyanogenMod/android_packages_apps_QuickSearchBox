@@ -20,8 +20,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -79,7 +79,16 @@ public class VoiceSearch {
     }
 
     /**
+     * Create an intent to launch the voice search help screen, if any exists.
+     * @return The intent, or null.
+     */
+    public Intent createVoiceSearchHelpIntent() {
+        return null;
+    }
+
+    /**
      * Gets the {@code versionCode} of the currently installed voice search package.
+     *
      * @return The {@code versionCode} of voiceSearch, or 0 if none is installed.
      */
     public int getVersion() {

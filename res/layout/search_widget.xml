@@ -56,6 +56,17 @@
             android:textColorHint="@color/search_hint"
         />
 
+        <include
+            android:id="@+id/voice_search_hint"
+            layout="@layout/voice_search_hint"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:layout_marginTop="6dip"
+            android:layout_marginBottom="6dip"
+            android:focusable="true"
+        />
+
         <ImageButton
             android:id="@+id/search_widget_voice_btn"
             android:layout_width="wrap_content"
@@ -66,14 +77,5 @@
         />
 
     </LinearLayout>
-
-    <include
-        android:id="@+id/voice_search_hint"
-        layout="@layout/voice_search_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-    />
 
 </RelativeLayout>
