@@ -288,8 +288,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
                 if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v != mIcon2) {
                     consumed = mIcon2.requestFocus();
                     if (DBG) Log.d(TAG, "onKey Icon2 accepted focus: " + consumed);
-                } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                        && v != DefaultSuggestionView.this) {
+                } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && v == mIcon2) {
                     consumed = requestFocus();
                     if (DBG) Log.d(TAG, "onKey SuggestionView accepted focus: " + consumed);
                 }
