@@ -77,8 +77,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             "com.android.quicksearchbox.action.CONSIDER_VOICE_SEARCH_HINT";
 
     /**
-     * Broadcast intent action for displaying voice search hints immediately. This will only have
-     * any effect when {@link #DBG} is true.
+     * Broadcast intent action for displaying voice search hints immediately.
      */
     private static final String ACTION_SHOW_VOICE_SEARCH_HINT_NOW =
             "com.android.quicksearchbox.action.SHOW_VOICE_SEARCH_HINT_NOW";
@@ -119,7 +118,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             getHintsFromVoiceSearch(context);
         } else if (ACTION_HIDE_VOICE_SEARCH_HINT.equals(action)) {
             hideVoiceSearchHint(context);
-        } else if (DBG && ACTION_SHOW_VOICE_SEARCH_HINT_NOW.equals(action)) {
+        } else if (ACTION_SHOW_VOICE_SEARCH_HINT_NOW.equals(action)) {
             showVoiceSearchHintNow(context);
         }
     }
