@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.0"
             android:textColor="#88000000"
-            android:textSize="14dip"
+            android:textSize="@dimen/voice_search_hint_text_size"
             android:gravity="left"
             android:singleLine="true"
             android:paddingRight="4dip"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:textColor="@android:color/black"
-            android:textSize="14dip"
+            android:textSize="@dimen/voice_search_hint_text_size"
             android:gravity="left"
             android:singleLine="true"
             />
