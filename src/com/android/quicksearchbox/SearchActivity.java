@@ -67,6 +67,9 @@ public class SearchActivity extends Activity {
     public static final String INTENT_ACTION_QSB_AND_SELECT_CORPUS
             = "com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS";
 
+    public static final String INTENT_ACTION_QSB_AND_HIDE_WIDGET_HINTS
+            = "com.android.quicksearchbox.action.QSB_AND_HIDE_WIDGET_HINTS";
+
     // The string used for privateImeOptions to identify to the IME that it should not show
     // a microphone button since one already exists in the search dialog.
     // TODO: This should move to android-common or something.
@@ -230,6 +233,9 @@ public class SearchActivity extends Activity {
 
         if (startedIntoCorpusSelectionDialog()) {
             showCorpusSelectionDialog();
+        }
+        if (INTENT_ACTION_QSB_AND_HIDE_WIDGET_HINTS.equals(intent.getAction())) {
+            SearchWidgetProvider.hideHintsNow(getApplicationContext());
         }
     }
 

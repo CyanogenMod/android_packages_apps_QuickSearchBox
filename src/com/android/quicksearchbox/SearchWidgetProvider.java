@@ -123,6 +123,13 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         }
     }
 
+    public static void hideHintsNow(Context context) {
+        if (DBG) Log.d(TAG, "hideHintsNow");
+        Intent hideHints = new Intent(ACTION_HIDE_VOICE_SEARCH_HINT);
+        hideHints.setComponent(myComponentName(context));
+        context.sendBroadcast(hideHints);
+    }
+
     private static Random getRandom() {
         if (sRandom == null) {
             sRandom = new Random();
@@ -274,6 +281,18 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         return new ComponentName(pkg, cls);
     }
 
+    private static Intent createQsbActivityIntent(Context context, String action,
+            Bundle widgetAppData, Corpus corpus) {
+        Intent qsbIntent = new Intent(action);
+        qsbIntent.setPackage(context.getPackageName());
+        qsbIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        qsbIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
+        qsbIntent.setData(SearchActivity.getCorpusUri(corpus));
+        return qsbIntent;
+    }
+
     private static SearchWidgetState getSearchWidgetState(Context context, 
             int appWidgetId, boolean enableVoiceSearchHints) {
         String corpusName =
@@ -285,18 +304,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         Bundle widgetAppData = new Bundle();
         widgetAppData.putString(Search.SOURCE, WIDGET_SEARCH_SOURCE);
 
-        // Corpus indicator
-        state.setCorpusIconUri(getCorpusIconUri(context, corpus));
-
-        Intent corpusIconIntent = new Intent(SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS);
-        corpusIconIntent.setPackage(context.getPackageName());
-        corpusIconIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        corpusIconIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
-        corpusIconIntent.setData(SearchActivity.getCorpusUri(corpus));
-        state.setCorpusIndicatorIntent(corpusIconIntent);
-
         // Query text view hint
         if (corpus == null || corpus.isWebCorpus()) {
             state.setQueryTextViewBackgroundResource(R.drawable.textfield_search_empty_google);
@@ -306,30 +313,35 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         }
 
         // Text field click
-        Intent qsbIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
-        qsbIntent.setPackage(context.getPackageName());
-        qsbIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        qsbIntent.putExtra(SearchManager.APP_DATA, widgetAppData);
-        qsbIntent.setData(SearchActivity.getCorpusUri(corpus));
+        Intent qsbIntent = createQsbActivityIntent(
+                context,
+                SearchManager.INTENT_ACTION_GLOBAL_SEARCH,
+                widgetAppData,
+                corpus);
         state.setQueryTextViewIntent(qsbIntent);
 
         // Voice search button
-        if (enableVoiceSearchHints) {
-            Intent voiceSearchIntent = getVoiceSearchIntent(context, corpus, widgetAppData);
-            state.setVoiceSearchIntent(voiceSearchIntent);
-            if (voiceSearchIntent != null
-                    && RecognizerIntent.ACTION_WEB_SEARCH.equals(voiceSearchIntent.getAction())) {
-                state.setVoiceSearchHintsEnabled(true);
+        Intent voiceSearchIntent = getVoiceSearchIntent(context, corpus, widgetAppData);
+        state.setVoiceSearchIntent(voiceSearchIntent);
+        if (enableVoiceSearchHints && voiceSearchIntent != null
+                && RecognizerIntent.ACTION_WEB_SEARCH.equals(voiceSearchIntent.getAction())) {
+            state.setVoiceSearchHintsEnabled(true);
 
-                boolean showingHint =
-                        SearchWidgetConfigActivity.getWidgetShowingHint(context, appWidgetId);
-                if (DBG) Log.d(TAG, "Widget " + appWidgetId + " showing hint: " + showingHint);
-                state.setShowingHint(showingHint);
+            boolean showingHint =
+                    SearchWidgetConfigActivity.getWidgetShowingHint(context, appWidgetId);
+            if (DBG) Log.d(TAG, "Widget " + appWidgetId + " showing hint: " + showingHint);
+            state.setShowingHint(showingHint);
 
-            }
         }
+
+        // Corpus indicator
+        state.setCorpusIconUri(getCorpusIconUri(context, corpus));
+
+        String action = state.isShowingHint()
+                ? SearchActivity.INTENT_ACTION_QSB_AND_HIDE_WIDGET_HINTS
+                : SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS;
+        Intent corpusIconIntent = createQsbActivityIntent(context, action, widgetAppData, corpus);
+        state.setCorpusIndicatorIntent(corpusIconIntent);
 
         return state;
     }
@@ -589,6 +601,8 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             if (QsbApplication.isFroyoOrLater()) {
                 views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
             }
+            setOnClickActivityIntent(context, views, R.id.corpus_indicator,
+                    mCorpusIndicatorIntent);
             // Query TextView
             views.setCharSequence(R.id.search_widget_text, "setHint", mQueryTextViewHint);
             setBackgroundResource(views, R.id.search_widget_text, mQueryTextViewBackgroundResource);
@@ -618,14 +632,10 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
                 setBackgroundResource(views, R.id.corpus_indicator,
                         R.drawable.corpus_indicator_bg_noarrow);
-                setOnClickBroadcastIntent(context, views, R.id.corpus_indicator,
-                        createIntent(context, ACTION_HIDE_VOICE_SEARCH_HINT));
             } else {
                 views.setViewVisibility(R.id.voice_search_hint, View.GONE);
                 views.setViewVisibility(R.id.search_widget_text, View.VISIBLE);
                 setBackgroundResource(views, R.id.corpus_indicator, R.drawable.corpus_indicator_bg);
-                setOnClickActivityIntent(context, views, R.id.corpus_indicator,
-                        mCorpusIndicatorIntent);
             }
             appWidgetMgr.updateAppWidget(mAppWidgetId, views);
         }
