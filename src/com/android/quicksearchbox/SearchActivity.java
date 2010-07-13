@@ -22,6 +22,7 @@ import com.android.quicksearchbox.ui.QueryTextView;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
+import com.google.common.base.CharMatcher;
 
 import android.app.Activity;
 import android.app.SearchManager;
@@ -458,7 +459,7 @@ public class SearchActivity extends Activity {
      * @return true if a search was performed as a result of this click, false otherwise.
      */
     protected boolean onSearchClicked(int method) {
-        String query = ltrim(getQuery());
+        String query = CharMatcher.WHITESPACE.trimAndCollapseFrom(getQuery(), ' ');
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
 
         // Don't do empty queries
@@ -642,7 +643,7 @@ public class SearchActivity extends Activity {
 
     protected void updateSuggestions(String query) {
 
-        query = ltrim(query);
+        query = CharMatcher.WHITESPACE.trimLeadingFrom(query);
         if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
                 query, mCorpus, getMaxSuggestions());
@@ -866,15 +867,6 @@ public class SearchActivity extends Activity {
         public void onChanged() {
             updateInputMethodSuggestions();
         }
-    }
-
-    private static String ltrim(String text) {
-        int start = 0;
-        int length = text.length();
-        while (start < length && Character.isWhitespace(text.charAt(start))) {
-            start++;
-        }
-        return start > 0 ? text.substring(start, length) : text;
     }
 
 }
