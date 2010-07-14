@@ -21,8 +21,6 @@ import com.android.quicksearchbox.MockTextAppearanceFactory.MockStyleSpan;
 import android.test.AndroidTestCase;
 import android.text.Spanned;
 
-import java.util.List;
-
 /**
  * Tests for {@link LevenshteinSuggestionFormatter}.
  */
@@ -40,10 +38,10 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
     }
 
     private void verifyTokenizeResult(String input, String... output) {
-        List<LevenshteinSuggestionFormatter.Token> tokens = mFormatter.tokenize(input);
-        assertEquals(output.length, tokens.size());
+        LevenshteinSuggestionFormatter.Token[] tokens = mFormatter.tokenize(input);
+        assertEquals(output.length, tokens.length);
         for (int i=0; i<output.length; ++i) {
-            assertEquals(output[i], tokens.get(i).toString());
+            assertEquals(output[i], tokens[i].toString());
         }
     }
 
@@ -90,18 +88,18 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
     }
 
     private void verifyFindMatches(String source, String target, String... newTokensInTarget) {
-        List<LevenshteinSuggestionFormatter.Token> sourceTokens = mFormatter.tokenize(source);
-        List<LevenshteinSuggestionFormatter.Token> targetTokens = mFormatter.tokenize(target);
+        LevenshteinSuggestionFormatter.Token[] sourceTokens = mFormatter.tokenize(source);
+        LevenshteinSuggestionFormatter.Token[] targetTokens = mFormatter.tokenize(target);
 
         int[] matches = mFormatter.findMatches(sourceTokens, targetTokens);
-        assertEquals(targetTokens.size(), matches.length);
+        assertEquals(targetTokens.length, matches.length);
         int newTokenCount = 0;
         int lastSourceToken = -1;
-        for (int i=0; i<targetTokens.size(); ++i) {
+        for (int i=0; i<targetTokens.length; ++i) {
 
             int sourceIdx = matches[i];
             if (sourceIdx < 0) {
-                String targetToken = targetTokens.get(i).toString();
+                String targetToken = targetTokens[i].toString();
                 assertTrue("Unexpected new token '" + targetToken + "'",
                         newTokenCount < newTokensInTarget.length);
 
@@ -109,8 +107,8 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
                 ++newTokenCount;
             } else {
                 assertTrue("Source token out of order", lastSourceToken < sourceIdx);
-                LevenshteinSuggestionFormatter.Token srcToken = sourceTokens.get(sourceIdx);
-                LevenshteinSuggestionFormatter.Token trgToken = targetTokens.get(i);
+                LevenshteinSuggestionFormatter.Token srcToken = sourceTokens[sourceIdx];
+                LevenshteinSuggestionFormatter.Token trgToken = targetTokens[i];
                 assertTrue("'" + srcToken + "' is not a prefix of '" + trgToken + "'",
                         srcToken.prefixOf(trgToken));
                 lastSourceToken = sourceIdx;

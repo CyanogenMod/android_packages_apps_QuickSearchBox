@@ -20,8 +20,6 @@ import com.android.quicksearchbox.util.LevenshteinDistance.EditOperation;
 
 import android.test.AndroidTestCase;
 
-import java.util.Arrays;
-
 /**
  * Tests for class {@link LevenshteinDistance}.
  */
@@ -36,8 +34,7 @@ public class LevenshteinDistanceTest extends AndroidTestCase {
             int expectedDistance) {
 
         assertEquals("test error", target.length, expectedOps.length);
-        LevenshteinDistance<String> distance = new LevenshteinDistance<String>
-                (Arrays.asList(source), Arrays.asList(target)){
+        LevenshteinDistance<String> distance = new LevenshteinDistance<String>(source, target){
                     @Override
                     protected boolean match(String source, String target) {
                         return source.equals(target);
