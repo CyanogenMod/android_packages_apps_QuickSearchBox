@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox.util;
 
-import java.util.List;
 
 /**
  * This class represents the matrix used in the Levenshtein distance algorithm, together
@@ -32,21 +31,30 @@ public abstract class LevenshteinDistance<T> {
     public static final int EDIT_REPLACE = 2;
     public static final int EDIT_UNCHANGED = 3;
 
-    private final List<T> mSource;
-    private final List<T> mTarget;
-    private final Entry[][] mTable;
+    private final T[] mSource;
+    private final T[] mTarget;
+    private final int[][] mEditTypeTable;
+    private final int[][] mDistanceTable;
 
-    public LevenshteinDistance(List<T> source, List<T> target) {
-        mTable = new Entry[source.size()+1][target.size()+1];
+    public LevenshteinDistance(T[] source, T[] target) {
+        final int sourceSize = source.length;
+        final int targetSize = target.length;
+        final int[][] editTab = new int[sourceSize+1][targetSize+1];
+        final int[][] distTab = new int[sourceSize+1][targetSize+1];
+        editTab[0][0] = EDIT_UNCHANGED;
+        distTab[0][0] = 0;
+        for (int i = 1; i <= sourceSize; ++i) {
+            editTab[i][0] = EDIT_DELETE;
+            distTab[i][0] = i;
+        }
+        for (int i = 1; i <= targetSize; ++i) {
+            editTab[0][i] = EDIT_INSERT;
+            distTab[0][i] = i;
+        }
+        mEditTypeTable = editTab;
+        mDistanceTable = distTab;
         mSource = source;
         mTarget = target;
-        set(0, 0, EDIT_UNCHANGED, 0);
-        for (int i = 1; i <= source.size(); ++i) {
-            set(i, 0, EDIT_DELETE, i);
-        }
-        for (int i = 1; i <= target.size(); ++i) {
-            set(0, i, EDIT_INSERT, i);
-        }
     }
 
     /**
@@ -64,31 +72,37 @@ public abstract class LevenshteinDistance<T> {
      * @return The Levenshtein distance.
      */
     public int calculate() {
-        for (int s = 1; s <= mSource.size(); ++s) {
-            T sourceToken = mSource.get(s-1);
-            for (int t = 1; t <= mTarget.size(); ++t) {
-                T targetToken = mTarget.get(t-1);
+        final T[] src = mSource;
+        final T[] trg = mTarget;
+        final int sourceLen = src.length;
+        final int targetLen = trg.length;
+        final int[][] distTab = mDistanceTable;
+        final int[][] editTab = mEditTypeTable;
+        for (int s = 1; s <= sourceLen; ++s) {
+            T sourceToken = src[s-1];
+            for (int t = 1; t <= targetLen; ++t) {
+                T targetToken = trg[t-1];
                 int cost = match(sourceToken, targetToken) ? 0 : 1;
 
-                Entry e = get(s - 1, t);
-                int distance = e.getDistance() + 1;
+                int distance = distTab[s-1][t] + 1;
                 int type = EDIT_DELETE;
 
-                e = get(s, t - 1);
-                if (e.getDistance() + 1 < distance ) {
-                    distance = e.getDistance() + 1;
+                int d = distTab[s][t - 1];
+                if (d + 1 < distance ) {
+                    distance = d + 1;
                     type = EDIT_INSERT;
                 }
 
-                e = get(s - 1, t - 1);
-                if (e.getDistance() + cost < distance) {
-                    distance = e.getDistance() + cost;
+                d = distTab[s - 1][t - 1];
+                if (d + cost < distance) {
+                    distance = d + cost;
                     type = cost == 0 ? EDIT_UNCHANGED : EDIT_REPLACE;
                 }
-                set(s, t, type, distance);
+                distTab[s][t] = distance;
+                editTab[s][t] = type;
             }
         }
-        return get(mSource.size(), mTarget.size()).getDistance();
+        return distTab[sourceLen][targetLen];
     }
 
     /**
@@ -100,12 +114,13 @@ public abstract class LevenshteinDistance<T> {
      *      token was inserted.
      */
     public EditOperation[] getTargetOperations() {
-        EditOperation[] ops = new EditOperation[mTarget.size()];
-        int targetPos = mTarget.size();
-        int sourcePos = mSource.size();
+        final int trgLen = mTarget.length;
+        final EditOperation[] ops = new EditOperation[trgLen];
+        int targetPos = trgLen;
+        int sourcePos = mSource.length;
+        final int[][] editTab = mEditTypeTable;
         while (targetPos > 0) {
-            Entry e = get(sourcePos, targetPos);
-            int editType = e.getEditType();
+            int editType = editTab[sourcePos][targetPos];
             switch (editType) {
                 case LevenshteinDistance.EDIT_DELETE:
                     sourcePos--;
@@ -124,34 +139,6 @@ public abstract class LevenshteinDistance<T> {
         }
 
         return ops;
-    }
-
-    private void set(int sourceIdx, int targetIdx, int editType, int distance) {
-        mTable[sourceIdx][targetIdx] = new Entry(editType, distance);
-    }
-
-    private Entry get(int sourceIdx, int targetIdx) {
-        Entry e = mTable[sourceIdx][targetIdx];
-        if (e == null) {
-            throw new NullPointerException("No entry at " + sourceIdx + "," + targetIdx +
-                    "; size: " + (mSource.size() + 1) + "," + (mTarget.size() + 1));
-        }
-        return e;
-    }
-
-    private static class Entry {
-        private final int mEditType;
-        private final int mDistance;
-        public Entry(int editType, int distance) {
-            mEditType = editType;
-            mDistance = distance;
-        }
-        public int getDistance() {
-            return mDistance;
-        }
-        public int getEditType() {
-            return mEditType;
-        }
     }
 
     public static class EditOperation {

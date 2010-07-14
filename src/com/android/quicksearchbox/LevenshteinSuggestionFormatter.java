@@ -24,7 +24,6 @@ import android.text.Spanned;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Suggestion formatter using the Levenshtein distance (minumum edit distance) to calculate the
@@ -42,24 +41,26 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
     public Spanned formatSuggestion(CharSequence query, CharSequence suggestion) {
         if (DBG) Log.d(TAG, "formatSuggestion('" + query + "', '" + suggestion + "')");
         query = normalizeQuery(query);
-        List<Token> queryTokens = tokenize(query);
-        List<Token> suggestionTokens = tokenize(suggestion);
-        int[] matches = findMatches(queryTokens, suggestionTokens);
+        final Token[] queryTokens = tokenize(query);
+        final Token[] suggestionTokens = tokenize(suggestion);
+        final int[] matches = findMatches(queryTokens, suggestionTokens);
         if (DBG){
             Log.d(TAG, "source = " + queryTokens);
             Log.d(TAG, "target = " + suggestionTokens);
             Log.d(TAG, "matches = " + matches);
         }
-        SpannableString str = new SpannableString(suggestion);
+        final SpannableString str = new SpannableString(suggestion);
 
-        for (int i = 0; i < matches.length; ++i) {
-            Token t = suggestionTokens.get(i);
+        final int matchesLen = matches.length;
+        for (int i = 0; i < matchesLen; ++i) {
+            final Token t = suggestionTokens[i];
             int sourceLen = 0;
-            if (matches[i] >= 0) {
-                sourceLen = queryTokens.get(matches[i]).getLength();
+            int thisMatch = matches[i];
+            if (thisMatch >= 0) {
+                sourceLen = queryTokens[thisMatch].length();
             }
-            applySuggestedTextStyle(str, t.getStart() + sourceLen, t.getEnd());
-            applyQueryTextStyle(str, t.getStart(), t.getStart() + sourceLen);
+            applySuggestedTextStyle(str, t.mStart + sourceLen, t.mEnd);
+            applyQueryTextStyle(str, t.mStart, t.mStart + sourceLen);
         }
 
         return str;
@@ -79,17 +80,18 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
      *      the target token i does not match any source token.
      */
     @VisibleForTesting
-    int[] findMatches(List<Token> source, List<Token> target) {
-        LevenshteinDistance<Token> table = new LevenshteinDistance<Token>(source, target) {
+    int[] findMatches(Token[] source, Token[] target) {
+        final LevenshteinDistance<Token> table = new LevenshteinDistance<Token>(source, target) {
             @Override
-            protected boolean match(Token source, Token target) {
+            protected boolean match(final Token source, final Token target) {
                 return source.prefixOf(target);
             }
         };
         table.calculate();
-        int[] result = new int[target.size()];
+        final int targetLen = target.length;
+        final int[] result = new int[targetLen];
         LevenshteinDistance.EditOperation[] ops = table.getTargetOperations();
-        for (int i = 0; i < result.length; ++i) {
+        for (int i = 0; i < targetLen; ++i) {
             if (ops[i].getType() == LevenshteinDistance.EDIT_UNCHANGED) {
                 result[i] = ops[i].getPosition();
             } else {
@@ -100,61 +102,72 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
     }
 
     @VisibleForTesting
-    List<Token> tokenize(CharSequence seq) {
+    Token[] tokenize(final CharSequence seq) {
         int pos = 0;
+        final int len = seq.length();
+        final char[] chars = new char[len];
+        seq.toString().getChars(0, len, chars, 0);
         ArrayList<Token> tokens = new ArrayList<Token>();
-        while (pos < seq.length()) {
-            while (pos < seq.length() && Character.isWhitespace(seq.charAt(pos))) {
+        while (pos < len) {
+            while (pos < len && Character.isWhitespace((int) seq.charAt(pos))) {
                 pos++;
             }
             int start = pos;
-            while (pos < seq.length() && !Character.isWhitespace(seq.charAt(pos))) {
+            while (pos < len && !Character.isWhitespace((int) seq.charAt(pos))) {
                 pos++;
             }
             int end = pos;
             if (start != end) {
-                Token t = new Token(seq, start, end);
+                Token t = new Token(chars, start, end);
                 tokens.add(t);
             }
         }
-        return tokens;
+        return tokens.toArray(new Token[tokens.size()]);
     }
 
     @VisibleForTesting
-    static class Token {
-        private final CharSequence mContainer;
-        private final int mStart;
-        private final int mEnd;
+    static class Token implements CharSequence {
+        private final char[] mContainer;
+        public final int mStart;
+        public final int mEnd;
 
-        public Token(CharSequence container, int start, int end) {
+        public Token(char[] container, int start, int end) {
             mContainer = container;
             mStart = start;
             mEnd = end;
         }
 
-        public int getStart() {
-            return mStart;
-        }
-
-        public int getEnd() {
-            return mEnd;
-        }
-
-        public int getLength() {
+        public int length() {
             return mEnd - mStart;
         }
 
         @Override
         public String toString() {
-            return getSequence().toString();
+            // used in tests only.
+            return subSequence(0, length());
         }
 
-        public CharSequence getSequence() {
-            return mContainer.subSequence(mStart, mEnd);
+        public boolean prefixOf(final Token that) {
+            final int len = length();
+            if (len > that.length()) return false;
+            final int thisStart = mStart;
+            final int thatStart = that.mStart;
+            final char[] thisContainer = mContainer;
+            final char[] thatContainer = that.mContainer;
+            for (int i = 0; i < len; ++i) {
+                if (thisContainer[thisStart + i] != thatContainer[thatStart + i]) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        public boolean prefixOf(Token that) {
-            return that.toString().startsWith(toString());
+        public char charAt(int index) {
+            return mContainer[index + mStart];
+        }
+
+        public String subSequence(int start, int end) {
+            return new String(mContainer, mStart + start, length());
         }
 
     }
