@@ -697,6 +697,7 @@ public class SearchActivity extends Activity {
             String source = getIntent().getStringExtra(Search.SOURCE);
             int latency = mStartLatencyTracker.getLatency();
             getLogger().logStart(latency, source, mCorpus, suggestions.getExpectedCorpora());
+            getQsbApplication().onStartupComplete();
         }
 
         mSuggestionsAdapter.setSuggestions(suggestions);

@@ -134,6 +134,12 @@ public class QsbApplication {
     }
 
     /**
+     * Indicates that construction of the QSB UI is now complete.
+     */
+    public void onStartupComplete() {
+    }
+
+    /**
      * Gets the QSB configuration object.
      * May be called from any thread.
      */
