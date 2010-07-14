@@ -17,13 +17,12 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.LevenshteinDistance;
+import com.android.quicksearchbox.util.LevenshteinDistance.Token;
 import com.google.common.annotations.VisibleForTesting;
 
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.Log;
-
-import java.util.ArrayList;
 
 /**
  * Suggestion formatter using the Levenshtein distance (minumum edit distance) to calculate the
@@ -38,7 +37,7 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
     }
 
     @Override
-    public Spanned formatSuggestion(CharSequence query, CharSequence suggestion) {
+    public Spanned formatSuggestion(String query, String suggestion) {
         if (DBG) Log.d(TAG, "formatSuggestion('" + query + "', '" + suggestion + "')");
         query = normalizeQuery(query);
         final Token[] queryTokens = tokenize(query);
@@ -66,8 +65,8 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
         return str;
     }
 
-    private CharSequence normalizeQuery(CharSequence query) {
-        return query.toString().toLowerCase();
+    private String normalizeQuery(String query) {
+        return query.toLowerCase();
     }
 
     /**
@@ -81,12 +80,7 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
      */
     @VisibleForTesting
     int[] findMatches(Token[] source, Token[] target) {
-        final LevenshteinDistance<Token> table = new LevenshteinDistance<Token>(source, target) {
-            @Override
-            protected boolean match(final Token source, final Token target) {
-                return source.prefixOf(target);
-            }
-        };
+        final LevenshteinDistance table = new LevenshteinDistance(source, target);
         table.calculate();
         final int targetLen = target.length;
         final int[] result = new int[targetLen];
@@ -102,74 +96,30 @@ public class LevenshteinSuggestionFormatter extends SuggestionFormatter {
     }
 
     @VisibleForTesting
-    Token[] tokenize(final CharSequence seq) {
+    Token[] tokenize(final String seq) {
         int pos = 0;
         final int len = seq.length();
-        final char[] chars = new char[len];
-        seq.toString().getChars(0, len, chars, 0);
-        ArrayList<Token> tokens = new ArrayList<Token>();
+        final char[] chars = seq.toCharArray();
+        // There can't be more tokens than characters, make an array that is large enough
+        Token[] tokens = new Token[len];
+        int tokenCount = 0;
         while (pos < len) {
-            while (pos < len && Character.isWhitespace((int) seq.charAt(pos))) {
+            while (pos < len && (chars[pos] == ' ' || chars[pos] == '\t')) {
                 pos++;
             }
             int start = pos;
-            while (pos < len && !Character.isWhitespace((int) seq.charAt(pos))) {
+            while (pos < len && !(chars[pos] == ' ' || chars[pos] == '\t')) {
                 pos++;
             }
             int end = pos;
             if (start != end) {
-                Token t = new Token(chars, start, end);
-                tokens.add(t);
+                tokens[tokenCount++] = new Token(chars, start, end);
             }
         }
-        return tokens.toArray(new Token[tokens.size()]);
-    }
-
-    @VisibleForTesting
-    static class Token implements CharSequence {
-        private final char[] mContainer;
-        public final int mStart;
-        public final int mEnd;
-
-        public Token(char[] container, int start, int end) {
-            mContainer = container;
-            mStart = start;
-            mEnd = end;
-        }
-
-        public int length() {
-            return mEnd - mStart;
-        }
-
-        @Override
-        public String toString() {
-            // used in tests only.
-            return subSequence(0, length());
-        }
-
-        public boolean prefixOf(final Token that) {
-            final int len = length();
-            if (len > that.length()) return false;
-            final int thisStart = mStart;
-            final int thatStart = that.mStart;
-            final char[] thisContainer = mContainer;
-            final char[] thatContainer = that.mContainer;
-            for (int i = 0; i < len; ++i) {
-                if (thisContainer[thisStart + i] != thatContainer[thatStart + i]) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public char charAt(int index) {
-            return mContainer[index + mStart];
-        }
-
-        public String subSequence(int start, int end) {
-            return new String(mContainer, mStart + start, length());
-        }
-
+        // Create a token array of the right size and return
+        Token[] ret = new Token[tokenCount];
+        System.arraycopy(tokens, 0, ret, 0, tokenCount);
+        return ret;
     }
 
 }

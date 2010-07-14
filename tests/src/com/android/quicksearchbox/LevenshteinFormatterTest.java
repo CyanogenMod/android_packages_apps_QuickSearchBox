@@ -17,13 +17,16 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.MockTextAppearanceFactory.MockStyleSpan;
+import com.android.quicksearchbox.util.LevenshteinDistance.Token;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.text.Spanned;
 
 /**
  * Tests for {@link LevenshteinSuggestionFormatter}.
  */
+@SmallTest
 public class LevenshteinFormatterTest extends AndroidTestCase {
 
     private LevenshteinSuggestionFormatter mFormatter;
@@ -38,7 +41,7 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
     }
 
     private void verifyTokenizeResult(String input, String... output) {
-        LevenshteinSuggestionFormatter.Token[] tokens = mFormatter.tokenize(input);
+        Token[] tokens = mFormatter.tokenize(input);
         assertEquals(output.length, tokens.length);
         for (int i=0; i<output.length; ++i) {
             assertEquals(output[i], tokens[i].toString());
@@ -83,13 +86,13 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
         verifyTokenizeResult("' . ; . ..", "'", ".", ";", ".", "..");
     }
 
-    public void testTokenizeWithTabsAndNewLines() {
-        verifyTokenizeResult("paranoid\nandroid\t", "paranoid", "android");
+    public void testTokenizeWithTabs() {
+        verifyTokenizeResult("paranoid\tandroid\t", "paranoid", "android");
     }
 
     private void verifyFindMatches(String source, String target, String... newTokensInTarget) {
-        LevenshteinSuggestionFormatter.Token[] sourceTokens = mFormatter.tokenize(source);
-        LevenshteinSuggestionFormatter.Token[] targetTokens = mFormatter.tokenize(target);
+        Token[] sourceTokens = mFormatter.tokenize(source);
+        Token[] targetTokens = mFormatter.tokenize(target);
 
         int[] matches = mFormatter.findMatches(sourceTokens, targetTokens);
         assertEquals(targetTokens.length, matches.length);
@@ -107,8 +110,8 @@ public class LevenshteinFormatterTest extends AndroidTestCase {
                 ++newTokenCount;
             } else {
                 assertTrue("Source token out of order", lastSourceToken < sourceIdx);
-                LevenshteinSuggestionFormatter.Token srcToken = sourceTokens[sourceIdx];
-                LevenshteinSuggestionFormatter.Token trgToken = targetTokens[i];
+                Token srcToken = sourceTokens[sourceIdx];
+                Token trgToken = targetTokens[i];
                 assertTrue("'" + srcToken + "' is not a prefix of '" + trgToken + "'",
                         srcToken.prefixOf(trgToken));
                 lastSourceToken = sourceIdx;

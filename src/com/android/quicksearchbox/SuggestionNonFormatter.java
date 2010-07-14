@@ -27,7 +27,7 @@ public class SuggestionNonFormatter extends SuggestionFormatter {
     }
 
     @Override
-    public CharSequence formatSuggestion(CharSequence query, CharSequence suggestion) {
+    public CharSequence formatSuggestion(String query, String suggestion) {
         return suggestion;
     }
 

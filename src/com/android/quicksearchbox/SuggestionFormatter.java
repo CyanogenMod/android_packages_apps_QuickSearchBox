@@ -37,7 +37,7 @@ public abstract class SuggestionFormatter {
      * @param suggestion the suggestion
      * @return Formatted suggestion text.
      */
-    public abstract CharSequence formatSuggestion(CharSequence query, CharSequence suggestion);
+    public abstract CharSequence formatSuggestion(String query, String suggestion);
 
     protected void applyQueryTextStyle(Spannable text, int start, int end) {
         if (start == end) return;

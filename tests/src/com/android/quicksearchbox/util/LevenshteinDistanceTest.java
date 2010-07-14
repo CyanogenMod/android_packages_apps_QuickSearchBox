@@ -17,12 +17,15 @@
 package com.android.quicksearchbox.util;
 
 import com.android.quicksearchbox.util.LevenshteinDistance.EditOperation;
+import com.android.quicksearchbox.util.LevenshteinDistance.Token;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Tests for class {@link LevenshteinDistance}.
  */
+@SmallTest
 public class LevenshteinDistanceTest extends AndroidTestCase {
     // to make the tests less verbose:
     private static final int INSERT = LevenshteinDistance.EDIT_INSERT;
@@ -33,12 +36,11 @@ public class LevenshteinDistanceTest extends AndroidTestCase {
     private void verifyTargetOperations(String[] source, String[] target, int[] expectedOps,
             int expectedDistance) {
 
+        Token[] sourceTokens = makeTokens(source);
+        Token[] targetTokens = makeTokens(target);
+
         assertEquals("test error", target.length, expectedOps.length);
-        LevenshteinDistance<String> distance = new LevenshteinDistance<String>(source, target){
-                    @Override
-                    protected boolean match(String source, String target) {
-                        return source.equals(target);
-                    }};
+        LevenshteinDistance distance = new LevenshteinDistance(sourceTokens, targetTokens);
 
         assertEquals(expectedDistance, distance.calculate());
         EditOperation[] ops = distance.getTargetOperations();
@@ -52,6 +54,15 @@ public class LevenshteinDistanceTest extends AndroidTestCase {
                 assertFalse(source[ops[i].getPosition()].equals(target[i]));
             }
         }
+    }
+
+    private Token[] makeTokens(String[] strings) {
+        Token[] tokens = new Token[strings.length];
+        for (int i = 0; i < strings.length; i++) {
+            String str = strings[i];
+            tokens[i] = new Token(str.toCharArray(), 0, str.length());
+        }
+        return tokens;
     }
 
     public void testGetTargetOperationsEmptySource() {

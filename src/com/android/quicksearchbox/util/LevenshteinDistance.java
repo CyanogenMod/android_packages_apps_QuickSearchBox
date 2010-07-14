@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox.util;
 
-
 /**
  * This class represents the matrix used in the Levenshtein distance algorithm, together
  * with the algorithm itself which operates on the matrix.
@@ -25,18 +24,18 @@ package com.android.quicksearchbox.util;
  * target string so we can trace the path taken through the matrix afterwards, in order to
  * perform the formatting as required.
  */
-public abstract class LevenshteinDistance<T> {
+public class LevenshteinDistance {
     public static final int EDIT_DELETE = 0;
     public static final int EDIT_INSERT = 1;
     public static final int EDIT_REPLACE = 2;
     public static final int EDIT_UNCHANGED = 3;
 
-    private final T[] mSource;
-    private final T[] mTarget;
+    private final Token[] mSource;
+    private final Token[] mTarget;
     private final int[][] mEditTypeTable;
     private final int[][] mDistanceTable;
 
-    public LevenshteinDistance(T[] source, T[] target) {
+    public LevenshteinDistance(Token[] source, Token[] target) {
         final int sourceSize = source.length;
         final int targetSize = target.length;
         final int[][] editTab = new int[sourceSize+1][targetSize+1];
@@ -58,31 +57,22 @@ public abstract class LevenshteinDistance<T> {
     }
 
     /**
-     * Compares a source and target token.
-     * @param source Token from the source string.
-     * @param target Token from the target string.
-     * @return {@code true} if the two are the same for the purposes of edit distance calculation,
-     *      {@code false} otherwise.
-     */
-    protected abstract boolean match(T source, T target);
-
-    /**
      * Implementation of Levenshtein distance algorithm.
      *
      * @return The Levenshtein distance.
      */
     public int calculate() {
-        final T[] src = mSource;
-        final T[] trg = mTarget;
+        final Token[] src = mSource;
+        final Token[] trg = mTarget;
         final int sourceLen = src.length;
         final int targetLen = trg.length;
         final int[][] distTab = mDistanceTable;
         final int[][] editTab = mEditTypeTable;
         for (int s = 1; s <= sourceLen; ++s) {
-            T sourceToken = src[s-1];
+            Token sourceToken = src[s-1];
             for (int t = 1; t <= targetLen; ++t) {
-                T targetToken = trg[t-1];
-                int cost = match(sourceToken, targetToken) ? 0 : 1;
+                Token targetToken = trg[t-1];
+                int cost = sourceToken.prefixOf(targetToken) ? 0 : 1;
 
                 int distance = distTab[s-1][t] + 1;
                 int type = EDIT_DELETE;
@@ -141,7 +131,7 @@ public abstract class LevenshteinDistance<T> {
         return ops;
     }
 
-    public static class EditOperation {
+    public static final class EditOperation {
         private final int mType;
         private final int mPosition;
         public EditOperation(int type, int position) {
@@ -156,4 +146,49 @@ public abstract class LevenshteinDistance<T> {
         }
     }
 
+    public static final class Token implements CharSequence {
+        private final char[] mContainer;
+        public final int mStart;
+        public final int mEnd;
+
+        public Token(char[] container, int start, int end) {
+            mContainer = container;
+            mStart = start;
+            mEnd = end;
+        }
+
+        public int length() {
+            return mEnd - mStart;
+        }
+
+        @Override
+        public String toString() {
+            // used in tests only.
+            return subSequence(0, length());
+        }
+
+        public boolean prefixOf(final Token that) {
+            final int len = length();
+            if (len > that.length()) return false;
+            final int thisStart = mStart;
+            final int thatStart = that.mStart;
+            final char[] thisContainer = mContainer;
+            final char[] thatContainer = that.mContainer;
+            for (int i = 0; i < len; ++i) {
+                if (thisContainer[thisStart + i] != thatContainer[thatStart + i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public char charAt(int index) {
+            return mContainer[index + mStart];
+        }
+
+        public String subSequence(int start, int end) {
+            return new String(mContainer, mStart + start, length());
+        }
+
+    }
 }
