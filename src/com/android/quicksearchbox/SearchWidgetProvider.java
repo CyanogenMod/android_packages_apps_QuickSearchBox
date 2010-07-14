@@ -597,20 +597,19 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             if (DBG) Log.d(TAG, "Updating appwidget " + mAppWidgetId);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
             // Corpus indicator
-            // Before Froyo, android.resource URI could not be used in ImageViews.
-            if (QsbApplication.isFroyoOrLater()) {
-                views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
-            }
+            if (DBG) Log.d(TAG, "Corpus indicator intent: " + mCorpusIndicatorIntent.toUri(0));
             setOnClickActivityIntent(context, views, R.id.corpus_indicator,
                     mCorpusIndicatorIntent);
             // Query TextView
             views.setCharSequence(R.id.search_widget_text, "setHint", mQueryTextViewHint);
             setBackgroundResource(views, R.id.search_widget_text, mQueryTextViewBackgroundResource);
 
+            if (DBG) Log.d(TAG, "Query text view intent: " + mQueryTextViewIntent.toUri(0));
             setOnClickActivityIntent(context, views, R.id.search_widget_text,
                     mQueryTextViewIntent);
             // Voice Search button
             if (mVoiceSearchIntent != null) {
+                if (DBG) Log.d(TAG, "Voice search intent: " + mVoiceSearchIntent.toUri(0));
                 setOnClickActivityIntent(context, views, R.id.search_widget_voice_btn,
                         mVoiceSearchIntent);
                 views.setViewVisibility(R.id.search_widget_voice_btn, View.VISIBLE);
@@ -620,22 +619,44 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
             // Voice Search hints
             if (mShowHint && !TextUtils.isEmpty(mVoiceSearchHint)) {
-                views.setTextViewText(R.id.voice_search_hint_text, mVoiceSearchHint);
+                // Corpus indicator
+                views.setImageViewResource(R.id.corpus_indicator, R.drawable.hints_corpus_icon);
+                setBackgroundResource(views, R.id.corpus_indicator,
+                        R.drawable.corpus_indicator_widget_rightarrow_bg);
 
+                // Voice Search hints
+                views.setTextViewText(R.id.voice_search_hint_text, mVoiceSearchHint);
                 Intent voiceSearchHelp = getVoiceSearchHelpIntent(context);
                 if (voiceSearchHelp == null) voiceSearchHelp = mVoiceSearchIntent;
+                if (DBG) Log.d(TAG, "Voice search hint intent: " + voiceSearchHelp.toUri(0));
                 setOnClickActivityIntent(context, views, R.id.voice_search_hint,
                         voiceSearchHelp);
-
                 views.setViewVisibility(R.id.voice_search_hint, View.VISIBLE);
+
+                // Query text view
                 views.setViewVisibility(R.id.search_widget_text, View.GONE);
 
-                setBackgroundResource(views, R.id.corpus_indicator,
-                        R.drawable.corpus_indicator_bg_noarrow);
+                // Voice Search button
+                setBackgroundResource(views, R.id.search_widget_voice_btn,
+                        R.drawable.voice_search_button_widget_borderless_bg);
             } else {
+                // Corpus indicator
+                // Before Froyo, android.resource URI could not be used in ImageViews.
+                if (QsbApplication.isFroyoOrLater()) {
+                    views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
+                }
+                setBackgroundResource(views, R.id.corpus_indicator,
+                        R.drawable.corpus_indicator_widget_downarrow_bg);
+
+                // Voice Search hints
                 views.setViewVisibility(R.id.voice_search_hint, View.GONE);
+
+                // Query text view
                 views.setViewVisibility(R.id.search_widget_text, View.VISIBLE);
-                setBackgroundResource(views, R.id.corpus_indicator, R.drawable.corpus_indicator_bg);
+
+                // Voice Search button
+                setBackgroundResource(views, R.id.search_widget_voice_btn,
+                        R.drawable.voice_search_button_widget_bg);
             }
             appWidgetMgr.updateAppWidget(mAppWidgetId, views);
         }

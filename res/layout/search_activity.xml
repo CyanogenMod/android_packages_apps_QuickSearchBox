@@ -45,46 +45,44 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="-10dip"
-        android:paddingRight="4dip"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:background="@drawable/search_plate_global"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         >
 
-        <include layout="@layout/corpus_indicator" />
+        <ImageButton
+            android:id="@+id/corpus_indicator"
+            android:layout_width="48dip"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:focusable="true"
+            android:clickable="true"
+            android:src="@drawable/search_app_icon"
+            android:background="@drawable/corpus_indicator_app_bg"
+        />
 
-        <RelativeLayout
+        <com.android.quicksearchbox.ui.QueryTextView
+            android:id="@+id/search_src_text"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
+            android:layout_marginLeft="4dip"
             android:layout_marginTop="6dip"
-            android:layout_marginBottom="6dip" >
-
-            <com.android.quicksearchbox.ui.QueryTextView
-                android:id="@+id/search_src_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="10dip"
-                android:paddingRight="10dip"
-                android:paddingTop="5dip"
-                android:paddingBottom="5dip"
-                android:gravity="center_vertical|left"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:inputType="text|textAutoComplete"
-                android:background="@drawable/textfield_search_empty_google"
-                android:textSize="18sp"
-                android:textStyle="normal"
-                android:textColor="@android:color/primary_text_light"
-                android:textColorHint="@color/search_hint"
-                android:imeOptions="actionGo"
-            />
-
-            <include layout="@layout/search_text_overlay"/>
-
-        </RelativeLayout>
+            android:layout_marginBottom="6dip"
+            android:gravity="center_vertical|left"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:inputType="text|textAutoComplete"
+            android:background="@drawable/textfield_search_empty_google"
+            android:textSize="18sp"
+            android:textStyle="normal"
+            android:textColor="@android:color/primary_text_light"
+            android:textColorHint="@color/search_hint"
+            android:imeOptions="actionGo"
+        />
 
         <ImageButton 
             android:id="@+id/search_go_btn"
@@ -94,16 +92,16 @@
             android:layout_height="match_parent"
             android:layout_marginTop="6dip"
             android:layout_marginBottom="6dip"
+            android:layout_marginRight="4dip"
             android:visibility="gone"
         />
 
         <ImageButton
             android:id="@+id/search_voice_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="56dip"
             android:layout_height="match_parent"
-            android:background="@drawable/btn_search_dialog_voice"
-            android:src="@drawable/ic_btn_speak_now"
-            android:layout_marginRight="-4dip"
+            android:background="@drawable/voice_search_button_app_bg"
+            android:src="@drawable/voice_search_icon"
         />
     </LinearLayout>
 
