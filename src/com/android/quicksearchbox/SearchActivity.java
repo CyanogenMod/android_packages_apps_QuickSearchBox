@@ -51,6 +51,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * The main activity for Quick Search Box. Shows the search UI.
@@ -536,6 +537,25 @@ public class SearchActivity extends Activity {
         return mSuggestionsAdapter.getCurrentSuggestions();
     }
 
+    protected SuggestionCursor getCurrentSuggestions(int position) {
+        SuggestionCursor suggestions = getCurrentSuggestions();
+        if (suggestions == null) {
+            return null;
+        }
+        int count = suggestions.getCount();
+        if (position < 0 || position >= count) {
+            Log.w(TAG, "Invalid suggestion position " + position + ", count = " + count);
+            return null;
+        }
+        suggestions.moveTo(position);
+        return suggestions;
+    }
+
+    protected Set<Corpus> getCurrentIncludedCorpora() {
+        Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
+        return suggestions == null ? null : suggestions.getIncludedCorpora();
+    }
+
     protected void launchIntent(Intent intent) {
         if (intent == null) {
             return;
@@ -550,18 +570,14 @@ public class SearchActivity extends Activity {
     }
 
     protected boolean launchSuggestion(int position) {
-        SuggestionCursor suggestions = getCurrentSuggestions();
-        if (position < 0 || position >= suggestions.getCount()) {
-            Log.w(TAG, "Tried to launch invalid suggestion " + position);
-            return false;
-        }
+        SuggestionCursor suggestions = getCurrentSuggestions(position);
+        if (suggestions == null) return false;
 
         if (DBG) Log.d(TAG, "Launching suggestion " + position);
         mTookAction = true;
 
         // Log suggestion click
-        Collection<Corpus> corpora = mSuggestionsAdapter.getSuggestions().getIncludedCorpora();
-        getLogger().logSuggestionClick(position, suggestions, corpora);
+        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora());
 
         // Create shortcut
         getShortcutRepository().reportClick(suggestions, position);
@@ -586,6 +602,27 @@ public class SearchActivity extends Activity {
         }
 
         return false;
+    }
+
+    protected void refineSuggestion(int position) {
+        if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
+        SuggestionCursor suggestions = getCurrentSuggestions(position);
+        if (suggestions == null) {
+            return;
+        }
+        String query = suggestions.getSuggestionQuery();
+        if (TextUtils.isEmpty(query)) {
+            return;
+        }
+
+        // Log refine click
+        getLogger().logRefine(position, suggestions, getCurrentIncludedCorpora());
+
+        // Put query + space in query text view
+        String queryWithSpace = query + ' ';
+        setQuery(queryWithSpace, false);
+        updateSuggestions(queryWithSpace);
+        mQueryTextView.requestFocus();
     }
 
     protected int getSelectedPosition() {
@@ -801,18 +838,7 @@ public class SearchActivity extends Activity {
        }
 
        public void onSuggestionQueryRefineClicked(int position) {
-           if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
-           SuggestionCursor suggestions = getCurrentSuggestions();
-           if (suggestions != null) {
-               suggestions.moveTo(position);
-               String query = suggestions.getSuggestionQuery();
-               if (!TextUtils.isEmpty(query)) {
-                   query += " ";
-                   setQuery(query, false);
-                   updateSuggestions(query);
-                   mQueryTextView.requestFocus();
-               }
-           }
+           refineSuggestion(position);
        }
     }
 

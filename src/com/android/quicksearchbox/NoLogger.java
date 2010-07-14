@@ -35,6 +35,10 @@ public class NoLogger implements Logger {
             SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora) {
     }
 
+    public void logRefine(int position, SuggestionCursor suggestionCursor,
+            Collection<Corpus> queriedCorpora) {
+    }
+
     public void logSearch(Corpus corpus, int startMethod, int numChars) {
     }
 

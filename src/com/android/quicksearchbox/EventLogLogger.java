@@ -28,6 +28,9 @@ import java.util.Random;
  */
 public class EventLogLogger implements Logger {
 
+    private static final int SUGGESTION_CLICK_TYPE_LAUNCH = 0;
+    private static final int SUGGESTION_CLICK_TYPE_REFINE = 1;
+
     private static final char LIST_SEPARATOR = '|';
 
     private final Context mContext;
@@ -69,10 +72,21 @@ public class EventLogLogger implements Logger {
 
     public void logSuggestionClick(int position,
             SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora) {
+        logQsbClick(position, suggestionCursor, queriedCorpora, SUGGESTION_CLICK_TYPE_LAUNCH);
+    }
+
+    public void logRefine(int position, SuggestionCursor suggestionCursor,
+            Collection<Corpus> queriedCorpora) {
+        logQsbClick(position, suggestionCursor, queriedCorpora, SUGGESTION_CLICK_TYPE_REFINE);
+    }
+
+    private void logQsbClick(int position, SuggestionCursor suggestionCursor,
+            Collection<Corpus> queriedCorpora, int clickType) {
         String suggestions = getSuggestions(suggestionCursor);
         String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
-        EventLogTags.writeQsbClick(position, suggestions, corpora, numChars);
+        EventLogTags.writeQsbClick(position, suggestions, corpora, numChars,
+                clickType);
     }
 
     public void logSearch(Corpus corpus, int startMethod, int numChars) {
