@@ -631,7 +631,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
                 views.setViewVisibility(R.id.search_widget_text, View.GONE);
 
                 setBackgroundResource(views, R.id.corpus_indicator,
-                        R.drawable.btn_search_dialog_voice);
+                        R.drawable.corpus_indicator_bg_noarrow);
             } else {
                 views.setViewVisibility(R.id.voice_search_hint, View.GONE);
                 views.setViewVisibility(R.id.search_widget_text, View.VISIBLE);
