@@ -597,7 +597,9 @@ public class SearchActivity extends Activity {
 
     protected boolean onSuggestionKeyDown(int position, int keyCode, KeyEvent event) {
         // Treat enter or search as a click
-        if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
+        if (       keyCode == KeyEvent.KEYCODE_ENTER
+                || keyCode == KeyEvent.KEYCODE_SEARCH
+                || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             return launchSuggestion(position);
         }
 
