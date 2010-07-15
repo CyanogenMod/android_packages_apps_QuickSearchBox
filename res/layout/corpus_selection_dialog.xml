@@ -28,7 +28,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:paddingTop="22dip"
-        android:paddingBottom="24dip"
+        android:paddingBottom="26dip"
         android:paddingLeft="4dip"
         android:paddingRight="4dip"
         android:background="@drawable/corpus_selector_bg"
