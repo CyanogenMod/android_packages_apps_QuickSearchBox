@@ -364,7 +364,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static Uri getCorpusIconUri(Context context, Corpus corpus) {
         if (corpus == null) {
-            return getCorpusViewFactory(context).getCorpusIndicatorGlobalSearchIconUri();
+            return getCorpusViewFactory(context).getGlobalSearchIconUri();
         }
         return corpus.getCorpusIconUri();
     }
@@ -598,7 +598,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
             // Corpus indicator
             if (DBG) Log.d(TAG, "Corpus indicator intent: " + mCorpusIndicatorIntent.toUri(0));
-            setOnClickActivityIntent(context, views, R.id.corpus_indicator_frame,
+            setOnClickActivityIntent(context, views, R.id.corpus_indicator,
                     mCorpusIndicatorIntent);
             // Query TextView
             views.setCharSequence(R.id.search_widget_text, "setHint", mQueryTextViewHint);
@@ -620,9 +620,8 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             // Voice Search hints
             if (mShowHint && !TextUtils.isEmpty(mVoiceSearchHint)) {
                 // Corpus indicator
-                views.setImageViewResource(R.id.corpus_indicator,
-                        R.drawable.corpus_icon_all_corpus_indicator);
-                setBackgroundResource(views, R.id.corpus_indicator_frame,
+                views.setImageViewResource(R.id.corpus_indicator, R.drawable.hints_corpus_icon);
+                setBackgroundResource(views, R.id.corpus_indicator,
                         R.drawable.corpus_indicator_widget_rightarrow_bg);
 
                 // Voice Search hints
@@ -646,7 +645,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
                 if (QsbApplication.isFroyoOrLater()) {
                     views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
                 }
-                setBackgroundResource(views, R.id.corpus_indicator_frame,
+                setBackgroundResource(views, R.id.corpus_indicator,
                         R.drawable.corpus_indicator_widget_downarrow_bg);
 
                 // Voice Search hints

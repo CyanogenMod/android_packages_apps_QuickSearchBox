@@ -46,11 +46,11 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -102,7 +102,7 @@ public class SearchActivity extends Activity {
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
-    protected ImageView mCorpusIndicator;
+    protected ImageButton mCorpusIndicator;
 
     private Corpus mCorpus;
     private Bundle mAppSearchData;
@@ -143,15 +143,14 @@ public class SearchActivity extends Activity {
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-        mCorpusIndicator = (ImageView) findViewById(R.id.corpus_indicator);
-        View corpusIndicatorFrame = findViewById(R.id.corpus_indicator_frame);
+        mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
         mQueryTextView.setSuggestionClickListener(new ClickHandler());
 
-        corpusIndicatorFrame.setOnClickListener(new CorpusIndicatorClickListener());
+        mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
 
         mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
 
@@ -287,7 +286,7 @@ public class SearchActivity extends Activity {
         mCorpus = getCorpus(corpusName);
         Drawable sourceIcon;
         if (mCorpus == null) {
-            sourceIcon = getCorpusViewFactory().getCorpusIndicatorGlobalSearchIcon();
+            sourceIcon = getCorpusViewFactory().getGlobalSearchIcon();
         } else {
             sourceIcon = mCorpus.getCorpusIcon();
         }

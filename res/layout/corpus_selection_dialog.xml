@@ -90,7 +90,7 @@
         android:layout_alignParentLeft="true"
         android:layout_marginTop="44dip"
         android:layout_marginBottom="-8.5dip"
-        android:layout_marginLeft="12dip"
+        android:layout_marginLeft="8.5dip"
         android:src="@drawable/corpus_selector_arrow_up"
         />
 
