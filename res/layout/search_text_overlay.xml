@@ -14,17 +14,4 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/voice_search_button_widget_normal" />
-
-    <item android:state_pressed="true"
-        android:drawable="@drawable/voice_search_button_widget_pressed" />
-
-    <item android:state_enabled="true" android:state_focused="true"
-        android:drawable="@drawable/voice_search_button_widget_selected" />
-
-    <item android:drawable="@drawable/voice_search_button_widget_normal" />
-
-</selector>
+<merge />

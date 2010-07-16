@@ -14,17 +14,10 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_rightarrow_normal" />
+    <item android:drawable="@drawable/corpus_indicator_bg_focused" />
 
-    <item android:state_pressed="true"
-        android:drawable="@drawable/corpus_indicator_rightarrow_pressed" />
+    <item android:drawable="@drawable/corpus_indicator_arrow" />
 
-    <item android:state_enabled="true" android:state_focused="true"
-        android:drawable="@drawable/corpus_indicator_rightarrow_selected" />
-
-    <item android:drawable="@drawable/corpus_indicator_rightarrow_normal" />
-
-</selector>
+</layer-list>
