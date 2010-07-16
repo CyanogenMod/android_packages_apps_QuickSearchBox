@@ -119,7 +119,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         setText1(text1);
         setText2(text2);
         setIcon1(icon1);
-        setIcon2(icon2);
+        setIcon2(icon2, null);
         updateRefinable(suggestion);
     }
 
@@ -150,6 +150,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         } else {
             mIcon2.setOnClickListener(null);
             mIcon2.setFocusable(false);
+            mIcon2.setOnKeyListener(null);
         }
     }
 
@@ -221,13 +222,6 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
      */
     private void setIcon1(Drawable icon) {
         setViewDrawable(mIcon1, icon);
-    }
-
-    /**
-     * Sets the right-hand-side icon.
-     */
-    private void setIcon2(Drawable icon) {
-        setViewDrawable(mIcon2, icon);
     }
 
     /**
