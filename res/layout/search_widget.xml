@@ -28,6 +28,7 @@
         android:layout_alignParentLeft="true"
         android:paddingRight="14dip"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:background="@drawable/search_floater" >
 
         <include layout="@layout/corpus_indicator" />
@@ -70,10 +71,11 @@
         <ImageButton
             android:id="@+id/search_widget_voice_btn"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@drawable/btn_search_dialog_voice"
-            android:src="@drawable/ic_btn_speak_now"
+            android:src="@drawable/voice_search_icon"
             android:layout_marginRight="-4dip"
+            android:layout_marginLeft="-4dip"
         />
 
     </LinearLayout>
