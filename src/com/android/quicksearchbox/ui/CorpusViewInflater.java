@@ -57,15 +57,23 @@ public class CorpusViewInflater implements CorpusViewFactory {
     }
 
     private int getGlobalSearchIconResource() {
-        return R.drawable.search_app_icon;
+        return R.drawable.corpus_icon_all;
+    }
+
+    private int getGlobalSearchCorpusIndicatorIconResource() {
+        return R.drawable.corpus_icon_all_corpus_indicator;
     }
 
     public Drawable getGlobalSearchIcon() {
         return mContext.getResources().getDrawable(getGlobalSearchIconResource());
     }
 
-    public Uri getGlobalSearchIconUri() {
-        return Util.getResourceUri(mContext, getGlobalSearchIconResource());
+    public Drawable getCorpusIndicatorGlobalSearchIcon() {
+        return mContext.getResources().getDrawable(getGlobalSearchCorpusIndicatorIconResource());
+    }
+
+    public Uri getCorpusIndicatorGlobalSearchIconUri() {
+        return Util.getResourceUri(mContext, getGlobalSearchCorpusIndicatorIconResource());
     }
 
 }

@@ -33,5 +33,7 @@ public interface CorpusViewFactory {
 
     Drawable getGlobalSearchIcon();
 
-    Uri getGlobalSearchIconUri();
+    Drawable getCorpusIndicatorGlobalSearchIcon();
+
+    Uri getCorpusIndicatorGlobalSearchIconUri();
 }

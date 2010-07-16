@@ -30,24 +30,33 @@
         android:gravity="center_vertical"
         android:background="@drawable/search_floater" >
 
-        <ImageButton
-            android:id="@+id/corpus_indicator"
-            android:layout_width="48dip"
-            android:layout_height="match_parent"
-            android:scaleType="centerInside"
-            android:focusable="true"
-            android:clickable="true"
-            android:paddingLeft="15dip"
-            android:src="@drawable/search_app_icon"
-            android:background="@drawable/corpus_indicator_widget_downarrow_bg"
-        />
+        <LinearLayout
+                android:id="@+id/corpus_indicator_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:addStatesFromChildren="true"
+                android:focusable="true"
+                android:clickable="true"
+                android:background="@drawable/corpus_indicator_widget_downarrow_bg">
+
+            <ImageView
+                android:id="@+id/corpus_indicator"
+                android:layout_width="48dip"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="2dip"
+                android:layout_marginBottom="2dip"
+                android:scaleType="centerInside"
+                android:src="@drawable/search_app_icon"
+            />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/search_widget_text"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:layout_marginLeft="4dip"
+            android:layout_marginLeft="2dip"
             android:layout_marginTop="6dip"
             android:layout_marginBottom="6dip"
             android:gravity="center_vertical|left"
@@ -72,6 +81,7 @@
             android:layout_marginTop="6dip"
             android:layout_marginBottom="6dip"
             android:layout_marginLeft="6dip"
+            android:layout_marginRight="-2dip"
             android:focusable="true"
         />
 
