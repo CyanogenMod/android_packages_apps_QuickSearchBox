@@ -123,13 +123,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         }
     }
 
-    public static void hideHintsNow(Context context) {
-        if (DBG) Log.d(TAG, "hideHintsNow");
-        Intent hideHints = new Intent(ACTION_HIDE_VOICE_SEARCH_HINT);
-        hideHints.setComponent(myComponentName(context));
-        context.sendBroadcast(hideHints);
-    }
-
     private static Random getRandom() {
         if (sRandom == null) {
             sRandom = new Random();
@@ -337,10 +330,8 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         // Corpus indicator
         state.setCorpusIconUri(getCorpusIconUri(context, corpus));
 
-        String action = state.isShowingHint()
-                ? SearchActivity.INTENT_ACTION_QSB_AND_HIDE_WIDGET_HINTS
-                : SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS;
-        Intent corpusIconIntent = createQsbActivityIntent(context, action, widgetAppData, corpus);
+        Intent corpusIconIntent = createQsbActivityIntent(context,
+                SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS, widgetAppData, corpus);
         state.setCorpusIndicatorIntent(corpusIconIntent);
 
         return state;
@@ -360,6 +351,12 @@ public class SearchWidgetProvider extends BroadcastReceiver {
     private static Intent getVoiceSearchHelpIntent(Context context) {
         VoiceSearch voiceSearch = QsbApplication.get(context).getVoiceSearch();
         return voiceSearch.createVoiceSearchHelpIntent();
+    }
+
+    private static PendingIntent createBroadcast(Context context, String action) {
+        Intent intent = new Intent(action);
+        intent.setComponent(myComponentName(context));
+        return PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 
     private static Uri getCorpusIconUri(Context context, Corpus corpus) {
@@ -393,14 +390,12 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static void rescheduleAction(Context context, boolean reschedule, String action, long period) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(action);
-        intent.setComponent(myComponentName(context));
-        PendingIntent pending = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmManager.cancel(pending);
+        PendingIntent intent = createBroadcast(context, action);
+        alarmManager.cancel(intent);
         if (reschedule) {
             if (DBG) Log.d(TAG, "Scheduling action " + action + " after period " + period);
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + period, period, pending);
+                    SystemClock.elapsedRealtime() + period, period, intent);
         } else {
             if (DBG) Log.d(TAG, "Cancelled action " + action);
         }
@@ -493,10 +488,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             mAppWidgetId = appWidgetId;
         }
 
-        public int getId() {
-            return mAppWidgetId;
-        }
-
         public void setVoiceSearchHintsEnabled(boolean enabled) {
             mVoiceSearchHintsEnabled = enabled;
         }
@@ -552,18 +543,10 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             return r;
         }
 
-        private Intent createIntent(Context context, String action) {
-            Intent intent = new Intent(action);
-            intent.setComponent(myComponentName(context));
-            return intent;
-        }
-
         private void scheduleHintHiding(Context context) {
-            Intent hideIntent = createIntent(context, ACTION_HIDE_VOICE_SEARCH_HINT);
-
             AlarmManager alarmManager =
                     (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            PendingIntent hideHint = PendingIntent.getBroadcast(context, 0, hideIntent, 0);
+            PendingIntent hideHint = createBroadcast(context, ACTION_HIDE_VOICE_SEARCH_HINT);
 
             long period = getConfig(context).getVoiceSearchHintVisibleTime();
             if (DBG) {
@@ -627,15 +610,16 @@ public class SearchWidgetProvider extends BroadcastReceiver {
                 setOnClickActivityIntent(context, views, R.id.voice_search_hint,
                         voiceSearchHelp);
 
-                views.setViewVisibility(R.id.voice_search_hint, View.VISIBLE);
-                views.setViewVisibility(R.id.search_widget_text, View.GONE);
+                PendingIntent hideIntent = createBroadcast(context, ACTION_HIDE_VOICE_SEARCH_HINT);
+                views.setOnClickPendingIntent(R.id.voice_search_hint_close_button, hideIntent);
 
-                setBackgroundResource(views, R.id.corpus_indicator,
-                        R.drawable.btn_search_dialog_voice);
+                views.setViewVisibility(R.id.voice_search_hint_container, View.VISIBLE);
+                views.setViewVisibility(R.id.search_widget_text, View.GONE);
+                views.setViewVisibility(R.id.corpus_indicator, View.GONE);
             } else {
-                views.setViewVisibility(R.id.voice_search_hint, View.GONE);
+                views.setViewVisibility(R.id.voice_search_hint_container, View.GONE);
                 views.setViewVisibility(R.id.search_widget_text, View.VISIBLE);
-                setBackgroundResource(views, R.id.corpus_indicator, R.drawable.corpus_indicator_bg);
+                views.setViewVisibility(R.id.corpus_indicator, View.VISIBLE);
             }
             appWidgetMgr.updateAppWidget(mAppWidgetId, views);
         }
@@ -645,12 +629,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             if (QsbApplication.isFroyoOrLater()) {
                 views.setInt(viewId, "setBackgroundResource", bgResource);
             }
-        }
-
-        private void setOnClickBroadcastIntent(Context context, RemoteViews views, int viewId,
-                Intent intent) {
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-            views.setOnClickPendingIntent(viewId, pendingIntent);
         }
 
         private void setOnClickActivityIntent(Context context, RemoteViews views, int viewId,

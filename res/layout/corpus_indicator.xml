@@ -22,6 +22,6 @@
     android:scaleType="centerInside"
     android:focusable="true"
     android:clickable="true"
-    android:src="@drawable/all_corpus_icon"
+    android:src="@drawable/search_app_icon"
     android:background="@drawable/corpus_indicator_bg"
     />

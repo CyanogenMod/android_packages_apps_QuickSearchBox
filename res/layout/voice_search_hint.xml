@@ -15,14 +15,32 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical|left"
+        android:visibility="gone"
+        >
+
+<ImageView
+        android:id="@+id/voice_search_hint_close_button"
         android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/voice_search_hint_close"
+        android:clickable="true"
+        android:focusable="true"
+        />
+
+<LinearLayout
+        android:id="@+id/voice_search_hint"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/voice_search_hint_bg"
         android:orientation="vertical"
         android:gravity="center_vertical|left"
-        android:visibility="gone"
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
+        android:clickable="true"
         android:focusable="true"
         >
 
@@ -48,5 +66,7 @@
             android:gravity="left"
             android:singleLine="true"
             />
+
+</LinearLayout>
 
 </LinearLayout>

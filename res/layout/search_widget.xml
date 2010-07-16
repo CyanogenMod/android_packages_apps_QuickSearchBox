@@ -58,14 +58,14 @@
         />
 
         <include
-            android:id="@+id/voice_search_hint"
+            android:id="@+id/voice_search_hint_container"
             layout="@layout/voice_search_hint"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
+            android:layout_marginLeft="10dip"
             android:layout_marginTop="6dip"
             android:layout_marginBottom="6dip"
-            android:focusable="true"
         />
 
         <ImageButton
