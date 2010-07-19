@@ -23,8 +23,8 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"모두"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"웹"</string>
     <string name="corpus_description_web" msgid="5553049179123250409">"웹 검색, 북마크 및 브라우저 기록"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"응용프로그램"</string>
-    <string name="corpus_description_apps" msgid="7434542427108237469">"설치된 응용프로그램의 이름"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"애플리케이션"</string>
+    <string name="corpus_description_apps" msgid="7434542427108237469">"설치된 애플리케이션의 이름"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"애플리케이션 검색"</string>
     <string name="corpus_label_apps_market" msgid="7625179316335589490">"애플리케이션 및 마켓"</string>
     <string name="corpus_description_apps_market" msgid="6676825865398169853">"설치된 애플리케이션 및 마켓의 애플리케이션"</string>
