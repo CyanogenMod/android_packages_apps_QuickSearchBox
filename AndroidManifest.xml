@@ -69,17 +69,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="qsb.corpus" />
             </intent-filter>
-            <!-- Intent sent by corpus indicator in search widget. Opens QSB and
-                 hides voice search hints in widget. -->
-            <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.QSB_AND_HIDE_WIDGET_HINTS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.QSB_AND_HIDE_WIDGET_HINTS" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="qsb.corpus" />
-            </intent-filter>
             <meta-data android:name="android.app.search.shortcut.provider" android:value="content://com.android.quicksearchbox.shortcuts/shortcuts" />
         </activity>
 
