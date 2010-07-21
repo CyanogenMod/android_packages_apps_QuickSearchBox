@@ -44,6 +44,10 @@ public class MockExecutor implements Executor {
         mClosed = true;
     }
 
+    public int countPendingTasks() {
+        return mQueue.size();
+    }
+
     public boolean runNext() {
         if (mQueue.isEmpty()) {
             return false;

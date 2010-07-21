@@ -15,8 +15,6 @@
  */
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.SearchActivity;
-
 import android.test.ActivityInstrumentationTestCase2;
 
 /**

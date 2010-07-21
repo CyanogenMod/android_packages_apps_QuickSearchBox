@@ -49,7 +49,8 @@ public class RankAwarePromoter implements Promoter {
         for (CorpusResult result : suggestions) {
             if (result.getCount() > 0) {
                 result.moveTo(0);
-                if (mCorpora.isCorpusDefaultEnabled(result.getCorpus())) {
+                Corpus corpus = result.getCorpus();
+                if (corpus == null || corpus.isCorpusDefaultEnabled()) {
                     defaultResults.add(result);
                 } else {
                     otherResults.add(result);

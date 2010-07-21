@@ -50,7 +50,8 @@
                 android:src="@drawable/ic_dialog_menu_generic" />
             <TextView android:id="@+id/alertTitle"
                 style="?android:attr/textAppearanceLarge"
-                android:singleLine="true"
+                android:singleLine="false"
+                android:maxLines="3"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -62,7 +63,7 @@
         android:layout_height="match_parent"
         android:cacheColorHint="@null"
         android:background="@drawable/popup_bottom_bright"
-        android:divider="@android:drawable/divider_horizontal_bright"
+        android:divider="@drawable/divider_horizontal_bright"
         android:scrollbars="vertical" />
 
 </LinearLayout>

@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox;
+
+import static com.android.quicksearchbox.SuggestionCursorUtil.assertSameSuggestion;
+import static com.android.quicksearchbox.SuggestionCursorUtil.assertSameSuggestions;
+import static com.android.quicksearchbox.SuggestionCursorUtil.slice;
 
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -25,7 +28,6 @@ import java.util.List;
 
 /**
  * Tests for {@link ShortcutPromoter}.
- *
  */
 @MediumTest
 public class ShortcutPromoterTest extends AndroidTestCase {
@@ -42,10 +44,10 @@ public class ShortcutPromoterTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         mQuery = "foo";
         List<Corpus> corpora = Arrays.asList(MockCorpus.CORPUS_1, MockCorpus.CORPUS_2);
-        mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery, corpora, 8);
+        mShortcuts = new MockShortcutRepository().getShortcutsForQuery(mQuery, null, 8);
         mSuggestions = new ArrayList<CorpusResult>();
         for (Corpus corpus : corpora) {
-            mSuggestions.add(corpus.getSuggestions(mQuery, 10));
+            mSuggestions.add(corpus.getSuggestions(mQuery, 10, false));
         }
         mSuggestionCount = countSuggestions(mSuggestions);
     }
@@ -81,10 +83,8 @@ public class ShortcutPromoterTest extends AndroidTestCase {
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
         promoter.pickPromoted(mShortcuts, mSuggestions, maxPromoted, promoted);
         assertEquals(expectedCount, promoted.getCount());
-        for (int i = 0; i < Math.min(maxPromoted, mShortcuts.getCount()); i++) {
-            assertSuggestionEquals(new SuggestionPosition(promoted, i),
-                    new SuggestionPosition(mShortcuts, i));
-        }
+        int count = Math.min(maxPromoted, mShortcuts.getCount());
+        assertSameSuggestions(slice(promoted, 0, count), slice(mShortcuts, 0, count));
     }
 
     private void maxPromotedTestConcatNext(int maxPromoted) {
@@ -93,13 +93,11 @@ public class ShortcutPromoterTest extends AndroidTestCase {
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
         promoter.pickPromoted(mShortcuts, mSuggestions, maxPromoted, promoted);
         assertEquals(expectedCount, promoted.getCount());
-        for (int i = 0; i < Math.min(maxPromoted, mShortcuts.getCount()); i++) {
-            assertSuggestionEquals(new SuggestionPosition(promoted, i),
-                    new SuggestionPosition(mShortcuts, i));
-        }
+        int count = Math.min(maxPromoted, mShortcuts.getCount());
+        assertSameSuggestions(slice(promoted, 0, count), slice(mShortcuts, 0, count));
         if (mShortcuts.getCount() < expectedCount) {
-            assertSuggestionEquals(new SuggestionPosition(promoted, mShortcuts.getCount()),
-                    new SuggestionPosition(mSuggestions.get(0), 0));
+            assertSameSuggestion("wrong suggestion after shortcuts",
+                    promoted, mShortcuts.getCount(), mSuggestions.get(0), 0);
         }
     }
 
@@ -109,11 +107,5 @@ public class ShortcutPromoterTest extends AndroidTestCase {
             count += c.getCount();
         }
         return count;
-    }
-
-    private static void assertSuggestionEquals(SuggestionPosition x, SuggestionPosition y) {
-        assertEquals(x.current().getSuggestionKey(), y.current().getSuggestionKey());
-        assertEquals(x.current().getSuggestionDisplayQuery(),
-                y.current().getSuggestionDisplayQuery());
     }
 }

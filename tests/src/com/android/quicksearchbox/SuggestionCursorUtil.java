@@ -34,39 +34,17 @@ public class SuggestionCursorUtil extends Assert {
 
     public static void assertSameSuggestion(String message, int position,
             SuggestionCursor expected, SuggestionCursor observed) {
-        message +=  " at position " + position;
-        expected.moveTo(position);
-        observed.moveTo(position);
-        assertEquals(message + ", source", expected.getSuggestionSource(),
-                observed.getSuggestionSource());
-        assertEquals(message + ", shortcutId", expected.getShortcutId(),
-                observed.getShortcutId());
-        assertEquals(message + ", spinnerWhileRefreshing", expected.isSpinnerWhileRefreshing(),
-                observed.isSpinnerWhileRefreshing());
-        assertEquals(message + ", format", expected.getSuggestionFormat(),
-                observed.getSuggestionFormat());
-        assertEquals(message + ", icon1", expected.getSuggestionIcon1(),
-                observed.getSuggestionIcon1());
-        assertEquals(message + ", icon2", expected.getSuggestionIcon2(),
-                observed.getSuggestionIcon2());
-        assertEquals(message + ", text1", expected.getSuggestionText1(),
-                observed.getSuggestionText1());
-        assertEquals(message + ", text2", expected.getSuggestionText2(),
-                observed.getSuggestionText2());
-        assertEquals(message + ", text2Url", expected.getSuggestionText2Url(),
-                observed.getSuggestionText2Url());
-        assertEquals(message + ", action", expected.getSuggestionIntentAction(),
-                observed.getSuggestionIntentAction());
-        assertEquals(message + ", data", expected.getSuggestionIntentDataString(),
-                observed.getSuggestionIntentDataString());
-        assertEquals(message + ", extraData", expected.getSuggestionIntentExtraData(),
-                observed.getSuggestionIntentExtraData());
-        assertEquals(message + ", query", expected.getSuggestionQuery(),
-                observed.getSuggestionQuery());
-        assertEquals(message + ", displayQuery", expected.getSuggestionDisplayQuery(),
-                observed.getSuggestionDisplayQuery());
-        assertEquals(message + ", logType", expected.getSuggestionLogType(),
-                observed.getSuggestionLogType());
+        assertSameSuggestion(message, expected, position, observed, position);
+    }
+
+    public static void assertSameSuggestion(String message,
+            SuggestionCursor expected, int positionExpected,
+            SuggestionCursor observed, int positionObserved) {
+        message +=  " at positions " + positionExpected + "(expected) "
+                + positionObserved + " (observed)";
+        expected.moveTo(positionExpected);
+        observed.moveTo(positionObserved);
+        assertSuggestionEquals(message, expected, observed);
     }
 
     public static void assertSameSuggestions(SuggestionCursor expected, SuggestionCursor observed) {
@@ -91,5 +69,55 @@ public class SuggestionCursorUtil extends Assert {
             out.add(new SuggestionPosition(cursor, i));
         }
         return out;
+    }
+
+    public static void assertSuggestionEquals(Suggestion expected, Suggestion observed) {
+        assertSuggestionEquals(null, expected, observed);
+    }
+
+    public static void assertSuggestionEquals(String message, Suggestion expected,
+            Suggestion observed) {
+        assertFieldEquals(message, "source", expected.getSuggestionSource(),
+                observed.getSuggestionSource());
+        assertFieldEquals(message, "shortcutId", expected.getShortcutId(),
+                observed.getShortcutId());
+        assertFieldEquals(message, "spinnerWhileRefreshing", expected.isSpinnerWhileRefreshing(),
+                observed.isSpinnerWhileRefreshing());
+        assertFieldEquals(message, "format", expected.getSuggestionFormat(),
+                observed.getSuggestionFormat());
+        assertFieldEquals(message, "icon1", expected.getSuggestionIcon1(),
+                observed.getSuggestionIcon1());
+        assertFieldEquals(message, "icon2", expected.getSuggestionIcon2(),
+                observed.getSuggestionIcon2());
+        assertFieldEquals(message, "text1", expected.getSuggestionText1(),
+                observed.getSuggestionText1());
+        assertFieldEquals(message, "text2", expected.getSuggestionText2(),
+                observed.getSuggestionText2());
+        assertFieldEquals(message, "text2Url", expected.getSuggestionText2Url(),
+                observed.getSuggestionText2Url());
+        assertFieldEquals(message, "action", expected.getSuggestionIntentAction(),
+                observed.getSuggestionIntentAction());
+        assertFieldEquals(message, "data", expected.getSuggestionIntentDataString(),
+                observed.getSuggestionIntentDataString());
+        assertFieldEquals(message, "extraData", expected.getSuggestionIntentExtraData(),
+                observed.getSuggestionIntentExtraData());
+        assertFieldEquals(message, "query", expected.getSuggestionQuery(),
+                observed.getSuggestionQuery());
+        assertFieldEquals(message, "logType", expected.getSuggestionLogType(),
+                observed.getSuggestionLogType());
+    }
+
+    private static void assertFieldEquals(String message, String field,
+            Object expected, Object observed) {
+        String msg = (message == null) ? field : message + ", " + field;
+        assertEquals(msg, expected, observed);
+    }
+
+    public static void addAll(ListSuggestionCursor to, SuggestionCursor from) {
+        if (from == null) return;
+        int count = from.getCount();
+        for (int i = 0; i < count; i++) {
+            to.add(new SuggestionPosition(from, i));
+        }
     }
 }

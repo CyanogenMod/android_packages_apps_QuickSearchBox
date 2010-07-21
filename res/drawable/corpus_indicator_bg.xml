@@ -17,7 +17,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_window_focused="false" android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_bg_default" />
+        android:drawable="@drawable/corpus_indicator_bg_normal" />
 
     <item android:state_pressed="true"
         android:drawable="@drawable/corpus_indicator_bg_pressed" />
@@ -26,6 +26,6 @@
         android:drawable="@drawable/corpus_indicator_bg_focused" />
 
     <item android:state_enabled="true"
-        android:drawable="@drawable/corpus_indicator_bg_default" />
+        android:drawable="@drawable/corpus_indicator_bg_normal" />
 
 </selector>

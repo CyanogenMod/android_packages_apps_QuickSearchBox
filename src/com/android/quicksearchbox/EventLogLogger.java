@@ -17,8 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.util.EventLog;
 
 import java.util.Collection;
@@ -30,6 +28,9 @@ import java.util.Random;
  */
 public class EventLogLogger implements Logger {
 
+    private static final int SUGGESTION_CLICK_TYPE_LAUNCH = 0;
+    private static final int SUGGESTION_CLICK_TYPE_REFINE = 1;
+
     private static final char LIST_SEPARATOR = '|';
 
     private final Context mContext;
@@ -38,22 +39,12 @@ public class EventLogLogger implements Logger {
 
     private final String mPackageName;
 
-    private final int mVersionCode;
-
     private final Random mRandom;
 
     public EventLogLogger(Context context, Config config) {
         mContext = context;
         mConfig = config;
-        mPackageName= mContext.getPackageName();
-        try {
-            PackageInfo pkgInfo = mContext.getPackageManager().getPackageInfo(mPackageName, 0);
-            mVersionCode = pkgInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException ex) {
-            // The current package should always exist, how else could we
-            // run code from it?
-            throw new RuntimeException(ex);
-        }
+        mPackageName = mContext.getPackageName();
         mRandom = new Random();
     }
 
@@ -62,7 +53,7 @@ public class EventLogLogger implements Logger {
     }
 
     protected int getVersionCode() {
-        return mVersionCode;
+        return QsbApplication.get(getContext()).getVersionCode();
     }
 
     protected Config getConfig() {
@@ -75,16 +66,27 @@ public class EventLogLogger implements Logger {
         String startMethod = intentSource;
         String currentCorpus = getCorpusLogName(corpus);
         String enabledCorpora = getCorpusLogNames(orderedCorpora);
-        EventLogTags.writeQsbStart(mPackageName, mVersionCode, startMethod,
+        EventLogTags.writeQsbStart(mPackageName, getVersionCode(), startMethod,
                 latency, currentCorpus, enabledCorpora);
     }
 
     public void logSuggestionClick(int position,
             SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora) {
+        logQsbClick(position, suggestionCursor, queriedCorpora, SUGGESTION_CLICK_TYPE_LAUNCH);
+    }
+
+    public void logRefine(int position, SuggestionCursor suggestionCursor,
+            Collection<Corpus> queriedCorpora) {
+        logQsbClick(position, suggestionCursor, queriedCorpora, SUGGESTION_CLICK_TYPE_REFINE);
+    }
+
+    private void logQsbClick(int position, SuggestionCursor suggestionCursor,
+            Collection<Corpus> queriedCorpora, int clickType) {
         String suggestions = getSuggestions(suggestionCursor);
         String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
-        EventLogTags.writeQsbClick(position, suggestions, corpora, numChars);
+        EventLogTags.writeQsbClick(position, suggestions, corpora, numChars,
+                clickType);
     }
 
     public void logSearch(Corpus corpus, int startMethod, int numChars) {

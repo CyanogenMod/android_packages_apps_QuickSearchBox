@@ -17,8 +17,8 @@
 <view
     xmlns:android="http://schemas.android.com/apk/res/android"
     class="com.android.quicksearchbox.ui.CorpusView"
-    android:layout_width="78dip"
-    android:layout_height="78dip"
+    android:layout_width="76dip"
+    android:layout_height="76dip"
     android:padding="4dip"
     >
 
@@ -26,9 +26,8 @@
         android:layout_width="48dip"
         android:layout_height="48dip"
         android:scaleType="centerInside"
-        android:layout_alignParentLeft="true"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
         android:layout_marginBottom="2dip"
         />
 

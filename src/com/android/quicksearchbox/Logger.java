@@ -48,6 +48,17 @@ public interface Logger {
             Collection<Corpus> queriedCorpora);
 
     /**
+     * The user clicked the query refine button.
+     *
+     * @param position 0-based position of the suggestion in the UI.
+     * @param suggestionCursor all the suggestions shown in the UI.
+     * @param queriedCorpora all corpora that were queried to produce the suggestions in
+     *        {@code suggestionCursor}, ordered by rank.
+     */
+    void logRefine(int position, SuggestionCursor suggestionCursor,
+            Collection<Corpus> queriedCorpora);
+
+    /**
      * The user launched a search.
      *
      * @param startMethod One of {@link #SEARCH_METHOD_BUTTON} or {@link #SEARCH_METHOD_KEYBOARD}.

@@ -28,7 +28,7 @@ import java.util.Collections;
  * Mock implementation of {@link Corpus}.
  *
  */
-public class MockCorpus extends AbstractCorpus {
+public class MockCorpus implements Corpus {
 
     public static final Corpus CORPUS_1 = new MockCorpus(MockSource.SOURCE_1);
 
@@ -38,9 +38,16 @@ public class MockCorpus extends AbstractCorpus {
 
     private final Source mSource;
 
+    private final boolean mDefaultEnabled;
+
     public MockCorpus(Source source) {
+        this(source, true);
+    }
+
+    public MockCorpus(Source source, boolean defaultEnabled) {
         mName = "corpus_" + source.getName();
         mSource = source;
+        mDefaultEnabled = defaultEnabled;
     }
 
     public Intent createSearchIntent(String query, Bundle appData) {
@@ -87,8 +94,13 @@ public class MockCorpus extends AbstractCorpus {
         return null;
     }
 
-    public CorpusResult getSuggestions(String query, int queryLimit) {
-        return new Result(query, mSource.getSuggestions(query, queryLimit));
+    public CorpusResult getSuggestions(String query, int queryLimit, boolean onlyCorpus) {
+        return new Result(query, mSource.getSuggestions(query, queryLimit, true));
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 
     @Override
@@ -128,6 +140,22 @@ public class MockCorpus extends AbstractCorpus {
     }
 
     public boolean voiceSearchEnabled() {
+        return false;
+    }
+
+    public boolean isCorpusDefaultEnabled() {
+        return mDefaultEnabled;
+    }
+
+    public boolean isCorpusEnabled() {
+        return true;
+    }
+
+    public boolean isCorpusHidden() {
+        return false;
+    }
+
+    public boolean isLocationAware() {
         return false;
     }
 

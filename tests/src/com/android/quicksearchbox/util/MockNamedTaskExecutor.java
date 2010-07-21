@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox.util;
 
+import junit.framework.Assert;
+
 
 /**
  * A simple executor that maintains a queue and executes one task synchronously every
@@ -42,4 +44,12 @@ public class MockNamedTaskExecutor implements NamedTaskExecutor {
         return mExecutor.runNext();
     }
 
+    public void assertPendingTaskCount(int expected) {
+        Assert.assertEquals("Wrong number of pending tasks",
+                expected, mExecutor.countPendingTasks());
+    }
+
+    public void assertDone() {
+        assertPendingTaskCount(0);
+    }
 }

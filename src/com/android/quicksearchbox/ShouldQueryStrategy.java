@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -57,6 +58,7 @@ class ShouldQueryStrategy {
             }
             return true;
         }
+        if (DBG) Log.d(TAG, "Query too short for corpus " + corpus);
         return false;
     }
 
@@ -65,8 +67,9 @@ class ShouldQueryStrategy {
      */
     public void onZeroResults(Corpus corpus, String query) {
         // Make sure this result is actually for a prefix of the current query.
-        if (mLastQuery.startsWith(query) && !corpus.queryAfterZeroResults()) {
-            if (DBG) Log.d(TAG, corpus + " returned 0 results for " + query);
+        if (mLastQuery.startsWith(query) && !corpus.queryAfterZeroResults()
+                && !TextUtils.isEmpty(query)) {
+            if (DBG) Log.d(TAG, corpus + " returned 0 results for '" + query + "'");
             mEmptyCorpora.put(corpus, query.length());
         }
     }

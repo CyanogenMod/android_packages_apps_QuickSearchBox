@@ -16,12 +16,13 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SuggestionCursor;
+
 import android.content.Context;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.widget.QuickContactBadge;
-import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.SuggestionCursor;
 
 /**
  * View for contacts appearing in the suggestions list.
@@ -49,8 +50,8 @@ public class ContactSuggestionView extends DefaultSuggestionView {
     }
 
     @Override
-    public void bindAsSuggestion(SuggestionCursor suggestion) {
-        super.bindAsSuggestion(suggestion);
+    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionClickListener onClick) {
+        super.bindAsSuggestion(suggestion, onClick);
         mQuickContact.assignContactUri(Uri.parse(suggestion.getSuggestionIntentDataString()));
     }
 }

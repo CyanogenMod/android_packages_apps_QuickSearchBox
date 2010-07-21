@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import java.util.List;
 
 /**
  * Provides a set of suggestion results for a query..
@@ -27,10 +26,10 @@ public interface SuggestionsProvider {
      * Gets suggestions for a query.
      *
      * @param query The query.
-     * @param corpora The corpora to query.
+     * @param singleCorpus The corpora to query, {@code null} for all enabled corpora.
      * @param maxSuggestions The maximum number of suggestions to return.
      */
-    Suggestions getSuggestions(String query, List<Corpus> corpora, int maxSuggestions);
+    Suggestions getSuggestions(String query, Corpus singleCorpus, int maxSuggestions);
 
     void close();
 }

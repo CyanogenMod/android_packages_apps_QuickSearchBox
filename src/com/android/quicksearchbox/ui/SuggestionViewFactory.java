@@ -16,7 +16,7 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.Suggestion;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +34,7 @@ public interface SuggestionViewFactory {
     /**
      * Gets the view type associated with a given suggestion.
      */
-    int getSuggestionViewType(SuggestionCursor suggestion);
+    int getSuggestionViewType(Suggestion suggestion);
 
     /**
      * Gets a suggestion view, possibly recycling convertView.

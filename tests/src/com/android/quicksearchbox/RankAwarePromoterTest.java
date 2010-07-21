@@ -20,8 +20,6 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -71,7 +69,7 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     private ArrayList<CorpusResult> getSuggestions(String query) {
         ArrayList<CorpusResult> suggestions = new ArrayList<CorpusResult>();
         for (Corpus corpus : getRankedCorpora()) {
-            suggestions.add(corpus.getSuggestions(query, 10));
+            suggestions.add(corpus.getSuggestions(query, 10, false));
         }
         return suggestions;
     }
@@ -80,32 +78,9 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         MockCorpora corpora = new MockCorpora();
         for (int i = 0; i < count; i++) {
             Source mockSource = new MockSource("Source" + i);
-            Corpus mockCorpus = new MockCorpus(mockSource);
+            Corpus mockCorpus = new MockCorpus(mockSource, i < defaultCount);
             corpora.addCorpus(mockCorpus);
-            if (i < defaultCount) {
-                corpora.addDefaultCorpus(mockCorpus);
-            }
         }
         return corpora;
-    }
-
-    // A corpus ranker that orders corpora lexicographically by name.
-    private class LexicographicalCorpusRanker extends AbstractCorpusRanker {
-
-        public LexicographicalCorpusRanker(Corpora corpora) {
-            super(corpora);
-        }
-
-        @Override
-        public List<Corpus> rankCorpora(Corpora corpora) {
-            ArrayList<Corpus> ordered = new ArrayList<Corpus>(corpora.getEnabledCorpora());
-            Collections.sort(ordered, new Comparator<Corpus>() {
-                public int compare(Corpus c1, Corpus c2) {
-                    return c1.getName().compareTo(c2.getName());
-                }
-            });
-            return ordered;
-        }
-
     }
 }

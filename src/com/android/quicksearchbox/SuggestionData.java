@@ -18,12 +18,14 @@ package com.android.quicksearchbox;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import android.content.Intent;
+
 
 /**
  * Holds data for each suggest item including the display data and how to launch the result.
  * Used for passing from the provider to the suggest cursor.
  */
-public class SuggestionData {
+public class SuggestionData implements Suggestion {
 
     private final Source mSource;
     private String mFormat;
@@ -39,6 +41,7 @@ public class SuggestionData {
     private String mIntentExtraData;
     private String mSuggestionQuery;
     private String mLogType;
+    private boolean mIsShortcut;
 
     public SuggestionData(Source source) {
         mSource = source;
@@ -85,7 +88,8 @@ public class SuggestionData {
     }
 
     public String getSuggestionIntentAction() {
-        return mIntentAction;
+        if (mIntentAction != null) return mIntentAction;
+        return mSource.getDefaultIntentAction();
     }
 
     public String getSuggestionIntentDataString() {
@@ -102,6 +106,14 @@ public class SuggestionData {
 
     public String getSuggestionLogType() {
         return mLogType;
+    }
+
+    public boolean isSuggestionShortcut() {
+        return mIsShortcut;
+    }
+
+    public boolean isWebSearchSuggestion() {
+        return Intent.ACTION_WEB_SEARCH.equals(getSuggestionIntentAction());
     }
 
     @VisibleForTesting
@@ -182,24 +194,10 @@ public class SuggestionData {
         return this;
     }
 
-    private String makeKeyComponent(String str) {
-        return str == null ? "" : str;
-    }
-
-    public String getSuggestionKey() {
-        String action = makeKeyComponent(mIntentAction);
-        String data = makeKeyComponent(mIntentData);
-        String query = makeKeyComponent(mSuggestionQuery);
-        // calculating accurate size of string builder avoids an allocation vs starting with
-        // the default size and having to expand.
-        int size = action.length() + 2 + data.length() + query.length();
-        return new StringBuilder(size)
-                .append(action)
-                .append('#')
-                .append(data)
-                .append('#')
-                .append(query)
-                .toString();
+    @VisibleForTesting
+    public SuggestionData setIsShortcut(boolean isShortcut) {
+        mIsShortcut = isShortcut;
+        return this;
     }
 
     @Override

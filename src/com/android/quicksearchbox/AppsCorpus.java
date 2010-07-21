@@ -38,8 +38,8 @@ public class AppsCorpus extends SingleSourceCorpus {
 
     private static final String APPS_CORPUS_NAME = "apps";
 
-    public AppsCorpus(Context context, Source appsSource) {
-        super(context, appsSource);
+    public AppsCorpus(Context context, Config config, Source appsSource) {
+        super(context, config, appsSource);
     }
 
     @Override
@@ -54,13 +54,12 @@ public class AppsCorpus extends SingleSourceCorpus {
 
     @Override
     public Drawable getCorpusIcon() {
-        // TODO: Should we have a different icon for the apps corpus?
-        return getContext().getResources().getDrawable(android.R.drawable.sym_def_app_icon);
+        return getContext().getResources().getDrawable(R.drawable.corpus_icon_apps);
     }
 
     @Override
     public Uri getCorpusIconUri() {
-        return Util.getResourceUri(getContext(), android.R.drawable.sym_def_app_icon);
+        return Util.getResourceUri(getContext(), R.drawable.corpus_icon_apps);
     }
 
     @Override
@@ -93,13 +92,13 @@ public class AppsCorpus extends SingleSourceCorpus {
     private Intent createAppSearchIntent(String query, Bundle appData) {
         ComponentName name = getComponentName(getContext(), R.string.apps_search_activity);
         if (name == null) return null;
-        Intent intent = SearchableSource.createSourceSearchIntent(name, query, appData);
+        Intent intent = AbstractSource.createSourceSearchIntent(name, query, appData);
         if (intent == null) return null;
         ActivityInfo ai = intent.resolveActivityInfo(getContext().getPackageManager(), 0);
         if (ai != null) {
             return intent;
         } else {
-            Log.w(TAG, "Can't find app search acitivity " + name);
+            Log.w(TAG, "Can't find app search activity " + name);
             return null;
         }
     }

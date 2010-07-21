@@ -18,16 +18,17 @@ package com.android.quicksearchbox;
 
 import com.android.common.Search;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
+import com.android.quicksearchbox.ui.QueryTextView;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
-import com.android.quicksearchbox.ui.SuggestionSelectionListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
-import com.android.quicksearchbox.ui.SuggestionsFooter;
 import com.android.quicksearchbox.ui.SuggestionsView;
+import com.google.common.base.CharMatcher;
 
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,16 +41,17 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
+import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+import android.widget.AbsListView;
 import android.widget.ImageButton;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 /**
  * The main activity for Quick Search Box. Shows the search UI.
@@ -73,7 +75,7 @@ public class SearchActivity extends Activity {
 
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_CORPUS = "corpus";
-    private static final String INSTANCE_KEY_USER_QUERY = "query";
+    private static final String INSTANCE_KEY_QUERY = "query";
 
     // Measures time from for last onCreate()/onNewIntent() call.
     private LatencyTracker mStartLatencyTracker;
@@ -87,33 +89,30 @@ public class SearchActivity extends Activity {
 
     protected SuggestionsAdapter mSuggestionsAdapter;
 
-    protected EditText mQueryTextView;
+    private CorporaObserver mCorporaObserver;
+
+    protected QueryTextView mQueryTextView;
     // True if the query was empty on the previous call to updateQuery()
     protected boolean mQueryWasEmpty = true;
 
     protected SuggestionsView mSuggestionsView;
-    protected SuggestionsFooter mSuggestionsFooter;
 
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
     protected ImageButton mCorpusIndicator;
 
-    private Launcher mLauncher;
-
     private Corpus mCorpus;
     private Bundle mAppSearchData;
     private boolean mUpdateSuggestions;
-    private String mUserQuery;
-    private boolean mSelectAll;
 
-    private Handler mHandler = new Handler();
-    private Runnable mUpdateSuggestionsTask = new Runnable() {
+    private final Handler mHandler = new Handler();
+    private final Runnable mUpdateSuggestionsTask = new Runnable() {
         public void run() {
             updateSuggestions(getQuery());
         }
     };
 
-    private Runnable mShowInputMethodTask = new Runnable() {
+    private final Runnable mShowInputMethodTask = new Runnable() {
         public void run() {
             showInputMethodForQuery();
         }
@@ -127,31 +126,26 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.search_activity);
-
+        setContentView();
+        SuggestListFocusListener suggestionFocusListener = new SuggestListFocusListener();
         mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
+        mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler());
+        mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
 
-        mQueryTextView = (EditText) findViewById(R.id.search_src_text);
+        mQueryTextView = (QueryTextView) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
-        mSuggestionsView.setSuggestionClickListener(new ClickHandler());
-        mSuggestionsView.setSuggestionSelectionListener(new SelectionHandler());
-        mSuggestionsView.setInteractionListener(new InputMethodCloser());
+        mSuggestionsView.setOnScrollListener(new InputMethodCloser());
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
-        mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
-
-        mSuggestionsFooter = getQsbApplication().createSuggestionsFooter();
-        ViewGroup footerFrame = (ViewGroup) findViewById(R.id.footer);
-        mSuggestionsFooter.addToContainer(footerFrame);
+        mSuggestionsView.setOnFocusChangeListener(suggestionFocusListener);
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
         mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
 
-        mLauncher = new Launcher(this);
-
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
+        mQueryTextView.setSuggestionClickListener(new ClickHandler());
 
         mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
 
@@ -172,10 +166,18 @@ public class SearchActivity extends Activity {
         // Then restore any saved instance state
         restoreInstanceState(savedInstanceState);
 
+        mSuggestionsAdapter.registerDataSetObserver(new SuggestionsObserver());
+
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
-        mSuggestionsFooter.setAdapter(mSuggestionsAdapter);
+
+        mCorporaObserver = new CorporaObserver();
+        getCorpora().registerDataSetObserver(mCorporaObserver);
+    }
+
+    protected void setContentView() {
+        setContentView(R.layout.search_activity);
     }
 
     private void startMethodTracing() {
@@ -186,6 +188,7 @@ public class SearchActivity extends Activity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        if (DBG) Log.d(TAG, "onNewIntent()");
         recordStartTime();
         setIntent(intent);
         setupFromIntent(intent);
@@ -200,9 +203,9 @@ public class SearchActivity extends Activity {
     protected void restoreInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState == null) return;
         String corpusName = savedInstanceState.getString(INSTANCE_KEY_CORPUS);
-        String query = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
-        setCorpus(getCorpus(corpusName));
-        setUserQuery(query);
+        String query = savedInstanceState.getString(INSTANCE_KEY_QUERY);
+        setCorpus(corpusName);
+        setQuery(query, false);
     }
 
     @Override
@@ -211,20 +214,19 @@ public class SearchActivity extends Activity {
         // We don't save appSearchData, since we always get the value
         // from the intent and the user can't change it.
 
-        String corpusName = mCorpus == null ? null : mCorpus.getName();
-        outState.putString(INSTANCE_KEY_CORPUS, corpusName);
-        outState.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
+        outState.putString(INSTANCE_KEY_CORPUS, getCorpusName());
+        outState.putString(INSTANCE_KEY_QUERY, getQuery());
     }
 
     private void setupFromIntent(Intent intent) {
         if (DBG) Log.d(TAG, "setupFromIntent(" + intent.toUri(0) + ")");
-        Corpus corpus = getCorpusFromUri(intent.getData());
+        String corpusName = getCorpusNameFromUri(intent.getData());
         String query = intent.getStringExtra(SearchManager.QUERY);
         Bundle appSearchData = intent.getBundleExtra(SearchManager.APP_DATA);
+        boolean selectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
 
-        setCorpus(corpus);
-        setUserQuery(query);
-        mSelectAll = intent.getBooleanExtra(SearchManager.EXTRA_SELECT_QUERY, false);
+        setCorpus(corpusName);
+        setQuery(query, selectAll);
         mAppSearchData = appSearchData;
 
         if (startedIntoCorpusSelectionDialog()) {
@@ -257,11 +259,10 @@ public class SearchActivity extends Activity {
                 .build();
     }
 
-    private Corpus getCorpusFromUri(Uri uri) {
+    private String getCorpusNameFromUri(Uri uri) {
         if (uri == null) return null;
         if (!SCHEME_CORPUS.equals(uri.getScheme())) return null;
-        String name = uri.getAuthority();
-        return getCorpus(name);
+        return uri.getAuthority();
     }
 
     private Corpus getCorpus(String sourceName) {
@@ -274,23 +275,27 @@ public class SearchActivity extends Activity {
         return corpus;
     }
 
-    private void setCorpus(Corpus corpus) {
-        if (DBG) Log.d(TAG, "setCorpus(" + corpus + ")");
-        mCorpus = corpus;
+    private void setCorpus(String corpusName) {
+        if (DBG) Log.d(TAG, "setCorpus(" + corpusName + ")");
+        mCorpus = getCorpus(corpusName);
         Drawable sourceIcon;
-        if (corpus == null) {
+        if (mCorpus == null) {
             sourceIcon = getCorpusViewFactory().getGlobalSearchIcon();
         } else {
-            sourceIcon = corpus.getCorpusIcon();
+            sourceIcon = mCorpus.getCorpusIcon();
         }
-        mSuggestionsAdapter.setCorpus(corpus);
+        mSuggestionsAdapter.setCorpus(mCorpus);
         mCorpusIndicator.setImageDrawable(sourceIcon);
 
         updateUi(getQuery().length() == 0);
     }
 
+    private String getCorpusName() {
+        return mCorpus == null ? null : mCorpus.getName();
+    }
+
     private QsbApplication getQsbApplication() {
-        return (QsbApplication) getApplication();
+        return QsbApplication.get(this);
     }
 
     private Config getConfig() {
@@ -309,12 +314,12 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getSuggestionsProvider();
     }
 
-    private CorpusRanker getCorpusRanker() {
-        return getQsbApplication().getCorpusRanker();
-    }
-
     private CorpusViewFactory getCorpusViewFactory() {
         return getQsbApplication().getCorpusViewFactory();
+    }
+
+    private VoiceSearch getVoiceSearch() {
+        return QsbApplication.get(this).getVoiceSearch();
     }
 
     private Logger getLogger() {
@@ -325,7 +330,7 @@ public class SearchActivity extends Activity {
     protected void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy()");
         super.onDestroy();
-        mSuggestionsFooter.setAdapter(null);
+        getCorpora().unregisterDataSetObserver(mCorporaObserver);
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 
@@ -346,12 +351,15 @@ public class SearchActivity extends Activity {
     }
 
     @Override
+    protected void onRestart() {
+        if (DBG) Log.d(TAG, "onRestart()");
+        super.onRestart();
+    }
+
+    @Override
     protected void onResume() {
         if (DBG) Log.d(TAG, "onResume()");
         super.onResume();
-        setQuery(mUserQuery, mSelectAll);
-        // Only select everything the first time after creating the activity.
-        mSelectAll = false;
         updateSuggestionsBuffered();
         if (!isCorpusSelectionDialogShowing()) {
             mQueryTextView.requestFocus();
@@ -375,57 +383,22 @@ public class SearchActivity extends Activity {
         }
     }
 
-    /**
-     * Sets the query as typed by the user. Does not update the suggestions
-     * or the text in the query box.
-     */
-    protected void setUserQuery(String userQuery) {
-        if (userQuery == null) userQuery = "";
-        mUserQuery = userQuery;
-    }
-
     protected String getQuery() {
         CharSequence q = mQueryTextView.getText();
         return q == null ? "" : q.toString();
     }
 
-    /** 
-     * Restores the query entered by the user.
-     */
-    private void restoreUserQuery() {
-        if (DBG) Log.d(TAG, "Restoring query to '" + mUserQuery + "'");
-        setQuery(mUserQuery, false);
-    }
-
     /**
-     * Sets the text in the query box. Does not update the suggestions,
-     * and does not change the saved user-entered query.
-     * {@link #restoreUserQuery()} will restore the query to the last
-     * user-entered query.
+     * Sets the text in the query box. Does not update the suggestions.
      */
     private void setQuery(String query, boolean selectAll) {
         mUpdateSuggestions = false;
         mQueryTextView.setText(query);
-        setTextSelection(selectAll);
+        mQueryTextView.setTextSelection(selectAll);
         mUpdateSuggestions = true;
     }
 
-    /**
-     * Sets the text selection in the query text view.
-     *
-     * @param selectAll If {@code true}, selects the entire query.
-     *        If {@false}, no characters are selected, and the cursor is placed
-     *        at the end of the query.
-     */
-    private void setTextSelection(boolean selectAll) {
-        if (selectAll) {
-            mQueryTextView.selectAll();
-        } else {
-            mQueryTextView.setSelection(mQueryTextView.length());
-        }
-    }
-
-    private void updateUi(boolean queryEmpty) {
+    protected void updateUi(boolean queryEmpty) {
         updateQueryTextView(queryEmpty);
         updateSearchGoButton(queryEmpty);
         updateVoiceSearchButton(queryEmpty);
@@ -433,7 +406,7 @@ public class SearchActivity extends Activity {
 
     private void updateQueryTextView(boolean queryEmpty) {
         if (queryEmpty) {
-            if (mCorpus == null || mCorpus.isWebCorpus()) {
+            if (isSearchCorpusWeb()) {
                 mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty_google);
                 mQueryTextView.setHint(null);
             } else {
@@ -454,7 +427,7 @@ public class SearchActivity extends Activity {
     }
 
     protected void updateVoiceSearchButton(boolean queryEmpty) {
-        if (queryEmpty && mLauncher.shouldShowVoiceSearch(mCorpus)) {
+        if (queryEmpty && getVoiceSearch().shouldShowVoiceSearch(mCorpus)) {
             mVoiceSearchButton.setVisibility(View.VISIBLE);
             mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
         } else {
@@ -483,15 +456,18 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected void onSearchClicked(int method) {
-        String query = getQuery();
+    /**
+     * @return true if a search was performed as a result of this click, false otherwise.
+     */
+    protected boolean onSearchClicked(int method) {
+        String query = CharMatcher.WHITESPACE.trimAndCollapseFrom(getQuery(), ' ');
         if (DBG) Log.d(TAG, "Search clicked, query=" + query);
 
         // Don't do empty queries
-        if (TextUtils.getTrimmedLength(query) == 0) return;
+        if (TextUtils.getTrimmedLength(query) == 0) return false;
 
-        Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
-        if (searchCorpus == null) return;
+        Corpus searchCorpus = getSearchCorpus();
+        if (searchCorpus == null) return false;
 
         mTookAction = true;
 
@@ -501,19 +477,20 @@ public class SearchActivity extends Activity {
         // Create shortcut
         SuggestionData searchShortcut = searchCorpus.createSearchShortcut(query);
         if (searchShortcut != null) {
-            DataSuggestionCursor cursor = new DataSuggestionCursor(query);
+            ListSuggestionCursor cursor = new ListSuggestionCursor(query);
             cursor.add(searchShortcut);
             getShortcutRepository().reportClick(cursor, 0);
         }
 
         // Start search
         Intent intent = searchCorpus.createSearchIntent(query, mAppSearchData);
-        mLauncher.launchIntent(intent);
+        launchIntent(intent);
+        return true;
     }
 
     protected void onVoiceSearchClicked() {
         if (DBG) Log.d(TAG, "Voice Search clicked");
-        Corpus searchCorpus = mLauncher.getSearchCorpus(getCorpora(), mCorpus);
+        Corpus searchCorpus = getSearchCorpus();
         if (searchCorpus == null) return;
 
         mTookAction = true;
@@ -523,33 +500,86 @@ public class SearchActivity extends Activity {
 
         // Start voice search
         Intent intent = searchCorpus.createVoiceSearchIntent(mAppSearchData);
-        mLauncher.launchIntent(intent);
+        launchIntent(intent);
+    }
+
+    /**
+     * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
+     * and the selected corpus otherwise.
+     */
+    protected Corpus getSearchCorpus() {
+        if (mCorpus != null) {
+            return mCorpus;
+        } else {
+            Corpus webCorpus = getCorpora().getWebCorpus();
+            if (webCorpus == null) {
+                Log.e(TAG, "No web corpus");
+            }
+            return webCorpus;
+        }
+    }
+
+    /**
+     * Checks if the corpus used for typed searchs is the web corpus.
+     */
+    protected boolean isSearchCorpusWeb() {
+        Corpus corpus = getSearchCorpus();
+        return corpus != null && corpus.isWebCorpus();
     }
 
     protected SuggestionCursor getCurrentSuggestions() {
         return mSuggestionsAdapter.getCurrentSuggestions();
     }
 
-    protected boolean launchSuggestion(int position) {
+    protected SuggestionCursor getCurrentSuggestions(int position) {
         SuggestionCursor suggestions = getCurrentSuggestions();
-        if (position < 0 || position >= suggestions.getCount()) {
-            Log.w(TAG, "Tried to launch invalid suggestion " + position);
-            return false;
+        if (suggestions == null) {
+            return null;
         }
+        int count = suggestions.getCount();
+        if (position < 0 || position >= count) {
+            Log.w(TAG, "Invalid suggestion position " + position + ", count = " + count);
+            return null;
+        }
+        suggestions.moveTo(position);
+        return suggestions;
+    }
+
+    protected Set<Corpus> getCurrentIncludedCorpora() {
+        Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
+        return suggestions == null ? null : suggestions.getIncludedCorpora();
+    }
+
+    protected void launchIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+        try {
+            startActivity(intent);
+        } catch (RuntimeException ex) {
+            // Since the intents for suggestions specified by suggestion providers,
+            // guard against them not being handled, not allowed, etc.
+            Log.e(TAG, "Failed to start " + intent.toUri(0), ex);
+        }
+    }
+
+    protected boolean launchSuggestion(int position) {
+        SuggestionCursor suggestions = getCurrentSuggestions(position);
+        if (suggestions == null) return false;
 
         if (DBG) Log.d(TAG, "Launching suggestion " + position);
         mTookAction = true;
 
         // Log suggestion click
-        Collection<Corpus> corpora = mSuggestionsAdapter.getSuggestions().getIncludedCorpora();
-        getLogger().logSuggestionClick(position, suggestions, corpora);
+        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora());
 
         // Create shortcut
         getShortcutRepository().reportClick(suggestions, position);
 
         // Launch intent
-        Intent intent = mLauncher.getSuggestionIntent(suggestions, position, mAppSearchData);
-        mLauncher.launchIntent(intent);
+        suggestions.moveTo(position);
+        Intent intent = SuggestionUtils.getSuggestionIntent(suggestions, mAppSearchData);
+        launchIntent(intent);
 
         return true;
     }
@@ -561,36 +591,34 @@ public class SearchActivity extends Activity {
 
     protected boolean onSuggestionKeyDown(int position, int keyCode, KeyEvent event) {
         // Treat enter or search as a click
-        if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
+        if (       keyCode == KeyEvent.KEYCODE_ENTER
+                || keyCode == KeyEvent.KEYCODE_SEARCH
+                || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             return launchSuggestion(position);
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_DPAD_UP && position == 0) {
-            // Moved up from the top suggestion, restore the user query and focus query box
-            if (DBG) Log.d(TAG, "Up and out");
-            restoreUserQuery();
-            return false;  // let the framework handle the move
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-            // Moved left / right from a suggestion, keep current query, move
-            // focus to query box, and move cursor to far left / right
-            if (DBG) Log.d(TAG, "Left/right on a suggestion");
-            String query = getQuery();
-            int cursorPos = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 0 : query.length();
-            mQueryTextView.setSelection(cursorPos);
-            mQueryTextView.requestFocus();
-            updateSuggestions(query);
-            return true;
         }
 
         return false;
     }
 
-    protected void onSourceSelected() {
-        if (DBG) Log.d(TAG, "No suggestion selected");
-        restoreUserQuery();
+    protected void refineSuggestion(int position) {
+        if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
+        SuggestionCursor suggestions = getCurrentSuggestions(position);
+        if (suggestions == null) {
+            return;
+        }
+        String query = suggestions.getSuggestionQuery();
+        if (TextUtils.isEmpty(query)) {
+            return;
+        }
+
+        // Log refine click
+        getLogger().logRefine(position, suggestions, getCurrentIncludedCorpora());
+
+        // Put query + space in query text view
+        String queryWithSpace = query + ' ';
+        setQuery(queryWithSpace, false);
+        updateSuggestions(queryWithSpace);
+        mQueryTextView.requestFocus();
     }
 
     protected int getSelectedPosition() {
@@ -601,17 +629,17 @@ public class SearchActivity extends Activity {
      * Hides the input method.
      */
     protected void hideInputMethod() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(mQueryTextView.getWindowToken(), 0);
-        }
+        mQueryTextView.hideInputMethod();
     }
 
     protected void showInputMethodForQuery() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.showSoftInput(mQueryTextView, 0);
-        }
+        mQueryTextView.showInputMethod();
+    }
+
+    protected void onSuggestionListFocusChange(boolean focused) {
+    }
+
+    protected void onQueryTextViewFocusChange(boolean focused) {
     }
 
     /**
@@ -624,6 +652,7 @@ public class SearchActivity extends Activity {
                 // The suggestions list got focus, hide the input method
                 hideInputMethod();
             }
+            onSuggestionListFocusChange(focused);
         }
     }
 
@@ -634,14 +663,7 @@ public class SearchActivity extends Activity {
                 // The query box got focus, show the input method
                 showInputMethodForQuery();
             }
-        }
-    }
-
-    private List<Corpus> getCorporaToQuery() {
-        if (mCorpus == null) {
-            return getCorpusRanker().getRankedCorpora();
-        } else {
-            return Collections.singletonList(mCorpus);
+            onQueryTextViewFocusChange(focused);
         }
     }
 
@@ -658,21 +680,53 @@ public class SearchActivity extends Activity {
         mHandler.postDelayed(mUpdateSuggestionsTask, delay);
     }
 
-    private void updateSuggestions(String query) {
+    protected void updateSuggestions(String query) {
+
+        query = CharMatcher.WHITESPACE.trimLeadingFrom(query);
+        if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
+        Suggestions suggestions = getSuggestionsProvider().getSuggestions(
+                query, mCorpus, getMaxSuggestions());
+
         // Log start latency if this is the first suggestions update
         if (mStarting) {
             mStarting = false;
             String source = getIntent().getStringExtra(Search.SOURCE);
-            List<Corpus> rankedCorpora = getCorpusRanker().getRankedCorpora();
             int latency = mStartLatencyTracker.getLatency();
-            getLogger().logStart(latency, source, mCorpus, rankedCorpora);
+            getLogger().logStart(latency, source, mCorpus, suggestions.getExpectedCorpora());
+            getQsbApplication().onStartupComplete();
         }
 
-        query = ltrim(query);
-        List<Corpus> corporaToQuery = getCorporaToQuery();
-        Suggestions suggestions = getSuggestionsProvider().getSuggestions(
-                query, corporaToQuery, getMaxSuggestions());
         mSuggestionsAdapter.setSuggestions(suggestions);
+    }
+
+    /**
+     * If the input method is in fullscreen mode, and the selector corpus
+     * is All or Web, use the web search suggestions as completions.
+     */
+    protected void updateInputMethodSuggestions() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm == null || !imm.isFullscreenMode()) return;
+        Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
+        if (suggestions == null) return;
+        SuggestionCursor cursor = suggestions.getPromoted();
+        if (cursor == null) return;
+        CompletionInfo[] completions = webSuggestionsToCompletions(cursor);
+        if (DBG) Log.d(TAG, "displayCompletions(" + Arrays.toString(completions) + ")");
+        imm.displayCompletions(mQueryTextView, completions);
+    }
+
+    private CompletionInfo[] webSuggestionsToCompletions(SuggestionCursor cursor) {
+        int count = cursor.getCount();
+        ArrayList<CompletionInfo> completions = new ArrayList<CompletionInfo>(count);
+        boolean usingWebCorpus = isSearchCorpusWeb();
+        for (int i = 0; i < count; i++) {
+            cursor.moveTo(i);
+            if (!usingWebCorpus || cursor.isWebSearchSuggestion()) {
+                String text1 = cursor.getSuggestionText1();
+                completions.add(new CompletionInfo(i, i, text1));
+            }
+        }
+        return completions.toArray(new CompletionInfo[completions.size()]);
     }
 
     private boolean forwardKeyToQueryTextView(int keyCode, KeyEvent event) {
@@ -709,8 +763,6 @@ public class SearchActivity extends Activity {
                 updateUi(empty);
             }
             if (mUpdateSuggestions) {
-                String query = s == null ? "" : s.toString();
-                setUserQuery(query);
                 updateSuggestionsBuffered();
             }
         }
@@ -729,7 +781,9 @@ public class SearchActivity extends Activity {
         public boolean onKey(View view, int keyCode, KeyEvent event) {
             // Handle IME search action key
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
+                // if no action was taken, consume the key event so that the keyboard
+                // remains on screen.
+                return !onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
             }
             return false;
         }
@@ -753,15 +807,20 @@ public class SearchActivity extends Activity {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 int position = getSelectedPosition();
                 if (onSuggestionKeyDown(position, keyCode, event)) {
-                        return true;
+                    return true;
                 }
             }
             return forwardKeyToQueryTextView(keyCode, event);
         }
     }
 
-    private class InputMethodCloser implements SuggestionsView.InteractionListener {
-        public void onInteraction() {
+    private class InputMethodCloser implements SuggestionsView.OnScrollListener {
+
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                int totalItemCount) {
+        }
+
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
             hideInputMethod();
         }
     }
@@ -774,26 +833,10 @@ public class SearchActivity extends Activity {
        public boolean onSuggestionLongClicked(int position) {
            return SearchActivity.this.onSuggestionLongClicked(position);
        }
-    }
 
-    private class SelectionHandler implements SuggestionSelectionListener {
-        public void onSuggestionSelected(int position) {
-            SuggestionCursor suggestions = getCurrentSuggestions();
-            suggestions.moveTo(position);
-            String displayQuery = suggestions.getSuggestionDisplayQuery();
-            if (TextUtils.isEmpty(displayQuery)) {
-                restoreUserQuery();
-            } else {
-                setQuery(displayQuery, false);
-            }
-        }
-
-        public void onNothingSelected() {
-                // This happens when a suggestion has been selected with the
-                // dpad / trackball and then a different UI element is touched.
-                // Do nothing, since we want to keep the query of the selection
-                // in the search box.
-        }
+       public void onSuggestionQueryRefineClicked(int position) {
+           refineSuggestion(position);
+       }
     }
 
     /**
@@ -823,8 +866,8 @@ public class SearchActivity extends Activity {
 
     private class CorpusSelectionListener
             implements CorpusSelectionDialog.OnCorpusSelectedListener {
-        public void onCorpusSelected(Corpus corpus) {
-            setCorpus(corpus);
+        public void onCorpusSelected(String corpusName) {
+            setCorpus(corpusName);
             updateSuggestions(getQuery());
             mQueryTextView.requestFocus();
             showInputMethodForQuery();
@@ -840,13 +883,19 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private static String ltrim(String text) {
-        int start = 0;
-        int length = text.length();
-        while (start < length && Character.isWhitespace(text.charAt(start))) {
-            start++;
+    private class CorporaObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            setCorpus(getCorpusName());
+            updateSuggestions(getQuery());
         }
-        return start > 0 ? text.substring(start, length) : text;
+    }
+
+    private class SuggestionsObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            updateInputMethodSuggestions();
+        }
     }
 
 }
