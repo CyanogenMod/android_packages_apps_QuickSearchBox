@@ -16,7 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -54,7 +54,7 @@ public interface ShortcutRepository {
      * @param maxShortcuts The maximum number of shortcuts to return.
      * @return A cursor containing shortcutted results for the query.
      */
-    SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora,
+    SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora,
             int maxShortcuts);
 
     /**

@@ -17,9 +17,9 @@
 package com.android.quicksearchbox;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Maintains the list of all suggestion sources.
+ * Maintains the list of all corpora.
  */
 public class SearchableCorpora implements Corpora {
 
@@ -40,11 +40,7 @@ public class SearchableCorpora implements Corpora {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private final Context mContext;
-    private final Config mConfig;
     private final CorpusFactory mCorpusFactory;
-    private final SharedPreferences mPreferences;
-
-    private boolean mLoaded = false;
 
     private Sources mSources;
     // Maps corpus names to corpora
@@ -60,12 +56,9 @@ public class SearchableCorpora implements Corpora {
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableCorpora(Context context, Config config, Sources sources,
-            CorpusFactory corpusFactory) {
+    public SearchableCorpora(Context context, Sources sources, CorpusFactory corpusFactory) {
         mContext = context;
-        mConfig = config;
         mCorpusFactory = corpusFactory;
-        mPreferences = SearchSettings.getSearchPreferences(context);
         mSources = sources;
     }
 
@@ -73,24 +66,15 @@ public class SearchableCorpora implements Corpora {
         return mContext;
     }
 
-    private void checkLoaded() {
-        if (!mLoaded) {
-            throw new IllegalStateException("corpora not loaded.");
-        }
-    }
-
     public Collection<Corpus> getAllCorpora() {
-        checkLoaded();
         return Collections.unmodifiableCollection(mCorporaByName.values());
     }
 
     public Collection<Corpus> getEnabledCorpora() {
-        checkLoaded();
         return mEnabledCorpora;
     }
 
     public Corpus getCorpus(String name) {
-        checkLoaded();
         return mCorporaByName.get(name);
     }
 
@@ -99,48 +83,20 @@ public class SearchableCorpora implements Corpora {
     }
 
     public Corpus getCorpusForSource(Source source) {
-        checkLoaded();
         return mCorporaBySource.get(source);
     }
 
     public Source getSource(String name) {
-        checkLoaded();
+        if (TextUtils.isEmpty(name)) {
+            Log.w(TAG, "Empty source name");
+            return null;
+        }
         return mSources.getSource(name);
     }
 
-    /**
-     * After calling, clients must call {@link #close()} when done with this object.
-     */
-    public void load() {
-        if (mLoaded) {
-            throw new IllegalStateException("load(): Already loaded.");
-        }
+    public void update() {
+        mSources.update();
 
-        mSources.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                updateCorpora();
-            }
-        });
-
-        // will cause a callback to updateCorpora()
-        mSources.load();
-        mLoaded = true;
-    }
-
-    /**
-     * Releases all resources used by this object. It is possible to call
-     * {@link #load()} again after calling this method.
-     */
-    public void close() {
-        checkLoaded();
-
-        mSources.close();
-        mSources = null;
-        mLoaded = false;
-    }
-
-    private void updateCorpora() {
         Collection<Corpus> corpora = mCorpusFactory.createCorpora(mSources);
 
         mCorporaByName = new HashMap<String,Corpus>(corpora.size());
@@ -153,7 +109,7 @@ public class SearchableCorpora implements Corpora {
             for (Source source : corpus.getSources()) {
                 mCorporaBySource.put(source, corpus);
             }
-            if (isCorpusEnabled(corpus)) {
+            if (corpus.isCorpusEnabled()) {
                 mEnabledCorpora.add(corpus);
             }
             if (corpus.isWebCorpus()) {
@@ -169,18 +125,6 @@ public class SearchableCorpora implements Corpora {
         mEnabledCorpora = Collections.unmodifiableList(mEnabledCorpora);
 
         notifyDataSetChanged();
-    }
-
-    public boolean isCorpusEnabled(Corpus corpus) {
-        if (corpus == null) return false;
-        boolean defaultEnabled = isCorpusDefaultEnabled(corpus);
-        String sourceEnabledPref = SearchSettings.getCorpusEnabledPreference(corpus);
-        return mPreferences.getBoolean(sourceEnabledPref, defaultEnabled);
-    }
-
-    public boolean isCorpusDefaultEnabled(Corpus corpus) {
-        String name = corpus.getName();
-        return mConfig.isCorpusEnabledByDefault(name);
     }
 
     public void registerDataSetObserver(DataSetObserver observer) {

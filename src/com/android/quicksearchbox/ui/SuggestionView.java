@@ -25,6 +25,6 @@ public interface SuggestionView {
     /**
      * Set the view's contents based on the given suggestion.
      */
-    void bindAsSuggestion(SuggestionCursor suggestion);
+    void bindAsSuggestion(SuggestionCursor suggestion, SuggestionClickListener clickListener);
 
 }

@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Process;
@@ -34,12 +35,16 @@ public class Config {
 
     private static final String TAG = "QSB.Config";
 
-    private static final long DAY_MILLIS = 86400000L;
+    protected static final long SECOND_MILLIS = 1000L;
+    protected static final long MINUTE_MILLIS = 60L * SECOND_MILLIS;
+    protected static final long DAY_MILLIS = 86400000L;
 
     private static final int NUM_SUGGESTIONS_ABOVE_KEYBOARD = 4;
     private static final int NUM_PROMOTED_SOURCES = 3;
     private static final int MAX_PROMOTED_SUGGESTIONS = 8;
     private static final int MAX_RESULTS_PER_SOURCE = 50;
+    private static final int MAX_SHORTCUTS_PER_WEB_SOURCE = MAX_PROMOTED_SUGGESTIONS;
+    private static final int MAX_SHORTCUTS_PER_NON_WEB_SOURCE = 2;
     private static final long SOURCE_TIMEOUT_MILLIS = 10000;
 
     private static final int QUERY_THREAD_PRIORITY =
@@ -54,9 +59,23 @@ public class Config {
     private static final int LATENCY_LOG_FREQUENCY = 1000;
 
     private static final long TYPING_SUGGESTIONS_UPDATE_DELAY_MILLIS = 100;
+    private static final long PUBLISH_RESULT_DELAY_MILLIS = 200;
+
+    private static final long VOICE_SEARCH_HINT_ACTIVE_PERIOD = 7L * DAY_MILLIS;
+
+    private static final long VOICE_SEARCH_HINT_UPDATE_INTERVAL
+            = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+
+    private static final long VOICE_SEARCH_HINT_SHOW_PERIOD_MILLIS
+            = AlarmManager.INTERVAL_HOUR * 2;
+
+    private static final long VOICE_SEARCH_HINT_CHANGE_PERIOD = 2L * MINUTE_MILLIS;
+
+    private static final long VOICE_SEARCH_HINT_VISIBLE_PERIOD = 6L * MINUTE_MILLIS;
 
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
+    private HashSet<String> mHiddenCorpora;
 
     /**
      * Creates a new config that uses hard-coded default values.
@@ -77,17 +96,16 @@ public class Config {
     public void close() {
     }
 
-    private HashSet<String> loadDefaultCorpora() {
+    private HashSet<String> loadResourceStringSet(int res) {
         HashSet<String> defaultCorpora = new HashSet<String>();
         try {
-            // Get the list of default corpora from a resource, which allows vendor overlays.
-            String[] corpora = mContext.getResources().getStringArray(R.array.default_corpora);
+            String[] corpora = mContext.getResources().getStringArray(res);
             for (String corpus : corpora) {
                 defaultCorpora.add(corpus);
             }
             return defaultCorpora;
         } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load default corpora", ex);
+            Log.e(TAG, "Could not load resource string set", ex);
             return defaultCorpora;
         }
     }
@@ -97,9 +115,19 @@ public class Config {
      */
     public synchronized boolean isCorpusEnabledByDefault(String corpusName) {
         if (mDefaultCorpora == null) {
-            mDefaultCorpora = loadDefaultCorpora();
+            mDefaultCorpora = loadResourceStringSet(R.array.default_corpora);
         }
         return mDefaultCorpora.contains(corpusName);
+    }
+
+    /**
+     * Checks if the given corpus should be hidden from the corpus selection dialog.
+     */
+    public synchronized boolean isCorpusHidden(String corpusName) {
+        if (mHiddenCorpora == null) {
+            mHiddenCorpora = loadResourceStringSet(R.array.hidden_corpora);
+        }
+        return mHiddenCorpora.contains(corpusName);
     }
 
     /**
@@ -134,6 +162,20 @@ public class Config {
      */
     public int getMaxResultsPerSource() {
         return MAX_RESULTS_PER_SOURCE;
+    }
+
+    /**
+     * The maximum number of shortcuts to show for the web source in All mode.
+     */
+    public int getMaxShortcutsPerWebSource() {
+        return MAX_SHORTCUTS_PER_WEB_SOURCE;
+    }
+
+    /**
+     * The maximum number of shortcuts to show for each non-web source in All mode.
+     */
+    public int getMaxShortcutsPerNonWebSource() {
+        return MAX_SHORTCUTS_PER_NON_WEB_SOURCE;
     }
 
     /**
@@ -193,5 +235,63 @@ public class Config {
      */
     public long getTypingUpdateSuggestionsDelayMillis() {
         return TYPING_SUGGESTIONS_UPDATE_DELAY_MILLIS;
+    }
+
+    /**
+     * The delay in milliseconds before corpus results are published.
+     * If a new result arrives before this timeout expires, the timeout is reset.
+     */
+    public long getPublishResultDelayMillis() {
+        return PUBLISH_RESULT_DELAY_MILLIS;
+    }
+
+    public boolean allowVoiceSearchHints() {
+        return true;
+    }
+
+    /**
+     * The period of time for which after installing voice search we should consider showing voice
+     * search hints.
+     *
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintActivePeriod() {
+        return VOICE_SEARCH_HINT_ACTIVE_PERIOD;
+    }
+
+    /**
+     * The time interval at which we should consider whether or not to show some voice search hints.
+     *
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintUpdatePeriod() {
+        return VOICE_SEARCH_HINT_UPDATE_INTERVAL;
+    }
+
+    /**
+     * The time interval at which, on average, voice search hints are displayed.
+     *
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintShowPeriod() {
+        return VOICE_SEARCH_HINT_SHOW_PERIOD_MILLIS;
+    }
+
+    /**
+     * The amount of time for which voice search hints are displayed in one go.
+     *
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintVisibleTime() {
+        return VOICE_SEARCH_HINT_VISIBLE_PERIOD;
+    }
+
+    /**
+     * The period that we change voice search hints at while they're being displayed.
+     *
+     * @return The period in milliseconds.
+     */
+    public long getVoiceSearchHintChangePeriod() {
+        return VOICE_SEARCH_HINT_CHANGE_PERIOD;
     }
 }

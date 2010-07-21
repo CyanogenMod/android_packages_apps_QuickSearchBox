@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,7 +67,12 @@ public class CorporaAdapter extends BaseAdapter {
     }
 
     private void updateCorpora() {
-        mRankedEnabledCorpora = mRanker.getRankedCorpora();
+        mRankedEnabledCorpora = new ArrayList<Corpus>();
+        for (Corpus corpus : mRanker.getRankedCorpora()) {
+            if (!corpus.isCorpusHidden()) {
+                mRankedEnabledCorpora.add(corpus);
+            }
+        }
         notifyDataSetChanged();
     }
 

@@ -27,15 +27,11 @@
     
     <PreferenceCategory
             android:title="@string/system_search_category_title">
-            
+
         <PreferenceScreen
-                android:title="@string/search_sources"
                 android:key="search_corpora"
-                android:summary="@string/search_sources_summary">
-
-            <!-- CheckBoxPreferences added here dynamically -->
-
-        </PreferenceScreen>
+                android:title="@string/search_sources"
+                android:summary="@string/search_sources_summary" />
 
         <!-- TODO: Use DialogPreference instead. -->
         <Preference

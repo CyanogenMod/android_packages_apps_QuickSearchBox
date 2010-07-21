@@ -31,26 +31,35 @@ import java.util.concurrent.Executor;
  */
 public abstract class MultiSourceCorpus extends AbstractCorpus {
 
-    private final Context mContext;
-
     private final Executor mExecutor;
 
     private final ArrayList<Source> mSources;
 
-    public MultiSourceCorpus(Context context, Executor executor, Source... sources) {
-        mContext = context;
+    // calculated values based on properties of sources:
+    private boolean mSourcePropertiesValid;
+    private int mQueryThreshold;
+    private boolean mQueryAfterZeroResults;
+    private boolean mVoiceSearchEnabled;
+    private boolean mIsLocationAware;
+
+    public MultiSourceCorpus(Context context, Config config,
+            Executor executor, Source... sources) {
+        super(context, config);
         mExecutor = executor;
 
         mSources = new ArrayList<Source>();
         for (Source source : sources) {
-            if (source != null) {
-                mSources.add(source);
-            }
+            addSource(source);
         }
+
     }
 
-    protected Context getContext() {
-        return mContext;
+    protected void addSource(Source source) {
+        if (source != null) {
+            mSources.add(source);
+            // invalidate calculated values:
+            mSourcePropertiesValid = false;
+        }
     }
 
     public Collection<Source> getSources() {
@@ -71,23 +80,69 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
     }
 
     /**
-     * Gets the sources to query for the given input.
+     * Gets the sources to query for suggestions for the given input.
      *
      * @param query The current input.
+     * @param onlyCorpus If true, this is the only corpus being queried.
      * @return The sources to query.
      */
-    protected List<Source> getSourcesToQuery(String query) {
-        return mSources;
+    protected List<Source> getSourcesToQuery(String query, boolean onlyCorpus) {
+        List<Source> sources = new ArrayList<Source>();
+        for (Source candidate : getSources()) {
+            if (candidate.getQueryThreshold() <= query.length()) {
+                sources.add(candidate);
+            }
+        }
+        return sources;
     }
 
-    public CorpusResult getSuggestions(String query, int queryLimit) {
+    private void updateSourceProperties() {
+        if (mSourcePropertiesValid) return;
+        mQueryThreshold = Integer.MAX_VALUE;
+        mQueryAfterZeroResults = false;
+        mVoiceSearchEnabled = false;
+        mIsLocationAware = false;
+        for (Source s : getSources()) {
+            mQueryThreshold = Math.min(mQueryThreshold, s.getQueryThreshold());
+            mQueryAfterZeroResults |= s.queryAfterZeroResults();
+            mVoiceSearchEnabled |= s.voiceSearchEnabled();
+            mIsLocationAware |= s.isLocationAware();
+        }
+        if (mQueryThreshold == Integer.MAX_VALUE) {
+            mQueryThreshold = 0;
+        }
+        mSourcePropertiesValid = true;
+    }
+
+    public int getQueryThreshold() {
+        updateSourceProperties();
+        return mQueryThreshold;
+    }
+
+    public boolean queryAfterZeroResults() {
+        updateSourceProperties();
+        return mQueryAfterZeroResults;
+    }
+
+    public boolean voiceSearchEnabled() {
+        updateSourceProperties();
+        return mVoiceSearchEnabled;
+    }
+
+    public boolean isLocationAware() {
+        updateSourceProperties();
+        return mIsLocationAware;
+    }
+
+    public CorpusResult getSuggestions(String query, int queryLimit, boolean onlyCorpus) {
         LatencyTracker latencyTracker = new LatencyTracker();
-        List<Source> sources = getSourcesToQuery(query);
+        List<Source> sources = getSourcesToQuery(query, onlyCorpus);
         BarrierConsumer<SourceResult> consumer =
                 new BarrierConsumer<SourceResult>(sources.size());
+        boolean onlySource = sources.size() == 1;
         for (Source source : sources) {
             QueryTask<SourceResult> task = new QueryTask<SourceResult>(query, queryLimit,
-                    source, null, consumer);
+                    source, null, consumer, onlySource);
             mExecutor.execute(task);
         }
         ArrayList<SourceResult> results = consumer.getValues();

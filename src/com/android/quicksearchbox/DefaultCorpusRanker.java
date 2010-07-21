@@ -38,17 +38,15 @@ public class DefaultCorpusRanker extends AbstractCorpusRanker {
     }
 
     private static class CorpusComparator implements Comparator<Corpus> {
-        private final Corpora mCorpora;
         private final Map<String,Integer> mClickScores;
 
-        public CorpusComparator(Corpora corpora, Map<String,Integer> clickScores) {
-            mCorpora = corpora;
+        public CorpusComparator(Map<String,Integer> clickScores) {
             mClickScores = clickScores;
         }
 
         public int compare(Corpus corpus1, Corpus corpus2) {
-            boolean corpus1IsDefault = mCorpora.isCorpusDefaultEnabled(corpus1);
-            boolean corpus2IsDefault = mCorpora.isCorpusDefaultEnabled(corpus2);
+            boolean corpus1IsDefault = corpus1.isCorpusDefaultEnabled();
+            boolean corpus2IsDefault = corpus2.isCorpusDefaultEnabled();
 
             if (corpus1IsDefault != corpus2IsDefault) {
                 // Default corpora always come before non-default
@@ -83,7 +81,7 @@ public class DefaultCorpusRanker extends AbstractCorpusRanker {
 
         Map<String,Integer> clickScores = mShortcuts.getCorpusScores();
         ArrayList<Corpus> ordered = new ArrayList<Corpus>(enabledCorpora);
-        Collections.sort(ordered, new CorpusComparator(corpora, clickScores));
+        Collections.sort(ordered, new CorpusComparator(clickScores));
 
         if (DBG) Log.d(TAG, "Click scores: " + clickScores);
         if (DBG) Log.d(TAG, "Ordered: " + ordered);

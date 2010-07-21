@@ -1,7 +1,7 @@
 
 package com.android.quicksearchbox;
 
-import android.database.DataSetObserver;
+import android.content.ComponentName;
 
 import java.util.Collection;
 
@@ -28,29 +28,15 @@ public interface Sources {
     Source getWebSearchSource();
 
     /**
-     * After calling, clients must call {@link #close()} when done with this object.
+     * Creates a new source for a specific component.
+     * @param component Name of the component to search
+     * @return a new {@code Source} corresponding to {@code component}.
      */
-    void load();
+    Source createSourceFor(ComponentName component);
 
     /**
-     * Releases all resources used by this object. It is possible to call
-     * {@link #load()} again after calling this method.
+     * Updates the list of sources.
      */
-    void close();
-
-    /**
-     * Register an observer that is called when changes happen to this data set.
-     *
-     * @param observer gets notified when the data set changes.
-     */
-    void registerDataSetObserver(DataSetObserver observer);
-
-    /**
-     * Unregister an observer that has previously been registered with
-     * {@link #registerDataSetObserver(DataSetObserver)}
-     *
-     * @param observer the observer to unregister.
-     */
-    void unregisterDataSetObserver(DataSetObserver observer);
+    void update();
 
 }

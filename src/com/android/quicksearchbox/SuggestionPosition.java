@@ -21,7 +21,7 @@ package com.android.quicksearchbox;
  * A pointer to a suggestion in a {@link SuggestionCursor}.
  *
  */
-public class SuggestionPosition {
+public class SuggestionPosition extends AbstractSuggestionWrapper {
 
     private final SuggestionCursor mCursor;
 
@@ -39,7 +39,7 @@ public class SuggestionPosition {
     /**
      * Gets the suggestion cursor, moved to point to the right suggestion.
      */
-    protected SuggestionCursor current() {
+    protected Suggestion current() {
         mCursor.moveTo(mPosition);
         return mCursor;
     }

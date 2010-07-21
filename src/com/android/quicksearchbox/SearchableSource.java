@@ -42,9 +42,8 @@ import java.util.Arrays;
 
 /**
  * Represents a single suggestion source, e.g. Contacts.
- *
  */
-public class SearchableSource implements Source {
+public class SearchableSource extends AbstractSource {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchableSource";
@@ -52,8 +51,6 @@ public class SearchableSource implements Source {
     // TODO: This should be exposed or moved to android-common, see http://b/issue?id=2440614
     // The extra key used in an intent to the speech recognizer for in-app voice search.
     private static final String EXTRA_CALLING_PACKAGE = "calling_package";
-
-    private final Context mContext;
 
     private final SearchableInfo mSearchable;
 
@@ -69,23 +66,16 @@ public class SearchableSource implements Source {
     // Cached icon for the activity
     private Drawable.ConstantState mSourceIcon = null;
 
-    private final IconLoader mIconLoader;
-
     public SearchableSource(Context context, SearchableInfo searchable)
             throws NameNotFoundException {
+        super(context);
         ComponentName componentName = searchable.getSearchActivity();
-        mContext = context;
         mSearchable = searchable;
         mName = componentName.flattenToShortString();
         PackageManager pm = context.getPackageManager();
         mActivityInfo = pm.getActivityInfo(componentName, 0);
         PackageInfo pkgInfo = pm.getPackageInfo(componentName.getPackageName(), 0);
         mVersionCode = pkgInfo.versionCode;
-        mIconLoader = createIconLoader(context, searchable.getSuggestPackage());
-    }
-
-    protected Context getContext() {
-        return mContext;
     }
 
     protected SearchableInfo getSearchableInfo() {
@@ -98,8 +88,9 @@ public class SearchableSource implements Source {
     public boolean canRead() {
         String authority = mSearchable.getSuggestAuthority();
         if (authority == null) {
-            Log.w(TAG, getName() + " has no searchSuggestAuthority");
-            return false;
+            // TODO: maybe we should have a way to distinguish between having suggestions
+            // and being readable.
+            return true;
         }
 
         Uri.Builder uriBuilder = new Uri.Builder()
@@ -122,7 +113,7 @@ public class SearchableSource implements Source {
      * TODO: Shouldn't this be a PackageManager / Context / ContentResolver method?
      */
     private boolean canRead(Uri uri) {
-        ProviderInfo provider = mContext.getPackageManager().resolveContentProvider(
+        ProviderInfo provider = getContext().getPackageManager().resolveContentProvider(
                 uri.getAuthority(), 0);
         if (provider == null) {
             Log.w(TAG, getName() + " has bad suggestion authority " + uri.getAuthority());
@@ -135,7 +126,7 @@ public class SearchableSource implements Source {
         }
         int pid = android.os.Process.myPid();
         int uid = android.os.Process.myUid();
-        if (mContext.checkPermission(readPermission, pid, uid)
+        if (getContext().checkPermission(readPermission, pid, uid)
                 == PackageManager.PERMISSION_GRANTED) {
             // We have permission to read everything in the content provider
             return true;
@@ -151,7 +142,7 @@ public class SearchableSource implements Source {
             String pathReadPermission = perm.getReadPermission();
             if (pathReadPermission != null
                     && perm.match(path)
-                    && mContext.checkPermission(pathReadPermission, pid, uid)
+                    && getContext().checkPermission(pathReadPermission, pid, uid)
                             == PackageManager.PERMISSION_GRANTED) {
                 // We have the path permission
                 return true;
@@ -161,12 +152,7 @@ public class SearchableSource implements Source {
         return false;
     }
 
-    private IconLoader createIconLoader(Context context, String providerPackage) {
-        if (providerPackage == null) return null;
-        return new CachingIconLoader(new PackageIconLoader(context, providerPackage));
-    }
-
-    public ComponentName getComponentName() {
+    public ComponentName getIntentComponent() {
         return mSearchable.getSearchActivity();
     }
 
@@ -178,18 +164,22 @@ public class SearchableSource implements Source {
         return mName;
     }
 
-    public Drawable getIcon(String drawableId) {
-        return mIconLoader == null ? null : mIconLoader.getIcon(drawableId);
-    }
-
-    public Uri getIconUri(String drawableId) {
-        return mIconLoader == null ? null : mIconLoader.getIconUri(drawableId);
+    @Override
+    protected String getIconPackage() {
+        // Get icons from the package containing the suggestion provider, if any
+        String iconPackage = mSearchable.getSuggestPackage();
+        if (iconPackage != null) {
+            return iconPackage;
+        } else {
+            // Fall back to the package containing the searchable activity
+            return mSearchable.getSearchActivity().getPackageName();
+        }
     }
 
     public CharSequence getLabel() {
         if (mLabel == null) {
             // Load label lazily
-            mLabel = mActivityInfo.loadLabel(mContext.getPackageManager());
+            mLabel = mActivityInfo.loadLabel(getContext().getPackageManager());
         }
         return mLabel;
     }
@@ -208,11 +198,10 @@ public class SearchableSource implements Source {
 
     public Drawable getSourceIcon() {
         if (mSourceIcon == null) {
-            // Load icon lazily
-            int iconRes = getSourceIconResource();
-            PackageManager pm = mContext.getPackageManager();
-            Drawable icon = pm.getDrawable(mActivityInfo.packageName, iconRes,
-                    mActivityInfo.applicationInfo);
+            Drawable icon = loadSourceIcon();
+            if (icon == null) {
+                icon = getContext().getResources().getDrawable(R.drawable.corpus_icon_default);
+            }
             // Can't share Drawable instances, save constant state instead.
             mSourceIcon = (icon != null) ? icon.getConstantState() : null;
             // Optimization, return the Drawable the first time
@@ -221,47 +210,38 @@ public class SearchableSource implements Source {
         return (mSourceIcon != null) ? mSourceIcon.newDrawable() : null;
     }
 
+    private Drawable loadSourceIcon() {
+        int iconRes = getSourceIconResource();
+        if (iconRes == 0) return null;
+        PackageManager pm = getContext().getPackageManager();
+        return pm.getDrawable(mActivityInfo.packageName, iconRes,
+                mActivityInfo.applicationInfo);
+    }
+
     public Uri getSourceIconUri() {
         int resourceId = getSourceIconResource();
-        return Util.getResourceUri(getContext(), mActivityInfo.applicationInfo, resourceId);
+        if (resourceId == 0) {
+            return Util.getResourceUri(getContext(), R.drawable.corpus_icon_default);
+        } else {
+            return Util.getResourceUri(getContext(), mActivityInfo.applicationInfo, resourceId);
+        }
     }
 
     private int getSourceIconResource() {
-        int icon = mActivityInfo.getIconResource();
-        return (icon != 0) ? icon : android.R.drawable.sym_def_app_icon;
+        return mActivityInfo.getIconResource();
     }
 
     public boolean voiceSearchEnabled() {
         return mSearchable.getVoiceSearchEnabled();
     }
 
-    public Intent createSearchIntent(String query, Bundle appData) {
-        return createSourceSearchIntent(getComponentName(), query, appData);
-    }
-
-    public static Intent createSourceSearchIntent(ComponentName activity, String query,
-            Bundle appData) {
-        if (activity == null) {
-            Log.w(TAG, "Tried to create search intent with no target activity");
-            return null;
-        }
-        Intent intent = new Intent(Intent.ACTION_SEARCH);
-        intent.setComponent(activity);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // We need CLEAR_TOP to avoid reusing an old task that has other activities
-        // on top of the one we want.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(SearchManager.USER_QUERY, query);
-        intent.putExtra(SearchManager.QUERY, query);
-        if (appData != null) {
-            intent.putExtra(SearchManager.APP_DATA, appData);
-        }
-        return intent;
+    public boolean isLocationAware() {
+        return false;
     }
 
     public Intent createVoiceSearchIntent(Bundle appData) {
         if (mSearchable.getVoiceSearchLaunchWebSearch()) {
-            return WebCorpus.createVoiceWebSearchIntent(appData);
+            return createVoiceWebSearchIntent(appData);
         } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
             return createVoiceAppSearchIntent(appData);
         }
@@ -328,26 +308,26 @@ public class SearchableSource implements Source {
         return voiceIntent;
     }
 
-    public SourceResult getSuggestions(String query, int queryLimit) {
+    public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
         try {
-            Cursor cursor = getSuggestions(mContext, mSearchable, query, queryLimit);
+            Cursor cursor = getSuggestions(getContext(), mSearchable, query, queryLimit);
             if (DBG) Log.d(TAG, toString() + "[" + query + "] returned.");
-            return new CursorBackedSourceResult(query, cursor);
+            return new CursorBackedSourceResult(this, query, cursor);
         } catch (RuntimeException ex) {
             Log.e(TAG, toString() + "[" + query + "] failed", ex);
-            return new CursorBackedSourceResult(query);
+            return new CursorBackedSourceResult(this, query);
         }
     }
 
     public SuggestionCursor refreshShortcut(String shortcutId, String extraData) {
         Cursor cursor = null;
         try {
-            cursor = getValidationCursor(mContext, mSearchable, shortcutId, extraData);
+            cursor = getValidationCursor(getContext(), mSearchable, shortcutId, extraData);
             if (DBG) Log.d(TAG, toString() + "[" + shortcutId + "] returned.");
             if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
             }
-            return new CursorBackedSourceResult(null, cursor);
+            return new CursorBackedSourceResult(this, null, cursor);
         } catch (RuntimeException ex) {
             Log.e(TAG, toString() + "[" + shortcutId + "] failed", ex);
             if (cursor != null) {
@@ -356,37 +336,6 @@ public class SearchableSource implements Source {
             // TODO: Should we delete the shortcut even if the failure is temporary?
             return null;
         }
-    }
-
-    private class CursorBackedSourceResult extends CursorBackedSuggestionCursor
-            implements SourceResult {
-
-        public CursorBackedSourceResult(String userQuery) {
-            this(userQuery, null);
-        }
-
-        public CursorBackedSourceResult(String userQuery, Cursor cursor) {
-            super(userQuery, cursor);
-        }
-
-        public Source getSource() {
-            return SearchableSource.this;
-        }
-
-        @Override
-        public Source getSuggestionSource() {
-            return SearchableSource.this;
-        }
-
-        public boolean isSuggestionShortcut() {
-            return false;
-        }
-
-        @Override
-        public String toString() {
-            return SearchableSource.this + "[" + getUserQuery() + "]";
-        }
-
     }
 
     /**
@@ -476,35 +425,10 @@ public class SearchableSource implements Source {
         return mSearchable.queryAfterZeroResults();
     }
 
-    public boolean shouldRewriteQueryFromData() {
-        return mSearchable.shouldRewriteQueryFromData();
-    }
-
-    public boolean shouldRewriteQueryFromText() {
-        return mSearchable.shouldRewriteQueryFromText();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o != null && o.getClass().equals(this.getClass())) {
-            SearchableSource s = (SearchableSource) o;
-            return s.mName.equals(mName);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return mName.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "SearchableSource{component=" + getName() + "}";
-    }
-
     public String getDefaultIntentAction() {
-        return mSearchable.getSuggestIntentAction();
+        String action = mSearchable.getSuggestIntentAction();
+        if (action != null) return action;
+        return Intent.ACTION_SEARCH;
     }
 
     public String getDefaultIntentData() {
@@ -513,7 +437,7 @@ public class SearchableSource implements Source {
 
     private CharSequence getText(int id) {
         if (id == 0) return null;
-        return mContext.getPackageManager().getText(mActivityInfo.packageName, id,
+        return getContext().getPackageManager().getText(mActivityInfo.packageName, id,
                 mActivityInfo.applicationInfo);
     }
 

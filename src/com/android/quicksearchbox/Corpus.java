@@ -57,6 +57,9 @@ public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
      */
     CharSequence getHint();
 
+    /**
+     * @return The minimum query length for which this corpus should be queried.
+     */
     int getQueryThreshold();
 
     boolean queryAfterZeroResults();
@@ -75,4 +78,24 @@ public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
      * Gets the sources that this corpus uses.
      */
     Collection<Source> getSources();
+
+    /**
+     * Checks if this corpus is enabled.
+     */
+    boolean isCorpusEnabled();
+
+    /**
+     * Checks if this corpus is enabled by default.
+     */
+    boolean isCorpusDefaultEnabled();
+
+    /**
+     * Checks if this corpus should be hidden from the corpus selector.
+     */
+    boolean isCorpusHidden();
+
+    /**
+     * Checks if this corpus is location aware.
+     */
+    boolean isLocationAware();
 }

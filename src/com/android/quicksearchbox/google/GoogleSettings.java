@@ -39,7 +39,6 @@ public class GoogleSettings extends PreferenceActivity implements OnPreferenceCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.google_preferences);
-        PreferenceScreen preferenceScreen = getPreferenceScreen();
         mShowWebSuggestionsPreference = (CheckBoxPreference)
                 findPreference(SHOW_WEB_SUGGESTIONS_PREF);
         mShowWebSuggestionsPreference.setOnPreferenceClickListener(this);

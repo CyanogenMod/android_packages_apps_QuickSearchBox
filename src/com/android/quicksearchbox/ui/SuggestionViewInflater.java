@@ -17,7 +17,7 @@
 package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.Suggestion;
 
 import android.content.Context;
 import android.provider.ContactsContract;
@@ -59,7 +59,7 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return SUGGESTION_VIEW_CLASSES.length;
     }
 
-    public int getSuggestionViewType(SuggestionCursor suggestion) {
+    public int getSuggestionViewType(Suggestion suggestion) {
         return isContactSuggestion(suggestion) ? 1 : 0;
     }
 
@@ -73,7 +73,7 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return (SuggestionView) convertView;
     }
 
-    private boolean isContactSuggestion(SuggestionCursor suggestion) {
+    private boolean isContactSuggestion(Suggestion suggestion) {
         String intentData = suggestion.getSuggestionIntentDataString();
         return intentData != null && intentData.startsWith(CONTACT_LOOKUP_URI);
     }

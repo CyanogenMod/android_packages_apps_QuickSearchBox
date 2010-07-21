@@ -30,17 +30,11 @@ import java.util.Collections;
  */
 public class SingleSourceCorpus extends AbstractCorpus {
 
-    private final Context mContext;
-
     private final Source mSource;
 
-    public SingleSourceCorpus(Context context, Source source) {
-        mContext = context;
+    public SingleSourceCorpus(Context context, Config config, Source source) {
+        super(context, config);
         mSource = source;
-    }
-
-    protected Context getContext() {
-        return mContext;
     }
 
     public Drawable getCorpusIcon() {
@@ -63,9 +57,9 @@ public class SingleSourceCorpus extends AbstractCorpus {
         return mSource.getSettingsDescription();
     }
 
-    public CorpusResult getSuggestions(String query, int queryLimit) {
+    public CorpusResult getSuggestions(String query, int queryLimit, boolean onlyCorpus) {
         LatencyTracker latencyTracker = new LatencyTracker();
-        SourceResult sourceResult = mSource.getSuggestions(query, queryLimit);
+        SourceResult sourceResult = mSource.getSuggestions(query, queryLimit, true);
         int latency = latencyTracker.getLatency();
         return new SingleSourceCorpusResult(this, query, sourceResult, latency);
     }
@@ -101,6 +95,10 @@ public class SingleSourceCorpus extends AbstractCorpus {
 
     public boolean isWebCorpus() {
         return false;
+    }
+
+    public boolean isLocationAware() {
+        return mSource.isLocationAware();
     }
 
     public Collection<Source> getSources() {
