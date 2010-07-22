@@ -352,6 +352,15 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 "app", mApp2, mApp1, mApp3);
     }
 
+    public void testMoreRecentlyClickedWinsSeconds() {
+        reportClick("app", mApp1, NOW - 10000);
+        reportClick("app", mApp2, NOW - 5000);
+        reportClick("app", mApp3, NOW);
+
+        assertShortcuts("expecting more recently clicked app to rank higher",
+                "app", mApp3, mApp2, mApp1);
+    }
+
     public void testRecencyOverridesClicks() {
 
         // 5 clicks, most recent half way through age limit
