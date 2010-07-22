@@ -138,7 +138,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String PREFIX_RESTRICTION =
             ClickLog.query.fullName + " >= ?1 AND " + ClickLog.query.fullName + " < ?2";
 
-    private static final String HIT_COUNT_EXPR = "COUNT(" + ClickLog._id.fullName + ")";
     private static final String LAST_HIT_TIME_EXPR = "MAX(" + ClickLog.hit_time.fullName + ")";
     private static final String GROUP_BY = ClickLog.intent_key.fullName;
     private static final String PREFER_LATEST_PREFIX =
@@ -152,13 +151,10 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         // Filter out clicks that are too old
         String ageRestriction = ClickLog.hit_time.fullName + " >= " + cutOffTime_expr;
         String having = null;
-        String scale_expr =
-            // time (msec) from cut-off to last hit time
-            "((" + LAST_HIT_TIME_EXPR + " - " + cutOffTime_expr + ") / "
-            // divided by time (sec) from cut-off to now
-            // we use msec/sec to get 1000 as max score
-            + (mConfig.getMaxStatAgeMillis() / 1000) + ")";
-        String ordering_expr = "(" + HIT_COUNT_EXPR + " * " + scale_expr + ")";
+        // Order by sum of hit times (seconds since cutoff) for the clicks for each shortcut.
+        // This has the effect of multiplying the average hit time with the click count
+        String ordering_expr =
+                "SUM((" + ClickLog.hit_time.fullName + " - " + cutOffTime_expr + ") / 1000)";
 
         String where = ageRestriction;
         String preferLatest = PREFER_LATEST_PREFIX + where + PREFER_LATEST_SUFFIX;
