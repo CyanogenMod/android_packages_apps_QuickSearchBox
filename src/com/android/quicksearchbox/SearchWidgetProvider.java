@@ -82,6 +82,9 @@ public class SearchWidgetProvider extends BroadcastReceiver {
     private static final String ACTION_SHOW_VOICE_SEARCH_HINT_NOW =
             "com.android.quicksearchbox.action.SHOW_VOICE_SEARCH_HINT_NOW";
 
+    private static final String ACTION_RESET_VOICE_SEARCH_HINT_FIRST_SEEN =
+            "com.android.quicksearchbox.action.debugonly.RESET_HINT_FIRST_SEEN_TIME";
+
     /**
      * Preference key used for storing the index of the next voice search hint to show.
      */
@@ -120,6 +123,8 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             hideVoiceSearchHint(context);
         } else if (ACTION_SHOW_VOICE_SEARCH_HINT_NOW.equals(action)) {
             showVoiceSearchHintNow(context);
+        } else if (ACTION_RESET_VOICE_SEARCH_HINT_FIRST_SEEN.equals(action)) {
+            resetVoiceSearchHintFirstSeenTime(context);
         }
     }
 
@@ -128,6 +133,13 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             sRandom = new Random();
         }
         return sRandom;
+    }
+
+    private static void resetVoiceSearchHintFirstSeenTime(Context context) {
+        SharedPreferences prefs = SearchSettings.getSearchPreferences(context);
+        Editor e = prefs.edit();
+        e.putLong(FIRST_VOICE_HINT_DISPLAY_TIME, System.currentTimeMillis());
+        e.commit();
     }
 
     private static boolean haveVoiceSearchHintsExpired(Context context) {
@@ -179,11 +191,9 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         if (DBG) Log.d(TAG, "considerShowingVoiceSearchHints");
         if (!shouldShowVoiceSearchHints(context)) return;
         SearchWidgetState[] states = getSearchWidgetStates(context, true);
-        boolean needHint = false;
         boolean changed = false;
         for (SearchWidgetState state : states) {
             changed |= state.considerShowingHint(context);
-            needHint |= state.isShowingHint();
         }
         if (changed) {
             getHintsFromVoiceSearch(context);
@@ -195,8 +205,9 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         if (DBG) Log.d(TAG, "showVoiceSearchHintNow");
         SearchWidgetState[] states = getSearchWidgetStates(context, true);
         for (SearchWidgetState state : states) {
-            state.setShowingHint(true);
-            state.updateShowingHint(context);
+            if (state.mVoiceSearchIntent != null) {
+                state.showHintNow(context);
+            }
         }
         getHintsFromVoiceSearch(context);
         scheduleNextVoiceSearchHint(context, true);
@@ -565,10 +576,14 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         public boolean considerShowingHint(Context context) {
             if (!mVoiceSearchHintsEnabled || mShowHint) return false;
             if (!chooseToShowHint(context)) return false;
+            showHintNow(context);
+            return true;
+        }
+
+        public void showHintNow(Context context) {
             scheduleHintHiding(context);
             mShowHint = true;
             updateShowingHint(context);
-            return true;
         }
 
         public void hideVoiceSearchHint(Context context) {
