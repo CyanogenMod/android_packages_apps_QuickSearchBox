@@ -32,11 +32,8 @@ public class NoLogger implements Logger {
     }
 
     public void logSuggestionClick(int position,
-            SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora) {
-    }
-
-    public void logRefine(int position, SuggestionCursor suggestionCursor,
-            Collection<Corpus> queriedCorpora) {
+            SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora,
+            int clickType) {
     }
 
     public void logSearch(Corpus corpus, int startMethod, int numChars) {

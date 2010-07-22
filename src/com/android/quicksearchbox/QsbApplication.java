@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.google.GoogleSource;
+import com.android.quicksearchbox.google.GoogleSuggestClient;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
@@ -380,7 +381,7 @@ public class QsbApplication {
     }
 
     protected GoogleSource createGoogleSource() {
-        return new GoogleSource(getContext());
+        return new GoogleSuggestClient(getContext());
     }
 
     /**

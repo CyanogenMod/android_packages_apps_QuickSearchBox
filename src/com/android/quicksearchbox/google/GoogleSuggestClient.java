@@ -46,7 +46,7 @@ import java.util.Locale;
 /**
  * Use network-based Google Suggests to provide search suggestions.
  */
-public class GoogleSuggestClient implements GoogleClient {
+public class GoogleSuggestClient extends GoogleSource {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "GoogleSearch";
@@ -58,13 +58,10 @@ public class GoogleSuggestClient implements GoogleClient {
     // TODO: this should be defined somewhere
     private static final String HTTP_TIMEOUT = "http.connection-manager.timeout";
 
-    private final Context mContext;
-    private final Source mSource;
     private final HttpClient mHttpClient;
 
-    public GoogleSuggestClient(Context context, Source source) {
-        mContext = context;
-        mSource = source;
+    public GoogleSuggestClient(Context context) {
+        super(context);
         mHttpClient = new DefaultHttpClient();
         HttpParams params = mHttpClient.getParams();
         HttpProtocolParams.setUserAgent(params, USER_AGENT);
@@ -75,10 +72,6 @@ public class GoogleSuggestClient implements GoogleClient {
         mSuggestUri = null;
     }
 
-    protected Context getContext() {
-        return mContext;
-    }
-
     public ComponentName getIntentComponent() {
         return new ComponentName(getContext(), GoogleSearch.class);
     }
@@ -87,11 +80,21 @@ public class GoogleSuggestClient implements GoogleClient {
         return false;
     }
 
+    @Override
+    public SourceResult queryInternal(String query) {
+        return query(query);
+    }
+
+    @Override
+    public SourceResult queryExternal(String query) {
+        return query(query);
+    }
+
     /**
      * Queries for a given search term and returns a cursor containing
      * suggestions ordered by best match.
      */
-    public SourceResult query(String query) {
+    private SourceResult query(String query) {
         if (TextUtils.isEmpty(query)) {
             return null;
         }
@@ -148,7 +151,7 @@ public class GoogleSuggestClient implements GoogleClient {
                 JSONArray suggestions = results.getJSONArray(1);
                 JSONArray popularity = results.getJSONArray(2);
                 if (DBG) Log.d(LOG_TAG, "Got " + suggestions.length() + " results");
-                return new GoogleSuggestCursor(mSource, query, suggestions, popularity);
+                return new GoogleSuggestCursor(this, query, suggestions, popularity);
             } else {
                 if (DBG) Log.d(LOG_TAG, "Request failed " + response.getStatusLine());
             }
