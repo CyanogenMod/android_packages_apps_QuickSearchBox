@@ -50,7 +50,6 @@ import android.widget.ImageButton;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -571,7 +570,8 @@ public class SearchActivity extends Activity {
         mTookAction = true;
 
         // Log suggestion click
-        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora());
+        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora(),
+                Logger.SUGGESTION_CLICK_TYPE_LAUNCH);
 
         // Create shortcut
         getShortcutRepository().reportClick(suggestions, position);
@@ -582,6 +582,21 @@ public class SearchActivity extends Activity {
         launchIntent(intent);
 
         return true;
+    }
+
+    protected void clickedQuickContact(int position) {
+        SuggestionCursor suggestions = getCurrentSuggestions(position);
+        if (suggestions == null) return;
+
+        if (DBG) Log.d(TAG, "Used suggestion " + position);
+        mTookAction = true;
+
+        // Log suggestion click
+        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora(),
+                Logger.SUGGESTION_CLICK_TYPE_QUICK_CONTACT);
+
+        // Create shortcut
+        getShortcutRepository().reportClick(suggestions, position);
     }
 
     protected boolean onSuggestionLongClicked(int position) {
@@ -612,7 +627,8 @@ public class SearchActivity extends Activity {
         }
 
         // Log refine click
-        getLogger().logRefine(position, suggestions, getCurrentIncludedCorpora());
+        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora(),
+                Logger.SUGGESTION_CLICK_TYPE_REFINE);
 
         // Put query + space in query text view
         String queryWithSpace = query + ' ';
@@ -828,6 +844,10 @@ public class SearchActivity extends Activity {
     private class ClickHandler implements SuggestionClickListener {
        public void onSuggestionClicked(int position) {
            launchSuggestion(position);
+       }
+
+       public void onSuggestionQuickContactClicked(int position) {
+           clickedQuickContact(position);
        }
 
        public boolean onSuggestionLongClicked(int position) {

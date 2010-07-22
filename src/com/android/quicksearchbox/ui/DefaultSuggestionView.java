@@ -256,6 +256,12 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
+    protected void fireOnSuggestionQuickContactClicked() {
+        if (mClickListener != null) {
+            mClickListener.onSuggestionQuickContactClicked(mPosition);
+        }
+    }
+
     private class ClickListener implements OnClickListener {
         public void onClick(View v) {
             if (DBG) Log.d(TAG, "onItemClick(" + mPosition + ")");

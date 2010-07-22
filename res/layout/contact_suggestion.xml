@@ -35,7 +35,7 @@
         android:layout_alignParentBottom="true"
     >
 
-        <android.widget.QuickContactBadge android:id="@+id/icon1"
+        <com.android.quicksearchbox.ui.ContactBadge android:id="@+id/icon1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerInside"
