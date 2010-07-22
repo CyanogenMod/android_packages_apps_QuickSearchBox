@@ -65,7 +65,7 @@ public class GoogleSuggestionProvider extends ContentProvider {
 
         if (match == SEARCH_SUGGEST) {
             String query = getQuery(uri);
-            return new SuggestionCursorBackedCursor(mSource.getSuggestions(query, 0, true));
+            return new SuggestionCursorBackedCursor(mSource.getSuggestionsExternal(query));
         } else if (match == SEARCH_SHORTCUT) {
             String shortcutId = getQuery(uri);
             String extraData =
