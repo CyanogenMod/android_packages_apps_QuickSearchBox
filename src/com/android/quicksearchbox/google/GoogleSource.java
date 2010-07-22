@@ -32,20 +32,29 @@ import android.os.Bundle;
 /**
  * Special source implementation for Google suggestions.
  */
-public class GoogleSource extends AbstractSource {
+public abstract class GoogleSource extends AbstractSource {
 
     private static final String GOOGLE_SOURCE_NAME = "google";
 
-    private final GoogleClient mClient;
-
     public GoogleSource(Context context) {
         super(context);
-        mClient = createGoogleClient();
     }
 
-    protected GoogleClient createGoogleClient() {
-        return new GoogleSuggestClient(getContext(), this);
-    }
+    public abstract ComponentName getIntentComponent();
+
+    public abstract SuggestionCursor refreshShortcut(String shortcutId, String extraData);
+
+    public abstract boolean isLocationAware();
+
+    /**
+     * Called by QSB to get web suggestions for a query.
+     */
+    protected abstract SourceResult queryInternal(String query);
+
+    /**
+     * Called by external apps to get web suggestions for a query.
+     */
+    public abstract SourceResult queryExternal(String query);
 
     public boolean canRead() {
         return true;
@@ -70,10 +79,6 @@ public class GoogleSource extends AbstractSource {
     @Override
     protected String getIconPackage() {
         return getContext().getPackageName();
-    }
-
-    public ComponentName getIntentComponent() {
-        return mClient.getIntentComponent();
     }
 
     public CharSequence getLabel() {
@@ -106,13 +111,15 @@ public class GoogleSource extends AbstractSource {
     }
 
     public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
-        SourceResult result = mClient.query(query);
-        if (result == null) {
-            // getSuggestions() should never return null
-            return new CursorBackedSourceResult(this, query);
-        } else {
-            return result;
-        }
+        return emptyIfNull(queryInternal(query), query);
+    }
+
+    public SourceResult getSuggestionsExternal(String query) {
+        return emptyIfNull(queryExternal(query), query);
+    }
+
+    private SourceResult emptyIfNull(SourceResult result, String query) {
+        return result == null ? new CursorBackedSourceResult(this, query) : result;
     }
 
     public int getVersionCode() {
@@ -123,20 +130,12 @@ public class GoogleSource extends AbstractSource {
         return true;
     }
 
-    public SuggestionCursor refreshShortcut(String shortcutId, String extraData) {
-        return mClient.refreshShortcut(shortcutId, extraData);
-    }
-
     public boolean voiceSearchEnabled() {
         return true;
     }
 
     public boolean isWebSuggestionSource() {
         return true;
-    }
-
-    public boolean isLocationAware() {
-        return mClient.isLocationAware();
     }
 
 }

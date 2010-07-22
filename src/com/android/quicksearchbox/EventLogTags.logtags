@@ -32,6 +32,7 @@ option java_package com.android.quicksearchbox
 # @param click_type
 #     SUGGESTION_CLICK_TYPE_LAUNCH = 0
 #     SUGGESTION_CLICK_TYPE_REFINE = 1
+#     SUGGESTION_CLICK_TYPE_QUICK_CONTACT = 2
 #
 # TODO: latency?
 71002 qsb_click (position|1),(suggestions|3),(queried_sources|3),(num_chars|1),(click_type|1)

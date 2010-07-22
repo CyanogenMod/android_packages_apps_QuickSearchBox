@@ -29,6 +29,13 @@ public interface SuggestionClickListener {
     void onSuggestionClicked(int position);
 
     /**
+     * Called when a quick contact badge in a suggestion is clicked.
+     *
+     * @param position Position of the suggestion.
+     */
+    void onSuggestionQuickContactClicked(int position);
+
+    /**
      * Called when a suggestion is long clicked.
      *
      * @param position Position of the long clicked suggestion.
