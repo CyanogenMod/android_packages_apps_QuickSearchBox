@@ -39,6 +39,7 @@ public class SuggestionPosition extends AbstractSuggestionWrapper {
     /**
      * Gets the suggestion cursor, moved to point to the right suggestion.
      */
+    @Override
     protected Suggestion current() {
         mCursor.moveTo(mPosition);
         return mCursor;

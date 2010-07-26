@@ -46,6 +46,7 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -88,6 +89,10 @@ public class SearchActivity extends Activity {
 
     protected SuggestionsAdapter mSuggestionsAdapter;
 
+    // The list adapter for showing results other than query completion
+    // suggestions
+    protected SuggestionsAdapter mResultsAdapter;
+
     private CorporaObserver mCorporaObserver;
 
     protected QueryTextView mQueryTextView;
@@ -98,9 +103,14 @@ public class SearchActivity extends Activity {
 
     protected SuggestionsView mSuggestionsView;
 
+    // View that shows the results other than the query completions
+    protected SuggestionsView mResultsView;
+
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
     protected ImageButton mCorpusIndicator;
+
+    protected ImageView mSettingsButton;
 
     private Corpus mCorpus;
     private Bundle mAppSearchData;
@@ -129,9 +139,6 @@ public class SearchActivity extends Activity {
 
         setContentView();
         SuggestListFocusListener suggestionFocusListener = new SuggestListFocusListener();
-        mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
-        mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler());
-        mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
 
         mQueryTextView = (QueryTextView) findViewById(R.id.search_src_text);
         mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
@@ -139,26 +146,51 @@ public class SearchActivity extends Activity {
         mSuggestionsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mSuggestionsView.setOnFocusChangeListener(suggestionFocusListener);
 
+        mResultsView = (SuggestionsView) findViewById(R.id.shortcuts);
+
+        boolean seperateResults = mResultsView != null;
+        getQsbApplication().setSeparateResults(seperateResults);
+
+        if (seperateResults) {
+            mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
+            mResultsAdapter = getQsbApplication().createSuggestionsAdapter();
+            mResultsAdapter.setSuggestionClickListener(new ClickHandler(mResultsAdapter));
+            mResultsAdapter.setOnFocusChangeListener(suggestionFocusListener);
+        } else {
+            mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
+        }
+        mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler(mSuggestionsAdapter));
+        mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
+
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
         mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
+        mSettingsButton = (ImageView) findViewById(R.id.settings_icon);
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
-        mQueryTextView.setSuggestionClickListener(new ClickHandler());
+        mQueryTextView.setSuggestionClickListener(new ClickHandler(mSuggestionsAdapter));
         mQueryTextEmptyBg = mQueryTextView.getBackground();
 
-        mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
+        if (mCorpusIndicator != null) {
+            mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
+        }
 
         mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
 
         mVoiceSearchButton.setOnClickListener(new VoiceSearchButtonClickListener());
 
+        if (mSettingsButton != null) {
+            mSettingsButton.setOnClickListener(new SettingsButtonClickListener());
+        }
+
         ButtonsKeyListener buttonsKeyListener = new ButtonsKeyListener();
         mSearchGoButton.setOnKeyListener(buttonsKeyListener);
         mVoiceSearchButton.setOnKeyListener(buttonsKeyListener);
-        mCorpusIndicator.setOnKeyListener(buttonsKeyListener);
+        if (mCorpusIndicator != null) {
+            mCorpusIndicator.setOnKeyListener(buttonsKeyListener);
+        }
 
         mUpdateSuggestions = true;
 
@@ -174,6 +206,10 @@ public class SearchActivity extends Activity {
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
 
+        if (seperateResults) {
+            mResultsAdapter.registerDataSetObserver(new SuggestionsObserver());
+            mResultsView.setAdapter(mResultsAdapter);
+        }
         mCorporaObserver = new CorporaObserver();
         getCorpora().registerDataSetObserver(mCorporaObserver);
     }
@@ -287,7 +323,9 @@ public class SearchActivity extends Activity {
             sourceIcon = mCorpus.getCorpusIcon();
         }
         mSuggestionsAdapter.setCorpus(mCorpus);
-        mCorpusIndicator.setImageDrawable(sourceIcon);
+        if (mCorpusIndicator != null) {
+            mCorpusIndicator.setImageDrawable(sourceIcon);
+        }
 
         updateUi(getQuery().length() == 0);
     }
@@ -298,6 +336,10 @@ public class SearchActivity extends Activity {
 
     private QsbApplication getQsbApplication() {
         return QsbApplication.get(this);
+    }
+
+    protected boolean separateResults() {
+        return getQsbApplication().seperateResults();
     }
 
     private Config getConfig() {
@@ -313,7 +355,12 @@ public class SearchActivity extends Activity {
     }
 
     private SuggestionsProvider getSuggestionsProvider() {
-        return getQsbApplication().getSuggestionsProvider();
+        return separateResults() ? getQsbApplication().getWebSuggestionsProvider()
+                                : getQsbApplication().getUnifiedProvider();
+    }
+
+    private SuggestionsProvider getResultsProvider() {
+        return getQsbApplication().getResultsProvider();
     }
 
     private CorpusViewFactory getCorpusViewFactory() {
@@ -334,19 +381,25 @@ public class SearchActivity extends Activity {
         super.onDestroy();
         getCorpora().unregisterDataSetObserver(mCorporaObserver);
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
+        if (separateResults()) {
+            mResultsView.setAdapter(null);
+        }
     }
 
     @Override
     protected void onStop() {
         if (DBG) Log.d(TAG, "onStop()");
         if (!mTookAction) {
-            // TODO: This gets logged when starting other activities, e.g. by opening he search
+            // TODO: This gets logged when starting other activities, e.g. by opening the search
             // settings, or clicking a notification in the status bar.
             getLogger().logExit(getCurrentSuggestions(), getQuery().length());
         }
         // Close all open suggestion cursors. The query will be redone in onResume()
         // if we come back to this activity.
         mSuggestionsAdapter.setSuggestions(null);
+        if (mResultsAdapter != null) {
+            mResultsAdapter.setSuggestions(null);
+        }
         getQsbApplication().getShortcutRefresher().reset();
         dismissCorpusSelectionDialog();
         super.onStop();
@@ -513,6 +566,10 @@ public class SearchActivity extends Activity {
         launchIntent(intent);
     }
 
+    protected void onSettingsClicked() {
+        SearchSettings.launchSettings(this);
+    }
+
     /**
      * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
      * and the selected corpus otherwise.
@@ -541,8 +598,8 @@ public class SearchActivity extends Activity {
         return mSuggestionsAdapter.getCurrentSuggestions();
     }
 
-    protected SuggestionCursor getCurrentSuggestions(int position) {
-        SuggestionCursor suggestions = getCurrentSuggestions();
+    protected SuggestionCursor getCurrentSuggestions(SuggestionsAdapter adapter, int position) {
+        SuggestionCursor suggestions = adapter.getCurrentSuggestions();
         if (suggestions == null) {
             return null;
         }
@@ -555,9 +612,28 @@ public class SearchActivity extends Activity {
         return suggestions;
     }
 
+    private BlendedSuggestions blendedOrNothing(Suggestions s) {
+        if (s instanceof BlendedSuggestions) return (BlendedSuggestions) s;
+        return null;
+    }
+
+    private BlendedSuggestions pickBlended(Suggestions... suggestionses) {
+        for (Suggestions s : suggestionses) {
+            BlendedSuggestions b = blendedOrNothing(s);
+            if (b != null) return b;
+        }
+        return null;
+    }
+
+    private BlendedSuggestions getBlendedSuggestions() {
+        return pickBlended(
+                mResultsAdapter == null ? null : mResultsAdapter.getSuggestions(),
+                mSuggestionsAdapter.getSuggestions());
+    }
+
     protected Set<Corpus> getCurrentIncludedCorpora() {
-        Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
-        return suggestions == null ? null : suggestions.getIncludedCorpora();
+        BlendedSuggestions suggestions = getBlendedSuggestions();
+        return suggestions == null  ? null : suggestions.getIncludedCorpora();
     }
 
     protected void launchIntent(Intent intent) {
@@ -573,8 +649,13 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected boolean launchSuggestion(int position) {
-        SuggestionCursor suggestions = getCurrentSuggestions(position);
+    protected boolean launchSuggestion(SuggestionsAdapter adapter, int position) {
+        SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
+        // SuggestionCursor suggestions = new
+        // ListSuggestionCursor(adapter.getCurrentSuggestions()
+        // .getUserQuery());
+        // suggestions.add(new SuggestionPosition(adapter.getItem(position),
+        // 0));
         if (suggestions == null) return false;
 
         if (DBG) Log.d(TAG, "Launching suggestion " + position);
@@ -596,7 +677,9 @@ public class SearchActivity extends Activity {
     }
 
     protected void clickedQuickContact(int position) {
-        SuggestionCursor suggestions = getCurrentSuggestions(position);
+        // TODO: Should be mOtherResultsAdapter when in 2-pane mode
+        SuggestionCursor suggestions = getCurrentSuggestions(
+                separateResults() ? mResultsAdapter : mSuggestionsAdapter, position);
         if (suggestions == null) return;
 
         if (DBG) Log.d(TAG, "Used suggestion " + position);
@@ -610,7 +693,7 @@ public class SearchActivity extends Activity {
         getShortcutRepository().reportClick(suggestions, position);
     }
 
-    protected boolean onSuggestionLongClicked(int position) {
+    protected boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position) {
         if (DBG) Log.d(TAG, "Long clicked on suggestion " + position);
         return false;
     }
@@ -620,15 +703,15 @@ public class SearchActivity extends Activity {
         if (       keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == KeyEvent.KEYCODE_SEARCH
                 || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-            return launchSuggestion(position);
+            return launchSuggestion(mSuggestionsAdapter, position);
         }
 
         return false;
     }
 
-    protected void refineSuggestion(int position) {
+    protected void refineSuggestion(SuggestionsAdapter adapter, int position) {
         if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
-        SuggestionCursor suggestions = getCurrentSuggestions(position);
+        SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
         if (suggestions == null) {
             return;
         }
@@ -675,7 +758,7 @@ public class SearchActivity extends Activity {
     private class SuggestListFocusListener implements OnFocusChangeListener {
         public void onFocusChange(View v, boolean focused) {
             if (DBG) Log.d(TAG, "Suggestions focus change, now: " + focused);
-            if (focused) {
+            if (focused && getConfig().isKeyboardDismissedOnScroll()) {
                 // The suggestions list got focus, hide the input method
                 hideInputMethod();
             }
@@ -707,23 +790,39 @@ public class SearchActivity extends Activity {
         mHandler.postDelayed(mUpdateSuggestionsTask, delay);
     }
 
-    protected void updateSuggestions(String query) {
-
-        query = CharMatcher.WHITESPACE.trimLeadingFrom(query);
-        if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
-        Suggestions suggestions = getSuggestionsProvider().getSuggestions(
-                query, mCorpus, getMaxSuggestions());
-
-        // Log start latency if this is the first suggestions update
+    private void gotSuggestions(BlendedSuggestions suggestions) {
         if (mStarting) {
             mStarting = false;
             String source = getIntent().getStringExtra(Search.SOURCE);
             int latency = mStartLatencyTracker.getLatency();
-            getLogger().logStart(latency, source, mCorpus, suggestions.getExpectedCorpora());
+            getLogger().logStart(latency, source, mCorpus, 
+                    suggestions == null ? null : suggestions.getExpectedCorpora());
             getQsbApplication().onStartupComplete();
         }
+    }
 
-        mSuggestionsAdapter.setSuggestions(suggestions);
+    protected void updateSuggestions(String query) {
+
+        query = CharMatcher.WHITESPACE.trimLeadingFrom(query);
+        if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
+        if (!separateResults()) {
+            Suggestions suggestions = getSuggestionsProvider().getSuggestions(
+                    query, mCorpus, getMaxSuggestions());
+            // Log start latency if this is the first suggestions update
+            gotSuggestions(blendedOrNothing(suggestions));
+            mSuggestionsAdapter.setSuggestions(suggestions);
+        } else {
+            // TODO getMaxSuggestions() - different for suggestions & results?
+            Suggestions webSuggestions = getSuggestionsProvider().getSuggestions(
+                    query, null, getMaxSuggestions());
+            Suggestions results = getResultsProvider().getSuggestions(
+                    query, mCorpus, getMaxSuggestions());
+            // TODO gotSuggestions(webSuggestions, results)
+            gotSuggestions(pickBlended(results, webSuggestions));
+            
+            mSuggestionsAdapter.setSuggestions(webSuggestions);
+            mResultsAdapter.setSuggestions(results);
+        }
     }
 
     /**
@@ -848,26 +947,34 @@ public class SearchActivity extends Activity {
         }
 
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-            hideInputMethod();
+            if (getConfig().isKeyboardDismissedOnScroll()) {
+                hideInputMethod();
+            }
         }
     }
 
     private class ClickHandler implements SuggestionClickListener {
-       public void onSuggestionClicked(int position) {
-           launchSuggestion(position);
-       }
+        private final SuggestionsAdapter mSuggestionsAdapter;
 
-       public void onSuggestionQuickContactClicked(int position) {
-           clickedQuickContact(position);
-       }
+        public ClickHandler(SuggestionsAdapter suggestionsAdapter) {
+            mSuggestionsAdapter = suggestionsAdapter;
+        }
 
-       public boolean onSuggestionLongClicked(int position) {
-           return SearchActivity.this.onSuggestionLongClicked(position);
-       }
+        public void onSuggestionQuickContactClicked(int position) {
+            clickedQuickContact(position);
+        }
 
-       public void onSuggestionQueryRefineClicked(int position) {
-           refineSuggestion(position);
-       }
+        public void onSuggestionClicked(int position) {
+            launchSuggestion(mSuggestionsAdapter, position);
+        }
+
+        public boolean onSuggestionLongClicked(int position) {
+            return SearchActivity.this.onSuggestionLongClicked(mSuggestionsAdapter, position);
+        }
+
+        public void onSuggestionQueryRefineClicked(int position) {
+            refineSuggestion(mSuggestionsAdapter, position);
+        }
     }
 
     /**
@@ -911,6 +1018,15 @@ public class SearchActivity extends Activity {
     private class VoiceSearchButtonClickListener implements View.OnClickListener {
         public void onClick(View view) {
             onVoiceSearchClicked();
+        }
+    }
+
+    /**
+     * Listens for clicks on the settings button.
+     */
+    private class SettingsButtonClickListener implements View.OnClickListener {
+        public void onClick(View view) {
+            onSettingsClicked();
         }
     }
 

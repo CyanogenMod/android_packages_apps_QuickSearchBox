@@ -128,7 +128,6 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      * Gets suggestions from this source.
      *
      * @param query The user query.
-     * @param queryLimit An advisory maximum number of results that the source should return.
      * @param onlySource Indicates if this is the only source being queried.
      * @return The suggestion results.
      */
@@ -157,5 +156,11 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      * @return The default intent data, or {@code null}.
      */
     String getDefaultIntentData();
+
+    /**
+     * Gets the root source, if this source is a wrapper around another. Otherwise, returns this
+     * source.
+     */
+    Source getRoot();
 
 }

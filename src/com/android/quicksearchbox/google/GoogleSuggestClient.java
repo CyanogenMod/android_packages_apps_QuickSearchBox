@@ -46,7 +46,7 @@ import java.util.Locale;
 /**
  * Use network-based Google Suggests to provide search suggestions.
  */
-public class GoogleSuggestClient extends GoogleSource {
+public class GoogleSuggestClient extends AbstractGoogleSource {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "GoogleSearch";
@@ -72,12 +72,25 @@ public class GoogleSuggestClient extends GoogleSource {
         mSuggestUri = null;
     }
 
+    @Override
     public ComponentName getIntentComponent() {
         return new ComponentName(getContext(), GoogleSearch.class);
     }
 
+    @Override
     public boolean isLocationAware() {
         return false;
+    }
+
+
+    @Override
+    public GoogleSource getNonWebSuggestSource() {
+        return null;
+    }
+
+    @Override
+    public GoogleSource getWebSuggestOnlySource() {
+        return this; // we don't provide anything else
     }
 
     @Override
@@ -165,6 +178,7 @@ public class GoogleSuggestClient extends GoogleSource {
         return null;
     }
 
+    @Override
     public SuggestionCursor refreshShortcut(String shortcutId, String oldExtraData) {
         return null;
     }

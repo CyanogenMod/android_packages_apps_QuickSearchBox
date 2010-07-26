@@ -84,7 +84,9 @@ public class SearchableSources implements Sources {
         addSearchableSources();
 
         mWebSearchSource = createWebSearchSource();
-        addSource(mWebSearchSource);
+        if (mWebSearchSource != null) {
+            addSource(mWebSearchSource);
+        }
     }
 
     private void addSearchableSources() {

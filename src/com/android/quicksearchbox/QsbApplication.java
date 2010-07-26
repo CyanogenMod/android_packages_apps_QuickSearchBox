@@ -38,25 +38,31 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
+import android.util.Log;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class QsbApplication {
+    private static final String TAG = "QSB.QsbApplication";
+    private static final boolean DBG = false;
 
     private final Context mContext;
 
     private int mVersionCode;
     private Handler mUiThreadHandler;
     private Config mConfig;
+    private Sources mSources;
     private Corpora mCorpora;
     private CorpusRanker mCorpusRanker;
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
     private NamedTaskExecutor mSourceTaskExecutor;
     private ThreadFactory mQueryThreadFactory;
-    private SuggestionsProvider mSuggestionsProvider;
+    private SuggestionsProvider mUnifiedProvider;
+    private SuggestionsProvider mWebSuggestionProvider;
+    private SuggestionsProvider mResultsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
     private GoogleSource mGoogleSource;
@@ -64,6 +70,8 @@ public class QsbApplication {
     private Logger mLogger;
     private SuggestionFormatter mSuggestionFormatter;
     private TextAppearanceFactory mTextAppearanceFactory;
+    // Whether to split the results into query completions and other results
+    private boolean mSeperateResults;
 
     public QsbApplication(Context context) {
         mContext = context;
@@ -117,9 +125,17 @@ public class QsbApplication {
             mSourceTaskExecutor.close();
             mSourceTaskExecutor = null;
         }
-        if (mSuggestionsProvider != null) {
-            mSuggestionsProvider.close();
-            mSuggestionsProvider = null;
+        if (mUnifiedProvider != null) {
+            mUnifiedProvider.close();
+            mUnifiedProvider = null;
+        }
+        if (mWebSuggestionProvider != null) {
+            mWebSuggestionProvider.close();
+            mWebSuggestionProvider = null;
+        }
+        if (mResultsProvider != null) {
+            mResultsProvider.close();
+            mResultsProvider = null;
         }
     }
 
@@ -162,13 +178,13 @@ public class QsbApplication {
     public Corpora getCorpora() {
         checkThread();
         if (mCorpora == null) {
-            mCorpora = createCorpora();
+            mCorpora = createCorpora(getSources());
         }
         return mCorpora;
     }
 
-    protected Corpora createCorpora() {
-        SearchableCorpora corpora = new SearchableCorpora(getContext(), createSources(),
+    protected Corpora createCorpora(Sources sources) {
+        SearchableCorpora corpora = new SearchableCorpora(getContext(), sources,
                 createCorpusFactory());
         corpora.update();
         return corpora;
@@ -183,6 +199,14 @@ public class QsbApplication {
         if (mCorpora != null) {
             mCorpora.update();
         }
+    }
+
+    protected Sources getSources() {
+        checkThread();
+        if (mSources == null) {
+            mSources = createSources();
+        }
+        return mSources;
     }
 
     protected Sources createSources() {
@@ -294,18 +318,47 @@ public class QsbApplication {
     }
 
     /**
-     * Gets the suggestion provider.
+     * Gets the suggestion provider which provides suggestions from all sources blended together.
+     * Used when all suggestions are presented in a single list.
+     *
      * May only be called from the main thread.
      */
-    protected SuggestionsProvider getSuggestionsProvider() {
+    protected SuggestionsProvider getUnifiedProvider() {
         checkThread();
-        if (mSuggestionsProvider == null) {
-            mSuggestionsProvider = createSuggestionsProvider();
+        if (mUnifiedProvider == null) {
+            mUnifiedProvider = createUnifiedProvider();
         }
-        return mSuggestionsProvider;
+        return mUnifiedProvider;
     }
 
-    protected SuggestionsProvider createSuggestionsProvider() {
+    /**
+     * Gets the suggestion provider which provides web query suggestions only.
+     *
+     * May only be called from the main thread.
+     */
+    protected SuggestionsProvider getWebSuggestionsProvider() {
+        checkThread();
+        if (mWebSuggestionProvider == null) {
+            mWebSuggestionProvider = createWebSuggestionsProvider();
+        }
+        return mWebSuggestionProvider;
+    }
+
+    /**
+     * Gets the suggestion provider which provides all results for a query except web query
+     * suggestions.
+     *
+     * May only be called from the main thread.
+     */
+    protected SuggestionsProvider getResultsProvider() {
+        checkThread();
+        if (mResultsProvider == null) {
+            mResultsProvider = createResultsProvider();
+        }
+        return mResultsProvider;
+    }
+
+    protected SuggestionsProvider createUnifiedProvider() {
         int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
         int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
         Promoter allPromoter = new ShortcutLimitingPromoter(
@@ -314,7 +367,7 @@ public class QsbApplication {
                 new ShortcutPromoter(
                         new RankAwarePromoter(getConfig(), getCorpora())));
         Promoter singleCorpusPromoter = new ShortcutPromoter(new ConcatPromoter());
-        SuggestionsProviderImpl provider = new SuggestionsProviderImpl(getConfig(),
+        BlendingSuggestionsProvider provider = new BlendingSuggestionsProvider(getConfig(),
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
                 getShortcutRepository(),
@@ -324,6 +377,16 @@ public class QsbApplication {
         provider.setAllPromoter(allPromoter);
         provider.setSingleCorpusPromoter(singleCorpusPromoter);
         return provider;
+    }
+
+    protected SuggestionsProvider createWebSuggestionsProvider() {
+        return new WebSuggestionsProvider(getGoogleSource(), getMainThreadHandler());
+    }
+
+    protected SuggestionsProvider createResultsProvider() {
+        // separation of non-suggestion web results is handled inside Sources, assuming
+        // setSeparateResults(true) has been called.
+        return createUnifiedProvider();
     }
 
     /**
@@ -435,5 +498,25 @@ public class QsbApplication {
 
     protected TextAppearanceFactory createTextAppearanceFactory() {
         return new TextAppearanceFactory(getContext());
+    }
+
+    public void setSeparateResults(boolean separate) {
+        if (DBG) Log.d(TAG, "setSeparateResults: " + separate);
+        mSeperateResults = separate;
+
+        //TODO this doesn't quite seem right here. Is there a nicer way of configuring the web
+        // source used by the web corpus?
+        Source webSource = getSources().getWebSearchSource();
+        Corpus webCorpus = getCorpora().getWebCorpus();
+        if ((webSource instanceof GoogleSource) && (webCorpus instanceof WebCorpus)){
+            
+            Source web = mSeperateResults ? ((GoogleSource) webSource).getNonWebSuggestSource()
+                                          : webSource;
+            ((WebCorpus) webCorpus).setWebSource(web);
+        }
+    }
+
+    public boolean seperateResults() {
+        return mSeperateResults;
     }
 }

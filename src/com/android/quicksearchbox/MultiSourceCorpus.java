@@ -206,7 +206,7 @@ public abstract class MultiSourceCorpus extends AbstractCorpus {
 
         @Override
         public String toString() {
-            return getCorpus() + "[" + getUserQuery() + "]";
+            return "{" + getCorpus() + "[" + getUserQuery() + "]" + ";n=" + getCount() + "}";
         }
     }
 

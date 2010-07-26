@@ -73,6 +73,8 @@ public class Config {
 
     private static final long VOICE_SEARCH_HINT_VISIBLE_PERIOD = 6L * MINUTE_MILLIS;
 
+    private static final boolean DISMISS_KEYBOARD_ON_SCROLL = true;
+
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
     private HashSet<String> mHiddenCorpora;
@@ -154,7 +156,12 @@ public class Config {
      * The maximum number of suggestions to promote.
      */
     public int getMaxPromotedSuggestions() {
-        return MAX_PROMOTED_SUGGESTIONS;
+        try {
+            return mContext.getResources().getInteger(R.integer.max_promoted_suggestions);
+        } catch (Resources.NotFoundException ex) {
+            Log.e(TAG, "Could not load max_promoted_suggestions", ex);
+            return MAX_PROMOTED_SUGGESTIONS;
+        }
     }
 
     /**
@@ -293,5 +300,15 @@ public class Config {
      */
     public long getVoiceSearchHintChangePeriod() {
         return VOICE_SEARCH_HINT_CHANGE_PERIOD;
+    }
+
+    public boolean isKeyboardDismissedOnScroll() {
+        try {
+            // Get the keyboard dismiss policy
+            return mContext.getResources().getBoolean(R.bool.dismiss_keyboard_on_scroll);
+        } catch (Resources.NotFoundException ex) {
+            Log.e(TAG, "Could not load dismiss_keyboard_on_scroll", ex);
+            return DISMISS_KEYBOARD_ON_SCROLL;
+        }
     }
 }

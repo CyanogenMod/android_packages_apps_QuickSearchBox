@@ -16,7 +16,10 @@
 
 package com.android.quicksearchbox.google;
 
+import com.android.quicksearchbox.CursorBackedSourceResult;
 import com.android.quicksearchbox.QsbApplication;
+import com.android.quicksearchbox.Source;
+import com.android.quicksearchbox.SourceResult;
 import com.android.quicksearchbox.SuggestionCursorBackedCursor;
 
 import android.app.SearchManager;
@@ -57,6 +60,10 @@ public class GoogleSuggestionProvider extends ContentProvider {
         return SearchManager.SUGGEST_MIME_TYPE;
     }
 
+    private SourceResult emptyIfNull(SourceResult result, Source source, String query) {
+        return result == null ? new CursorBackedSourceResult(source, query) : result;
+    }
+
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
@@ -65,7 +72,8 @@ public class GoogleSuggestionProvider extends ContentProvider {
 
         if (match == SEARCH_SUGGEST) {
             String query = getQuery(uri);
-            return new SuggestionCursorBackedCursor(mSource.getSuggestionsExternal(query));
+            return new SuggestionCursorBackedCursor(
+                    emptyIfNull(mSource.queryExternal(query), mSource, query));
         } else if (match == SEARCH_SHORTCUT) {
             String shortcutId = getQuery(uri);
             String extraData =

@@ -124,4 +124,6 @@
     <string name="google_suggest_base" translatable="false">
         http://www.google.com/complete/search?hl=%1$s&amp;gl=%2$s&amp;</string>
 
+    <!-- Title for shorcuts pane -->
+    <string name="shortcuts_label">Search results</string>
 </resources>

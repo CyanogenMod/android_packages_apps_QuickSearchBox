@@ -201,4 +201,8 @@ public class MockSource implements Source {
         return false;
     }
 
+    public Source getRoot() {
+        return this;
+    }
+
 }

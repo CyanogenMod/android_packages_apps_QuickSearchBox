@@ -34,7 +34,7 @@ import java.util.List;
  * The provider will only handle a single query at a time. If a new query comes
  * in, the old one is cancelled.
  */
-public class SuggestionsProviderImpl implements SuggestionsProvider {
+public class BlendingSuggestionsProvider implements SuggestionsProvider {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsProviderImpl";
@@ -61,7 +61,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private BatchingNamedTaskExecutor mBatchingExecutor;
 
-    public SuggestionsProviderImpl(Config config,
+    public BlendingSuggestionsProvider(Config config,
             NamedTaskExecutor queryExecutor,
             Handler publishThread,
             ShortcutRepository shortcutRepo,
@@ -151,12 +151,12 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
     }
 
-    public Suggestions getSuggestions(String query, Corpus singleCorpus, int maxSuggestions) {
+    public BlendedSuggestions getSuggestions(String query, Corpus singleCorpus, int maxSuggestions) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         cancelPendingTasks();
         List<Corpus> corporaToQuery = getCorporaToQuery(query, singleCorpus);
         Promoter promoter = singleCorpus == null ? mAllPromoter : mSingleCorpusPromoter;
-        final Suggestions suggestions = new Suggestions(promoter,
+        final BlendedSuggestions suggestions = new BlendedSuggestions(promoter,
                 maxSuggestions,
                 query,
                 corporaToQuery);
@@ -202,7 +202,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private class SuggestionCursorReceiver implements Consumer<CorpusResult> {
         private final BatchingNamedTaskExecutor mExecutor;
-        private final Suggestions mSuggestions;
+        private final BlendedSuggestions mSuggestions;
         private final long mResultPublishDelayMillis;
         private final ArrayList<CorpusResult> mPendingResults;
         private final Runnable mResultPublishTask = new Runnable () {
@@ -215,7 +215,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         private int mCountAtWhichToExecuteNextBatch;
 
         public SuggestionCursorReceiver(BatchingNamedTaskExecutor executor,
-                Suggestions suggestions, int initialBatchSize,
+                BlendedSuggestions suggestions, int initialBatchSize,
                 long publishResultDelayMillis) {
             mExecutor = executor;
             mSuggestions = suggestions;
@@ -225,6 +225,10 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
 
         public boolean consume(CorpusResult cursor) {
+            if (DBG) {
+                Log.d(TAG, "SuggestionCursorReceiver.consume(" + cursor + ") corpus=" +
+                        cursor.getCorpus() + " count = " + cursor.getCount());
+            }
             updateShouldQueryStrategy(cursor);
             mPendingResults.add(cursor);
             if (mResultPublishDelayMillis > 0

@@ -226,4 +226,10 @@ public class SearchSettings extends PreferenceActivity
                 .setIcon(R.drawable.ic_menu_preferences).setAlphabeticShortcut('P')
                 .setIntent(settings);
     }
+
+    public static void launchSettings(Context context) {
+        Intent settings = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
+        settings.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        context.startActivity(settings);
+    }
 }

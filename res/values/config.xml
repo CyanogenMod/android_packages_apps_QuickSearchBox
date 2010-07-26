@@ -46,4 +46,10 @@
       the default sources. -->
   <integer name="num_suggestions_above_keyboard">4</integer>
 
+  <!-- Whether the keyboard should be dismissed when the results lists are touched or cursored
+       through -->
+  <bool name="dismiss_keyboard_on_scroll">true</bool>
+
+  <!-- The maximum promoted suggestions -->
+  <integer name="max_promoted_suggestions">8</integer>
 </resources>

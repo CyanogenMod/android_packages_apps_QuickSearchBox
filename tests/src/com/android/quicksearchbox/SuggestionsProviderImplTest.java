@@ -23,14 +23,14 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
 /**
- * Tests for {@link SuggestionsProviderImpl}.
+ * Tests for {@link BlendingSuggestionsProvider}.
  */
 @MediumTest
 public class SuggestionsProviderImplTest extends AndroidTestCase {
 
     private MockCorpora mCorpora;
     private MockNamedTaskExecutor mTaskExecutor;
-    private SuggestionsProviderImpl mProvider;
+    private BlendingSuggestionsProvider mProvider;
 
     @Override
     protected void setUp() throws Exception {
@@ -43,7 +43,7 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
         mCorpora.addCorpus(MockCorpus.CORPUS_2);
         CorpusRanker corpusRanker = new LexicographicalCorpusRanker(mCorpora);
         Logger logger = new NoLogger();
-        mProvider = new SuggestionsProviderImpl(config,
+        mProvider = new BlendingSuggestionsProvider(config,
                 mTaskExecutor,
                 publishThread,
                 shortcutRepo,
@@ -55,7 +55,7 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
     }
 
     public void testSingleCorpus() {
-        Suggestions suggestions = mProvider.getSuggestions("foo", MockCorpus.CORPUS_1, 3);
+        BlendedSuggestions suggestions = mProvider.getSuggestions("foo", MockCorpus.CORPUS_1, 3);
         try {
             assertEquals(1, suggestions.getExpectedResultCount());
             assertEquals(0, suggestions.getResultCount());
@@ -72,7 +72,7 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
     }
 
     public void testMultipleCorpora() {
-        Suggestions suggestions = mProvider.getSuggestions("foo", null, 6);
+        BlendedSuggestions suggestions = mProvider.getSuggestions("foo", null, 6);
         try {
             int corpus1Count = MockCorpus.CORPUS_1.getSuggestions("foo", 3, true).getCount();
             int corpus2Count = MockCorpus.CORPUS_2.getSuggestions("foo", 3, true).getCount();

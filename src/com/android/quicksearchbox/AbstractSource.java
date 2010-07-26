@@ -95,11 +95,17 @@ public abstract class AbstractSource implements Source {
                 .createVoiceWebSearchIntent(appData);
     }
 
+    public Source getRoot() {
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (o != null && o.getClass().equals(this.getClass())) {
-            AbstractSource s = (AbstractSource) o;
-            return s.getName().equals(getName());
+        if (o != null && o instanceof Source) {
+            Source s = ((Source) o).getRoot();
+            if (s.getClass().equals(this.getClass())) {
+                return s.getName().equals(getName());
+            }
         }
         return false;
     }

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.webkit.URLUtil;
 
@@ -35,18 +36,28 @@ import java.util.concurrent.Executor;
  * The web search source.
  */
 public class WebCorpus extends MultiSourceCorpus {
+    private static final String TAG = "QSB.WebCorpus";
+    private static final boolean DBG = false;
 
     private static final String WEB_CORPUS_NAME = "web";
 
-    private final Source mWebSearchSource;
+    private Source mWebSearchSource;
 
     private final Source mBrowserSource;
 
     public WebCorpus(Context context, Config config, Executor executor,
             Source webSearchSource, Source browserSource) {
         super(context, config, executor, webSearchSource, browserSource);
+        if (DBG) {
+            Log.d(TAG, "init webSource=" + webSearchSource + "; browser source = " + browserSource);
+        }
         mWebSearchSource = webSearchSource;
         mBrowserSource = browserSource;
+    }
+
+    public void setWebSource(Source web) {
+        if (DBG) Log.d(TAG, "setWebSource(" + web + ")");
+        mWebSearchSource = web;
     }
 
     public CharSequence getLabel() {
@@ -101,6 +112,8 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     public Intent createVoiceSearchIntent(Bundle appData) {
+        // TODO in 2-pane mode, mWebSearchSource may be NULL
+        // this functionality should be moved elsewhere.
         if (mWebSearchSource != null){
             return mWebSearchSource.createVoiceSearchIntent(appData);
         } else {
@@ -150,13 +163,13 @@ public class WebCorpus extends MultiSourceCorpus {
     @Override
     protected List<Source> getSourcesToQuery(String query, boolean onlyCorpus) {
         ArrayList<Source> sourcesToQuery = new ArrayList<Source>(2);
-        if (mWebSearchSource != null
-                && SearchSettings.getShowWebSuggestions(getContext())) {
-            sourcesToQuery.add(mWebSearchSource);
+        if (SearchSettings.getShowWebSuggestions(getContext())) {
+            if (mWebSearchSource != null) sourcesToQuery.add(mWebSearchSource);
         }
         if (mBrowserSource != null && query.length() > 0) {
             sourcesToQuery.add(mBrowserSource);
         }
+        if (DBG) Log.d(TAG, "getSourcesToQuery sourcesToQuery=" + sourcesToQuery);
         return sourcesToQuery;
     }
 

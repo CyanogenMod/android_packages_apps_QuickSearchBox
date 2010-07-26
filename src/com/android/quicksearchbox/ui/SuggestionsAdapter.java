@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.BlendedSuggestions;
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionPosition;
@@ -24,8 +25,8 @@ import com.android.quicksearchbox.Suggestions;
 import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 /**
@@ -118,7 +119,9 @@ public class SuggestionsAdapter extends BaseAdapter {
                 // we've just switched from the 'All' corpus to a specific corpus
                 // we can filter the existing results immediately.
                 if (DBG) Log.d(TAG, "setCorpus(" + corpus.getName() + ") Filter suggestions");
-                mSuggestions.filterByCorpus(corpus);
+                if (mSuggestions instanceof BlendedSuggestions) {
+                    ((BlendedSuggestions) mSuggestions).filterByCorpus(corpus);
+                }
             } else if (corpus != null) {
                 // Note, when switching from a specific corpus to 'All' we do not change the
                 // suggestions, since they're still relevant for 'All'. Hence 'corpus != null'
@@ -159,6 +162,7 @@ public class SuggestionsAdapter extends BaseAdapter {
         return mViewFactory.getSuggestionViewType(mCursor);
     }
 
+    // Implements Adapter#getView()
     public View getView(int position, View convertView, ViewGroup parent) {
         if (mCursor == null) {
             throw new IllegalStateException("getView() called with null cursor");

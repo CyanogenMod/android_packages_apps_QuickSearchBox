@@ -33,14 +33,14 @@ import java.util.Set;
 @SmallTest
 public class SuggestionsTest extends AndroidTestCase {
 
-    private Suggestions mSuggestions;
+    private BlendedSuggestions mSuggestions;
     private MockDataSetObserver mObserver;
     private List<Corpus> mExpectedCorpora;
 
     @Override
     protected void setUp() throws Exception {
         mExpectedCorpora = Arrays.asList(new Corpus[]{null,null});
-        mSuggestions = new Suggestions(null, 0, "foo", mExpectedCorpora);
+        mSuggestions = new BlendedSuggestions(null, 0, "foo", mExpectedCorpora);
         mObserver = new MockDataSetObserver();
         mSuggestions.registerDataSetObserver(mObserver);
     }

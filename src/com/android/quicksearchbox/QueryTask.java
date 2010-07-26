@@ -21,11 +21,15 @@ import com.android.quicksearchbox.util.NamedTask;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.os.Handler;
+import android.util.Log;
 
 /**
  * A task that gets suggestions from a corpus.
  */
 public class QueryTask<C extends SuggestionCursor> implements NamedTask {
+    private static final String TAG = "QSB.QueryTask";
+    private static final boolean DBG = false;
+
     private final String mQuery;
     private final int mQueryLimit;
     private final SuggestionCursorProvider<C> mProvider;
@@ -60,6 +64,7 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
 
     public void run() {
         final C cursor = mProvider.getSuggestions(mQuery, mQueryLimit, mTheOnlyOne);
+        if (DBG) Log.d(TAG, "Suggestions from " + mProvider + " = " + cursor);
         if (mHandler == null) {
             mConsumer.consume(cursor);
         } else {

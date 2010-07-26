@@ -17,7 +17,10 @@
 <resources>
     <style name="Theme.QuickSearchBox" parent="@android:style/Theme.Light.NoTitleBar">
         <!-- Get rid of status bar shadow. -->
+        <item name="android:windowSoftInputMode">stateUnchanged|adjustResize</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Theme.SearchWidgetConfig" parent="@android:style/Theme.Dialog">
