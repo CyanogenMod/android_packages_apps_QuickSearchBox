@@ -32,6 +32,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -44,7 +45,7 @@ public class CorpusSelectionDialog extends Dialog {
 
     private GridView mCorpusGrid;
 
-    private TextView mEditItems;
+    private ImageView mEditItems;
 
     private OnCorpusSelectedListener mListener;
 
@@ -79,7 +80,7 @@ public class CorpusSelectionDialog extends Dialog {
         // the list items unclickable.
         mCorpusGrid.setFocusable(true);
 
-        mEditItems = (TextView) findViewById(R.id.corpus_edit_items);
+        mEditItems = (ImageView) findViewById(R.id.corpus_edit_items);
         mEditItems.setOnClickListener(new CorpusEditListener());
 
         Window window = getWindow();
