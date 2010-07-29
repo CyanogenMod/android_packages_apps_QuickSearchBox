@@ -444,7 +444,7 @@ public class SearchActivity extends Activity {
 
     protected void showCorpusSelectionDialog() {
         if (mCorpusSelectionDialog == null) {
-            mCorpusSelectionDialog = getCorpusSelectionDialog();
+            mCorpusSelectionDialog = createCorpusSelectionDialog();
             mCorpusSelectionDialog.setOwnerActivity(this);
             mCorpusSelectionDialog.setOnDismissListener(new CorpusSelectorDismissListener());
             mCorpusSelectionDialog.setOnCorpusSelectedListener(new CorpusSelectionListener());
@@ -452,7 +452,7 @@ public class SearchActivity extends Activity {
         mCorpusSelectionDialog.show(mCorpus);
     }
 
-    protected CorpusSelectionDialog getCorpusSelectionDialog() {
+    protected CorpusSelectionDialog createCorpusSelectionDialog() {
         return new CorpusSelectionDialog(this);
     }
 
