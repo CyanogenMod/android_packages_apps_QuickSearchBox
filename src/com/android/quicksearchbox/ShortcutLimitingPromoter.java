@@ -28,7 +28,7 @@ import java.util.ArrayList;
  */
 public class ShortcutLimitingPromoter extends PromoterWrapper {
 
-    private static final String TAG = "QSB.ShortcutPromoter";
+    private static final String TAG = "QSB.ShortcutLimitingPromoter";
     private static final boolean DBG = false;
 
     private final int mMaxShortcutsPerWebSource;
@@ -51,7 +51,7 @@ public class ShortcutLimitingPromoter extends PromoterWrapper {
     public void pickPromoted(SuggestionCursor shortcuts,
             ArrayList<CorpusResult> suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
-        int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
+        final int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
         ListSuggestionCursor filteredShortcuts = null;
         if (shortcutCount > 0) {
             filteredShortcuts = new ListSuggestionCursor(shortcuts.getUserQuery());
@@ -68,7 +68,10 @@ public class ShortcutLimitingPromoter extends PromoterWrapper {
                 }
             }
         }
-
+        if (DBG) {
+            Log.d(TAG, "pickPromoted shortcuts=" + shortcutCount + " filtered=" +
+                    filteredShortcuts.getCount());
+        }
         super.pickPromoted(filteredShortcuts, suggestions, maxPromoted, promoted);
     }
 

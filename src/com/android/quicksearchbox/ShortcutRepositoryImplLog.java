@@ -161,12 +161,14 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         String orderBy = preferLatest + " DESC, " + ordering_expr + " DESC";
         mEmptyQueryShortcutQuery = SQLiteQueryBuilder.buildQueryString(
                 false, TABLES, SHORTCUT_QUERY_COLUMNS, where, GROUP_BY, having, orderBy, null);
+        if (DBG) Log.d(TAG, "Empty shortcut query:\n" + mEmptyQueryShortcutQuery);
 
         where = PREFIX_RESTRICTION + " AND " + ageRestriction;
         preferLatest = PREFER_LATEST_PREFIX + where + PREFER_LATEST_SUFFIX;
         orderBy = preferLatest + " DESC, " + ordering_expr + " DESC";
         mShortcutQuery = SQLiteQueryBuilder.buildQueryString(
                 false, TABLES, SHORTCUT_QUERY_COLUMNS, where, GROUP_BY, having, orderBy, null);
+        if (DBG) Log.d(TAG, "Empty shortcut:\n" + mShortcutQuery);
     }
 
     /**
@@ -271,9 +273,11 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return null;
         }
 
+        if (DBG) Log.d(TAG, "Allowed sources: ");
         HashMap<String,Source> allowedSources = new HashMap<String,Source>();
         for (Corpus corpus : allowedCorpora) {
             for (Source source : corpus.getSources()) {
+                if (DBG) Log.d(TAG, "\t" + source.getName());
                 allowedSources.put(source.getName(), source);
             }
         }
@@ -346,14 +350,17 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             }
             Source source = mAllowedSources.get(srcStr);
             if (source == null) {
-                if (DBG) Log.d(TAG, "Source " + srcStr + " not allowed");
+                if (DBG) {
+                    Log.d(TAG, "Source " + srcStr + " (position " + mCursor.getPosition() +
+                            " not allowed");
+                }
                 return null;
             }
             int versionCode = mCursor.getInt(Shortcuts.source_version_code.ordinal());
-            if (versionCode != source.getVersionCode()) {
+            if (!source.isVersionCodeCompatible(versionCode)) {
                 if (DBG) {
-                    Log.d(TAG, "Wrong version (" + versionCode + " != " + source.getVersionCode()
-                            + ") for source " + srcStr);
+                    Log.d(TAG, "Version " + versionCode + " not compatible with " +
+                            source.getVersionCode() + " for source " + srcStr);
                 }
                 return null;
             }

@@ -110,7 +110,7 @@ public class SearchableSources implements Sources {
         return QsbApplication.get(getContext()).getGoogleSource();
     }
 
-    private SearchableSource createSearchableSource(SearchableInfo searchable) {
+    protected SearchableSource createSearchableSource(SearchableInfo searchable) {
         if (searchable == null) return null;
         try {
             return new SearchableSource(mContext, searchable);
