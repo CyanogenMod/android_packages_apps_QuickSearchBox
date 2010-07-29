@@ -56,6 +56,7 @@ public class ShortcutLimitingPromoter extends PromoterWrapper {
         if (shortcutCount > 0) {
             filteredShortcuts = new ListSuggestionCursor(shortcuts.getUserQuery());
             HashMultiset<Source> sourceShortcutCounts = HashMultiset.create(shortcutCount);
+            int numPromoted = 0;
             for (int i = 0; i < shortcutCount; i++) {
                 shortcuts.moveTo(i);
                 Source source = shortcuts.getSuggestionSource();
@@ -64,8 +65,10 @@ public class ShortcutLimitingPromoter extends PromoterWrapper {
                 int maxShortcuts = source.isWebSuggestionSource()
                         ? mMaxShortcutsPerWebSource : mMaxShortcutsPerNonWebSource;
                 if (prevCount < maxShortcuts) {
+                    numPromoted++;
                     filteredShortcuts.add(new SuggestionPosition(shortcuts));
                 }
+                if (numPromoted >= maxPromoted) break;
             }
         }
         if (DBG) {

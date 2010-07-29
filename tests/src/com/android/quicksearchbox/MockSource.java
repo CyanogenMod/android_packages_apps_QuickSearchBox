@@ -64,6 +64,10 @@ public class MockSource implements Source {
         return mVersionCode;
     }
 
+    public boolean isVersionCodeCompatible(int version) {
+        return version == mVersionCode;
+    }
+
     public String getName() {
         return getIntentComponent().flattenToShortString();
     }

@@ -239,9 +239,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         reportClickAtTime(suggestions, position, now);
     }
 
-    public SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora,
-            int maxShortcuts) {
-        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora, maxShortcuts,
+    public SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora) {
+        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora,
                         System.currentTimeMillis());
         if (shortcuts != null) {
             startRefresh(shortcuts);
@@ -260,8 +259,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                 suggestion.getShortcutId());
     }
 
-    /* package for testing */ ShortcutCursor getShortcutsForQuery(String query,
-            Collection<Corpus> allowedCorpora, int maxShortcuts, long now) {
+    @VisibleForTesting
+    ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + "," + allowedCorpora + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
@@ -282,8 +281,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             }
         }
 
-        return new ShortcutCursor(maxShortcuts,
-                new SuggestionCursorImpl(allowedSources, query, cursor));
+        return new ShortcutCursor(new SuggestionCursorImpl(allowedSources, query, cursor));
     }
 
     private void startRefresh(final ShortcutCursor shortcuts) {
