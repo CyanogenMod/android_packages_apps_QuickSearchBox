@@ -20,16 +20,32 @@ package com.android.quicksearchbox.ui;
  * Listener interface for clicks on suggestions.
  */
 public interface SuggestionClickListener {
+
     /**
      * Called when a suggestion is clicked.
      *
      * @param position Position of the clicked suggestion.
      */
     void onSuggestionClicked(int position);
+
+    /**
+     * Called when a quick contact badge in a suggestion is clicked.
+     *
+     * @param position Position of the suggestion.
+     */
+    void onSuggestionQuickContactClicked(int position);
+
     /**
      * Called when a suggestion is long clicked.
      *
      * @param position Position of the long clicked suggestion.
      */
     boolean onSuggestionLongClicked(int position);
+
+    /**
+     * Called when the "query refine" button of a suggestion is clicked.
+     *
+     * @param position Position of the suggestion.
+     */
+    void onSuggestionQueryRefineClicked(int position);
 }

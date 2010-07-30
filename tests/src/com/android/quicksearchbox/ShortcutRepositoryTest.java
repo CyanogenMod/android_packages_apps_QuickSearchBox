@@ -27,6 +27,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -77,8 +78,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected ShortcutRepositoryImplLog mRepo;
 
-    protected DataSuggestionCursor mAppSuggestions;
-    protected DataSuggestionCursor mContactSuggestions;
+    protected ListSuggestionCursor mAppSuggestions;
+    protected ListSuggestionCursor mContactSuggestions;
 
     protected SuggestionData mApp1;
     protected SuggestionData mApp2;
@@ -110,7 +111,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         mApp1 = makeApp("app1");
         mApp2 = makeApp("app2");
         mApp3 = makeApp("app3");
-        mAppSuggestions = new DataSuggestionCursor("foo", mApp1, mApp2, mApp3);
+        mAppSuggestions = new ListSuggestionCursor("foo", mApp1, mApp2, mApp3);
 
         mContact1 = new SuggestionData(CONTACTS_SOURCE)
                 .setText1("Joe Blow")
@@ -123,7 +124,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setIntentData("contacts/mikeJ")
                 .setShortcutId("mo-jo");
 
-        mContactSuggestions = new DataSuggestionCursor("foo", mContact1, mContact2);
+        mContactSuggestions = new ListSuggestionCursor("foo", mContact1, mContact2);
     }
 
     private SuggestionData makeApp(String name) {
@@ -351,6 +352,15 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 "app", mApp2, mApp1, mApp3);
     }
 
+    public void testMoreRecentlyClickedWinsSeconds() {
+        reportClick("app", mApp1, NOW - 10000);
+        reportClick("app", mApp2, NOW - 5000);
+        reportClick("app", mApp3, NOW);
+
+        assertShortcuts("expecting more recently clicked app to rank higher",
+                "app", mApp3, mApp2, mApp1);
+    }
+
     public void testRecencyOverridesClicks() {
 
         // 5 clicks, most recent half way through age limit
@@ -540,16 +550,6 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 "app", mApp2, mApp1);
     }
 
-    public void testShortcutsLimitedCount() {
-
-        for (int i = 1; i <= 2 * mConfig.getMaxShortcutsReturned(); i++) {
-            reportClick("a", makeApp("app" + i));
-        }
-
-        assertShortcutCount("number of shortcuts should be limited.",
-                "", mConfig.getMaxShortcutsReturned());
-    }
-
     public void testShortcutsAllowedCorpora() {
         reportClick("a", mApp1);
         reportClick("a", mContact1);
@@ -643,7 +643,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     public void testAppUpgradePromotesLowerRanked() {
         int maxShortcuts = mConfig.getMaxShortcutsReturned();
 
-        DataSuggestionCursor expected = new DataSuggestionCursor("a");
+        ListSuggestionCursor expected = new ListSuggestionCursor("a");
         for (int i = 0; i < maxShortcuts + 1; i++) {
             reportClick("app", mApp1, NOW);
         }
@@ -692,8 +692,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     // Utilities
 
-    protected DataSuggestionCursor makeCursor(String query, SuggestionData... suggestions) {
-        DataSuggestionCursor cursor = new DataSuggestionCursor(query);
+    protected ListSuggestionCursor makeCursor(String query, SuggestionData... suggestions) {
+        ListSuggestionCursor cursor = new ListSuggestionCursor(query);
         for (SuggestionData suggestion : suggestions) {
             cursor.add(suggestion);
         }
@@ -701,11 +701,11 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     protected void reportClick(String query, SuggestionData suggestion) {
-        reportClick(new DataSuggestionCursor(query, suggestion), 0);
+        reportClick(new ListSuggestionCursor(query, suggestion), 0);
     }
 
     protected void reportClick(String query, SuggestionData suggestion, long now) {
-        reportClickAtTime(new DataSuggestionCursor(query, suggestion), 0, now);
+        reportClickAtTime(new ListSuggestionCursor(query, suggestion), 0, now);
     }
 
     protected void reportClick(SuggestionCursor suggestions, int position) {
@@ -723,7 +723,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected void refreshShortcut(Source source, String shortcutId, SuggestionData suggestion) {
         SuggestionCursor refreshed =
-                suggestion == null ? null : new DataSuggestionCursor(null, suggestion);
+                suggestion == null ? null : new ListSuggestionCursor(null, suggestion);
         mRepo.refreshShortcut(source, shortcutId, refreshed);
         mLogExecutor.runNext();
     }
@@ -768,8 +768,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertNoShortcuts(String message, String query) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora,
-                mConfig.getMaxShortcutsReturned(), NOW);
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
         try {
             assertNull(message + ", got shortcuts", cursor);
         } finally {
@@ -783,10 +782,9 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     void assertShortcutAtPosition(String message, String query,
             int position, SuggestionData expected) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora,
-                mConfig.getMaxShortcutsReturned(), NOW);
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
         try {
-            SuggestionCursor expectedCursor = new DataSuggestionCursor(query, expected);
+            SuggestionCursor expectedCursor = new ListSuggestionCursor(query, expected);
             SuggestionCursorUtil.assertSameSuggestion(message, position, expectedCursor, cursor);
         } finally {
             if (cursor != null) cursor.close();
@@ -794,8 +792,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertShortcutCount(String message, String query, int expectedCount) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora,
-                mConfig.getMaxShortcutsReturned(), NOW);
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
         try {
             assertEquals(message, expectedCount, cursor.getCount());
         } finally {
@@ -803,20 +800,19 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         }
     }
 
-    void assertShortcuts(String message, String query, List<Corpus> allowedCorpora,
+    void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
             SuggestionCursor expected) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, allowedCorpora,
-                mConfig.getMaxShortcutsReturned(), NOW);
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, allowedCorpora, NOW);
         try {
-            SuggestionCursorUtil.assertSameSuggestions(message, expected, cursor);
+            SuggestionCursorUtil.assertSameSuggestions(message, expected, cursor, true);
         } finally {
             if (cursor != null) cursor.close();
         }
     }
 
-    void assertShortcuts(String message, String query, List<Corpus> allowedCorpora,
+    void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
             SuggestionData... expected) {
-        assertShortcuts(message, query, allowedCorpora, new DataSuggestionCursor(query, expected));
+        assertShortcuts(message, query, allowedCorpora, new ListSuggestionCursor(query, expected));
     }
 
     void assertShortcuts(String message, String query, SuggestionData... expected) {

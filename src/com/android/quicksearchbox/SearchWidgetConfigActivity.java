@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
@@ -32,10 +33,12 @@ import android.widget.ListAdapter;
  * The configuration screen for search widgets.
  */
 public class SearchWidgetConfigActivity extends ChoiceActivity {
-    static final String TAG = "QSB.SearchWidgetConfigActivity";
+    private static final boolean DBG = false;
+    private static final String TAG = "QSB.SearchWidgetConfigActivity";
 
     private static final String PREFS_NAME = "SearchWidgetConfig";
-    private static final String WIDGET_CORPUS_PREF_PREFIX = "widget_corpus_";
+    private static final String WIDGET_CORPUS_NAME_PREFIX = "widget_corpus_";
+    private static final String WIDGET_CORPUS_SHOWING_HINT_PREFIX = "widget_showing_hint_";
 
     private CorporaAdapter mAdapter;
 
@@ -53,6 +56,12 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
                 AppWidgetManager.INVALID_APPWIDGET_ID);
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
+        }
+
+        // If there is only All, or only All and one other corpus, there is no
+        // point in asking the user to select a corpus.
+        if (getCorpusRanker().getRankedCorpora().size() <= 1) {
+            selectCorpus(null);
         }
     }
 
@@ -77,8 +86,8 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
     }
 
     protected void selectCorpus(Corpus corpus) {
-        writeWidgetCorpusPref(mAppWidgetId, corpus);
-        updateWidget(corpus);
+        setWidgetCorpusName(mAppWidgetId, corpus);
+        SearchWidgetProvider.updateSearchWidgets(this);
 
         Intent result = new Intent();
         result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
@@ -86,42 +95,50 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         finish();
     }
 
-    private void updateWidget(Corpus corpus) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        SearchWidgetProvider.setupSearchWidget(this, appWidgetManager,
-                mAppWidgetId, corpus);
-    }
-
     private static SharedPreferences getWidgetPreferences(Context context) {
         return context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     }
 
-    private static String getCorpusPrefKey(int appWidgetId) {
-        return WIDGET_CORPUS_PREF_PREFIX + appWidgetId;
+    private static String getCorpusNameKey(int appWidgetId) {
+        return WIDGET_CORPUS_NAME_PREFIX + appWidgetId;
     }
 
-    private void writeWidgetCorpusPref(int appWidgetId, Corpus corpus) {
+    private static String getShowingHintKey(int appWidgetId) {
+        return WIDGET_CORPUS_SHOWING_HINT_PREFIX + appWidgetId;
+    }
+
+    private void setWidgetCorpusName(int appWidgetId, Corpus corpus) {
         String corpusName = corpus == null ? null : corpus.getName();
         SharedPreferences.Editor prefs = getWidgetPreferences(this).edit();
-        prefs.putString(getCorpusPrefKey(appWidgetId), corpusName);
+        prefs.putString(getCorpusNameKey(appWidgetId), corpusName);
         prefs.commit();
     }
 
-    public static String readWidgetCorpusPref(Context context, int appWidgetId) {
+    public static String getWidgetCorpusName(Context context, int appWidgetId) {
         SharedPreferences prefs = getWidgetPreferences(context);
-        return prefs.getString(getCorpusPrefKey(appWidgetId), null);
+        return prefs.getString(getCorpusNameKey(appWidgetId), null);
     }
 
-    private QsbApplication getQsbApplication() {
-        return (QsbApplication) getApplication();
+    public static void setWidgetShowingHint(Context context, int appWidgetId, boolean showing) {
+        SharedPreferences.Editor prefs = getWidgetPreferences(context).edit();
+        prefs.putBoolean(getShowingHintKey(appWidgetId), showing);
+        boolean c = prefs.commit();
+        if (DBG) Log.d(TAG, "Widget " + appWidgetId + " set showing hint " + showing + "("+c+")");
+    }
+
+    public static boolean getWidgetShowingHint(Context context, int appWidgetId) {
+        SharedPreferences prefs = getWidgetPreferences(context);
+        boolean r = prefs.getBoolean(getShowingHintKey(appWidgetId), false);
+        if (DBG) Log.d(TAG, "Widget " + appWidgetId + " showing hint: " + r);
+        return r;
     }
 
     private CorpusRanker getCorpusRanker() {
-        return getQsbApplication().getCorpusRanker();
+        return QsbApplication.get(this).getCorpusRanker();
     }
 
     private CorpusViewFactory getViewFactory() {
-        return getQsbApplication().getCorpusViewFactory();
+        return QsbApplication.get(this).getCorpusViewFactory();
     }
 
     private class SourceClickListener implements AdapterView.OnItemClickListener {

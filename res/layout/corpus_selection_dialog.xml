@@ -20,42 +20,78 @@
     android:layout_height="wrap_content"
     >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/corpus_selector_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/corpus_selector_arrow"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:paddingTop="20dip"
-        android:paddingBottom="20dip"
-        android:paddingLeft="8dip"
-        android:paddingRight="8dip"
+        android:paddingTop="22dip"
+        android:paddingBottom="26dip"
+        android:paddingLeft="4dip"
+        android:paddingRight="4dip"
         android:background="@drawable/corpus_selector_bg"
         android:orientation="vertical"
         >
 
-        <TextView
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/corpus_selector_header"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dip"
-            android:singleLine="true"
-            android:textColor="@android:color/tertiary_text_light"
-            android:textSize="16dip"
-            android:text="@string/corpus_selection_heading"
-        />
+            android:layout_below="@+id/corpus_selector_arrow"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:paddingLeft="16dip"
+                android:singleLine="true"
+                android:gravity="center_vertical|left"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="14dip"
+                android:text="@string/corpus_selection_heading"
+            />
+
+            <ImageView
+                android:id="@+id/corpus_edit_items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:paddingLeft="6dip"
+                android:paddingTop="6dip"
+                android:paddingBottom="6dip"
+                android:paddingRight="6dip"
+                android:gravity="center_vertical|right"
+                android:singleLine="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/corpus_edit_icon"
+                android:background="@drawable/corpus_edit_items_bg"
+            />
+        </RelativeLayout>
 
         <GridView
             android:id="@+id/corpus_grid"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|left"
+            android:layout_below="@id/corpus_selector_header"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="12dip"
             android:horizontalSpacing="2dip"
-            android:verticalSpacing="2dip"
+            android:verticalSpacing="4dip"
+            android:numColumns="@integer/corpus_selection_dialog_columns"
             android:listSelector="@drawable/corpus_grid_item_bg"
             />
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/corpus_selector_arrow"
@@ -65,7 +101,7 @@
         android:layout_alignParentLeft="true"
         android:layout_marginTop="44dip"
         android:layout_marginBottom="-8.5dip"
-        android:layout_marginLeft="6.5dip"
+        android:layout_marginLeft="8.5dip"
         android:src="@drawable/corpus_selector_arrow_up"
         />
 

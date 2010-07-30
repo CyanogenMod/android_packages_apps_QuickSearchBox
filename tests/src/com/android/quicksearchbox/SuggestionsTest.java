@@ -16,9 +16,14 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.MockDataSetObserver;
+
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -29,10 +34,15 @@ import java.util.Set;
 public class SuggestionsTest extends AndroidTestCase {
 
     private Suggestions mSuggestions;
+    private MockDataSetObserver mObserver;
+    private List<Corpus> mExpectedCorpora;
 
     @Override
     protected void setUp() throws Exception {
-        mSuggestions = new Suggestions(null, 0, "foo", 2);
+        mExpectedCorpora = Arrays.asList(new Corpus[]{null,null});
+        mSuggestions = new Suggestions(null, 0, "foo", mExpectedCorpora);
+        mObserver = new MockDataSetObserver();
+        mSuggestions.registerDataSetObserver(mObserver);
     }
 
     @Override
@@ -41,8 +51,16 @@ public class SuggestionsTest extends AndroidTestCase {
         mSuggestions = null;
     }
 
-    public void testGetExpectedSourceCount() {
-        assertEquals(2, mSuggestions.getExpectedSourceCount());
+    public void testGetExpectedResultCount() {
+        assertEquals(mExpectedCorpora.size(), mSuggestions.getExpectedResultCount());
+    }
+
+    public void testGetExpectedCorpora() {
+        List<Corpus> expectedCorpora = mSuggestions.getExpectedCorpora();
+        assertEquals(mExpectedCorpora.size(), expectedCorpora.size());
+        for (int i=0; i<mExpectedCorpora.size(); ++i) {
+            assertEquals(mExpectedCorpora.get(i), expectedCorpora.get(i));
+        }
     }
 
     public void testGetUserQuery() {
@@ -51,10 +69,21 @@ public class SuggestionsTest extends AndroidTestCase {
 
     public void testGetIncludedCorpora() {
         Corpus corpus = MockCorpus.CORPUS_1;
-        mSuggestions.addCorpusResult(corpus.getSuggestions("foo", 50));
+        mSuggestions.addCorpusResults(
+                Collections.singletonList(corpus.getSuggestions("foo", 50, true)));
         Set<Corpus> includedCorpora = mSuggestions.getIncludedCorpora();
         assertEquals(includedCorpora.size(), 1);
         assertTrue(includedCorpora.contains(corpus));
+    }
+
+    public void testObserverNotified() {
+        Corpus corpus = MockCorpus.CORPUS_1;
+        mObserver.assertNotChanged();
+        mObserver.assertNotInvalidated();
+        mSuggestions.addCorpusResults(
+                Collections.singletonList(corpus.getSuggestions("foo", 50, true)));
+        mObserver.assertChanged();
+        mObserver.assertNotInvalidated();
     }
 
 }

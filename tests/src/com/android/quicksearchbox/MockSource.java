@@ -28,11 +28,18 @@ import android.os.Bundle;
  */
 public class MockSource implements Source {
 
-    public static final Source SOURCE_1 = new MockSource("SOURCE_1");
+    public static final MockSource SOURCE_1 = new MockSource("SOURCE_1");
 
-    public static final Source SOURCE_2 = new MockSource("SOURCE_2");
+    public static final MockSource SOURCE_2 = new MockSource("SOURCE_2");
 
-    public static final Source SOURCE_3 = new MockSource("SOURCE_3");
+    public static final MockSource SOURCE_3 = new MockSource("SOURCE_3");
+
+    public static final MockSource WEB_SOURCE = new MockSource("WEB") {
+        @Override
+        public boolean isWebSuggestionSource() {
+            return true;
+        }
+    };
 
     private final String mName;
 
@@ -47,7 +54,7 @@ public class MockSource implements Source {
         mVersionCode = versionCode;
     }
 
-    public ComponentName getComponentName() {
+    public ComponentName getIntentComponent() {
         // Not an activity, but no code should treat it as one.
         return new ComponentName("com.android.quicksearchbox",
                 getClass().getName() + "." + mName);
@@ -57,12 +64,16 @@ public class MockSource implements Source {
         return mVersionCode;
     }
 
+    public boolean isVersionCodeCompatible(int version) {
+        return version == mVersionCode;
+    }
+
     public String getName() {
-        return getComponentName().flattenToShortString();
+        return getIntentComponent().flattenToShortString();
     }
 
     public String getDefaultIntentAction() {
-        return null;
+        return Intent.ACTION_SEARCH;
     }
 
     public String getDefaultIntentData() {
@@ -101,23 +112,30 @@ public class MockSource implements Source {
         return null;
     }
 
-    public SourceResult getSuggestions(String query, int queryLimit) {
+    public boolean canRead() {
+        return true;
+    }
+
+    public boolean isLocationAware() {
+        return false;
+    }
+
+    public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
         if (query.length() == 0) {
             return null;
         }
-        DataSuggestionCursor cursor = new DataSuggestionCursor(query);
-        Intent i1 = new Intent(Intent.ACTION_VIEW);
-        SuggestionData s1 = new SuggestionData(this)
-                .setText1(query + "_1")
-                .setIntentAction(Intent.ACTION_VIEW)
-                .setIntentData("content://" + getClass().getName() + "/1");
-        SuggestionData s2 = new SuggestionData(this)
-                .setText1(query + "_2")
-                .setIntentAction(Intent.ACTION_VIEW)
-                .setIntentData("content://" + getClass().getName() + "/2");
-        cursor.add(s1);
-        cursor.add(s2);
+        ListSuggestionCursor cursor = new ListSuggestionCursor(query);
+        cursor.add(createSuggestion(query + "_1"));
+        cursor.add(createSuggestion(query + "_2"));
         return new Result(query, cursor);
+    }
+
+    public Suggestion createSuggestion(String query) {
+        Uri data = new Uri.Builder().scheme("content").authority(mName).path(query).build();
+        return new SuggestionData(this)
+                .setText1(query)
+                .setIntentAction(Intent.ACTION_VIEW)
+                .setIntentData(data.toString());
     }
 
     @Override
@@ -155,19 +173,15 @@ public class MockSource implements Source {
         return null;
     }
 
+    public boolean isExternal() {
+        return false;
+    }
+
     public boolean isWebSuggestionSource() {
         return false;
     }
 
     public boolean queryAfterZeroResults() {
-        return false;
-    }
-
-    public boolean shouldRewriteQueryFromData() {
-        return false;
-    }
-
-    public boolean shouldRewriteQueryFromText() {
         return false;
     }
 

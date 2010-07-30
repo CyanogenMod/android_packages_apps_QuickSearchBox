@@ -18,16 +18,9 @@ package com.android.quicksearchbox;
 
 import android.app.SearchManager;
 import android.app.SearchableInfo;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
-import android.os.Handler;
 import android.util.Log;
 
 import java.util.Collection;
@@ -43,15 +36,8 @@ public class SearchableSources implements Sources {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchableSources";
 
-    // The number of milliseconds that source update requests are delayed to
-    // allow grouping multiple requests.
-    private static final long UPDATE_SOURCES_DELAY_MILLIS = 200;
-
-    private final DataSetObservable mDataSetObservable = new DataSetObservable();
-
     private final Context mContext;
     private final SearchManager mSearchManager;
-    private boolean mLoaded;
 
     // All suggestion sources, by name.
     private HashMap<String, Source> mSources;
@@ -59,31 +45,24 @@ public class SearchableSources implements Sources {
     // The web search source to use.
     private Source mWebSearchSource;
 
-    private final Handler mUiThread;
-
-    private Runnable mUpdateSources = new Runnable() {
-        public void run() {
-            mUiThread.removeCallbacks(this);
-            updateSources();
-            notifyDataSetChanged();
-        }
-    };
-
     /**
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableSources(Context context, Handler uiThread) {
+    public SearchableSources(Context context) {
         mContext = context;
-        mUiThread = uiThread;
         mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
-        mLoaded = false;
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    protected SearchManager getSearchManager() {
+        return mSearchManager;
     }
 
     public Collection<Source> getSources() {
-        if (!mLoaded) {
-            throw new IllegalStateException("getSources(): sources not loaded.");
-        }
         return mSources.values();
     }
 
@@ -92,62 +71,14 @@ public class SearchableSources implements Sources {
     }
 
     public Source getWebSearchSource() {
-        if (!mLoaded) {
-            throw new IllegalStateException("getWebSearchSource(): sources not loaded.");
-        }
         return mWebSearchSource;
     }
 
-    // Broadcast receiver for package change notifications
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED.equals(action)
-                    || SearchManager.INTENT_ACTION_SEARCH_SETTINGS_CHANGED.equals(action)) {
-                if (DBG) Log.d(TAG, "onReceive(" + intent + ")");
-                // TODO: Instead of rebuilding the whole list on every change,
-                // just add, remove or update the application that has changed.
-                // Adding and updating seem tricky, since I can't see an easy way to list the
-                // launchable activities in a given package.
-                mUiThread.postDelayed(mUpdateSources, UPDATE_SOURCES_DELAY_MILLIS);
-            }
-        }
-    };
-
-    public void load() {
-        if (mLoaded) {
-            throw new IllegalStateException("load(): Already loaded.");
-        }
-
-        // Listen for searchables changes.
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
-        intentFilter.addAction(SearchManager.INTENT_ACTION_SEARCH_SETTINGS_CHANGED);
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
-
-        // update list of sources
-        updateSources();
-
-        mLoaded = true;
-
-        notifyDataSetChanged();
-    }
-
-    public void close() {
-        mContext.unregisterReceiver(mBroadcastReceiver);
-
-        mDataSetObservable.unregisterAll();
-
-        mSources = null;
-        mLoaded = false;
-    }
-
     /**
-     * Loads the list of suggestion sources.
+     * Updates the list of suggestion sources.
      */
-    private void updateSources() {
-        if (DBG) Log.d(TAG, "updateSources()");
+    public void update() {
+        if (DBG) Log.d(TAG, "update()");
         mSources = new HashMap<String,Source>();
 
         addSearchableSources();
@@ -164,7 +95,7 @@ public class SearchableSources implements Sources {
         }
         for (SearchableInfo searchable : searchables) {
             SearchableSource source = createSearchableSource(searchable);
-            if (source != null && source.canRead()) {
+            if (source != null) {
                 if (DBG) Log.d(TAG, "Created source " + source);
                 addSource(source);
             }
@@ -175,27 +106,11 @@ public class SearchableSources implements Sources {
         mSources.put(source.getName(), source);
     }
 
-    private Source createWebSearchSource() {
-        ComponentName name = getWebSearchComponent();
-        SearchableInfo webSearchable = mSearchManager.getSearchableInfo(name);
-        if (webSearchable == null) {
-            Log.e(TAG, "Web search source " + name + " is not searchable.");
-            return null;
-        }
-        return createSearchableSource(webSearchable);
+    protected Source createWebSearchSource() {
+        return QsbApplication.get(getContext()).getGoogleSource();
     }
 
-    private ComponentName getWebSearchComponent() {
-        // Looks for an activity in the current package that handles ACTION_WEB_SEARCH.
-        // This indirect method is used to allow easy replacement of the web
-        // search activity when extending this package.
-        Intent webSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
-        webSearchIntent.setPackage(mContext.getPackageName());
-        PackageManager pm = mContext.getPackageManager();
-        return webSearchIntent.resolveActivity(pm);
-    }
-
-    private SearchableSource createSearchableSource(SearchableInfo searchable) {
+    protected SearchableSource createSearchableSource(SearchableInfo searchable) {
         if (searchable == null) return null;
         try {
             return new SearchableSource(mContext, searchable);
@@ -205,15 +120,10 @@ public class SearchableSources implements Sources {
         }
     }
 
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.registerObserver(observer);
-    }
-
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.unregisterObserver(observer);
-    }
-
-    protected void notifyDataSetChanged() {
-        mDataSetObservable.notifyChanged();
+    public Source createSourceFor(ComponentName component) {
+        SearchableInfo info = mSearchManager.getSearchableInfo(component);
+        SearchableSource source = createSearchableSource(info);
+        if (DBG) Log.d(TAG, "SearchableSource for " + component + ": " + source);
+        return source;
     }
 }

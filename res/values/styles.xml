@@ -41,4 +41,19 @@
         <item name="android:windowExitAnimation">@anim/corpus_selector_close</item>
     </style>
 
+    <!-- The number of columns in the business listing launcher GridView -->
+    <integer name="corpus_selection_dialog_columns">4</integer>
+
+    <style name="SuggestionQueryTextAppearance">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ff000000</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="SuggestionSuggestedTextAppearance">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#ff000000</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
 </resources>

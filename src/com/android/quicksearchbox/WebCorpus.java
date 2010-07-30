@@ -19,13 +19,11 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.Util;
 
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.util.Patterns;
 import android.webkit.URLUtil;
 
@@ -44,9 +42,9 @@ public class WebCorpus extends MultiSourceCorpus {
 
     private final Source mBrowserSource;
 
-    public WebCorpus(Context context, Executor executor,
+    public WebCorpus(Context context, Config config, Executor executor,
             Source webSearchSource, Source browserSource) {
-        super(context, executor, webSearchSource, browserSource);
+        super(context, config, executor, webSearchSource, browserSource);
         mWebSearchSource = webSearchSource;
         mBrowserSource = browserSource;
     }
@@ -65,27 +63,16 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     public Intent createSearchIntent(String query, Bundle appData) {
-        return isUrl(query)? createBrowseIntent(query) : createWebSearchIntent(query, appData);
-    }
-
-    private static Intent createWebSearchIntent(String query, Bundle appData) {
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // We need CLEAR_TOP to avoid reusing an old task that has other activities
-        // on top of the one we want.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(SearchManager.USER_QUERY, query);
-        intent.putExtra(SearchManager.QUERY, query);
-        if (appData != null) {
-            intent.putExtra(SearchManager.APP_DATA, appData);
+        if (isUrl(query)) {
+            return createBrowseIntent(query);
+        } else if (mWebSearchSource != null){
+            return mWebSearchSource.createSearchIntent(query, appData);
+        } else {
+            return null;
         }
-        // TODO: Include something like this, to let the web search activity
-        // know how this query was started.
-        //intent.putExtra(SearchManager.SEARCH_MODE, SearchManager.MODE_GLOBAL_SEARCH_TYPED_QUERY);
-        return intent;
     }
 
-    private static Intent createBrowseIntent(String query) {
+    private Intent createBrowseIntent(String query) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addCategory(Intent.CATEGORY_BROWSABLE);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -114,18 +101,11 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     public Intent createVoiceSearchIntent(Bundle appData) {
-        return createVoiceWebSearchIntent(appData);
-    }
-
-    public static Intent createVoiceWebSearchIntent(Bundle appData) {
-        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        if (appData != null) {
-            intent.putExtra(SearchManager.APP_DATA, appData);
+        if (mWebSearchSource != null){
+            return mWebSearchSource.createVoiceSearchIntent(appData);
+        } else {
+            return null;
         }
-        return intent;
     }
 
     private int getCorpusIconResource() {
@@ -144,14 +124,17 @@ public class WebCorpus extends MultiSourceCorpus {
         return WEB_CORPUS_NAME;
     }
 
+    @Override
     public int getQueryThreshold() {
         return 0;
     }
 
+    @Override
     public boolean queryAfterZeroResults() {
         return true;
     }
 
+    @Override
     public boolean voiceSearchEnabled() {
         return true;
     }
@@ -165,7 +148,7 @@ public class WebCorpus extends MultiSourceCorpus {
     }
 
     @Override
-    protected List<Source> getSourcesToQuery(String query) {
+    protected List<Source> getSourcesToQuery(String query, boolean onlyCorpus) {
         ArrayList<Source> sourcesToQuery = new ArrayList<Source>(2);
         if (mWebSearchSource != null
                 && SearchSettings.getShowWebSuggestions(getContext())) {

@@ -16,9 +16,7 @@
 
 package com.android.quicksearchbox.tests.partial;
 
-import com.android.quicksearchbox.tests.partial.R;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 
 public class PartialSuggestionLauncher extends Activity {

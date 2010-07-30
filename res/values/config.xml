@@ -16,7 +16,7 @@
 
 <resources>
 
-  <!-- Name of corpora that are enabled by default in QSB.
+  <!-- Names of corpora that are enabled by default in QSB.
        For external single-source corpora, the corpus name is the component name of the
        searchable activity. -->
   <string-array name="default_corpora" translatable="false">
@@ -24,6 +24,11 @@
     <item>apps</item>
     <item>com.android.contacts/.SearchResultsActivity</item>
     <item>com.android.providers.applications/.ApplicationLauncher</item>
+  </string-array>
+
+  <!-- Names of corpora that are not shown in the corpus selector, even if they are
+       enabled in Searchable Items. -->
+  <string-array name="hidden_corpora" translatable="false">
   </string-array>
 
   <!-- The component name of the installed apps source used in QSB  -->

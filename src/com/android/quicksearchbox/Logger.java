@@ -28,6 +28,10 @@ public interface Logger {
     public static final int SEARCH_METHOD_BUTTON = 0;
     public static final int SEARCH_METHOD_KEYBOARD = 1;
 
+    public static final int SUGGESTION_CLICK_TYPE_LAUNCH = 0;
+    public static final int SUGGESTION_CLICK_TYPE_REFINE = 1;
+    public static final int SUGGESTION_CLICK_TYPE_QUICK_CONTACT = 2;
+
     /**
      * Called when QSB has started.
      *
@@ -43,9 +47,10 @@ public interface Logger {
      * @param suggestionCursor all the suggestions shown in the UI.
      * @param queriedCorpora all corpora that were queried to produce the suggestions in
      *        {@code suggestionCursor}, ordered by rank.
+     * @param clickType One of the SUGGESTION_CLICK_TYPE constants.
      */
     void logSuggestionClick(int position, SuggestionCursor suggestionCursor,
-            Collection<Corpus> queriedCorpora);
+            Collection<Corpus> queriedCorpora, int clickType);
 
     /**
      * The user launched a search.

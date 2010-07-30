@@ -25,6 +25,7 @@
 
     <!-- Source selector -->
     <string name="corpus_selection_heading">Search</string>
+    <string name="corpus_selection_edit_items">Add / Remove</string>
     <string name="corpus_label_global">All</string>
 
     <!-- Name of the combined Web source shown in QSB -->
@@ -87,6 +88,9 @@
          Home/res/values/strings.xml -->
     <string name="google_search_hint">Google Search</string>
 
+    <!-- Search settings description for the Google search source. -->
+    <string name="google_search_description">Google search suggestions</string>
+
     <!-- Settings category title for 'Google search settings' settings activity -->
     <string name="google_search_settings">Google search</string>
 
@@ -94,6 +98,13 @@
     <string name="google_show_web_suggestions">Show web suggestions</string>
     <string name="google_show_web_suggestions_summary_enabled">Show suggestions from Google as you type</string>
     <string name="google_show_web_suggestions_summary_disabled">Don\'t show suggestions from Google as you type</string>
+
+    <!-- Title for Voice Search hints bubble -->
+    <string name="voice_search_hint_title">Try saying:</string>
+    <!-- Starting quotation marks of the voice search hint -->
+    <string name="voice_search_hint_quotation_start">“</string>
+    <!-- Ending quotation marks of the voice search hint -->
+    <string name="voice_search_hint_quotation_end">”</string>
 
     <!-- Note that this is the standard search url.  It uses the current locale for language -->
     <!-- (%1$s) and country (%2$s) and shouldn't need to be replaced by locale or mcc selected -->

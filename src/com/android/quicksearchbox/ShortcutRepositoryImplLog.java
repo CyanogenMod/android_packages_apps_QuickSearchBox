@@ -34,8 +34,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -57,8 +57,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
-    private final String mEmptyQueryShortcutQuery ;
-    private final String mShortcutQuery;
+    private String mEmptyQueryShortcutQuery ;
+    private String mShortcutQuery;
 
     private static final String SHORTCUT_BY_ID_WHERE =
             Shortcuts.shortcut_id.name() + "=? AND " + Shortcuts.source.name() + "=?";
@@ -99,60 +99,76 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         mUiThread = uiThread;
         mLogExecutor = logExecutor;
         mOpenHelper = new DbOpenHelper(context, name, DB_VERSION, config);
-        mEmptyQueryShortcutQuery = buildShortcutQuery(true);
-        mShortcutQuery = buildShortcutQuery(false);
+        buildShortcutQueries();
+
         mSearchSpinner = Util.getResourceUri(mContext, R.drawable.search_spinner).toString();
     }
 
-    private String buildShortcutQuery(boolean emptyQuery) {
-        // clicklog first, since that's where restrict the result set
-        String tables = ClickLog.TABLE_NAME + " INNER JOIN " + Shortcuts.TABLE_NAME
-                + " ON " + ClickLog.intent_key.fullName + " = " + Shortcuts.intent_key.fullName;
-        String[] columns = {
+    // clicklog first, since that's where restrict the result set
+    private static final String TABLES = ClickLog.TABLE_NAME + " INNER JOIN " +
+            Shortcuts.TABLE_NAME + " ON " + ClickLog.intent_key.fullName + " = " +
+            Shortcuts.intent_key.fullName;
+
+    private static final String AS = " AS ";
+
+    private static final String[] SHORTCUT_QUERY_COLUMNS = {
             Shortcuts.intent_key.fullName,
             Shortcuts.source.fullName,
             Shortcuts.source_version_code.fullName,
-            Shortcuts.format.fullName + " AS " + SearchManager.SUGGEST_COLUMN_FORMAT,
-            Shortcuts.title + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
-            Shortcuts.description + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
-            Shortcuts.description_url + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2_URL,
-            Shortcuts.icon1 + " AS " + SearchManager.SUGGEST_COLUMN_ICON_1,
-            Shortcuts.icon2 + " AS " + SearchManager.SUGGEST_COLUMN_ICON_2,
-            Shortcuts.intent_action + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_ACTION,
-            Shortcuts.intent_data + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA,
-            Shortcuts.intent_query + " AS " + SearchManager.SUGGEST_COLUMN_QUERY,
-            Shortcuts.intent_extradata + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA,
-            Shortcuts.shortcut_id + " AS " + SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
-            Shortcuts.spinner_while_refreshing + " AS " + SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING,
-            Shortcuts.log_type + " AS " + CursorBackedSuggestionCursor.SUGGEST_COLUMN_LOG_TYPE,
+            Shortcuts.format.fullName + AS + SearchManager.SUGGEST_COLUMN_FORMAT,
+            Shortcuts.title + AS + SearchManager.SUGGEST_COLUMN_TEXT_1,
+            Shortcuts.description + AS + SearchManager.SUGGEST_COLUMN_TEXT_2,
+            Shortcuts.description_url + AS + SearchManager.SUGGEST_COLUMN_TEXT_2_URL,
+            Shortcuts.icon1 + AS + SearchManager.SUGGEST_COLUMN_ICON_1,
+            Shortcuts.icon2 + AS + SearchManager.SUGGEST_COLUMN_ICON_2,
+            Shortcuts.intent_action + AS + SearchManager.SUGGEST_COLUMN_INTENT_ACTION,
+            Shortcuts.intent_data + AS + SearchManager.SUGGEST_COLUMN_INTENT_DATA,
+            Shortcuts.intent_query + AS + SearchManager.SUGGEST_COLUMN_QUERY,
+            Shortcuts.intent_extradata + AS + SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA,
+            Shortcuts.shortcut_id + AS + SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
+            Shortcuts.spinner_while_refreshing + AS +
+                    SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING,
+            Shortcuts.log_type + AS + CursorBackedSuggestionCursor.SUGGEST_COLUMN_LOG_TYPE,
         };
+
+    // Avoid GLOB by using >= AND <, with some manipulation (see nextString(String)).
+    // to figure out the upper bound (e.g. >= "abc" AND < "abd"
+    // This allows us to use parameter binding and still take advantage of the
+    // index on the query column.
+    private static final String PREFIX_RESTRICTION =
+            ClickLog.query.fullName + " >= ?1 AND " + ClickLog.query.fullName + " < ?2";
+
+    private static final String LAST_HIT_TIME_EXPR = "MAX(" + ClickLog.hit_time.fullName + ")";
+    private static final String GROUP_BY = ClickLog.intent_key.fullName;
+    private static final String PREFER_LATEST_PREFIX =
+        "(" + LAST_HIT_TIME_EXPR + " = (SELECT " + LAST_HIT_TIME_EXPR + " FROM " +
+        ClickLog.TABLE_NAME + " WHERE ";
+    private static final String PREFER_LATEST_SUFFIX = "))";
+
+    private void buildShortcutQueries() {
         // SQL expression for the time before which no clicks should be counted.
-        String cutOffTime_expr = "(" + "?3" + " - " + mConfig.getMaxStatAgeMillis() + ")";
-        // Avoid GLOB by using >= AND <, with some manipulation (see nextString(String)).
-        // to figure out the upper bound (e.g. >= "abc" AND < "abd"
-        // This allows us to use parameter binding and still take advantage of the
-        // index on the query column.
-        String prefixRestriction =
-                ClickLog.query.fullName + " >= ?1 AND " + ClickLog.query.fullName + " < ?2";
+        String cutOffTime_expr = "(?3 - " + mConfig.getMaxStatAgeMillis() + ")";
         // Filter out clicks that are too old
         String ageRestriction = ClickLog.hit_time.fullName + " >= " + cutOffTime_expr;
-        String where = (emptyQuery ? "" : prefixRestriction + " AND ") + ageRestriction;
-        String groupBy = ClickLog.intent_key.fullName;
         String having = null;
-        String hit_count_expr = "COUNT(" + ClickLog._id.fullName + ")";
-        String last_hit_time_expr = "MAX(" + ClickLog.hit_time.fullName + ")";
-        String scale_expr =
-            // time (msec) from cut-off to last hit time
-            "((" + last_hit_time_expr + " - " + cutOffTime_expr + ") / "
-            // divided by time (sec) from cut-off to now
-            // we use msec/sec to get 1000 as max score
-            + (mConfig.getMaxStatAgeMillis() / 1000) + ")";
-        String ordering_expr = "(" + hit_count_expr + " * " + scale_expr + ")";
-        String preferLatest = "(" + last_hit_time_expr + " = (SELECT " + last_hit_time_expr +
-                " FROM " + ClickLog.TABLE_NAME + " WHERE " + where + "))";
+        // Order by sum of hit times (seconds since cutoff) for the clicks for each shortcut.
+        // This has the effect of multiplying the average hit time with the click count
+        String ordering_expr =
+                "SUM((" + ClickLog.hit_time.fullName + " - " + cutOffTime_expr + ") / 1000)";
+
+        String where = ageRestriction;
+        String preferLatest = PREFER_LATEST_PREFIX + where + PREFER_LATEST_SUFFIX;
         String orderBy = preferLatest + " DESC, " + ordering_expr + " DESC";
-        return SQLiteQueryBuilder.buildQueryString(
-                false, tables, columns, where, groupBy, having, orderBy, null);
+        mEmptyQueryShortcutQuery = SQLiteQueryBuilder.buildQueryString(
+                false, TABLES, SHORTCUT_QUERY_COLUMNS, where, GROUP_BY, having, orderBy, null);
+        if (DBG) Log.d(TAG, "Empty shortcut query:\n" + mEmptyQueryShortcutQuery);
+
+        where = PREFIX_RESTRICTION + " AND " + ageRestriction;
+        preferLatest = PREFER_LATEST_PREFIX + where + PREFER_LATEST_SUFFIX;
+        orderBy = preferLatest + " DESC, " + ordering_expr + " DESC";
+        mShortcutQuery = SQLiteQueryBuilder.buildQueryString(
+                false, TABLES, SHORTCUT_QUERY_COLUMNS, where, GROUP_BY, having, orderBy, null);
+        if (DBG) Log.d(TAG, "Empty shortcut:\n" + mShortcutQuery);
     }
 
     /**
@@ -223,9 +239,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         reportClickAtTime(suggestions, position, now);
     }
 
-    public SuggestionCursor getShortcutsForQuery(String query, List<Corpus> allowedCorpora,
-            int maxShortcuts) {
-        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora, maxShortcuts,
+    public SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora) {
+        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora,
                         System.currentTimeMillis());
         if (shortcuts != null) {
             startRefresh(shortcuts);
@@ -239,13 +254,13 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
 // -------------------------- end ShortcutRepository --------------------------
 
-    private boolean shouldRefresh(SuggestionCursor suggestion) {
+    private boolean shouldRefresh(Suggestion suggestion) {
         return mRefresher.shouldRefresh(suggestion.getSuggestionSource(),
                 suggestion.getShortcutId());
     }
 
-    /* package for testing */ ShortcutCursor getShortcutsForQuery(String query,
-            List<Corpus> allowedCorpora, int maxShortcuts, long now) {
+    @VisibleForTesting
+    ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + "," + allowedCorpora + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
@@ -257,15 +272,16 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return null;
         }
 
+        if (DBG) Log.d(TAG, "Allowed sources: ");
         HashMap<String,Source> allowedSources = new HashMap<String,Source>();
         for (Corpus corpus : allowedCorpora) {
             for (Source source : corpus.getSources()) {
+                if (DBG) Log.d(TAG, "\t" + source.getName());
                 allowedSources.put(source.getName(), source);
             }
         }
 
-        return new ShortcutCursor(maxShortcuts,
-                new SuggestionCursorImpl(allowedSources, query, cursor));
+        return new ShortcutCursor(new SuggestionCursorImpl(allowedSources, query, cursor));
     }
 
     private void startRefresh(final ShortcutCursor shortcuts) {
@@ -293,6 +309,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         if (refreshed == null || refreshed.getCount() == 0) {
             shortcut = null;
         } else {
+            refreshed.moveTo(0);
             shortcut = makeShortcutRow(refreshed);
         }
 
@@ -331,14 +348,17 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             }
             Source source = mAllowedSources.get(srcStr);
             if (source == null) {
-                if (DBG) Log.d(TAG, "Source " + srcStr + " not allowed");
+                if (DBG) {
+                    Log.d(TAG, "Source " + srcStr + " (position " + mCursor.getPosition() +
+                            " not allowed");
+                }
                 return null;
             }
             int versionCode = mCursor.getInt(Shortcuts.source_version_code.ordinal());
-            if (versionCode != source.getVersionCode()) {
+            if (!source.isVersionCodeCompatible(versionCode)) {
                 if (DBG) {
-                    Log.d(TAG, "Wrong version (" + versionCode + " != " + source.getVersionCode()
-                            + ") for source " + srcStr);
+                    Log.d(TAG, "Version " + versionCode + " not compatible with " +
+                            source.getVersionCode() + " for source " + srcStr);
                 }
                 return null;
             }
@@ -422,7 +442,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         }
     }
 
-    private ContentValues makeShortcutRow(SuggestionCursor suggestion) {
+    private ContentValues makeShortcutRow(Suggestion suggestion) {
         String intentAction = suggestion.getSuggestionIntentAction();
         String intentData = suggestion.getSuggestionIntentDataString();
         String intentQuery = suggestion.getSuggestionQuery();
@@ -632,7 +652,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
     // contains creation and update logic
     private static class DbOpenHelper extends SQLiteOpenHelper {
-        private Config mConfig;
+        private final Config mConfig;
         private String mPath;
         private static final String SHORTCUT_ID_INDEX
                 = Shortcuts.TABLE_NAME + "_" + Shortcuts.shortcut_id.name();

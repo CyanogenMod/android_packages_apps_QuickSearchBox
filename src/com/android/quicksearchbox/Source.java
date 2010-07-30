@@ -29,16 +29,25 @@ import android.os.Bundle;
 public interface Source extends SuggestionCursorProvider<SourceResult> {
 
     /**
-     * Gets the name of the activity that this source is for. When a suggestion is
-     * clicked, the resulting intent will be sent to this activity.
+     * Gets the name activity that intents from this source are sent to.
      */
-    ComponentName getComponentName();
+    ComponentName getIntentComponent();
 
     /**
      * Gets the version code of the source. This is expected to change when the app that
      * this source is for is upgraded.
      */
     int getVersionCode();
+
+    /**
+     * Indicates if shortcuts from the given version of this source are compatible with the
+     * currently installed version. The version code given will only differ from the currently
+     * installed version after the source has been upgraded.
+     *
+     * @param version version of the source (as returned by {@link #getVersionCode} which originally
+     *      created the shortcut.
+     */
+    boolean isVersionCodeCompatible(int version);
 
     /**
      * Gets the localized, human-readable label for this source.
@@ -102,18 +111,28 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
 
     boolean voiceSearchEnabled();
 
+    boolean isWebSuggestionSource();
+
+    boolean isLocationAware();
+
     Intent createSearchIntent(String query, Bundle appData);
 
     Intent createVoiceSearchIntent(Bundle appData);
+
+    /**
+     * Checks if the current process can read the suggestions from this source.
+     */
+    boolean canRead();
 
     /**
      * Gets suggestions from this source.
      *
      * @param query The user query.
      * @param queryLimit An advisory maximum number of results that the source should return.
+     * @param onlySource Indicates if this is the only source being queried.
      * @return The suggestion results.
      */
-    SourceResult getSuggestions(String query, int queryLimit);
+    SourceResult getSuggestions(String query, int queryLimit, boolean onlySource);
 
     /**
      * Updates a shorcut.
@@ -124,21 +143,6 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      *         cursor is empty or <code>null</code>, the shortcut will be removed.
      */
     SuggestionCursor refreshShortcut(String shortcutId, String extraData);
-
-    /**
-     * Checks whether this is a web suggestion source.
-     */
-    boolean isWebSuggestionSource();
-
-    /**
-     * Checks whether the text in the query field should come from the suggestion intent data.
-     */
-    boolean shouldRewriteQueryFromData();
-
-    /**
-     * Checks whether the text in the query field should come from the suggestion title.
-     */
-    boolean shouldRewriteQueryFromText();
 
     /**
      * Gets the default intent action for suggestions from this source.

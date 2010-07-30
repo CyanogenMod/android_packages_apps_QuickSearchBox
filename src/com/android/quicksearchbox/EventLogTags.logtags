@@ -28,10 +28,14 @@ option java_package com.android.quicksearchbox
 #   TODO: define format of suggestion log names
 # @param queried_sources A pipe-separated list of the sources that were queried to produce
 #        the list of suggestions shown.
-# @param Number of characters in the query typed by the user
-# TODO: action key?
+# @param num_chars Number of characters in the query typed by the user
+# @param click_type
+#     SUGGESTION_CLICK_TYPE_LAUNCH = 0
+#     SUGGESTION_CLICK_TYPE_REFINE = 1
+#     SUGGESTION_CLICK_TYPE_QUICK_CONTACT = 2
+#
 # TODO: latency?
-71002 qsb_click (position|1),(suggestions|3),(queried_sources|3),(num_chars|1)
+71002 qsb_click (position|1),(suggestions|3),(queried_sources|3),(num_chars|1),(click_type|1)
 
 # User launched a typed search
 # @param search_source Name of the selected search source

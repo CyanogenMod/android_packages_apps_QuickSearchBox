@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.Factory;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,12 +31,18 @@ import java.util.concurrent.Executor;
  */
 public class SearchableCorpusFactory implements CorpusFactory {
 
+    private static final String TAG = "QSB.SearchableCorpusFactory";
+
     private final Context mContext;
+
+    private final Config mConfig;
 
     private final Factory<Executor> mWebCorpusExecutorFactory;
 
-    public SearchableCorpusFactory(Context context, Factory<Executor> webCorpusExecutorFactory) {
+    public SearchableCorpusFactory(Context context, Config config,
+            Factory<Executor> webCorpusExecutorFactory) {
         mContext = context;
+        mConfig = config;
         mWebCorpusExecutorFactory = webCorpusExecutorFactory;
     }
 
@@ -50,6 +57,10 @@ public class SearchableCorpusFactory implements CorpusFactory {
         return mContext;
     }
 
+    protected Config getConfig() {
+        return mConfig;
+    }
+
     protected Executor createWebCorpusExecutor() {
         return mWebCorpusExecutorFactory.create();
     }
@@ -61,8 +72,8 @@ public class SearchableCorpusFactory implements CorpusFactory {
      * @param sources All available sources.
      */
     protected void addSpecialCorpora(ArrayList<Corpus> corpora, Sources sources) {
-        corpora.add(createWebCorpus(sources));
-        corpora.add(createAppsCorpus(sources));
+        addCorpus(corpora, createWebCorpus(sources));
+        addCorpus(corpora, createAppsCorpus(sources));
     }
 
     /**
@@ -82,25 +93,38 @@ public class SearchableCorpusFactory implements CorpusFactory {
         // Creates corpora for all unclaimed sources
         for (Source source : sources.getSources()) {
             if (!claimedSources.contains(source)) {
-                corpora.add(createSingleSourceCorpus(source));
+                addCorpus(corpora, createSingleSourceCorpus(source));
             }
         }
     }
 
+    private void addCorpus(ArrayList<Corpus> corpora, Corpus corpus) {
+        if (corpus != null) corpora.add(corpus);
+    }
+
     protected Corpus createWebCorpus(Sources sources) {
         Source webSource = sources.getWebSearchSource();
+        if (webSource != null && !webSource.canRead()) {
+            Log.w(TAG, "Can't read web source " + webSource.getName());
+            webSource = null;
+        }
         Source browserSource = getBrowserSource(sources);
+        if (browserSource != null && !browserSource.canRead()) {
+            Log.w(TAG, "Can't read browser source " + browserSource.getName());
+            browserSource = null;
+        }
         Executor executor = createWebCorpusExecutor();
-        return new WebCorpus(mContext, executor, webSource, browserSource);
+        return new WebCorpus(mContext, mConfig, executor, webSource, browserSource);
     }
 
     protected Corpus createAppsCorpus(Sources sources) {
         Source appsSource = getAppsSource(sources);
-        return new AppsCorpus(mContext, appsSource);
+        return new AppsCorpus(mContext, mConfig, appsSource);
     }
 
     protected Corpus createSingleSourceCorpus(Source source) {
-        return new SingleSourceCorpus(mContext, source);
+        if (!source.canRead()) return null;
+        return new SingleSourceCorpus(mContext, mConfig, source);
     }
 
     protected Source getBrowserSource(Sources sources) {

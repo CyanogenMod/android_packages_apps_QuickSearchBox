@@ -25,7 +25,6 @@ import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import java.util.Collection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -41,9 +40,10 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
+        Config config = new Config(getContext());
         // Using a single thread to make the test deterministic
         Executor executor = Executors.newSingleThreadExecutor();
-        mCorpus = new SkeletonMultiSourceCorpus(getContext(), executor,
+        mCorpus = new SkeletonMultiSourceCorpus(getContext(), config, executor,
                 MockSource.SOURCE_1, MockSource.SOURCE_2);
     }
 
@@ -54,9 +54,9 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
 
     public void testGetSuggestions() {
         ListSuggestionCursor expected = concatSuggestionCursors("foo",
-                MockSource.SOURCE_1.getSuggestions("foo", 50),
-                MockSource.SOURCE_2.getSuggestions("foo", 50));
-        CorpusResult observed = mCorpus.getSuggestions("foo", 50);
+                MockSource.SOURCE_1.getSuggestions("foo", 50, false),
+                MockSource.SOURCE_2.getSuggestions("foo", 50, false));
+        CorpusResult observed = mCorpus.getSuggestions("foo", 50, false);
         SuggestionCursorUtil.assertSameSuggestions(expected, observed);
     }
 
@@ -74,8 +74,9 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
 
     private static class SkeletonMultiSourceCorpus extends MultiSourceCorpus {
 
-        public SkeletonMultiSourceCorpus(Context context, Executor executor, Source... sources) {
-            super(context, executor, sources);
+        public SkeletonMultiSourceCorpus(Context context, Config config, Executor executor,
+                Source... sources) {
+            super(context, config, executor, sources);
         }
 
         public Intent createSearchIntent(String query, Bundle appData) {
@@ -106,6 +107,7 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
             return null;
         }
 
+        @Override
         public int getQueryThreshold() {
             return 0;
         }
@@ -118,10 +120,12 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
             return false;
         }
 
+        @Override
         public boolean queryAfterZeroResults() {
             return false;
         }
 
+        @Override
         public boolean voiceSearchEnabled() {
             return false;
         }
