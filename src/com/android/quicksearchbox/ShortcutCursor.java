@@ -37,13 +37,13 @@ class ShortcutCursor extends ListSuggestionCursor {
 
     private boolean mClosed;
 
-    public ShortcutCursor(int maxShortcuts, CursorBackedSuggestionCursor shortcuts) {
+    public ShortcutCursor(CursorBackedSuggestionCursor shortcuts) {
         super(shortcuts.getUserQuery());
         mShortcuts = shortcuts;
         mRefreshed = new HashSet<SuggestionCursor>();
         int count = shortcuts.getCount();
+        if (DBG) Log.d(TAG, "Total shortcuts: " + count);
         for (int i = 0; i < count; i++) {
-            if (getCount() >= maxShortcuts) break;
             shortcuts.moveTo(i);
             if (shortcuts.getSuggestionSource() != null) {
                 add(new SuggestionPosition(shortcuts));
@@ -69,8 +69,7 @@ class ShortcutCursor extends ListSuggestionCursor {
         if (refreshed != null) {
             mRefreshed.add(refreshed);
         }
-        int count = getCount();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < getCount(); i++) {
             moveTo(i);
             if (shortcutId.equals(getShortcutId()) && source.equals(getSuggestionSource())) {
               if (refreshed != null && refreshed.getCount() > 0) {

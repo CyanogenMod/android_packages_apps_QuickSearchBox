@@ -138,7 +138,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String PREFIX_RESTRICTION =
             ClickLog.query.fullName + " >= ?1 AND " + ClickLog.query.fullName + " < ?2";
 
-    private static final String HIT_COUNT_EXPR = "COUNT(" + ClickLog._id.fullName + ")";
     private static final String LAST_HIT_TIME_EXPR = "MAX(" + ClickLog.hit_time.fullName + ")";
     private static final String GROUP_BY = ClickLog.intent_key.fullName;
     private static final String PREFER_LATEST_PREFIX =
@@ -152,25 +151,24 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         // Filter out clicks that are too old
         String ageRestriction = ClickLog.hit_time.fullName + " >= " + cutOffTime_expr;
         String having = null;
-        String scale_expr =
-            // time (msec) from cut-off to last hit time
-            "((" + LAST_HIT_TIME_EXPR + " - " + cutOffTime_expr + ") / "
-            // divided by time (sec) from cut-off to now
-            // we use msec/sec to get 1000 as max score
-            + (mConfig.getMaxStatAgeMillis() / 1000) + ")";
-        String ordering_expr = "(" + HIT_COUNT_EXPR + " * " + scale_expr + ")";
+        // Order by sum of hit times (seconds since cutoff) for the clicks for each shortcut.
+        // This has the effect of multiplying the average hit time with the click count
+        String ordering_expr =
+                "SUM((" + ClickLog.hit_time.fullName + " - " + cutOffTime_expr + ") / 1000)";
 
         String where = ageRestriction;
         String preferLatest = PREFER_LATEST_PREFIX + where + PREFER_LATEST_SUFFIX;
         String orderBy = preferLatest + " DESC, " + ordering_expr + " DESC";
         mEmptyQueryShortcutQuery = SQLiteQueryBuilder.buildQueryString(
                 false, TABLES, SHORTCUT_QUERY_COLUMNS, where, GROUP_BY, having, orderBy, null);
+        if (DBG) Log.d(TAG, "Empty shortcut query:\n" + mEmptyQueryShortcutQuery);
 
         where = PREFIX_RESTRICTION + " AND " + ageRestriction;
         preferLatest = PREFER_LATEST_PREFIX + where + PREFER_LATEST_SUFFIX;
         orderBy = preferLatest + " DESC, " + ordering_expr + " DESC";
         mShortcutQuery = SQLiteQueryBuilder.buildQueryString(
                 false, TABLES, SHORTCUT_QUERY_COLUMNS, where, GROUP_BY, having, orderBy, null);
+        if (DBG) Log.d(TAG, "Empty shortcut:\n" + mShortcutQuery);
     }
 
     /**
@@ -241,9 +239,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         reportClickAtTime(suggestions, position, now);
     }
 
-    public SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora,
-            int maxShortcuts) {
-        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora, maxShortcuts,
+    public SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora) {
+        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora,
                         System.currentTimeMillis());
         if (shortcuts != null) {
             startRefresh(shortcuts);
@@ -262,8 +259,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                 suggestion.getShortcutId());
     }
 
-    /* package for testing */ ShortcutCursor getShortcutsForQuery(String query,
-            Collection<Corpus> allowedCorpora, int maxShortcuts, long now) {
+    @VisibleForTesting
+    ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + "," + allowedCorpora + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
@@ -275,15 +272,16 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return null;
         }
 
+        if (DBG) Log.d(TAG, "Allowed sources: ");
         HashMap<String,Source> allowedSources = new HashMap<String,Source>();
         for (Corpus corpus : allowedCorpora) {
             for (Source source : corpus.getSources()) {
+                if (DBG) Log.d(TAG, "\t" + source.getName());
                 allowedSources.put(source.getName(), source);
             }
         }
 
-        return new ShortcutCursor(maxShortcuts,
-                new SuggestionCursorImpl(allowedSources, query, cursor));
+        return new ShortcutCursor(new SuggestionCursorImpl(allowedSources, query, cursor));
     }
 
     private void startRefresh(final ShortcutCursor shortcuts) {
@@ -350,14 +348,17 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             }
             Source source = mAllowedSources.get(srcStr);
             if (source == null) {
-                if (DBG) Log.d(TAG, "Source " + srcStr + " not allowed");
+                if (DBG) {
+                    Log.d(TAG, "Source " + srcStr + " (position " + mCursor.getPosition() +
+                            " not allowed");
+                }
                 return null;
             }
             int versionCode = mCursor.getInt(Shortcuts.source_version_code.ordinal());
-            if (versionCode != source.getVersionCode()) {
+            if (!source.isVersionCodeCompatible(versionCode)) {
                 if (DBG) {
-                    Log.d(TAG, "Wrong version (" + versionCode + " != " + source.getVersionCode()
-                            + ") for source " + srcStr);
+                    Log.d(TAG, "Version " + versionCode + " not compatible with " +
+                            source.getVersionCode() + " for source " + srcStr);
                 }
                 return null;
             }

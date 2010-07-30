@@ -105,8 +105,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
     }
 
-    protected SuggestionCursor getShortcutsForQuery(String query, Corpus singleCorpus,
-            int maxShortcuts) {
+    protected SuggestionCursor getShortcutsForQuery(String query, Corpus singleCorpus) {
         if (mShortcutRepo == null) return null;
         Collection<Corpus> allowedCorpora;
         if (singleCorpus == null) {
@@ -114,7 +113,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         } else {
             allowedCorpora = Collections.singletonList(singleCorpus);
         }
-        return mShortcutRepo.getShortcutsForQuery(query, allowedCorpora, maxShortcuts);
+        return mShortcutRepo.getShortcutsForQuery(query, allowedCorpora);
     }
 
     /**
@@ -161,8 +160,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
                 maxSuggestions,
                 query,
                 corporaToQuery);
-        int maxShortcuts = mConfig.getMaxShortcutsReturned();
-        SuggestionCursor shortcuts = getShortcutsForQuery(query, singleCorpus, maxShortcuts);
+        SuggestionCursor shortcuts = getShortcutsForQuery(query, singleCorpus);
         if (shortcuts != null) {
             suggestions.setShortcuts(shortcuts);
         }

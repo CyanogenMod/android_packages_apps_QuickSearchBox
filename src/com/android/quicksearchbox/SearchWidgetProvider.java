@@ -77,13 +77,17 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             "com.android.quicksearchbox.action.CONSIDER_VOICE_SEARCH_HINT";
 
     /**
-     * Broadcast intent action for displaying voice search hints immediately.
+     * Broadcast intent action for displaying voice search hints immediately, and resetting the
+     * 'first seen' voice search timestamp, so we continue to show them for a while.
      */
     private static final String ACTION_SHOW_VOICE_SEARCH_HINT_NOW =
             "com.android.quicksearchbox.action.SHOW_VOICE_SEARCH_HINT_NOW";
 
     private static final String ACTION_RESET_VOICE_SEARCH_HINT_FIRST_SEEN =
             "com.android.quicksearchbox.action.debugonly.RESET_HINT_FIRST_SEEN_TIME";
+
+    private static final String ACTION_SHOW_HINT_TEMPORARILY =
+            "com.android.quicksearchbox.action.debugonly.SHOW_HINT_TEMPORARILY";
 
     /**
      * Preference key used for storing the index of the next voice search hint to show.
@@ -123,8 +127,13 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             hideVoiceSearchHint(context);
         } else if (ACTION_SHOW_VOICE_SEARCH_HINT_NOW.equals(action)) {
             showVoiceSearchHintNow(context);
+            resetVoiceSearchHintFirstSeenTime(context);
+        } else if (ACTION_SHOW_HINT_TEMPORARILY.equals(action)) {
+            showVoiceSearchHintNow(context);
         } else if (ACTION_RESET_VOICE_SEARCH_HINT_FIRST_SEEN.equals(action)) {
             resetVoiceSearchHintFirstSeenTime(context);
+        } else {
+            if (DBG) Log.d(TAG, "Unhandled intent action=" + action);
         }
     }
 
@@ -427,6 +436,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
      */
     private static void getHintsFromVoiceSearch(Context context) {
         Intent intent = new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
+        intent.putExtra(Recognition.EXTRA_HINT_CONTEXT, Recognition.HINT_CONTEXT_LAUNCHER);
         if (DBG) Log.d(TAG, "Broadcasting " + intent);
         context.sendOrderedBroadcast(intent, null,
                 new HintReceiver(), null, Activity.RESULT_OK, null, null);
@@ -435,6 +445,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
     private static class HintReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DBG) Log.d(TAG, "onReceive(" + intent.toUri(0) + ")");
             if (getResultCode() != Activity.RESULT_OK) {
                 return;
             }
