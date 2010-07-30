@@ -35,46 +35,53 @@
         android:orientation="vertical"
         >
 
-        <TextView
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/corpus_selector_header"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/corpus_selector_arrow"
             android:layout_alignParentLeft="true"
-            android:layout_alignBaseline="@+id/corpus_edit_items"
-            android:paddingLeft="16dip"
-            android:singleLine="true"
-            android:textColor="@android:color/primary_text_light"
-            android:textSize="14dip"
-            android:text="@string/corpus_selection_heading"
-        />
-
-        <TextView
-            android:id="@+id/corpus_edit_items"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="2dip"
-            android:paddingLeft="6dip"
-            android:paddingTop="6dip"
-            android:paddingBottom="6dip"
-            android:paddingRight="14dip"
-            android:gravity="center_vertical|left"
-            android:singleLine="true"
-            android:clickable="true"
-            android:focusable="true"
-            android:textColor="@android:color/primary_text_light"
-            android:textSize="14dip"
-            android:drawableLeft="@drawable/corpus_edit_icon"
-            android:drawablePadding="4dip"
-            android:text="@string/corpus_selection_edit_items"
-            android:background="@drawable/corpus_edit_items_bg"
-        />
+            android:layout_alignParentTop="true"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:paddingLeft="16dip"
+                android:singleLine="true"
+                android:gravity="center_vertical|left"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="14dip"
+                android:text="@string/corpus_selection_heading"
+            />
+
+            <ImageView
+                android:id="@+id/corpus_edit_items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:paddingLeft="6dip"
+                android:paddingTop="6dip"
+                android:paddingBottom="6dip"
+                android:paddingRight="6dip"
+                android:gravity="center_vertical|right"
+                android:singleLine="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/corpus_edit_icon"
+                android:background="@drawable/corpus_edit_items_bg"
+            />
+        </RelativeLayout>
 
         <GridView
             android:id="@+id/corpus_grid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/corpus_edit_items"
+            android:layout_below="@id/corpus_selector_header"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_marginTop="12dip"

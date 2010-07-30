@@ -93,6 +93,8 @@ public class SearchActivity extends Activity {
     protected QueryTextView mQueryTextView;
     // True if the query was empty on the previous call to updateQuery()
     protected boolean mQueryWasEmpty = true;
+    protected Drawable mQueryTextEmptyBg;
+    protected Drawable mQueryTextNotEmptyBg;
 
     protected SuggestionsView mSuggestionsView;
 
@@ -145,6 +147,7 @@ public class SearchActivity extends Activity {
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
         mQueryTextView.setSuggestionClickListener(new ClickHandler());
+        mQueryTextEmptyBg = mQueryTextView.getBackground();
 
         mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
 
@@ -406,10 +409,14 @@ public class SearchActivity extends Activity {
     private void updateQueryTextView(boolean queryEmpty) {
         if (queryEmpty) {
             if (isSearchCorpusWeb()) {
-                mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty_google);
+                mQueryTextView.setBackgroundDrawable(mQueryTextEmptyBg);
                 mQueryTextView.setHint(null);
             } else {
-                mQueryTextView.setBackgroundResource(R.drawable.textfield_search_empty);
+                if (mQueryTextNotEmptyBg == null) {
+                    mQueryTextNotEmptyBg =
+                            getResources().getDrawable(R.drawable.textfield_search_empty);
+                }
+                mQueryTextView.setBackgroundDrawable(mQueryTextNotEmptyBg);
                 mQueryTextView.setHint(mCorpus.getHint());
             }
         } else {
@@ -437,12 +444,16 @@ public class SearchActivity extends Activity {
 
     protected void showCorpusSelectionDialog() {
         if (mCorpusSelectionDialog == null) {
-            mCorpusSelectionDialog = new CorpusSelectionDialog(this);
+            mCorpusSelectionDialog = createCorpusSelectionDialog();
             mCorpusSelectionDialog.setOwnerActivity(this);
             mCorpusSelectionDialog.setOnDismissListener(new CorpusSelectorDismissListener());
             mCorpusSelectionDialog.setOnCorpusSelectedListener(new CorpusSelectionListener());
         }
         mCorpusSelectionDialog.show(mCorpus);
+    }
+
+    protected CorpusSelectionDialog createCorpusSelectionDialog() {
+        return new CorpusSelectionDialog(this);
     }
 
     protected boolean isCorpusSelectionDialogShowing() {

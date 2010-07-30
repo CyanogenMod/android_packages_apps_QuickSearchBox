@@ -48,14 +48,29 @@ public class SuggestionCursorUtil extends Assert {
     }
 
     public static void assertSameSuggestions(SuggestionCursor expected, SuggestionCursor observed) {
-        assertSameSuggestions("", expected, observed);
+        assertSameSuggestions("", expected, observed, false);
+    }
+
+    public static void assertSameSuggestions(SuggestionCursor expected, SuggestionCursor observed,
+            boolean allowExtras) {
+        assertSameSuggestions("", expected, observed, allowExtras);
     }
 
     public static void assertSameSuggestions(
             String message, SuggestionCursor expected, SuggestionCursor observed) {
+        assertSameSuggestions(message, expected, observed, false);
+    }
+
+    public static void assertSameSuggestions(
+            String message, SuggestionCursor expected, SuggestionCursor observed,
+            boolean allowExtras) {
         assertNotNull(expected);
         assertNotNull(message, observed);
-        assertEquals(message + ", count", expected.getCount(), observed.getCount());
+        if (!allowExtras) {
+            assertEquals(message + ", count", expected.getCount(), observed.getCount());
+        } else {
+            assertTrue(message + "count", expected.getCount() <= observed.getCount());
+        }
         assertEquals(message + ", userQuery", expected.getUserQuery(), observed.getUserQuery());
         int count = expected.getCount();
         for (int i = 0; i < count; i++) {

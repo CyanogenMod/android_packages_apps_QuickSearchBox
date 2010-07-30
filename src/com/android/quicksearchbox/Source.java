@@ -40,6 +40,16 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
     int getVersionCode();
 
     /**
+     * Indicates if shortcuts from the given version of this source are compatible with the
+     * currently installed version. The version code given will only differ from the currently
+     * installed version after the source has been upgraded.
+     *
+     * @param version version of the source (as returned by {@link #getVersionCode} which originally
+     *      created the shortcut.
+     */
+    boolean isVersionCodeCompatible(int version);
+
+    /**
      * Gets the localized, human-readable label for this source.
      */
     CharSequence getLabel();

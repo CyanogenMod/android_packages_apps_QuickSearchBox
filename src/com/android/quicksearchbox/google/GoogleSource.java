@@ -34,7 +34,13 @@ import android.os.Bundle;
  */
 public abstract class GoogleSource extends AbstractSource {
 
-    private static final String GOOGLE_SOURCE_NAME = "google";
+    /*
+     * This name corresponds to what was used in previous version of quick search box. We use the
+     * same name so that shortcuts continue to work after an upgrade. (It also makes logging more
+     * consistent).
+     */
+    private static final String GOOGLE_SOURCE_NAME =
+        "com.android.quicksearchbox/.google.GoogleSearch";
 
     public GoogleSource(Context context) {
         super(context);
@@ -124,6 +130,16 @@ public abstract class GoogleSource extends AbstractSource {
 
     public int getVersionCode() {
         return QsbApplication.get(getContext()).getVersionCode();
+    }
+
+    /**
+     * Shortcuts from previous version are compatible with shortcuts from this version, so we just
+     * return true. If shortcuts become incompatible during an upgrade, some examination of the
+     * version code should be added here.
+     */
+    @Override
+    public boolean isVersionCodeCompatible(int version) {
+        return true;
     }
 
     public boolean queryAfterZeroResults() {

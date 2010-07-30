@@ -54,6 +54,10 @@ public abstract class AbstractSource implements Source {
 
     protected abstract String getIconPackage();
 
+    public boolean isVersionCodeCompatible(int version) {
+        return getVersionCode() == version;
+    }
+
     public Drawable getIcon(String drawableId) {
         return getIconLoader().getIcon(drawableId);
     }
