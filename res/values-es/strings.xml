@@ -19,7 +19,7 @@
     <string name="app_name" msgid="1504397077706378597">"Búsqueda de Google"</string>
     <string name="search_widget" msgid="323244086853110381">"Búsqueda"</string>
     <string name="search_widget_config_ok" msgid="5928098252637988527">"Aceptar"</string>
-    <string name="corpus_selection_heading" msgid="6185939048752810271">"Búsqueda"</string>
+    <string name="corpus_selection_heading" msgid="6673422146423301360">"Búsqueda"</string>
     <string name="corpus_selection_edit_items" msgid="4467633677272572585">"Añadir/Eliminar"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Todo"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
