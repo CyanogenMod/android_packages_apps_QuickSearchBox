@@ -62,7 +62,7 @@ public class FilteredSource<S extends Source> extends SourceProxy<S> {
         @Override
         public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
             SourceResult unfiltered = super.getSuggestions(query, queryLimit, onlySource);
-            ListSourceResult filtered = new ListSourceResult(query, unfiltered.getCount(), this);
+            ListSourceResult filtered = new ListSourceResult(query, unfiltered);
             if (DBG) Log.d(TAG, this + ".getSuggestions('" + query + "') unfiltered=" + unfiltered);
             synchronized (unfiltered) {
                 for (int i = 0; i < unfiltered.getCount(); ++i) {
@@ -83,14 +83,18 @@ public class FilteredSource<S extends Source> extends SourceProxy<S> {
     }
 
     private static class ListSourceResult extends ListSuggestionCursor implements SourceResult {
-        private final Source mSource;
-        public ListSourceResult(String query, int capacity, Source source) {
-            super(query, capacity);
+        private final SourceResult mSource;
+        public ListSourceResult(String query, SourceResult source) {
+            super(query, source.getCount());
             mSource = source;
         }
-        @Override
         public Source getSource() {
-            return mSource;
+            return mSource.getSource();
+        }
+        @Override
+        public void close() {
+            mSource.close();
+            super.close();
         }
     }
 
@@ -98,7 +102,7 @@ public class FilteredSource<S extends Source> extends SourceProxy<S> {
         public final String mQuery;
         public final int mQueryLimit;
         public final boolean mOnlySource;
-        private SourceResult mResult;
+        private ReferenceCountedSourceResult mResult;
         public SuggestionsRequest(String query, int queryLimit, boolean onlySource) {
             mQuery = query;
             mQueryLimit = queryLimit;
@@ -106,6 +110,7 @@ public class FilteredSource<S extends Source> extends SourceProxy<S> {
         }
         public SourceResult run() {
             SuggestionsRequest existing = null;
+            SourceResult result;
             synchronized (mActiveQueries) {
                 existing = mActiveQueries.get(mQuery);
                 if (existing == null) {
@@ -113,18 +118,22 @@ public class FilteredSource<S extends Source> extends SourceProxy<S> {
                 }
             }
             if (existing == null) {
-                SourceResult result =mParent.getSuggestions(mQuery, mQueryLimit, mOnlySource);
+                // we're the first to be queried with this query
+                ReferenceCountedSourceResult rcResult = new ReferenceCountedSourceResult(
+                        mParent.getSuggestions(mQuery, mQueryLimit, mOnlySource));
                 synchronized (this) {
-                    mResult = result; 
+                    mResult = rcResult;
                     notifyAll();
                 }
+                result = mResult;
             } else {
+                // another query is already ongoing - wait here for it to finish.
                 synchronized(existing) {
                     try {
                         existing.wait();
-                        mResult = existing.mResult;
                     } catch (InterruptedException e) {
                     }
+                    result = existing.mResult.getRef();
                 }
             }
             if (existing == null) {
@@ -132,7 +141,7 @@ public class FilteredSource<S extends Source> extends SourceProxy<S> {
                     mActiveQueries.remove(mQuery);
                 }
             }
-            return mResult;
+            return result;
         }
     }
 
