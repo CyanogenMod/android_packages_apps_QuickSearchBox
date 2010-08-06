@@ -18,9 +18,9 @@ package com.android.quicksearchbox;
 
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
-import android.preference.Preference.OnPreferenceChangeListener;
 import android.util.Log;
 
 /**
@@ -53,7 +53,8 @@ public class SearchableItemsSettings extends PreferenceActivity
     }
 
     private Corpora getCorpora() {
-        return QsbApplication.get(this).getCorpora();
+        //TODO is is ok to always use All corpora?
+        return QsbApplication.get(this).getAllCorpora();
     }
 
     /**

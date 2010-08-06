@@ -186,11 +186,12 @@ public class ShortcutsProvider extends ContentProvider {
     }
 
     private ShortcutRepository getShortcutRepository() {
-        return getQsbApplication().getShortcutRepository();
+        return getQsbApplication().getShortcutRepository(getCorpora());
     }
 
     private Corpora getCorpora() {
-        return getQsbApplication().getCorpora();
+        //TODO should we getResultsCorpora() here when 2-pane UI in use?
+        return getQsbApplication().getAllCorpora();
     }
 
 }

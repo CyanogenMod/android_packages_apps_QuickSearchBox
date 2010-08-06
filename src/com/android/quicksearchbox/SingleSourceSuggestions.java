@@ -16,11 +16,8 @@
 
 package com.android.quicksearchbox;
 
-
-
-
 /**
- *
+ * Suggestions provided by a single Source.
  */
 public class SingleSourceSuggestions extends Suggestions {
 

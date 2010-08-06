@@ -103,7 +103,7 @@ public class SearchableCorpusFactory implements CorpusFactory {
     }
 
     protected Corpus createWebCorpus(Sources sources) {
-        Source webSource = sources.getWebSearchSource();
+        Source webSource = getWebSource(sources);
         if (webSource != null && !webSource.canRead()) {
             Log.w(TAG, "Can't read web source " + webSource.getName());
             webSource = null;
@@ -125,6 +125,10 @@ public class SearchableCorpusFactory implements CorpusFactory {
     protected Corpus createSingleSourceCorpus(Source source) {
         if (!source.canRead()) return null;
         return new SingleSourceCorpus(mContext, mConfig, source);
+    }
+
+    protected Source getWebSource(Sources sources) {
+        return sources.getWebSearchSource();
     }
 
     protected Source getBrowserSource(Sources sources) {

@@ -106,6 +106,8 @@ public class SearchActivity extends Activity {
     // View that shows the results other than the query completions
     protected SuggestionsView mResultsView;
 
+    protected boolean mSeparateResults;
+
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
     protected ImageButton mCorpusIndicator;
@@ -148,10 +150,9 @@ public class SearchActivity extends Activity {
 
         mResultsView = (SuggestionsView) findViewById(R.id.shortcuts);
 
-        boolean seperateResults = mResultsView != null;
-        getQsbApplication().setSeparateResults(seperateResults);
+        mSeparateResults = mResultsView != null;
 
-        if (seperateResults) {
+        if (mSeparateResults) {
             mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
             mResultsAdapter = getQsbApplication().createSuggestionsAdapter();
             mResultsAdapter.setSuggestionClickListener(new ClickHandler(mResultsAdapter));
@@ -206,7 +207,7 @@ public class SearchActivity extends Activity {
         // is called.
         mSuggestionsView.setAdapter(mSuggestionsAdapter);
 
-        if (seperateResults) {
+        if (mSeparateResults) {
             mResultsAdapter.registerDataSetObserver(new SuggestionsObserver());
             mResultsView.setAdapter(mResultsAdapter);
         }
@@ -339,19 +340,20 @@ public class SearchActivity extends Activity {
     }
 
     protected boolean separateResults() {
-        return getQsbApplication().seperateResults();
+        return mSeparateResults;
     }
 
     private Config getConfig() {
         return getQsbApplication().getConfig();
     }
 
-    private Corpora getCorpora() {
-        return getQsbApplication().getCorpora();
+    public Corpora getCorpora() {
+        return separateResults() ? getQsbApplication().getResultsCorpora()
+                                 : getQsbApplication().getAllCorpora();
     }
 
     private ShortcutRepository getShortcutRepository() {
-        return getQsbApplication().getShortcutRepository();
+        return getQsbApplication().getShortcutRepository(getCorpora());
     }
 
     private SuggestionsProvider getSuggestionsProvider() {
@@ -587,7 +589,7 @@ public class SearchActivity extends Activity {
     }
 
     /**
-     * Checks if the corpus used for typed searchs is the web corpus.
+     * Checks if the corpus used for typed searches is the web corpus.
      */
     protected boolean isSearchCorpusWeb() {
         Corpus corpus = getSearchCorpus();
@@ -819,7 +821,7 @@ public class SearchActivity extends Activity {
                     query, mCorpus, getMaxSuggestions());
             // TODO gotSuggestions(webSuggestions, results)
             gotSuggestions(pickBlended(results, webSuggestions));
-            
+
             mSuggestionsAdapter.setSuggestions(webSuggestions);
             mResultsAdapter.setSuggestions(results);
         }

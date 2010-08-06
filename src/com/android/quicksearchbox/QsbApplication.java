@@ -38,24 +38,22 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
-import android.util.Log;
 
+import java.util.HashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class QsbApplication {
-    private static final String TAG = "QSB.QsbApplication";
-    private static final boolean DBG = false;
-
     private final Context mContext;
 
     private int mVersionCode;
     private Handler mUiThreadHandler;
     private Config mConfig;
     private Sources mSources;
-    private Corpora mCorpora;
-    private CorpusRanker mCorpusRanker;
+    private Corpora mAllCorpora;
+    private Corpora mResultsCorpora;
+    private final HashMap<Corpora, CorpusRanker> mCorpusRankers;
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
     private NamedTaskExecutor mSourceTaskExecutor;
@@ -70,11 +68,10 @@ public class QsbApplication {
     private Logger mLogger;
     private SuggestionFormatter mSuggestionFormatter;
     private TextAppearanceFactory mTextAppearanceFactory;
-    // Whether to split the results into query completions and other results
-    private boolean mSeperateResults;
 
     public QsbApplication(Context context) {
         mContext = context;
+        mCorpusRankers = new HashMap<Corpora, CorpusRanker>();
     }
 
     public static boolean isFroyoOrLater() {
@@ -172,20 +169,39 @@ public class QsbApplication {
     }
 
     /**
-     * Gets the corpora.
+     * Gets the 'all' corpora providing results and web suggestions.
      * May only be called from the main thread.
      */
-    public Corpora getCorpora() {
+    public Corpora getAllCorpora() {
         checkThread();
-        if (mCorpora == null) {
-            mCorpora = createCorpora(getSources());
+        if (mAllCorpora == null) {
+            mAllCorpora = createAllCorpora(getSources());
         }
-        return mCorpora;
+        return mAllCorpora;
     }
 
-    protected Corpora createCorpora(Sources sources) {
+    protected Corpora createAllCorpora(Sources sources) {
         SearchableCorpora corpora = new SearchableCorpora(getContext(), sources,
-                createCorpusFactory());
+                createAllCorpusFactory());
+        corpora.update();
+        return corpora;
+    }
+
+    /**
+     * Gets the corpora providing results only.
+     * May only be called from the main thread.
+     */
+    public Corpora getResultsCorpora() {
+        checkThread();
+        if (mResultsCorpora == null) {
+            mResultsCorpora = createResultsCorpora(getSources());
+        }
+        return mResultsCorpora;
+    }
+
+    protected Corpora createResultsCorpora(Sources sources) {
+        SearchableCorpora corpora = new SearchableCorpora(getContext(), sources,
+                createResultsCorpusFactory());
         corpora.update();
         return corpora;
     }
@@ -196,8 +212,11 @@ public class QsbApplication {
      */
     public void updateCorpora() {
         checkThread();
-        if (mCorpora != null) {
-            mCorpora.update();
+        if (mAllCorpora != null) {
+            mAllCorpora.update();
+        }
+        if (mResultsCorpora != null) {
+            mResultsCorpora.update();
         }
     }
 
@@ -213,9 +232,15 @@ public class QsbApplication {
         return new SearchableSources(getContext());
     }
 
-    protected CorpusFactory createCorpusFactory() {
+    protected CorpusFactory createAllCorpusFactory() {
         int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
         return new SearchableCorpusFactory(getContext(), getConfig(),
+                createExecutorFactory(numWebCorpusThreads));
+    }
+
+    protected CorpusFactory createResultsCorpusFactory() {
+        int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
+        return new ResultsCorpusFactory(getContext(), getConfig(),
                 createExecutorFactory(numWebCorpusThreads));
     }
 
@@ -232,35 +257,40 @@ public class QsbApplication {
      * Gets the corpus ranker.
      * May only be called from the main thread.
      */
-    public CorpusRanker getCorpusRanker() {
+    public CorpusRanker getCorpusRanker(Corpora corpora) {
         checkThread();
-        if (mCorpusRanker == null) {
-            mCorpusRanker = createCorpusRanker();
+        if (mCorpusRankers.get(corpora) == null) {
+            mCorpusRankers.put(corpora, createCorpusRanker(corpora));
         }
-        return mCorpusRanker;
+        return mCorpusRankers.get(corpora);
     }
 
-    protected CorpusRanker createCorpusRanker() {
-        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository());
+    protected CorpusRanker createCorpusRanker(Corpora corpora) {
+        return new DefaultCorpusRanker(corpora, getShortcutRepository(corpora));
     }
 
     /**
      * Gets the shortcut repository.
      * May only be called from the main thread.
      */
-    public ShortcutRepository getShortcutRepository() {
+    public ShortcutRepository getShortcutRepository(Corpora corpora) {
         checkThread();
         if (mShortcutRepository == null) {
-            mShortcutRepository = createShortcutRepository();
+            mShortcutRepository = createShortcutRepository(corpora);
         }
         return mShortcutRepository;
     }
 
-    protected ShortcutRepository createShortcutRepository() {
+    @Deprecated
+    public ShortcutRepository getShortcutRepository() {
+        return getShortcutRepository(getAllCorpora());
+    }
+
+    protected ShortcutRepository createShortcutRepository(Corpora corpora) {
         ThreadFactory logThreadFactory = new NamingThreadFactory("ShortcutRepositoryWriter #%d",
                 new PriorityThreadFactory(Process.THREAD_PRIORITY_BACKGROUND));
         Executor logExecutor = Executors.newSingleThreadExecutor(logThreadFactory);
-        return ShortcutRepositoryImplLog.create(getContext(), getConfig(), getCorpora(),
+        return ShortcutRepositoryImplLog.create(getContext(), getConfig(), corpora,
             getShortcutRefresher(), getMainThreadHandler(), logExecutor);
     }
 
@@ -358,25 +388,29 @@ public class QsbApplication {
         return mResultsProvider;
     }
 
-    protected SuggestionsProvider createUnifiedProvider() {
+    protected SuggestionsProvider createBlendingProvider(Corpora corpora) {
         int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
         int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
         Promoter allPromoter = new ShortcutLimitingPromoter(
                 maxShortcutsPerWebSource,
                 maxShortcutsPerNonWebSource,
                 new ShortcutPromoter(
-                        new RankAwarePromoter(getConfig(), getCorpora())));
+                        new RankAwarePromoter(getConfig(), corpora)));
         Promoter singleCorpusPromoter = new ShortcutPromoter(new ConcatPromoter());
         BlendingSuggestionsProvider provider = new BlendingSuggestionsProvider(getConfig(),
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
-                getShortcutRepository(),
-                getCorpora(),
-                getCorpusRanker(),
+                getShortcutRepository(corpora),
+                corpora,
+                getCorpusRanker(corpora),
                 getLogger());
         provider.setAllPromoter(allPromoter);
         provider.setSingleCorpusPromoter(singleCorpusPromoter);
         return provider;
+    }
+
+    protected SuggestionsProvider createUnifiedProvider() {
+        return createBlendingProvider(getAllCorpora());
     }
 
     protected SuggestionsProvider createWebSuggestionsProvider() {
@@ -384,9 +418,7 @@ public class QsbApplication {
     }
 
     protected SuggestionsProvider createResultsProvider() {
-        // separation of non-suggestion web results is handled inside Sources, assuming
-        // setSeparateResults(true) has been called.
-        return createUnifiedProvider();
+        return createBlendingProvider(getResultsCorpora());
     }
 
     /**
@@ -500,23 +532,4 @@ public class QsbApplication {
         return new TextAppearanceFactory(getContext());
     }
 
-    public void setSeparateResults(boolean separate) {
-        if (DBG) Log.d(TAG, "setSeparateResults: " + separate);
-        mSeperateResults = separate;
-
-        //TODO this doesn't quite seem right here. Is there a nicer way of configuring the web
-        // source used by the web corpus?
-        Source webSource = getSources().getWebSearchSource();
-        Corpus webCorpus = getCorpora().getWebCorpus();
-        if ((webSource instanceof GoogleSource) && (webCorpus instanceof WebCorpus)){
-            
-            Source web = mSeperateResults ? ((GoogleSource) webSource).getNonWebSuggestSource()
-                                          : webSource;
-            ((WebCorpus) webCorpus).setWebSource(web);
-        }
-    }
-
-    public boolean seperateResults() {
-        return mSeperateResults;
-    }
 }

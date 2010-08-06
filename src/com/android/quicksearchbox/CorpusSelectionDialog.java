@@ -20,7 +20,6 @@ import com.android.quicksearchbox.ui.CorporaAdapter;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,7 +32,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 /**
  * Corpus selection dialog.
@@ -49,12 +47,15 @@ public class CorpusSelectionDialog extends Dialog {
 
     private OnCorpusSelectedListener mListener;
 
+    private final Corpora mCorpora;
+
     private Corpus mCorpus;
 
     private CorporaAdapter mAdapter;
 
-    public CorpusSelectionDialog(Context context) {
-        super(context, R.style.Theme_SelectSearchSource);
+    public CorpusSelectionDialog(SearchActivity searchActivity) {
+        super(searchActivity, R.style.Theme_SelectSearchSource);
+        mCorpora = searchActivity.getCorpora();
     }
 
     /**
@@ -172,7 +173,7 @@ public class CorpusSelectionDialog extends Dialog {
     }
 
     private CorpusRanker getCorpusRanker() {
-        return getQsbApplication().getCorpusRanker();
+        return getQsbApplication().getCorpusRanker(mCorpora);
     }
 
     private CorpusViewFactory getViewFactory() {
