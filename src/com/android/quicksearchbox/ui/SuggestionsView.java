@@ -20,6 +20,7 @@ import com.android.quicksearchbox.SuggestionPosition;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 /**
@@ -33,6 +34,21 @@ public class SuggestionsView extends ListView {
     public SuggestionsView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
+
+    @Override
+    public void setAdapter(ListAdapter adapter) {
+        if (!(adapter == null || adapter instanceof SuggestionsAdapter)){
+            throw new ClassCastException(
+                    "SuggestionsView adapter must be a SuggestionsAdapter (got " + adapter + ")");
+        }
+        super.setAdapter(adapter);
+    }
+
+    @Override
+    public SuggestionsAdapter getAdapter() {
+        return (SuggestionsAdapter) super.getAdapter();
+    }
+
 
     @Override
     public void onFinishInflate() {
