@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,6 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
     /**
      * Adds a suggestion from another suggestion cursor.
      *
-     * @param suggestionPos
      * @return {@code true} if the suggestion was added.
      */
     public boolean add(Suggestion suggestion) {
@@ -102,7 +102,7 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
 
     @Override
     public String toString() {
-        return "[" + getUserQuery() + "] " + mSuggestions;
+        return getClass().getSimpleName() + "{[" + getUserQuery() + "] " + mSuggestions + "}";
     }
 
     /**
