@@ -69,6 +69,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     static final Corpus CONTACTS_CORPUS = new MockCorpus(CONTACTS_SOURCE);
 
+    static final int MAX_SHORTCUTS = 8;
+
     protected Config mConfig;
     protected MockCorpora mCorpora;
     protected MockExecutor mLogExecutor;
@@ -310,8 +312,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     public void testMostRecentClickWinsEvenWithMoreThanLimitShortcuts() {
-        // Create MaxShortcutsReturned shortcuts
-        for (int i = 0; i < mConfig.getMaxShortcutsReturned(); i++) {
+        for (int i = 0; i < MAX_SHORTCUTS; i++) {
             SuggestionData app = makeApp("TestApp" + i);
             // Each of these shortcuts has two clicks
             reportClick("app", app, NOW - 2);
@@ -641,18 +642,17 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     public void testAppUpgradePromotesLowerRanked() {
-        int maxShortcuts = mConfig.getMaxShortcutsReturned();
 
         ListSuggestionCursor expected = new ListSuggestionCursor("a");
-        for (int i = 0; i < maxShortcuts + 1; i++) {
+        for (int i = 0; i < MAX_SHORTCUTS + 1; i++) {
             reportClick("app", mApp1, NOW);
         }
         expected.add(mApp1);
 
         // Enough contact clicks to make one more shortcut than getMaxShortcutsReturned()
-        for (int i = 0; i < maxShortcuts; i++) {
+        for (int i = 0; i < MAX_SHORTCUTS; i++) {
             SuggestionData contact = makeContact("andy" + i);
-            int numClicks = maxShortcuts - i;  // use click count to get shortcuts in order
+            int numClicks = MAX_SHORTCUTS - i;  // use click count to get shortcuts in order
             for (int j = 0; j < numClicks; j++) {
                 reportClick("and", contact, NOW);
             }
@@ -661,7 +661,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
         // Expect the app, and then all but one contact
         assertShortcuts("app and all but one contact should be returned",
-                "a", mAllowedCorpora, SuggestionCursorUtil.slice(expected, 0, maxShortcuts));
+                "a", mAllowedCorpora, SuggestionCursorUtil.slice(expected, 0, MAX_SHORTCUTS));
 
         // Upgrade app corpus
         MockCorpus upgradedCorpus = new MockCorpus(APP_SOURCE_V2);
@@ -671,7 +671,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         List<Corpus> newAllowedCorpora = new ArrayList<Corpus>(mCorpora.getAllCorpora());
         assertShortcuts("app shortcuts should be removed when the source was upgraded "
                 + "and a contact should take its place",
-                "a", newAllowedCorpora, SuggestionCursorUtil.slice(expected, 1, maxShortcuts));
+                "a", newAllowedCorpora, SuggestionCursorUtil.slice(expected, 1, MAX_SHORTCUTS));
     }
 
     public void testIrrelevantAppUpgrade() {
