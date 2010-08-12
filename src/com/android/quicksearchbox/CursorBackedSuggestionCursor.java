@@ -290,4 +290,9 @@ public abstract class CursorBackedSuggestionCursor implements SuggestionCursor {
         // We don't watch Cursor-backed SuggestionCursors for changes
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + mUserQuery + "]";
+    }
+
 }

@@ -91,7 +91,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     protected ShortcutRepositoryImplLog createShortcutRepository() {
         return new ShortcutRepositoryImplLog(getContext(), mConfig, mCorpora,
                 mRefresher, new MockHandler(), mLogExecutor,
-                "test-shortcuts-log.db");
+                "test-shortcuts-log.db").disableUpdateDelay();
     }
 
     @Override

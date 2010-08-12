@@ -60,15 +60,17 @@ public class ShortcutLimitingPromoter extends PromoterWrapper {
             for (int i = 0; i < shortcutCount; i++) {
                 shortcuts.moveTo(i);
                 Source source = shortcuts.getSuggestionSource();
-                int prevCount = sourceShortcutCounts.add(source, 1);
-                if (DBG) Log.d(TAG, "Source: " + source + ", count: " + prevCount);
-                int maxShortcuts = source.isWebSuggestionSource()
-                        ? mMaxShortcutsPerWebSource : mMaxShortcutsPerNonWebSource;
-                if (prevCount < maxShortcuts) {
-                    numPromoted++;
-                    filteredShortcuts.add(new SuggestionPosition(shortcuts));
+                if (source != null) {
+                    int prevCount = sourceShortcutCounts.add(source, 1);
+                    if (DBG) Log.d(TAG, "Source: " + source + ", count: " + prevCount);
+                    int maxShortcuts = source.isWebSuggestionSource()
+                            ? mMaxShortcutsPerWebSource : mMaxShortcutsPerNonWebSource;
+                    if (prevCount < maxShortcuts) {
+                        numPromoted++;
+                        filteredShortcuts.add(new SuggestionPosition(shortcuts));
+                    }
+                    if (numPromoted >= maxPromoted) break;
                 }
-                if (numPromoted >= maxPromoted) break;
             }
         }
         if (DBG) {
