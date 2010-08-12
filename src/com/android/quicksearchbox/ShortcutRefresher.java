@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ShortcutRefresher.Listener;
+
 /**
  * Fires off tasks to validate shortcuts, and reports the results back to a
  * {@link Listener}.
@@ -36,12 +38,12 @@ public interface ShortcutRefresher {
     }
 
     /**
-     * Sends off the refresher tasks.
+     * Starts a task to refresh a single shortcut.
      *
-     * @param shortcuts The shortcuts to refresh.
+     * @param shortcut The shortcut to be refreshed.
      * @param listener Who to report back to.
      */
-    void refresh(SuggestionCursor shortcuts, final Listener listener);
+    void refresh(Suggestion shortcut, Listener listener);
 
     /**
      * Returns true if the given shortcut requires refreshing.

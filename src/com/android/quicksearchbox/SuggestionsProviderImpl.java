@@ -105,7 +105,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
     }
 
-    protected SuggestionCursor getShortcutsForQuery(String query, Corpus singleCorpus) {
+    protected ShortcutCursor getShortcutsForQuery(String query, Corpus singleCorpus) {
         if (mShortcutRepo == null) return null;
         Collection<Corpus> allowedCorpora;
         if (singleCorpus == null) {
@@ -160,7 +160,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
                 maxSuggestions,
                 query,
                 corporaToQuery);
-        SuggestionCursor shortcuts = getShortcutsForQuery(query, singleCorpus);
+        ShortcutCursor shortcuts = getShortcutsForQuery(query, singleCorpus);
         if (shortcuts != null) {
             suggestions.setShortcuts(shortcuts);
         }

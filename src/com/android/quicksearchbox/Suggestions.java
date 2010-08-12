@@ -60,7 +60,7 @@ public class Suggestions {
      * */
     private final ArrayList<CorpusResult> mCorpusResults;
 
-    private SuggestionCursor mShortcuts;
+    private ShortcutCursor mShortcuts;
 
     private final MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
 
@@ -130,6 +130,7 @@ public class Suggestions {
         if (mPromoted == null) {
             updatePromoted();
         }
+        if (DBG) Log.d(TAG, "getPromoted() = " + mPromoted);
         return mPromoted;
     }
 
@@ -200,7 +201,7 @@ public class Suggestions {
      *
      * @param shortcuts The shortcuts.
      */
-    public void setShortcuts(SuggestionCursor shortcuts) {
+    public void setShortcuts(ShortcutCursor shortcuts) {
         if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
         mShortcuts = shortcuts;
         if (shortcuts != null) {
@@ -247,6 +248,7 @@ public class Suggestions {
                 Log.d(TAG, "pickPromoted(" + mShortcuts + "," + mCorpusResults + ","
                         + mMaxPromoted + ") = " + mPromoted);
             }
+            refreshShortcuts();
         } else {
             mPromoted = getCorpusResult(mSingleCorpusFilter);
             if (mPromoted == null) {
@@ -254,6 +256,17 @@ public class Suggestions {
             }
         }
     }
+
+    private void refreshShortcuts() {
+        if (DBG) Log.d(TAG, "refreshShortcuts(" + mPromoted + ")");
+        for (int i = 0; i < mPromoted.getCount(); ++i) {
+            mPromoted.moveTo(i);
+            if (mPromoted.isSuggestionShortcut()) {
+                mShortcuts.refresh(mPromoted);
+            }
+        }
+    }
+
 
     private CorpusResult getCorpusResult(Corpus corpus) {
         for (CorpusResult result : mCorpusResults) {

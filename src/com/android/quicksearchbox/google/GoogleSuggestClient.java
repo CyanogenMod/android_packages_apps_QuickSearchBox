@@ -72,10 +72,12 @@ public class GoogleSuggestClient extends GoogleSource {
         mSuggestUri = null;
     }
 
+    @Override
     public ComponentName getIntentComponent() {
         return new ComponentName(getContext(), GoogleSearch.class);
     }
 
+    @Override
     public boolean isLocationAware() {
         return false;
     }
@@ -165,6 +167,7 @@ public class GoogleSuggestClient extends GoogleSource {
         return null;
     }
 
+    @Override
     public SuggestionCursor refreshShortcut(String shortcutId, String oldExtraData) {
         return null;
     }
