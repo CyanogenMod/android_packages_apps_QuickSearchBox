@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import android.os.Handler;
 import android.util.Log;
 
@@ -52,6 +54,7 @@ class ShortcutCursor extends ListSuggestionCursor {
         mRefreshed = new HashSet<SuggestionCursor>();
     }
 
+    @VisibleForTesting
     public ShortcutCursor(String query, Handler uiThread,
             ShortcutRefresher refresher, ShortcutRepository repository) {
         this(query, null, uiThread, refresher, repository);
@@ -76,7 +79,7 @@ class ShortcutCursor extends ListSuggestionCursor {
     /**
      * Refresh a shortcut from this cursor.
      *
-     * @param shortcut The shotrcut to refresh. Should be a shortcut taken from this cursor.
+     * @param shortcut The shortcut to refresh. Should be a shortcut taken from this cursor.
      */
     public void refresh(Suggestion shortcut) {
         mRefresher.refresh(shortcut, new ShortcutRefresher.Listener() {

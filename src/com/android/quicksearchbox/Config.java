@@ -52,7 +52,6 @@ public class Config {
 
     private static final long MAX_STAT_AGE_MILLIS = 30 * DAY_MILLIS;
     private static final int MIN_CLICKS_FOR_SOURCE_RANKING = 3;
-    private static final int MAX_SHORTCUTS_RETURNED = MAX_PROMOTED_SUGGESTIONS;
 
     private static final int NUM_WEB_CORPUS_THREADS = 2;
 
@@ -213,13 +212,6 @@ public class Config {
      */
     public int getMinClicksForSourceRanking(){
         return MIN_CLICKS_FOR_SOURCE_RANKING;
-    }
-
-    /**
-     * The maximum number of shortcuts shown.
-     */
-    public int getMaxShortcutsReturned(){
-        return MAX_SHORTCUTS_RETURNED;
     }
 
     public int getNumWebCorpusThreads() {

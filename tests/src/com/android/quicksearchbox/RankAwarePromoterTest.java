@@ -27,6 +27,7 @@ import java.util.List;
  */
 @SmallTest
 public class RankAwarePromoterTest extends AndroidTestCase {
+    public static final int NUM_SUGGESTIONS_ABOVE_KEYBOARD = 4;
     public static final int MAX_PROMOTED_CORPORA = 3;
     public static final int MAX_PROMOTED_SUGGESTIONS = 8;
     public static final String TEST_QUERY = "query";
@@ -38,7 +39,12 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     public void setUp() {
         Corpora corpora = createMockCorpora(5, MAX_PROMOTED_CORPORA);
         mRanker = new LexicographicalCorpusRanker(corpora);
-        mPromoter = new RankAwarePromoter(new Config(mContext), corpora);
+        mPromoter = new RankAwarePromoter(new Config(mContext){
+            @Override
+            public int getNumSuggestionsAboveKeyboard() {
+                return NUM_SUGGESTIONS_ABOVE_KEYBOARD;
+            }
+        }, corpora);
     }
 
     public void testPromotesExpectedSuggestions() {
