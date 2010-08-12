@@ -53,7 +53,16 @@ public interface ShortcutRepository {
      * @param allowedCorpora The corpora to get shortcuts for.
      * @return A cursor containing shortcutted results for the query.
      */
-    SuggestionCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora);
+    ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora);
+
+    /**
+     * Updates a shortcut in the repository after it's been refreshed.
+     *
+     * @param source The source of the shortcut that's been refreshed
+     * @param shortcutId The ID of the shortcut that's been refershed
+     * @param refreshed The refreshed shortcut suggestion.
+     */
+    void updateShortcut(Source source, String shortcutId, SuggestionCursor refreshed);
 
     /**
      * @return A map for corpus name to score. A higher score means that the corpus

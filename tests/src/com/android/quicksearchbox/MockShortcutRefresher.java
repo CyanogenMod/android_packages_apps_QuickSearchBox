@@ -28,7 +28,7 @@ public class MockShortcutRefresher implements ShortcutRefresher {
     public void markShortcutRefreshed(Source source, String shortcutId) {
     }
 
-    public void refresh(SuggestionCursor shortcuts, Listener listener) {
+    public void refresh(Suggestion shortcut, Listener listener) {
     }
 
     public void reset() {

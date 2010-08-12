@@ -19,6 +19,8 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.NamedTask;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 
+import android.util.Log;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,10 +29,13 @@ import java.util.Set;
  * Refreshes shortcuts from their source.
  */
 class SourceShortcutRefresher implements ShortcutRefresher {
+    private static final String TAG = "QSB.SourceShortcutRefresher";
+    private static final boolean DBG = false;
 
     private final NamedTaskExecutor mExecutor;
 
     private final Set<String> mRefreshed = Collections.synchronizedSet(new HashSet<String>());
+    private final Set<String> mRefreshing = Collections.synchronizedSet(new HashSet<String>());
 
     /**
      * Create a ShortcutRefresher that will refresh shortcuts using the given executor.
@@ -41,27 +46,22 @@ class SourceShortcutRefresher implements ShortcutRefresher {
         mExecutor = executor;
     }
 
-    /**
-     * Sends off the refresher tasks.
-     *
-     * @param shortcuts The shortcuts to refresh.
-     * @param listener Who to report back to.
-     */
-    public void refresh(SuggestionCursor shortcuts, final Listener listener) {
-        int count = shortcuts.getCount();
-        for (int i = 0; i < count; i++) {
-            shortcuts.moveTo(i);
-            Source source = shortcuts.getSuggestionSource();
-            if (source == null) {
-                throw new NullPointerException("source");
+    public void refresh(Suggestion shortcut, Listener listener) {
+        Source source = shortcut.getSuggestionSource();
+        if (source == null) {
+            throw new NullPointerException("source");
+        }
+        String shortcutId = shortcut.getShortcutId();
+        if (shouldRefresh(source, shortcutId) && !isRefreshing(source, shortcutId)) {
+            if (DBG) {
+                Log.d(TAG, "Refreshing shortcut  " + shortcutId + " '" +
+                        shortcut.getSuggestionText1() + "'");
             }
-            String shortcutId = shortcuts.getShortcutId();
-            if (shouldRefresh(source, shortcutId)) {
-                String extraData = shortcuts.getSuggestionIntentExtraData();
-                ShortcutRefreshTask refreshTask = new ShortcutRefreshTask(
-                        source, shortcutId, extraData, listener);
-                mExecutor.execute(refreshTask);
-            }
+            markShortcutRefreshing(source, shortcutId);
+            String extraData = shortcut.getSuggestionIntentExtraData();
+            ShortcutRefreshTask refreshTask = new ShortcutRefreshTask(
+                    source, shortcutId, extraData, listener);
+            mExecutor.execute(refreshTask);
         }
     }
 
@@ -73,11 +73,22 @@ class SourceShortcutRefresher implements ShortcutRefresher {
                 && !mRefreshed.contains(makeKey(source, shortcutId));
     }
 
+    public boolean isRefreshing(Source source, String shortcutId) {
+        return source != null && shortcutId != null
+                && mRefreshing.contains(makeKey(source, shortcutId));
+    }
+
+    private void markShortcutRefreshing(Source source, String shortcutId) {
+        mRefreshing.add(makeKey(source, shortcutId));
+    }
+
     /**
      * Indicate that the shortcut no longer requires refreshing.
      */
     public void markShortcutRefreshed(Source source, String shortcutId) {
-        mRefreshed.add(makeKey(source, shortcutId));
+        String key = makeKey(source, shortcutId);
+        mRefreshed.add(key);
+        mRefreshing.remove(key);
     }
 
     /**

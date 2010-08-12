@@ -52,7 +52,7 @@ public class BlendedSuggestions extends Suggestions {
      * */
     private final ArrayList<CorpusResult> mCorpusResults;
 
-    private SuggestionCursor mShortcuts;
+    private ShortcutCursor mShortcuts;
 
     private final MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
 
@@ -147,7 +147,7 @@ public class BlendedSuggestions extends Suggestions {
      *
      * @param shortcuts The shortcuts.
      */
-    public void setShortcuts(SuggestionCursor shortcuts) {
+    public void setShortcuts(ShortcutCursor shortcuts) {
         if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
         mShortcuts = shortcuts;
         if (shortcuts != null) {
@@ -194,10 +194,21 @@ public class BlendedSuggestions extends Suggestions {
                 Log.d(TAG, "pickPromoted(" + mShortcuts + "," + mCorpusResults + ","
                         + mMaxPromoted + ") = " + mPromoted);
             }
+            refreshShortcuts();
         } else {
             mPromoted = getCorpusResult(mSingleCorpusFilter);
             if (mPromoted == null) {
                 mPromoted = new ListSuggestionCursor(mQuery);
+            }
+        }
+    }
+
+    private void refreshShortcuts() {
+        if (DBG) Log.d(TAG, "refreshShortcuts(" + mPromoted + ")");
+        for (int i = 0; i < mPromoted.getCount(); ++i) {
+            mPromoted.moveTo(i);
+            if (mPromoted.isSuggestionShortcut()) {
+                mShortcuts.refresh(mPromoted);
             }
         }
     }

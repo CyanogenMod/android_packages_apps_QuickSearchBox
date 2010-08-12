@@ -82,6 +82,7 @@ public abstract class Suggestions {
         if (!mClosed) {
             Log.e(TAG, "LEAK! Finalized without being closed: Suggestions[" + getQuery() + "]");
         }
+        
     }
 
     public String getQuery() {
