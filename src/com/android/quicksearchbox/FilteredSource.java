@@ -98,46 +98,56 @@ public class FilteredSource<S extends Source> extends SourceProxy<S> {
         }
     }
 
-    private class SuggestionsRequest {
+    private class SuggestionsRequest extends ReferenceCountedSourceResult {
         public final String mQuery;
         public final int mQueryLimit;
         public final boolean mOnlySource;
-        private ReferenceCountedSourceResult mResult;
+        private boolean mHaveResult;
         public SuggestionsRequest(String query, int queryLimit, boolean onlySource) {
             mQuery = query;
             mQueryLimit = queryLimit;
             mOnlySource = onlySource;
+            mHaveResult = false;
         }
         public SourceResult run() {
             SuggestionsRequest existing = null;
             SourceResult result;
             synchronized (mActiveQueries) {
                 existing = mActiveQueries.get(mQuery);
+                if (DBG) Log.d(TAG, "existing result for '" + mQuery + "' = " + existing);
                 if (existing == null) {
                     mActiveQueries.put(mQuery, this);
+                    result = this;
+                } else {
+                    result = existing.getRef();
                 }
             }
             if (existing == null) {
                 // we're the first to be queried with this query
-                ReferenceCountedSourceResult rcResult = new ReferenceCountedSourceResult(
-                        mParent.getSuggestions(mQuery, mQueryLimit, mOnlySource));
+                if (DBG) Log.d(TAG, "no existing result for '" + mQuery + "'; getting now...");
+                SourceResult suggestions = mParent.getSuggestions(mQuery, mQueryLimit, mOnlySource);
+                if (DBG) Log.d(TAG, "got result for '" + mQuery + "': " + suggestions);
                 synchronized (this) {
-                    mResult = rcResult;
+                    setResult(suggestions);
+                    mHaveResult = true;
                     notifyAll();
                 }
-                result = mResult;
             } else {
                 // another query is already ongoing - wait here for it to finish.
                 synchronized(existing) {
-                    try {
-                        existing.wait();
-                    } catch (InterruptedException e) {
+                    if (!existing.mHaveResult) {
+                        try {
+                            if (DBG) Log.d(TAG, "waiting for existing result for '" + mQuery + "'");
+                            existing.wait();
+                            if (DBG) Log.d(TAG, "existing result for '" + mQuery + "' ready");
+                        } catch (InterruptedException e) {
+                        }
                     }
-                    result = existing.mResult.getRef();
                 }
             }
             if (existing == null) {
                 synchronized (mActiveQueries) {
+                    if (DBG) Log.d(TAG, "request for '" + mQuery + "' done.");
                     mActiveQueries.remove(mQuery);
                 }
             }

@@ -28,14 +28,44 @@ public abstract class Suggestions {
     private boolean mClosed = false;
     protected final String mQuery;
 
+    private final int mMaxPromoted;
+    private SuggestionCursor mPromoted;
+
+    private ShortcutCursor mShortcuts;
+
+    private final MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
+
     /**
      * The observers that want notifications of changes to the published suggestions.
      * This object may be accessed on any thread.
      */
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
-    protected Suggestions(String query) {
+    protected Suggestions(String query, int maxPromoted) {
         mQuery = query;
+        mMaxPromoted = maxPromoted;
+    }
+
+    private void clearPromoted() {
+        if (mPromoted != null) {
+            mPromoted.close();
+        }
+        mPromoted = null;
+    }
+
+    /**
+     * Sets the shortcut suggestions.
+     * Must be called on the UI thread, or before this object is seen by the UI thread.
+     *
+     * @param shortcuts The shortcuts.
+     */
+    public void setShortcuts(ShortcutCursor shortcuts) {
+        if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
+        mShortcuts = shortcuts;
+        clearPromoted();
+        if (shortcuts != null) {
+            mShortcuts.registerDataSetObserver(mShortcutsObserver);
+        }
     }
 
     /**
@@ -62,6 +92,7 @@ public abstract class Suggestions {
      */
     protected void notifyDataSetChanged() {
         if (DBG) Log.d(TAG, "notifyDataSetChanged()");
+        clearPromoted();
         mDataSetObservable.notifyChanged();
     }
 
@@ -71,10 +102,35 @@ public abstract class Suggestions {
         }
         mClosed = true;
         mDataSetObservable.unregisterAll();
+        if (mPromoted != null) {
+            mPromoted.close();
+        }
+        if (mShortcuts != null) {
+            mShortcuts.close();
+            mShortcuts = null;
+        }
     }
 
     public boolean isClosed() {
         return mClosed;
+    }
+
+    protected ShortcutCursor getShortcuts() {
+        return mShortcuts;
+    }
+
+    protected int getMaxPromoted() {
+        return mMaxPromoted;
+    }
+
+    private void refreshShortcuts() {
+        if (DBG) Log.d(TAG, "refreshShortcuts(" + mPromoted + ")");
+        for (int i = 0; i < mPromoted.getCount(); ++i) {
+            mPromoted.moveTo(i);
+            if (mPromoted.isSuggestionShortcut()) {
+                getShortcuts().refresh(mPromoted);
+            }
+        }
     }
 
     @Override
@@ -89,7 +145,23 @@ public abstract class Suggestions {
         return mQuery;
     }
 
-    public abstract SuggestionCursor getPromoted();
+    public SuggestionCursor getPromoted() {
+        if (mPromoted == null) {
+            mPromoted = buildPromoted();
+            refreshShortcuts();
+        }
+        return mPromoted;
+    }
+
+    protected abstract SuggestionCursor buildPromoted();
 
     public abstract boolean isDone();
+
+    private class MyShortcutsObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            notifyDataSetChanged();
+        }
+    }
+
 }

@@ -35,12 +35,14 @@ public class PerNameExecutor implements NamedTaskExecutor {
     }
 
     public synchronized void cancelPendingTasks() {
+        if (mExecutors == null) return;
         for (NamedTaskExecutor executor : mExecutors.values()) {
             executor.cancelPendingTasks();
         }
     }
 
     public synchronized void close() {
+        if (mExecutors == null) return;
         for (NamedTaskExecutor executor : mExecutors.values()) {
             executor.close();
         }

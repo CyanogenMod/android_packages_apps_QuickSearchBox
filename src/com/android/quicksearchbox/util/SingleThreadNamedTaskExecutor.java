@@ -81,7 +81,9 @@ public class SingleThreadNamedTaskExecutor implements NamedTaskExecutor {
                 }
                 currentThread.setName(threadName + " " + task.getName());
                 try {
+                    if (DBG) Log.d(TAG, "Running task " + task.getName());
                     task.run();
+                    if (DBG) Log.d(TAG, "Task " + task.getName() + " complete");
                 } catch (RuntimeException ex) {
                     Log.e(TAG, "Task " + task.getName() + " failed", ex);
                 }

@@ -21,10 +21,10 @@ import java.util.ArrayList;
 /**
  * A simple promoter that concatenates the source results and ignores the shortcuts.
  */
-public class ConcatPromoter implements Promoter {
+public class ConcatPromoter<C extends SuggestionCursor> implements Promoter<C> {
 
     public void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<CorpusResult> suggestions, int maxPromoted,
+            ArrayList<C> suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
         for (SuggestionCursor c : suggestions) {
             for (int i = 0; i < c.getCount(); i++) {

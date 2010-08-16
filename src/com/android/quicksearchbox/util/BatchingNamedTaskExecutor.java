@@ -84,7 +84,6 @@ public class BatchingNamedTaskExecutor implements NamedTaskExecutor {
         synchronized (mQueuedTasks) {
             mQueuedTasks.clear();
         }
-        mExecutor.cancelPendingTasks();
     }
 
     public void close() {

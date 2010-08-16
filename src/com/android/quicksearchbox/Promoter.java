@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * Promoters choose which suggestions to promote from all the available suggestions.
  *
  */
-public interface Promoter {
+public interface Promoter<C extends SuggestionCursor> {
 
     /**
      * Gets the promoted suggestions.
@@ -33,7 +33,7 @@ public interface Promoter {
      * @param promoted List to add the promoted suggestions to.
      */
     void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<CorpusResult> suggestions, int maxPromoted,
+            ArrayList<C> suggestions, int maxPromoted,
             ListSuggestionCursor promoted);
 
 }

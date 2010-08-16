@@ -26,7 +26,7 @@ import java.util.ArrayList;
  * A promoter that limits the maximum number of shortcuts per source
  * (from non-web soruces), and then delegates promotion to another promoter.
  */
-public class ShortcutLimitingPromoter extends PromoterWrapper {
+public class ShortcutLimitingPromoter<C extends SuggestionCursor> extends PromoterWrapper<C> {
 
     private static final String TAG = "QSB.ShortcutLimitingPromoter";
     private static final boolean DBG = false;
@@ -41,7 +41,7 @@ public class ShortcutLimitingPromoter extends PromoterWrapper {
      *        May be {@code null}.
      */
     public ShortcutLimitingPromoter(int maxShortcutsPerWebSource,
-            int maxShortcutsPerNonWebSource, Promoter nextPromoter) {
+            int maxShortcutsPerNonWebSource, Promoter<C> nextPromoter) {
         super(nextPromoter);
         mMaxShortcutsPerWebSource = maxShortcutsPerWebSource;
         mMaxShortcutsPerNonWebSource = maxShortcutsPerNonWebSource;
@@ -49,7 +49,7 @@ public class ShortcutLimitingPromoter extends PromoterWrapper {
 
     @Override
     public void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<CorpusResult> suggestions, int maxPromoted,
+            ArrayList<C> suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
         final int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
         ListSuggestionCursor filteredShortcuts = null;

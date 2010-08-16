@@ -91,10 +91,19 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
             Consumer<C> consumer, boolean onlyOneProvider) {
 
         for (SuggestionCursorProvider<C> provider : providers) {
-            QueryTask<C> task = new QueryTask<C>(query, maxResultsPerProvider, provider, handler,
-                    consumer, onlyOneProvider);
-            executor.execute(task);
+            QueryTask.startQuery(query, maxResultsPerProvider, provider,
+                    executor, handler, consumer, onlyOneProvider);
         }
     }
 
+    public static <C extends SuggestionCursor> void startQuery(String query,
+            int maxResultsPerProvider,
+            SuggestionCursorProvider<C> provider,
+            NamedTaskExecutor executor, Handler handler,
+            Consumer<C> consumer, boolean onlyOneProvider) {
+
+        QueryTask<C> task = new QueryTask<C>(query, maxResultsPerProvider, provider, handler,
+                consumer, onlyOneProvider);
+        executor.execute(task);
+    }
 }

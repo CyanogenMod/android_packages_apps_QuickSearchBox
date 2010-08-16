@@ -18,7 +18,6 @@ package com.android.quicksearchbox;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import android.database.DataSetObserver;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -38,8 +37,6 @@ public class BlendedSuggestions extends Suggestions {
     // Object ID for debugging
     private final int mId;
 
-    private final int mMaxPromoted;
-
     /** The sources that are expected to report. */
     private final List<Corpus> mExpectedCorpora;
 
@@ -52,27 +49,19 @@ public class BlendedSuggestions extends Suggestions {
      * */
     private final ArrayList<CorpusResult> mCorpusResults;
 
-    private ShortcutCursor mShortcuts;
-
-    private final MyShortcutsObserver mShortcutsObserver = new MyShortcutsObserver();
-
-    private final Promoter mPromoter;
-
-    private SuggestionCursor mPromoted;
+    private final Promoter<CorpusResult> mPromoter;
 
     /**
      * Creates a new empty Suggestions.
      *
      * @param expectedCorpora The sources that are expected to report.
      */
-    public BlendedSuggestions(Promoter promoter, int maxPromoted,
+    public BlendedSuggestions(Promoter<CorpusResult> promoter, int maxPromoted,
             String query, List<Corpus> expectedCorpora) {
-        super(query);
+        super(query, maxPromoted);
         mPromoter = promoter;
-        mMaxPromoted = maxPromoted;
         mExpectedCorpora = expectedCorpora;
         mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpora.size());
-        mPromoted = null;  // will be set by updatePromoted()
         mId = sId++;
         if (DBG) {
             Log.d(TAG, "new Suggestions [" + mId + "] query \"" + query
@@ -90,14 +79,6 @@ public class BlendedSuggestions extends Suggestions {
     @VisibleForTesting
     public int getExpectedResultCount() {
         return mExpectedCorpora.size();
-    }
-
-    @Override
-    public SuggestionCursor getPromoted() {
-        if (mPromoted == null) {
-            updatePromoted();
-        }
-        return mPromoted;
     }
 
     /**
@@ -119,16 +100,12 @@ public class BlendedSuggestions extends Suggestions {
     @Override
     public void close() {
         if (DBG) Log.d(TAG, "close() [" + mId + "]");
-        super.close();
 
-        if (mShortcuts != null) {
-            mShortcuts.close();
-            mShortcuts = null;
-        }
         for (CorpusResult result : mCorpusResults) {
             result.close();
         }
         mCorpusResults.clear();
+        super.close();
     }
 
     /**
@@ -139,20 +116,6 @@ public class BlendedSuggestions extends Suggestions {
     public boolean isDone() {
         // TODO: Handle early completion because we have all the results we want.
         return mCorpusResults.size() >= mExpectedCorpora.size();
-    }
-
-    /**
-     * Sets the shortcut suggestions.
-     * Must be called on the UI thread, or before this object is seen by the UI thread.
-     *
-     * @param shortcuts The shortcuts.
-     */
-    public void setShortcuts(ShortcutCursor shortcuts) {
-        if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
-        mShortcuts = shortcuts;
-        if (shortcuts != null) {
-            mShortcuts.registerDataSetObserver(mShortcutsObserver);
-        }
     }
 
     /**
@@ -178,38 +141,28 @@ public class BlendedSuggestions extends Suggestions {
             }
             mCorpusResults.add(corpusResult);
         }
-        mPromoted = null;
         notifyDataSetChanged();
     }
 
-    private void updatePromoted() {
+    @Override
+    protected SuggestionCursor buildPromoted() {
         if (mSingleCorpusFilter == null) {
             ListSuggestionCursor promoted = new ListSuggestionCursorNoDuplicates(mQuery);
-            mPromoted = promoted;
             if (mPromoter == null) {
-                return;
+                return promoted;
             }
-            mPromoter.pickPromoted(mShortcuts, mCorpusResults, mMaxPromoted, promoted);
+            mPromoter.pickPromoted(getShortcuts(), mCorpusResults, getMaxPromoted(), promoted);
             if (DBG) {
-                Log.d(TAG, "pickPromoted(" + mShortcuts + "," + mCorpusResults + ","
-                        + mMaxPromoted + ") = " + mPromoted);
+                Log.d(TAG, "pickPromoted(" + getShortcuts() + "," + mCorpusResults + ","
+                        + getMaxPromoted() + ") = " + promoted);
             }
-            refreshShortcuts();
+            return promoted;
         } else {
-            mPromoted = getCorpusResult(mSingleCorpusFilter);
-            if (mPromoted == null) {
-                mPromoted = new ListSuggestionCursor(mQuery);
+            SuggestionCursor promoted = getCorpusResult(mSingleCorpusFilter);
+            if (promoted == null) {
+                promoted = new ListSuggestionCursor(mQuery);
             }
-        }
-    }
-
-    private void refreshShortcuts() {
-        if (DBG) Log.d(TAG, "refreshShortcuts(" + mPromoted + ")");
-        for (int i = 0; i < mPromoted.getCount(); ++i) {
-            mPromoted.moveTo(i);
-            if (mPromoted.isSuggestionShortcut()) {
-                mShortcuts.refresh(mPromoted);
-            }
+            return promoted;
         }
     }
 
@@ -241,7 +194,6 @@ public class BlendedSuggestions extends Suggestions {
         if ((mExpectedCorpora.size() == 1) && (mExpectedCorpora.get(0) == singleCorpus)) {
             return;
         }
-        updatePromoted();
         notifyDataSetChanged();
     }
 
@@ -249,14 +201,6 @@ public class BlendedSuggestions extends Suggestions {
     public String toString() {
         return "Suggestions{expectedCorpora=" + mExpectedCorpora
                 + ",mCorpusResults.size()=" + mCorpusResults.size() + "}";
-    }
-
-    private class MyShortcutsObserver extends DataSetObserver {
-        @Override
-        public void onChanged() {
-            mPromoted = null;
-            notifyDataSetChanged();
-        }
     }
 
 }

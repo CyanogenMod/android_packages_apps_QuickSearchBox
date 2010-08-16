@@ -388,20 +388,11 @@ public class QsbApplication {
         return mResultsProvider;
     }
 
-    protected SuggestionsProvider createBlendingProvider(Corpora corpora) {
-        int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
-        int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
-        Promoter allPromoter = new ShortcutLimitingPromoter(
-                maxShortcutsPerWebSource,
-                maxShortcutsPerNonWebSource,
-                new ShortcutPromoter(
-                        new RankAwarePromoter(getConfig(), corpora)));
-        Promoter singleCorpusPromoter = new ShortcutPromoter(new ConcatPromoter());
+    protected SuggestionsProvider createBlendingProvider(
+            Corpora corpora, Promoter<CorpusResult> allPromoter, Promoter<CorpusResult> singleCorpusPromoter) {
         BlendingSuggestionsProvider provider = new BlendingSuggestionsProvider(getConfig(),
                 getSourceTaskExecutor(),
                 getMainThreadHandler(),
-                getShortcutRepository(corpora),
-                corpora,
                 getCorpusRanker(corpora),
                 getLogger());
         provider.setAllPromoter(allPromoter);
@@ -410,15 +401,38 @@ public class QsbApplication {
     }
 
     protected SuggestionsProvider createUnifiedProvider() {
-        return createBlendingProvider(getAllCorpora());
+        int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
+        int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
+        Promoter<CorpusResult> allPromoter = new ShortcutLimitingPromoter<CorpusResult>(
+                maxShortcutsPerWebSource,
+                maxShortcutsPerNonWebSource,
+                new ShortcutPromoter<CorpusResult>(
+                        new RankAwarePromoter(getConfig())));
+        Promoter<CorpusResult> singleCorpusPromoter = new ShortcutPromoter<CorpusResult>(
+                new ConcatPromoter<CorpusResult>());
+        return createBlendingProvider(getAllCorpora(), allPromoter, singleCorpusPromoter);
     }
 
     protected SuggestionsProvider createWebSuggestionsProvider() {
-        return new WebSuggestionsProvider(getGoogleSource(), getMainThreadHandler());
+        SingleSourceSuggestionsProvider provider =  new SingleSourceSuggestionsProvider(
+                getGoogleSource(), getSourceTaskExecutor(), getMainThreadHandler());
+        provider.setPromoter(new WebSuggestionFilteringPromoter<SourceResult>(true,
+                new ConcatPromoter<SourceResult>()));
+        return provider;
     }
 
     protected SuggestionsProvider createResultsProvider() {
-        return createBlendingProvider(getResultsCorpora());
+        int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
+        int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
+        Promoter<CorpusResult> allPromoter = new ShortcutLimitingPromoter<CorpusResult>(
+                maxShortcutsPerWebSource,
+                maxShortcutsPerNonWebSource,
+                new WebSuggestionFilteringPromoter<CorpusResult>(false,
+                        new RankAwarePromoter(getConfig())));
+        Promoter<CorpusResult> singleCorpusPromoter =
+                new WebSuggestionFilteringPromoter<CorpusResult>(false,
+                        new ConcatPromoter<CorpusResult>());
+        return createBlendingProvider(getResultsCorpora(), allPromoter, singleCorpusPromoter);
     }
 
     /**

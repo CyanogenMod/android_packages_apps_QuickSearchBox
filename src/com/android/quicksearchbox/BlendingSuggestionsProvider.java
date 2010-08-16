@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,15 +44,11 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
 
     private final Handler mPublishThread;
 
-    private Promoter mAllPromoter;
+    private Promoter<CorpusResult> mAllPromoter;
 
-    private Promoter mSingleCorpusPromoter;
-
-    private final ShortcutRepository mShortcutRepo;
+    private Promoter<CorpusResult> mSingleCorpusPromoter;
 
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
-
-    private final Corpora mCorpora;
 
     private final CorpusRanker mCorpusRanker;
 
@@ -64,15 +59,11 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
     public BlendingSuggestionsProvider(Config config,
             NamedTaskExecutor queryExecutor,
             Handler publishThread,
-            ShortcutRepository shortcutRepo,
-            Corpora corpora,
             CorpusRanker corpusRanker,
             Logger logger) {
         mConfig = config;
         mQueryExecutor = queryExecutor;
         mPublishThread = publishThread;
-        mShortcutRepo = shortcutRepo;
-        mCorpora = corpora;
         mCorpusRanker = corpusRanker;
         mLogger = logger;
     }
@@ -80,14 +71,14 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
     /**
      * Sets the promoter used in All mode.
      */
-    public void setAllPromoter(Promoter promoter) {
+    public void setAllPromoter(Promoter<CorpusResult> promoter) {
         mAllPromoter = promoter;
     }
 
     /**
      * Sets the promoter used in single corpus mode.
      */
-    public void setSingleCorpusPromoter(Promoter promoter) {
+    public void setSingleCorpusPromoter(Promoter<CorpusResult> promoter) {
         mSingleCorpusPromoter = promoter;
     }
 
@@ -103,17 +94,6 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
             mBatchingExecutor.cancelPendingTasks();
             mBatchingExecutor = null;
         }
-    }
-
-    protected ShortcutCursor getShortcutsForQuery(String query, Corpus singleCorpus) {
-        if (mShortcutRepo == null) return null;
-        Collection<Corpus> allowedCorpora;
-        if (singleCorpus == null) {
-            allowedCorpora = mCorpora.getEnabledCorpora();
-        } else {
-            allowedCorpora = Collections.singletonList(singleCorpus);
-        }
-        return mShortcutRepo.getShortcutsForQuery(query, allowedCorpora);
     }
 
     /**
@@ -151,19 +131,15 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
         }
     }
 
-    public BlendedSuggestions getSuggestions(String query, Corpus singleCorpus, int maxSuggestions) {
+    public Suggestions getSuggestions(String query, Corpus singleCorpus, int maxSuggestions) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
-        cancelPendingTasks();
         List<Corpus> corporaToQuery = getCorporaToQuery(query, singleCorpus);
-        Promoter promoter = singleCorpus == null ? mAllPromoter : mSingleCorpusPromoter;
+        Promoter<CorpusResult> promoter = singleCorpus == null ? mAllPromoter
+                                                               : mSingleCorpusPromoter;
         final BlendedSuggestions suggestions = new BlendedSuggestions(promoter,
                 maxSuggestions,
                 query,
                 corporaToQuery);
-        ShortcutCursor shortcuts = getShortcutsForQuery(query, singleCorpus);
-        if (shortcuts != null) {
-            suggestions.setShortcuts(shortcuts);
-        }
 
         // Fast path for the zero sources case
         if (corporaToQuery.size() == 0) {

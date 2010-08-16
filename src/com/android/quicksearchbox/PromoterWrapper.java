@@ -22,22 +22,22 @@ import java.util.ArrayList;
  * A promoter that does some promotion or filtering and then delegates
  * to another promoter.
  */
-public class PromoterWrapper implements Promoter {
+public class PromoterWrapper<C extends SuggestionCursor> implements Promoter<C> {
 
     /** The next promoter to use. */
-    private final Promoter mNextPromoter;
+    private final Promoter<C> mNextPromoter;
 
     /**
      * Creates a new AbstractPromoterWrapper.
      *
      * @param nextPromoter The next promoter to use. May be {@code null}.
      */
-    public PromoterWrapper(Promoter nextPromoter) {
+    public PromoterWrapper(Promoter<C> nextPromoter) {
         mNextPromoter = nextPromoter;
     }
 
     public void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<CorpusResult> suggestions, int maxPromoted,
+            ArrayList<C> suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
         if (promoted.getCount() < maxPromoted && mNextPromoter != null) {
             mNextPromoter.pickPromoted(shortcuts, suggestions, maxPromoted, promoted);

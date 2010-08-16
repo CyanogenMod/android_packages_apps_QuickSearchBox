@@ -25,17 +25,15 @@ import java.util.LinkedList;
 /**
  * A promoter that gives preference to suggestions from higher ranking corpora.
  */
-public class RankAwarePromoter implements Promoter {
+public class RankAwarePromoter implements Promoter<CorpusResult> {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.RankAwarePromoter";
 
     private final Config mConfig;
-    private final Corpora mCorpora;
 
-    public RankAwarePromoter(Config config, Corpora corpora) {
+    public RankAwarePromoter(Config config) {
         mConfig = config;
-        mCorpora = corpora;
     }
 
     public void pickPromoted(SuggestionCursor shortcuts, ArrayList<CorpusResult> suggestions,

@@ -60,9 +60,4 @@ public interface ShortcutRefresher {
      */
     public void reset();
 
-    /**
-     * Cancels any pending shortcut refresh requests.
-     */
-    public void cancelPendingTasks();
-
 }

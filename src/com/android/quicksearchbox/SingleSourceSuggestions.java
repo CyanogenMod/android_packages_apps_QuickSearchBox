@@ -16,15 +16,25 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Consumer;
+
+import android.util.Log;
+
+import java.util.ArrayList;
+
 /**
  * Suggestions provided by a single Source.
  */
-public class SingleSourceSuggestions extends Suggestions {
+public class SingleSourceSuggestions extends Suggestions implements Consumer<SourceResult> {
+    private static final String TAG = "QSB.SingleSourceSuggestions";
+    private static final boolean DBG = false;
 
     SourceResult mResult;
+    private final Promoter<SourceResult> mPromoter;
 
-    public SingleSourceSuggestions(String query) {
-        super(query);
+    public SingleSourceSuggestions(String query, Promoter<SourceResult> promoter, int maxPromoted) {
+        super(query, maxPromoted);
+        mPromoter = promoter;
     }
 
     @Override
@@ -37,8 +47,16 @@ public class SingleSourceSuggestions extends Suggestions {
     }
 
     @Override
-    public SuggestionCursor getPromoted() {
-        return mResult;
+    protected SuggestionCursor buildPromoted() {
+        ListSuggestionCursor promoted =  new ListSuggestionCursorNoDuplicates(mQuery);
+        if (mPromoter == null) return promoted;
+        ArrayList<SourceResult> result = new ArrayList<SourceResult>(1);
+        if (mResult != null) {
+            result.add(mResult);
+        }
+        if (DBG) Log.d(TAG, "buildPromoted result=" + mResult + " shortcuts=" + getShortcuts());
+        mPromoter.pickPromoted(getShortcuts(), result, getMaxPromoted(), promoted);
+        return promoted;
     }
 
     @Override
@@ -46,14 +64,18 @@ public class SingleSourceSuggestions extends Suggestions {
         return mResult != null;
     }
 
-    public void setResult(SourceResult result) {
-        if (mResult != null) throw new IllegalStateException("Already have a result");
-        if (isClosed()) {
-            result.close();
-            return;
+    public boolean consume(SourceResult result) {
+        if (mResult != null) {
+            Log.e(TAG, "q=" + getQuery() + ": already have a result", new IllegalStateException());
+            return false;
         }
+        if (isClosed()) {
+            return false;
+        }
+        if (DBG) Log.d(TAG, "q=" + getQuery() + ": got result " + result);
         mResult = result;
         notifyDataSetChanged();
+        return true;
     }
 
 }

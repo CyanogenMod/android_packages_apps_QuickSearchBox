@@ -113,16 +113,16 @@ public class ShortcutLimitingPromoterTest extends AndroidTestCase {
 
     private SuggestionCursor promote(SuggestionCursor shortcuts, int maxShortcutsPerWebSource,
             int maxShortcutsPerNonWebSource) {
-        Promoter promoter = new ShortcutLimitingPromoter(maxShortcutsPerWebSource,
-                maxShortcutsPerNonWebSource, mShortcutTrap);
+        Promoter<SuggestionCursor> promoter = new ShortcutLimitingPromoter<SuggestionCursor>(
+                maxShortcutsPerWebSource, maxShortcutsPerNonWebSource, mShortcutTrap);
         int maxPromoted = 10;
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
         promoter.pickPromoted(shortcuts, null, maxPromoted, promoted);
         return promoted;
     }
 
-    private class ShortcutTrap implements Promoter {
-        public void pickPromoted(SuggestionCursor shortcuts, ArrayList<CorpusResult> suggestions,
+    private class ShortcutTrap implements Promoter<SuggestionCursor> {
+        public void pickPromoted(SuggestionCursor shortcuts, ArrayList<SuggestionCursor> suggestions,
                 int maxPromoted, ListSuggestionCursor promoted) {
             SuggestionCursorUtil.addAll(promoted, shortcuts);
         }

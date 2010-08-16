@@ -24,12 +24,20 @@ import android.database.DataSetObserver;
  */
 public class ReferenceCountedSourceResult implements SourceResult {
 
-    private final SourceResult mParent;
+    private SourceResult mParent;
     private int mRefCount = 0;
 
     public ReferenceCountedSourceResult(SourceResult aParent) {
         mParent = aParent;
         mRefCount = 1;
+    }
+
+    protected ReferenceCountedSourceResult() {
+        mRefCount = 1;
+    }
+
+    protected void setResult(SourceResult result) {
+        mParent = result;
     }
 
     public synchronized SourceResult getRef() {

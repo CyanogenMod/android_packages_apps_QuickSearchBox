@@ -42,7 +42,7 @@ class ShortcutCursor extends ListSuggestionCursor {
     private final ShortcutRepository mShortcutRepo;
     private final Handler mUiThread;
 
-    private boolean mClosed;
+    private int mRefCount;
 
     private ShortcutCursor(String query, SuggestionCursor shortcuts, Handler uiThread,
             ShortcutRefresher refresher, ShortcutRepository repository) {
@@ -52,6 +52,7 @@ class ShortcutCursor extends ListSuggestionCursor {
         mRefresher = refresher;
         mShortcutRepo = repository;
         mRefreshed = new HashSet<SuggestionCursor>();
+        mRefCount = 1;
     }
 
     @VisibleForTesting
@@ -73,6 +74,27 @@ class ShortcutCursor extends ListSuggestionCursor {
             } else {
                 if (DBG) Log.d(TAG, "Skipping shortcut " + i);
             }
+        }
+    }
+
+    public ShortcutCursor getRef() {
+        assertNotClosed();
+        mRefCount++;
+        return this;
+    }
+
+    public static ShortcutCursor getRef(ShortcutCursor c) {
+        if (c == null) return null;
+        return c.getRef();
+    }
+
+    private boolean closed() {
+        return mRefCount == 0;
+    }
+
+    private void assertNotClosed() {
+        if (mRefCount == 0) {
+            throw new IllegalStateException("Already closed");
         }
     }
 
@@ -103,7 +125,7 @@ class ShortcutCursor extends ListSuggestionCursor {
      */
     private void refresh(Source source, String shortcutId, SuggestionCursor refreshed) {
         if (DBG) Log.d(TAG, "refresh " + shortcutId);
-        if (mClosed) {
+        if (closed()) {
             if (refreshed != null) {
                 refreshed.close();
             }
@@ -131,17 +153,16 @@ class ShortcutCursor extends ListSuggestionCursor {
     @Override
     public void close() {
         if (DBG) Log.d(TAG, "close()");
-        if (mClosed) {
-            throw new IllegalStateException("Double close()");
+        assertNotClosed();
+        mRefCount--;
+        if (mRefCount == 0) {
+            if (mShortcuts != null) {
+                mShortcuts.close();
+            }
+            for (SuggestionCursor cursor : mRefreshed) {
+                 cursor.close();
+            }
+            super.close();
         }
-        super.close();
-        mClosed = true;
-        if (mShortcuts != null) {
-            mShortcuts.close();
-        }
-        for (SuggestionCursor cursor : mRefreshed) {
-             cursor.close();
-        }
-        super.close();
     }
 }

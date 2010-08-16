@@ -98,13 +98,6 @@ class SourceShortcutRefresher implements ShortcutRefresher {
         mRefreshed.clear();
     }
 
-    /**
-     * Cancel any pending shortcut refresh requests.
-     */
-    public void cancelPendingTasks() {
-        mExecutor.cancelPendingTasks();
-    }
-
     private static String makeKey(Source source, String shortcutId) {
         return source.getName() + "#" + shortcutId;
     }

@@ -51,6 +51,8 @@ import android.widget.ImageView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -664,11 +666,6 @@ public class SearchActivity extends Activity {
 
     protected boolean launchSuggestion(SuggestionsAdapter adapter, int position) {
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
-        // SuggestionCursor suggestions = new
-        // ListSuggestionCursor(adapter.getCurrentSuggestions()
-        // .getUserQuery());
-        // suggestions.add(new SuggestionPosition(adapter.getItem(position),
-        // 0));
         if (suggestions == null) return false;
 
         if (DBG) Log.d(TAG, "Launching suggestion " + position);
@@ -811,27 +808,50 @@ public class SearchActivity extends Activity {
         }
     }
 
+    protected ShortcutCursor getShortcutsForQuery(String query, Corpus singleCorpus) {
+        ShortcutRepository shortcutRepo = getShortcutRepository();
+        if (shortcutRepo == null) return null;
+        Collection<Corpus> allowedCorpora;
+        if (singleCorpus == null) {
+            allowedCorpora = getCorpora().getEnabledCorpora();
+        } else {
+            allowedCorpora = Collections.singletonList(singleCorpus);
+        }
+        return shortcutRepo.getShortcutsForQuery(query, allowedCorpora);
+    }
+
     protected void updateSuggestions(String query) {
 
         query = CharMatcher.WHITESPACE.trimLeadingFrom(query);
         if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
+        getQsbApplication().getSourceTaskExecutor().cancelPendingTasks();
         if (!separateResults()) {
+            ShortcutCursor shortcuts = getShortcutsForQuery(query, mCorpus);
             Suggestions suggestions = getSuggestionsProvider().getSuggestions(
                     query, mCorpus, getMaxSuggestions());
+            suggestions.setShortcuts(shortcuts);
             // Log start latency if this is the first suggestions update
             gotSuggestions(blendedOrNothing(suggestions));
             mSuggestionsAdapter.setSuggestions(suggestions);
         } else {
-            // TODO getMaxSuggestions() - different for suggestions & results?
+            // TODO: if we have a corpus selector in 2 pane UI, need to filter shortcuts by corpus
+            //for results somewhere.
+            ShortcutCursor shortcuts = getShortcutsForQuery(query, null);
+            // TODO: getMaxSuggestions() - different for suggestions & results?
             Suggestions webSuggestions = getSuggestionsProvider().getSuggestions(
                     query, null, getMaxSuggestions());
+            webSuggestions.setShortcuts(ShortcutCursor.getRef(shortcuts));
             Suggestions results = getResultsProvider().getSuggestions(
                     query, mCorpus, getMaxSuggestions());
-            // TODO gotSuggestions(webSuggestions, results)
+            results.setShortcuts(ShortcutCursor.getRef(shortcuts));
+            // TODO: gotSuggestions(webSuggestions, results)
             gotSuggestions(pickBlended(results, webSuggestions));
 
             mSuggestionsAdapter.setSuggestions(webSuggestions);
             mResultsAdapter.setSuggestions(results);
+            if (shortcuts != null) {
+                shortcuts.close();
+            }
         }
     }
 

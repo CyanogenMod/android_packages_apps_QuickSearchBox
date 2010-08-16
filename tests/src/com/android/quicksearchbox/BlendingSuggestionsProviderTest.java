@@ -26,18 +26,19 @@ import android.test.suitebuilder.annotation.MediumTest;
  * Tests for {@link BlendingSuggestionsProvider}.
  */
 @MediumTest
-public class SuggestionsProviderImplTest extends AndroidTestCase {
+public class BlendingSuggestionsProviderTest extends AndroidTestCase {
 
     private MockCorpora mCorpora;
     private MockNamedTaskExecutor mTaskExecutor;
     private BlendingSuggestionsProvider mProvider;
+    private ShortcutRepository mShortcutRepo;
 
     @Override
     protected void setUp() throws Exception {
         Config config = new Config(getContext());
         mTaskExecutor = new MockNamedTaskExecutor();
         Handler publishThread = new MockHandler();
-        ShortcutRepository shortcutRepo = new MockShortcutRepository();
+        mShortcutRepo = new MockShortcutRepository();
         mCorpora = new MockCorpora();
         mCorpora.addCorpus(MockCorpus.CORPUS_1);
         mCorpora.addCorpus(MockCorpus.CORPUS_2);
@@ -46,16 +47,17 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
         mProvider = new BlendingSuggestionsProvider(config,
                 mTaskExecutor,
                 publishThread,
-                shortcutRepo,
-                mCorpora,
                 corpusRanker,
                 logger);
-        mProvider.setAllPromoter(new ConcatPromoter());
-        mProvider.setSingleCorpusPromoter(new ConcatPromoter());
+        mProvider.setAllPromoter(new ConcatPromoter<CorpusResult>());
+        mProvider.setSingleCorpusPromoter(new ConcatPromoter<CorpusResult>());
     }
 
     public void testSingleCorpus() {
-        BlendedSuggestions suggestions = mProvider.getSuggestions("foo", MockCorpus.CORPUS_1, 3);
+        BlendedSuggestions suggestions = (BlendedSuggestions) mProvider.getSuggestions(
+                "foo", MockCorpus.CORPUS_1, 3);
+        suggestions.setShortcuts(mShortcutRepo.getShortcutsForQuery(
+                "foo", mCorpora.getAllCorpora()));
         try {
             assertEquals(1, suggestions.getExpectedResultCount());
             assertEquals(0, suggestions.getResultCount());
@@ -72,7 +74,10 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
     }
 
     public void testMultipleCorpora() {
-        BlendedSuggestions suggestions = mProvider.getSuggestions("foo", null, 6);
+        BlendedSuggestions suggestions = (BlendedSuggestions) mProvider.getSuggestions(
+                "foo", null, 6);
+        suggestions.setShortcuts(mShortcutRepo.getShortcutsForQuery(
+                        "foo", mCorpora.getAllCorpora()));
         try {
             int corpus1Count = MockCorpus.CORPUS_1.getSuggestions("foo", 3, true).getCount();
             int corpus2Count = MockCorpus.CORPUS_2.getSuggestions("foo", 3, true).getCount();
