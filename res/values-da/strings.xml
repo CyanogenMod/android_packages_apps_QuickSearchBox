@@ -18,18 +18,13 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Søg"</string>
     <string name="search_widget" msgid="323244086853110381">"Søg"</string>
-    <string name="search_widget_config_ok" msgid="5928098252637988527">"OK"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Søg"</string>
-    <string name="corpus_selection_edit_items" msgid="4467633677272572585">"Tilføl/fjern"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Alle"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
     <string name="corpus_description_web" msgid="5553049179123250409">"Websøgning, bogmærker og browseroversigt"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Apps"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Navne på installerede programmer"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Søg i Apps"</string>
-    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Apps og Marked"</string>
-    <string name="corpus_description_apps_market" msgid="6676825865398169853">"Installerede Apps og Apps fra Marked"</string>
-    <string name="corpus_hint_apps_market" msgid="627025611326022658">"Søg i Apps og Marked"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Indstillinger for søgning"</string>
     <string name="search_settings" msgid="4101951238194600323">"Indstillinger for søgning"</string>
     <string name="web_search_category_title" msgid="3696363552067530526">"Web"</string>

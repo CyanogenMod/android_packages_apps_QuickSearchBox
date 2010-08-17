@@ -16,18 +16,15 @@
 
 package com.android.quicksearchbox;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Dummy {@link Logger} implementation.
+ * Mock {@code Logger} implementation.
  */
-@VisibleForTesting
-public class NoLogger implements Logger {
+public class MockLogger implements Logger {
 
-    public NoLogger() {
+    public MockLogger() {
     }
 
     public void logStart(int latency, String intentSource, Corpus corpus,

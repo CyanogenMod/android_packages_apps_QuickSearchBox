@@ -43,7 +43,7 @@ public class BlendingSuggestionsProviderTest extends AndroidTestCase {
         mCorpora.addCorpus(MockCorpus.CORPUS_1);
         mCorpora.addCorpus(MockCorpus.CORPUS_2);
         CorpusRanker corpusRanker = new LexicographicalCorpusRanker(mCorpora);
-        Logger logger = new NoLogger();
+        Logger logger = new MockLogger();
         mProvider = new BlendingSuggestionsProvider(config,
                 mTaskExecutor,
                 publishThread,

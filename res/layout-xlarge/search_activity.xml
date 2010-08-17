@@ -48,15 +48,10 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"
                 android:layout_below="@+id/search_edit_frame"
-                android:layout_above="@+id/footer"
-                android:layout_alignWithParentIfMissing="true"
+                android:layout_alignParentBottom="true"
                 android:background="@drawable/bottom_curved"
                 >
             </view>
-
-            <include
-                android:id="@+id/footer"
-                layout="@layout/search_activity_footer" />
 
             <!-- The search plate is after the suggestions, to give it a higher
                  z-index. -->
@@ -101,8 +96,6 @@
                         android:imeOptions="actionGo"
                     />
 
-                    <include layout="@layout/search_text_overlay"/>
-
                 </RelativeLayout>
 
                 <ImageButton
@@ -126,11 +119,6 @@
                 />
             </LinearLayout>
 
-            <!-- The header comes last so that it is on top of all the other views. It sits on top
-                 of the suggestions list. -->
-            <include
-                android:id="@+id/header"
-                layout="@layout/search_activity_header" />
         </RelativeLayout>
         <!-- End left_pane -->
 

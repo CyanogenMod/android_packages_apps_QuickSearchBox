@@ -20,12 +20,8 @@
     <!-- Search widget -->
     <string name="search_widget">Search</string>
 
-    <!-- Search widget config -->
-    <string name="search_widget_config_ok">OK</string>
-
     <!-- Source selector -->
     <string name="corpus_selection_heading">Search</string>
-    <string name="corpus_selection_edit_items">Add / Remove</string>
     <string name="corpus_label_global">All</string>
 
     <!-- Name of the combined Web source shown in QSB -->
@@ -39,13 +35,6 @@
     <string name="corpus_description_apps">Names of installed applications</string>
     <!-- Search hint for the Apps source shown in QSB -->
     <string name="corpus_hint_apps">Search Apps</string>
-
-    <!-- Name of the Apps and Market source shown in QSB -->
-    <string name="corpus_label_apps_market">Apps and Market</string>
-    <!-- Settings description for the Apps and Market source shown in QSB -->
-    <string name="corpus_description_apps_market">Installed Apps and Apps from Market</string>
-    <!-- Search hint for the Apps source shown in QSB -->
-    <string name="corpus_hint_apps_market">Search Apps and Market</string>
 
 
     <!-- Search settings stuff -->
