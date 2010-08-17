@@ -57,7 +57,7 @@
         android:layout_height="29dip"
         android:paddingBottom="4dip"
         android:paddingRight="2dip"
-        android:gravity="top"
+        android:gravity="center_vertical"
         android:layout_toRightOf="@id/icon1"
         android:layout_toLeftOf="@id/icon2"
         android:layout_alignWithParentIfMissing="true"
