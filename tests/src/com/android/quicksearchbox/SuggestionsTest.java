@@ -33,21 +33,21 @@ import java.util.Set;
 @SmallTest
 public class SuggestionsTest extends AndroidTestCase {
 
-    private BlendedSuggestions mSuggestions;
+    private Suggestions mSuggestions;
     private MockDataSetObserver mObserver;
     private List<Corpus> mExpectedCorpora;
 
     @Override
     protected void setUp() throws Exception {
         mExpectedCorpora = Arrays.asList(new Corpus[]{null,null});
-        mSuggestions = new BlendedSuggestions(null, 0, "foo", mExpectedCorpora);
+        mSuggestions = new Suggestions("foo", mExpectedCorpora);
         mObserver = new MockDataSetObserver();
         mSuggestions.registerDataSetObserver(mObserver);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        mSuggestions.close();
+        mSuggestions.release();
         mSuggestions = null;
     }
 

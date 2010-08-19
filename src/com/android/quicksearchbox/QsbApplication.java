@@ -39,7 +39,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 
-import java.util.HashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -51,16 +50,13 @@ public class QsbApplication {
     private Handler mUiThreadHandler;
     private Config mConfig;
     private Sources mSources;
-    private Corpora mAllCorpora;
-    private Corpora mResultsCorpora;
-    private final HashMap<Corpora, CorpusRanker> mCorpusRankers;
+    private Corpora mCorpora;
+    private CorpusRanker mCorpusRanker;
     private ShortcutRepository mShortcutRepository;
     private ShortcutRefresher mShortcutRefresher;
     private NamedTaskExecutor mSourceTaskExecutor;
     private ThreadFactory mQueryThreadFactory;
-    private SuggestionsProvider mUnifiedProvider;
-    private SuggestionsProvider mWebSuggestionProvider;
-    private SuggestionsProvider mResultsProvider;
+    private SuggestionsProvider mSuggestionsProvider;
     private SuggestionViewFactory mSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
     private GoogleSource mGoogleSource;
@@ -71,7 +67,6 @@ public class QsbApplication {
 
     public QsbApplication(Context context) {
         mContext = context;
-        mCorpusRankers = new HashMap<Corpora, CorpusRanker>();
     }
 
     public static boolean isFroyoOrLater() {
@@ -122,17 +117,9 @@ public class QsbApplication {
             mSourceTaskExecutor.close();
             mSourceTaskExecutor = null;
         }
-        if (mUnifiedProvider != null) {
-            mUnifiedProvider.close();
-            mUnifiedProvider = null;
-        }
-        if (mWebSuggestionProvider != null) {
-            mWebSuggestionProvider.close();
-            mWebSuggestionProvider = null;
-        }
-        if (mResultsProvider != null) {
-            mResultsProvider.close();
-            mResultsProvider = null;
+        if (mSuggestionsProvider != null) {
+            mSuggestionsProvider.close();
+            mSuggestionsProvider = null;
         }
     }
 
@@ -169,39 +156,21 @@ public class QsbApplication {
     }
 
     /**
-     * Gets the 'all' corpora providing results and web suggestions.
+     * Gets all corpora.
+     *
      * May only be called from the main thread.
      */
-    public Corpora getAllCorpora() {
+    public Corpora getCorpora() {
         checkThread();
-        if (mAllCorpora == null) {
-            mAllCorpora = createAllCorpora(getSources());
+        if (mCorpora == null) {
+            mCorpora = createCorpora(getSources());
         }
-        return mAllCorpora;
+        return mCorpora;
     }
 
-    protected Corpora createAllCorpora(Sources sources) {
+    protected Corpora createCorpora(Sources sources) {
         SearchableCorpora corpora = new SearchableCorpora(getContext(), sources,
-                createAllCorpusFactory());
-        corpora.update();
-        return corpora;
-    }
-
-    /**
-     * Gets the corpora providing results only.
-     * May only be called from the main thread.
-     */
-    public Corpora getResultsCorpora() {
-        checkThread();
-        if (mResultsCorpora == null) {
-            mResultsCorpora = createResultsCorpora(getSources());
-        }
-        return mResultsCorpora;
-    }
-
-    protected Corpora createResultsCorpora(Sources sources) {
-        SearchableCorpora corpora = new SearchableCorpora(getContext(), sources,
-                createResultsCorpusFactory());
+                createCorpusFactory());
         corpora.update();
         return corpora;
     }
@@ -212,11 +181,8 @@ public class QsbApplication {
      */
     public void updateCorpora() {
         checkThread();
-        if (mAllCorpora != null) {
-            mAllCorpora.update();
-        }
-        if (mResultsCorpora != null) {
-            mResultsCorpora.update();
+        if (mCorpora != null) {
+            mCorpora.update();
         }
     }
 
@@ -232,15 +198,9 @@ public class QsbApplication {
         return new SearchableSources(getContext());
     }
 
-    protected CorpusFactory createAllCorpusFactory() {
+    protected CorpusFactory createCorpusFactory() {
         int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
         return new SearchableCorpusFactory(getContext(), getConfig(),
-                createExecutorFactory(numWebCorpusThreads));
-    }
-
-    protected CorpusFactory createResultsCorpusFactory() {
-        int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
-        return new ResultsCorpusFactory(getContext(), getConfig(),
                 createExecutorFactory(numWebCorpusThreads));
     }
 
@@ -257,40 +217,35 @@ public class QsbApplication {
      * Gets the corpus ranker.
      * May only be called from the main thread.
      */
-    public CorpusRanker getCorpusRanker(Corpora corpora) {
+    public CorpusRanker getCorpusRanker() {
         checkThread();
-        if (mCorpusRankers.get(corpora) == null) {
-            mCorpusRankers.put(corpora, createCorpusRanker(corpora));
+        if (mCorpusRanker == null) {
+            mCorpusRanker = createCorpusRanker();
         }
-        return mCorpusRankers.get(corpora);
+        return mCorpusRanker;
     }
 
-    protected CorpusRanker createCorpusRanker(Corpora corpora) {
-        return new DefaultCorpusRanker(corpora, getShortcutRepository(corpora));
+    protected CorpusRanker createCorpusRanker() {
+        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository());
     }
 
     /**
      * Gets the shortcut repository.
      * May only be called from the main thread.
      */
-    public ShortcutRepository getShortcutRepository(Corpora corpora) {
+    public ShortcutRepository getShortcutRepository() {
         checkThread();
         if (mShortcutRepository == null) {
-            mShortcutRepository = createShortcutRepository(corpora);
+            mShortcutRepository = createShortcutRepository();
         }
         return mShortcutRepository;
     }
 
-    @Deprecated
-    public ShortcutRepository getShortcutRepository() {
-        return getShortcutRepository(getAllCorpora());
-    }
-
-    protected ShortcutRepository createShortcutRepository(Corpora corpora) {
+    protected ShortcutRepository createShortcutRepository() {
         ThreadFactory logThreadFactory = new NamingThreadFactory("ShortcutRepositoryWriter #%d",
                 new PriorityThreadFactory(Process.THREAD_PRIORITY_BACKGROUND));
         Executor logExecutor = Executors.newSingleThreadExecutor(logThreadFactory);
-        return ShortcutRepositoryImplLog.create(getContext(), getConfig(), corpora,
+        return ShortcutRepositoryImplLog.create(getContext(), getConfig(), getCorpora(),
             getShortcutRefresher(), getMainThreadHandler(), logExecutor);
     }
 
@@ -348,91 +303,23 @@ public class QsbApplication {
     }
 
     /**
-     * Gets the suggestion provider which provides suggestions from all sources blended together.
-     * Used when all suggestions are presented in a single list.
+     * Gets the suggestion provider.
      *
      * May only be called from the main thread.
      */
-    protected SuggestionsProvider getUnifiedProvider() {
+    protected SuggestionsProvider getSuggestionsProvider() {
         checkThread();
-        if (mUnifiedProvider == null) {
-            mUnifiedProvider = createUnifiedProvider();
+        if (mSuggestionsProvider == null) {
+            mSuggestionsProvider = createSuggestionsProvider();
         }
-        return mUnifiedProvider;
+        return mSuggestionsProvider;
     }
 
-    /**
-     * Gets the suggestion provider which provides web query suggestions only.
-     *
-     * May only be called from the main thread.
-     */
-    protected SuggestionsProvider getWebSuggestionsProvider() {
-        checkThread();
-        if (mWebSuggestionProvider == null) {
-            mWebSuggestionProvider = createWebSuggestionsProvider();
-        }
-        return mWebSuggestionProvider;
-    }
-
-    /**
-     * Gets the suggestion provider which provides all results for a query except web query
-     * suggestions.
-     *
-     * May only be called from the main thread.
-     */
-    protected SuggestionsProvider getResultsProvider() {
-        checkThread();
-        if (mResultsProvider == null) {
-            mResultsProvider = createResultsProvider();
-        }
-        return mResultsProvider;
-    }
-
-    protected SuggestionsProvider createBlendingProvider(
-            Corpora corpora, Promoter<CorpusResult> allPromoter, Promoter<CorpusResult> singleCorpusPromoter) {
-        BlendingSuggestionsProvider provider = new BlendingSuggestionsProvider(getConfig(),
-                getSourceTaskExecutor(),
-                getMainThreadHandler(),
-                getCorpusRanker(corpora),
-                getLogger());
-        provider.setAllPromoter(allPromoter);
-        provider.setSingleCorpusPromoter(singleCorpusPromoter);
-        return provider;
-    }
-
-    protected SuggestionsProvider createUnifiedProvider() {
-        int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
-        int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
-        Promoter<CorpusResult> allPromoter = new ShortcutLimitingPromoter<CorpusResult>(
-                maxShortcutsPerWebSource,
-                maxShortcutsPerNonWebSource,
-                new ShortcutPromoter<CorpusResult>(
-                        new RankAwarePromoter(getConfig())));
-        Promoter<CorpusResult> singleCorpusPromoter = new ShortcutPromoter<CorpusResult>(
-                new ConcatPromoter<CorpusResult>());
-        return createBlendingProvider(getAllCorpora(), allPromoter, singleCorpusPromoter);
-    }
-
-    protected SuggestionsProvider createWebSuggestionsProvider() {
-        SingleSourceSuggestionsProvider provider =  new SingleSourceSuggestionsProvider(
-                getGoogleSource(), getSourceTaskExecutor(), getMainThreadHandler());
-        provider.setPromoter(new WebSuggestionFilteringPromoter<SourceResult>(true,
-                new ConcatPromoter<SourceResult>()));
-        return provider;
-    }
-
-    protected SuggestionsProvider createResultsProvider() {
-        int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
-        int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
-        Promoter<CorpusResult> allPromoter = new ShortcutLimitingPromoter<CorpusResult>(
-                maxShortcutsPerWebSource,
-                maxShortcutsPerNonWebSource,
-                new WebSuggestionFilteringPromoter<CorpusResult>(false,
-                        new RankAwarePromoter(getConfig())));
-        Promoter<CorpusResult> singleCorpusPromoter =
-                new WebSuggestionFilteringPromoter<CorpusResult>(false,
-                        new ConcatPromoter<CorpusResult>());
-        return createBlendingProvider(getResultsCorpora(), allPromoter, singleCorpusPromoter);
+    protected SuggestionsProvider createSuggestionsProvider() {
+        return new SuggestionsProviderImpl(getConfig(),
+              getSourceTaskExecutor(),
+              getMainThreadHandler(),
+              getLogger());
     }
 
     /**
@@ -468,13 +355,45 @@ public class QsbApplication {
     }
 
     /**
-     * Creates a suggestions adapter.
+     * Creates a suggestions adapter that blends web suggestions and results.
      * May only be called from the main thread.
      */
-    public SuggestionsAdapter createSuggestionsAdapter() {
+    public SuggestionsAdapter createBlendingSuggestionsAdapter() {
         SuggestionViewFactory viewFactory = getSuggestionViewFactory();
-        DelayingSuggestionsAdapter adapter = new DelayingSuggestionsAdapter(viewFactory);
-        return adapter;
+        return new DelayingSuggestionsAdapter(createBlendingPromoter(), viewFactory,
+                getConfig().getMaxPromotedSuggestions());
+    }
+
+    /**
+     * Creates a suggestions adapter that shows web suggestions.
+     * May only be called from the main thread.
+     */
+    public SuggestionsAdapter createWebSuggestionsAdapter() {
+        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
+        return new DelayingSuggestionsAdapter(createWebPromoter(), viewFactory,
+                getConfig().getMaxPromotedSuggestions());
+    }
+
+    /**
+     * Creates a suggestions adapter that shows results.
+     * May only be called from the main thread.
+     */
+    public SuggestionsAdapter createResultSuggestionsAdapter() {
+        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
+        return new DelayingSuggestionsAdapter(createResultsPromoter(), viewFactory,
+                getConfig().getMaxPromotedSuggestions());
+    }
+
+    private Promoter createBlendingPromoter() {
+        return new BlendingPromoter(getConfig());
+    }
+
+    private Promoter createWebPromoter() {
+        return new WebPromoter(getConfig().getMaxShortcutsPerWebSource());
+    }
+
+    private Promoter createResultsPromoter() {
+        return new ResultPromoter(getConfig());
     }
 
     /**

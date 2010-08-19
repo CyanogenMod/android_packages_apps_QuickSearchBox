@@ -22,15 +22,20 @@ import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
- * Tests for {@link BlendingSuggestionsProvider}.
+ * Tests for {@link SuggestionsProviderImpl}.
  */
 @MediumTest
-public class BlendingSuggestionsProviderTest extends AndroidTestCase {
+public class SuggestionsProviderImplTest extends AndroidTestCase {
 
-    private MockCorpora mCorpora;
+    private List<Corpus> mCorpora;
     private MockNamedTaskExecutor mTaskExecutor;
-    private BlendingSuggestionsProvider mProvider;
+    private SuggestionsProviderImpl mProvider;
     private ShortcutRepository mShortcutRepo;
 
     @Override
@@ -39,63 +44,63 @@ public class BlendingSuggestionsProviderTest extends AndroidTestCase {
         mTaskExecutor = new MockNamedTaskExecutor();
         Handler publishThread = new MockHandler();
         mShortcutRepo = new MockShortcutRepository();
-        mCorpora = new MockCorpora();
-        mCorpora.addCorpus(MockCorpus.CORPUS_1);
-        mCorpora.addCorpus(MockCorpus.CORPUS_2);
-        CorpusRanker corpusRanker = new LexicographicalCorpusRanker(mCorpora);
+        mCorpora = new ArrayList<Corpus>();
+        mCorpora.add(MockCorpus.CORPUS_1);
+        mCorpora.add(MockCorpus.CORPUS_2);
         Logger logger = new MockLogger();
-        mProvider = new BlendingSuggestionsProvider(config,
+        mProvider = new SuggestionsProviderImpl(config,
                 mTaskExecutor,
                 publishThread,
-                corpusRanker,
                 logger);
-        mProvider.setAllPromoter(new ConcatPromoter<CorpusResult>());
-        mProvider.setSingleCorpusPromoter(new ConcatPromoter<CorpusResult>());
     }
 
     public void testSingleCorpus() {
-        BlendedSuggestions suggestions = (BlendedSuggestions) mProvider.getSuggestions(
-                "foo", MockCorpus.CORPUS_1, 3);
+        Suggestions suggestions = mProvider.getSuggestions("foo",
+                Collections.singletonList(MockCorpus.CORPUS_1));
         suggestions.setShortcuts(mShortcutRepo.getShortcutsForQuery(
-                "foo", mCorpora.getAllCorpora()));
+                "foo", mCorpora));
         try {
             assertEquals(1, suggestions.getExpectedResultCount());
             assertEquals(0, suggestions.getResultCount());
-            assertEquals(0, suggestions.getPromoted().getCount());
+            assertEquals(0, promote(suggestions).getCount());
             assertTrue(mTaskExecutor.runNext());
             assertEquals(1, suggestions.getExpectedResultCount());
             assertEquals(1, suggestions.getResultCount());
             assertEquals(MockCorpus.CORPUS_1.getSuggestions("foo", 3, true).getCount(),
-                    suggestions.getPromoted().getCount());
+                    promote(suggestions).getCount());
             mTaskExecutor.assertDone();
         } finally {
-            if (suggestions != null) suggestions.close();
+            if (suggestions != null) suggestions.release();
         }
     }
 
     public void testMultipleCorpora() {
-        BlendedSuggestions suggestions = (BlendedSuggestions) mProvider.getSuggestions(
-                "foo", null, 6);
+        Suggestions suggestions = mProvider.getSuggestions("foo",
+                Arrays.asList(MockCorpus.CORPUS_1, MockCorpus.CORPUS_2));
         suggestions.setShortcuts(mShortcutRepo.getShortcutsForQuery(
-                        "foo", mCorpora.getAllCorpora()));
+                        "foo", mCorpora));
         try {
             int corpus1Count = MockCorpus.CORPUS_1.getSuggestions("foo", 3, true).getCount();
             int corpus2Count = MockCorpus.CORPUS_2.getSuggestions("foo", 3, true).getCount();
-            assertEquals(mCorpora.getEnabledCorpora().size(), suggestions.getExpectedResultCount());
+            assertEquals(mCorpora.size(), suggestions.getExpectedResultCount());
             assertEquals(0, suggestions.getResultCount());
-            assertEquals(0, suggestions.getPromoted().getCount());
+            assertEquals(0, promote(suggestions).getCount());
             assertTrue(mTaskExecutor.runNext());
             assertEquals(1, suggestions.getResultCount());
-            assertEquals("Incorrect promoted: " + suggestions.getPromoted(),
-                    corpus1Count, suggestions.getPromoted().getCount());
+            assertEquals("Incorrect promoted: " + promote(suggestions),
+                    corpus1Count, promote(suggestions).getCount());
             assertTrue(mTaskExecutor.runNext());
             assertEquals(2, suggestions.getResultCount());
-            assertEquals("Incorrect promoted: " + suggestions.getPromoted(),
-                    corpus1Count + corpus2Count, suggestions.getPromoted().getCount());
+            assertEquals("Incorrect promoted: " + promote(suggestions),
+                    corpus1Count + corpus2Count, promote(suggestions).getCount());
             mTaskExecutor.assertDone();
         } finally {
-            if (suggestions != null) suggestions.close();
+            if (suggestions != null) suggestions.release();
         }
+    }
+
+    private SuggestionCursor promote(Suggestions suggestions) {
+        return suggestions.getPromoted(new ConcatPromoter(), 10);
     }
 
 }

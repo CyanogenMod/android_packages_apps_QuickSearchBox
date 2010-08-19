@@ -53,8 +53,7 @@ public class SearchableItemsSettings extends PreferenceActivity
     }
 
     private Corpora getCorpora() {
-        //TODO is is ok to always use All corpora?
-        return QsbApplication.get(this).getAllCorpora();
+        return QsbApplication.get(this).getCorpora();
     }
 
     /**

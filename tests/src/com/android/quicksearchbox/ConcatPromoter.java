@@ -16,17 +16,15 @@
 
 package com.android.quicksearchbox;
 
-import java.util.ArrayList;
 
 /**
  * A simple promoter that concatenates the source results and ignores the shortcuts.
  */
-public class ConcatPromoter<C extends SuggestionCursor> implements Promoter<C> {
+public class ConcatPromoter implements Promoter {
 
-    public void pickPromoted(SuggestionCursor shortcuts,
-            ArrayList<C> suggestions, int maxPromoted,
+    public void pickPromoted(Suggestions suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
-        for (SuggestionCursor c : suggestions) {
+        for (SuggestionCursor c : suggestions.getCorpusResults()) {
             for (int i = 0; i < c.getCount(); i++) {
                 if (promoted.getCount() >= maxPromoted) {
                     return;

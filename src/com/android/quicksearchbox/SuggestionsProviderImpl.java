@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,7 +32,7 @@ import java.util.List;
  * The provider will only handle a single query at a time. If a new query comes
  * in, the old one is cancelled.
  */
-public class BlendingSuggestionsProvider implements SuggestionsProvider {
+public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsProviderImpl";
@@ -44,42 +43,20 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
 
     private final Handler mPublishThread;
 
-    private Promoter<CorpusResult> mAllPromoter;
-
-    private Promoter<CorpusResult> mSingleCorpusPromoter;
-
     private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
-
-    private final CorpusRanker mCorpusRanker;
 
     private final Logger mLogger;
 
     private BatchingNamedTaskExecutor mBatchingExecutor;
 
-    public BlendingSuggestionsProvider(Config config,
+    public SuggestionsProviderImpl(Config config,
             NamedTaskExecutor queryExecutor,
             Handler publishThread,
-            CorpusRanker corpusRanker,
             Logger logger) {
         mConfig = config;
         mQueryExecutor = queryExecutor;
         mPublishThread = publishThread;
-        mCorpusRanker = corpusRanker;
         mLogger = logger;
-    }
-
-    /**
-     * Sets the promoter used in All mode.
-     */
-    public void setAllPromoter(Promoter<CorpusResult> promoter) {
-        mAllPromoter = promoter;
-    }
-
-    /**
-     * Sets the promoter used in single corpus mode.
-     */
-    public void setSingleCorpusPromoter(Promoter<CorpusResult> promoter) {
-        mSingleCorpusPromoter = promoter;
     }
 
     public void close() {
@@ -99,12 +76,11 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
     /**
      * Gets the sources that should be queried for the given query.
      */
-    private List<Corpus> getCorporaToQuery(String query, Corpus singleCorpus) {
-        if (singleCorpus != null) return Collections.singletonList(singleCorpus);
-        List<Corpus> orderedCorpora = mCorpusRanker.getRankedCorpora();
-        if (DBG) Log.d(TAG, "getCorporaToQuery query='"+query+"' orderedCorpora="+orderedCorpora);
-        ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(orderedCorpora.size());
-        for (Corpus corpus : orderedCorpora) {
+    private List<Corpus> filterCorpora(String query, List<Corpus> corpora) {
+        // If there is only one corpus, always query it
+        if (corpora.size() <= 1) return corpora;
+        ArrayList<Corpus> corporaToQuery = new ArrayList<Corpus>(corpora.size());
+        for (Corpus corpus : corpora) {
             if (shouldQueryCorpus(corpus, query)) {
                 if (DBG) Log.d(TAG, "should query corpus " + corpus);
                 corporaToQuery.add(corpus);
@@ -131,15 +107,10 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
         }
     }
 
-    public Suggestions getSuggestions(String query, Corpus singleCorpus, int maxSuggestions) {
+    public Suggestions getSuggestions(String query, List<Corpus> corporaToQuery) {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
-        List<Corpus> corporaToQuery = getCorporaToQuery(query, singleCorpus);
-        Promoter<CorpusResult> promoter = singleCorpus == null ? mAllPromoter
-                                                               : mSingleCorpusPromoter;
-        final BlendedSuggestions suggestions = new BlendedSuggestions(promoter,
-                maxSuggestions,
-                query,
-                corporaToQuery);
+        corporaToQuery = filterCorpora(query, corporaToQuery);
+        final Suggestions suggestions = new Suggestions(query, corporaToQuery);
 
         // Fast path for the zero sources case
         if (corporaToQuery.size() == 0) {
@@ -160,7 +131,7 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
         QueryTask.startQueries(query, maxResultsPerSource, corporaToQuery, mBatchingExecutor,
-                mPublishThread, receiver, singleCorpus != null);
+                mPublishThread, receiver, corporaToQuery.size() == 1);
         mBatchingExecutor.executeNextBatch(initialBatchSize);
 
         return suggestions;
@@ -178,7 +149,7 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
 
     private class SuggestionCursorReceiver implements Consumer<CorpusResult> {
         private final BatchingNamedTaskExecutor mExecutor;
-        private final BlendedSuggestions mSuggestions;
+        private final Suggestions mSuggestions;
         private final long mResultPublishDelayMillis;
         private final ArrayList<CorpusResult> mPendingResults;
         private final Runnable mResultPublishTask = new Runnable () {
@@ -191,7 +162,7 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
         private int mCountAtWhichToExecuteNextBatch;
 
         public SuggestionCursorReceiver(BatchingNamedTaskExecutor executor,
-                BlendedSuggestions suggestions, int initialBatchSize,
+                Suggestions suggestions, int initialBatchSize,
                 long publishResultDelayMillis) {
             mExecutor = executor;
             mSuggestions = suggestions;
@@ -237,13 +208,10 @@ public class BlendingSuggestionsProvider implements SuggestionsProvider {
 
         private void executeNextBatchIfNeeded() {
             if (mSuggestions.getResultCount() == mCountAtWhichToExecuteNextBatch) {
-                // We've just finished one batch
-                if (mSuggestions.getPromoted().getCount() < mConfig.getMaxPromotedSuggestions()) {
-                    // But we still don't have enough results, ask for more
-                    int nextBatchSize = mConfig.getNumPromotedSources();
-                    mCountAtWhichToExecuteNextBatch += nextBatchSize;
-                    mExecutor.executeNextBatch(nextBatchSize);
-                }
+                // We've just finished one batch, ask for more
+                int nextBatchSize = mConfig.getNumPromotedSources();
+                mCountAtWhichToExecuteNextBatch += nextBatchSize;
+                mExecutor.executeNextBatch(nextBatchSize);
             }
         }
     }

@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import android.database.DataSetObserver;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Maintains the set of available and enabled corpora.
@@ -35,9 +36,9 @@ public interface Corpora {
     /**
      * Gets all enabled corpora.
      *
-     * @return Callers must not modify the returned collection.
+     * @return Callers must not modify the returned list.
      */
-    Collection<Corpus> getEnabledCorpora();
+    List<Corpus> getEnabledCorpora();
 
     /**
      * Gets a corpus by name.

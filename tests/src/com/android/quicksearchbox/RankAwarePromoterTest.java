@@ -48,9 +48,9 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     }
 
     public void testPromotesExpectedSuggestions() {
-        ArrayList<CorpusResult> suggestions = getSuggestions(TEST_QUERY);
+        List<CorpusResult> suggestions = getSuggestions(TEST_QUERY);
         ListSuggestionCursor promoted = new ListSuggestionCursor(TEST_QUERY);
-        mPromoter.pickPromoted(null, suggestions, MAX_PROMOTED_SUGGESTIONS, promoted);
+        mPromoter.promoteSuggestions(suggestions, MAX_PROMOTED_SUGGESTIONS, promoted);
 
         assertEquals(MAX_PROMOTED_SUGGESTIONS, promoted.getCount());
 
@@ -72,12 +72,13 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         return mRanker.getRankedCorpora();
     }
 
-    private ArrayList<CorpusResult> getSuggestions(String query) {
-        ArrayList<CorpusResult> suggestions = new ArrayList<CorpusResult>();
-        for (Corpus corpus : getRankedCorpora()) {
-            suggestions.add(corpus.getSuggestions(query, 10, false));
+    private List<CorpusResult> getSuggestions(String query) {
+        ArrayList<CorpusResult> results = new ArrayList<CorpusResult>();
+        List<Corpus> corpora = getRankedCorpora();
+        for (Corpus corpus : corpora) {
+            results.add(corpus.getSuggestions(query, 10, false));
         }
-        return suggestions;
+        return results;
     }
 
     private static MockCorpora createMockCorpora(int count, int defaultCount) {

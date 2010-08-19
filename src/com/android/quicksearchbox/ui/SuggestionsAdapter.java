@@ -16,18 +16,18 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.BlendedSuggestions;
-import com.android.quicksearchbox.Corpus;
-import com.android.quicksearchbox.SuggestionCursor;
-import com.android.quicksearchbox.SuggestionPosition;
-import com.android.quicksearchbox.Suggestions;
-
 import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+
+import com.android.quicksearchbox.Corpus;
+import com.android.quicksearchbox.Promoter;
+import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.SuggestionPosition;
+import com.android.quicksearchbox.Suggestions;
 
 /**
  * Uses a {@link Suggestions} object to back a {@link SuggestionsView}.
@@ -39,7 +39,11 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private DataSetObserver mDataSetObserver;
 
+    private final Promoter mPromoter;
+
     private final SuggestionViewFactory mViewFactory;
+
+    private final int mMaxPromoted;
 
     private SuggestionCursor mCursor;
 
@@ -52,8 +56,11 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private boolean mClosed = false;
 
-    public SuggestionsAdapter(SuggestionViewFactory viewFactory) {
+    public SuggestionsAdapter(Promoter promoter, SuggestionViewFactory viewFactory,
+            int maxPromoted) {
+        mPromoter = promoter;
         mViewFactory = viewFactory;
+        mMaxPromoted = maxPromoted;
     }
 
     public boolean isClosed() {
@@ -80,7 +87,7 @@ public class SuggestionsAdapter extends BaseAdapter {
         }
         if (mClosed) {
             if (suggestions != null) {
-                suggestions.close();
+                suggestions.release();
             }
             return;
         }
@@ -90,7 +97,7 @@ public class SuggestionsAdapter extends BaseAdapter {
         // TODO: delay the change if there are no suggestions for the currently visible tab.
         if (mSuggestions != null) {
             mSuggestions.unregisterDataSetObserver(mDataSetObserver);
-            mSuggestions.close();
+            mSuggestions.release();
         }
         mSuggestions = suggestions;
         if (mSuggestions != null) {
@@ -115,19 +122,15 @@ public class SuggestionsAdapter extends BaseAdapter {
      */
     public void setCorpus(Corpus corpus) {
         if (mSuggestions != null) {
-            if ((mCorpus == null) && (corpus != null)) {
-                // we've just switched from the 'All' corpus to a specific corpus
-                // we can filter the existing results immediately.
-                if (DBG) Log.d(TAG, "setCorpus(" + corpus.getName() + ") Filter suggestions");
-                if (mSuggestions instanceof BlendedSuggestions) {
-                    ((BlendedSuggestions) mSuggestions).filterByCorpus(corpus);
-                }
-            } else if (corpus != null) {
+            // TODO: if (mCorpus == null && corpus != null)
+            // we've just switched from the 'All' corpus to a specific corpus
+            // we can filter the existing results immediately.
+            if (corpus != null) {
                 // Note, when switching from a specific corpus to 'All' we do not change the
                 // suggestions, since they're still relevant for 'All'. Hence 'corpus != null'
                 if (DBG) Log.d(TAG, "setCorpus(" + corpus.getName() + ") Clear suggestions");
                 mSuggestions.unregisterDataSetObserver(mDataSetObserver);
-                mSuggestions.close();
+                mSuggestions.release();
                 mSuggestions = null;
             }
         }
@@ -197,7 +200,7 @@ public class SuggestionsAdapter extends BaseAdapter {
      */
     protected SuggestionCursor getCorpusCursor(Suggestions suggestions, Corpus corpus) {
         if (suggestions == null) return null;
-        return suggestions.getPromoted();
+        return suggestions.getPromoted(mPromoter, mMaxPromoted);
     }
 
     /**
@@ -215,8 +218,6 @@ public class SuggestionsAdapter extends BaseAdapter {
         }
         mCursor = newCursor;
         if (mCursor != null) {
-            // TODO: Register observers here to watch for
-            // changes in the cursor, e.g. shortcut refreshes?
             notifyDataSetChanged();
         } else {
             notifyDataSetInvalidated();

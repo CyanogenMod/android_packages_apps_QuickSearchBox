@@ -20,10 +20,11 @@ import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.util.Log;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 
 /**
@@ -56,8 +57,8 @@ public class MockCorpora implements Corpora {
         mDefaultCorpora.add(corpus);
     }
 
-    public Collection<Corpus> getAllCorpora() {
-        return Collections.unmodifiableCollection(mCorporaByName.values());
+    public List<Corpus> getAllCorpora() {
+        return Collections.unmodifiableList(new ArrayList<Corpus>(mCorporaByName.values()));
     }
 
     public Corpus getCorpus(String name) {
@@ -79,7 +80,7 @@ public class MockCorpora implements Corpora {
         return null;
     }
 
-    public Collection<Corpus> getEnabledCorpora() {
+    public List<Corpus> getEnabledCorpora() {
         return getAllCorpora();
     }
 

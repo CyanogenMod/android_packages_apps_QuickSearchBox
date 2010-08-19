@@ -16,16 +16,17 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
  * A promoter that gives preference to suggestions from higher ranking corpora.
  */
-public class RankAwarePromoter implements Promoter<CorpusResult> {
+public class RankAwarePromoter implements Promoter {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.RankAwarePromoter";
@@ -36,9 +37,18 @@ public class RankAwarePromoter implements Promoter<CorpusResult> {
         mConfig = config;
     }
 
-    public void pickPromoted(SuggestionCursor shortcuts, ArrayList<CorpusResult> suggestions,
-            int maxPromoted, ListSuggestionCursor promoted) {
+    protected Config getConfig() {
+        return mConfig;
+    }
 
+    public void pickPromoted(Suggestions suggestions,
+            int maxPromoted, ListSuggestionCursor promoted) {
+        promoteSuggestions(suggestions.getCorpusResults(), maxPromoted, promoted);
+    }
+
+    @VisibleForTesting
+    void promoteSuggestions(Iterable<CorpusResult> suggestions, int maxPromoted,
+            ListSuggestionCursor promoted) {
         if (DBG) Log.d(TAG, "Available results: " + suggestions);
 
         // Split non-empty results into default sources and other, positioned at first suggestion
@@ -126,11 +136,24 @@ public class RankAwarePromoter implements Promoter<CorpusResult> {
         if (count < 1 || cursor.getPosition() >= cursor.getCount()) {
             return 0;
         }
-        int i = 0;
+        int addedCount = 0;
         do {
-            promoted.add(new SuggestionPosition(cursor));
-            i++;
-        } while (cursor.moveToNext() && i < count);
-        return i;
+            if (accept(cursor)) {
+                promoted.add(new SuggestionPosition(cursor));
+                addedCount++;
+            }
+        } while (cursor.moveToNext() && addedCount < count);
+        return addedCount;
     }
+
+    /**
+     * Determines if a suggestion should be added to the promoted suggestion list.
+     *
+     * @param s The suggestion in question
+     * @return true to include it in the results
+     */
+    protected boolean accept(Suggestion s) {
+        return true;
+    }
+
 }

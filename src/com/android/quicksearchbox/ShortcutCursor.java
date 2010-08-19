@@ -38,11 +38,11 @@ class ShortcutCursor extends ListSuggestionCursor {
     // they can be closed when ShortcutCursor is closed.
     private final HashSet<SuggestionCursor> mRefreshed;
 
+    private boolean mClosed = false;
+
     private final ShortcutRefresher mRefresher;
     private final ShortcutRepository mShortcutRepo;
     private final Handler mUiThread;
-
-    private int mRefCount;
 
     private ShortcutCursor(String query, SuggestionCursor shortcuts, Handler uiThread,
             ShortcutRefresher refresher, ShortcutRepository repository) {
@@ -52,19 +52,22 @@ class ShortcutCursor extends ListSuggestionCursor {
         mRefresher = refresher;
         mShortcutRepo = repository;
         mRefreshed = new HashSet<SuggestionCursor>();
-        mRefCount = 1;
     }
 
     @VisibleForTesting
-    public ShortcutCursor(String query, Handler uiThread,
+    ShortcutCursor(String query, Handler uiThread,
             ShortcutRefresher refresher, ShortcutRepository repository) {
         this(query, null, uiThread, refresher, repository);
+    }
+
+    @VisibleForTesting
+    ShortcutCursor(SuggestionCursor suggestions) {
+        this(suggestions, null, null, null);
     }
 
     public ShortcutCursor(SuggestionCursor suggestions, Handler uiThread,
             ShortcutRefresher refresher, ShortcutRepository repository) {
         this(suggestions.getUserQuery(), suggestions, uiThread, refresher, repository);
-        if (suggestions == null) return;
         int count = suggestions.getCount();
         if (DBG) Log.d(TAG, "Total shortcuts: " + count);
         for (int i = 0; i < count; i++) {
@@ -74,27 +77,6 @@ class ShortcutCursor extends ListSuggestionCursor {
             } else {
                 if (DBG) Log.d(TAG, "Skipping shortcut " + i);
             }
-        }
-    }
-
-    public ShortcutCursor getRef() {
-        assertNotClosed();
-        mRefCount++;
-        return this;
-    }
-
-    public static ShortcutCursor getRef(ShortcutCursor c) {
-        if (c == null) return null;
-        return c.getRef();
-    }
-
-    private boolean closed() {
-        return mRefCount == 0;
-    }
-
-    private void assertNotClosed() {
-        if (mRefCount == 0) {
-            throw new IllegalStateException("Already closed");
         }
     }
 
@@ -125,7 +107,7 @@ class ShortcutCursor extends ListSuggestionCursor {
      */
     private void refresh(Source source, String shortcutId, SuggestionCursor refreshed) {
         if (DBG) Log.d(TAG, "refresh " + shortcutId);
-        if (closed()) {
+        if (mClosed) {
             if (refreshed != null) {
                 refreshed.close();
             }
@@ -153,16 +135,16 @@ class ShortcutCursor extends ListSuggestionCursor {
     @Override
     public void close() {
         if (DBG) Log.d(TAG, "close()");
-        assertNotClosed();
-        mRefCount--;
-        if (mRefCount == 0) {
-            if (mShortcuts != null) {
-                mShortcuts.close();
-            }
-            for (SuggestionCursor cursor : mRefreshed) {
-                 cursor.close();
-            }
-            super.close();
+        if (mClosed) {
+            throw new IllegalStateException("double close");
         }
+        mClosed = true;
+        if (mShortcuts != null) {
+            mShortcuts.close();
+        }
+        for (SuggestionCursor cursor : mRefreshed) {
+            cursor.close();
+        }
+        super.close();
     }
 }

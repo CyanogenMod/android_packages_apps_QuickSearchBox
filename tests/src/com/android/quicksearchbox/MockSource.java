@@ -125,17 +125,29 @@ public class MockSource implements Source {
             return null;
         }
         ListSuggestionCursor cursor = new ListSuggestionCursor(query);
-        cursor.add(createSuggestion(query + "_1"));
-        cursor.add(createSuggestion(query + "_2"));
+        if (isWebSuggestionSource()) {
+            cursor.add(createWebSuggestion(query + "_1"));
+            cursor.add(createWebSuggestion(query + "_2"));
+        } else {
+            cursor.add(createSuggestion(query + "_1"));
+            cursor.add(createSuggestion(query + "_2"));
+        }
         return new Result(query, cursor);
     }
 
-    public Suggestion createSuggestion(String query) {
+    public SuggestionData createSuggestion(String query) {
         Uri data = new Uri.Builder().scheme("content").authority(mName).path(query).build();
         return new SuggestionData(this)
                 .setText1(query)
                 .setIntentAction(Intent.ACTION_VIEW)
                 .setIntentData(data.toString());
+    }
+
+    public SuggestionData createWebSuggestion(String query) {
+        return new SuggestionData(this)
+                .setText1(query)
+                .setIntentAction(Intent.ACTION_WEB_SEARCH)
+                .setSuggestionQuery(query);
     }
 
     @Override

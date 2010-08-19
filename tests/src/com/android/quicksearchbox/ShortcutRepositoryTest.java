@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import junit.framework.Assert;
-
 /**
  * Abstract base class for tests of  {@link ShortcutRepository}
  * implementations.  Most importantly, verifies the
@@ -829,7 +827,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         // Highest scores should come first
         Collections.reverse(observed);
         Log.d(TAG, "scores=" + scores);
-        assertContentsInOrder(message, observed, (Object[]) expectedNames);
+        MoreAsserts.assertContentsInOrder(message, observed, (Object[]) expectedNames);
     }
 
     static <A extends Comparable<A>, B extends Comparable<B>> List<A> sortByValues(Map<A,B> map) {
@@ -854,19 +852,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     static void assertContentsInOrder(Iterable<?> actual, Object... expected) {
-        assertContentsInOrder(null, actual, expected);
+        MoreAsserts.assertContentsInOrder(null, actual, expected);
     }
 
-    /**
-     * an implementation of {@link MoreAsserts#assertContentsInOrder(String, Iterable, Object[])}
-     * that isn't busted.  a bug has been filed about that, but for now this works.
-     */
-    static void assertContentsInOrder(
-            String message, Iterable<?> actual, Object... expected) {
-        ArrayList actualList = new ArrayList();
-        for (Object o : actual) {
-            actualList.add(o);
-        }
-        Assert.assertEquals(message, Arrays.asList(expected), actualList);
-    }
 }

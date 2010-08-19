@@ -487,8 +487,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
     }
 
     private static Corpora getCorpora(Context context) {
-        //TODO should be use getResultsCorpora() when appropriate??
-        return QsbApplication.get(context).getAllCorpora();
+        return QsbApplication.get(context).getCorpora();
     }
 
     private static CorpusViewFactory getCorpusViewFactory(Context context) {

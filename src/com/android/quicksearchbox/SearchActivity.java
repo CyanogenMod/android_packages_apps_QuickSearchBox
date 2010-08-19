@@ -52,7 +52,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -158,15 +158,15 @@ public class SearchActivity extends Activity {
         mSeparateResults = mResultsView != null;
 
         if (mSeparateResults) {
-            mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
-            mResultsAdapter = getQsbApplication().createSuggestionsAdapter();
+            mSuggestionsAdapter = getQsbApplication().createWebSuggestionsAdapter();
+            mResultsAdapter = getQsbApplication().createResultSuggestionsAdapter();
             mResultsAdapter.setSuggestionClickListener(new ClickHandler(mResultsAdapter));
             mResultsAdapter.setOnFocusChangeListener(suggestionFocusListener);
             mResultsView.setOnScrollListener(imeCloser);
             mResultsView.setOnFocusChangeListener(suggestionFocusListener);
             mResultsView.setOnKeyListener(suggestionViewKeyListener);
         } else {
-            mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
+            mSuggestionsAdapter = getQsbApplication().createBlendingSuggestionsAdapter();
         }
         mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler(mSuggestionsAdapter));
         mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
@@ -358,22 +358,20 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getConfig();
     }
 
-    public Corpora getCorpora() {
-        return separateResults() ? getQsbApplication().getResultsCorpora()
-                                 : getQsbApplication().getAllCorpora();
+    private Corpora getCorpora() {
+        return getQsbApplication().getCorpora();
+    }
+
+    private CorpusRanker getCorpusRanker() {
+        return getQsbApplication().getCorpusRanker();
     }
 
     private ShortcutRepository getShortcutRepository() {
-        return getQsbApplication().getShortcutRepository(getCorpora());
+        return getQsbApplication().getShortcutRepository();
     }
 
     private SuggestionsProvider getSuggestionsProvider() {
-        return separateResults() ? getQsbApplication().getWebSuggestionsProvider()
-                                : getQsbApplication().getUnifiedProvider();
-    }
-
-    private SuggestionsProvider getResultsProvider() {
-        return getQsbApplication().getResultsProvider();
+        return getQsbApplication().getSuggestionsProvider();
     }
 
     private CorpusViewFactory getCorpusViewFactory() {
@@ -627,27 +625,12 @@ public class SearchActivity extends Activity {
         return suggestions;
     }
 
-    private BlendedSuggestions blendedOrNothing(Suggestions s) {
-        if (s instanceof BlendedSuggestions) return (BlendedSuggestions) s;
-        return null;
-    }
-
-    private BlendedSuggestions pickBlended(Suggestions... suggestionses) {
-        for (Suggestions s : suggestionses) {
-            BlendedSuggestions b = blendedOrNothing(s);
-            if (b != null) return b;
-        }
-        return null;
-    }
-
-    private BlendedSuggestions getBlendedSuggestions() {
-        return pickBlended(
-                mResultsAdapter == null ? null : mResultsAdapter.getSuggestions(),
-                mSuggestionsAdapter.getSuggestions());
+    private Suggestions getSuggestions() {
+        return mSuggestionsAdapter.getSuggestions();
     }
 
     protected Set<Corpus> getCurrentIncludedCorpora() {
-        BlendedSuggestions suggestions = getBlendedSuggestions();
+        Suggestions suggestions = getSuggestions();
         return suggestions == null  ? null : suggestions.getIncludedCorpora();
     }
 
@@ -784,20 +767,13 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private int getMaxSuggestions() {
-        Config config = getConfig();
-        return mCorpus == null
-                ? config.getMaxPromotedSuggestions()
-                : config.getMaxResultsPerSource();
-    }
-
     private void updateSuggestionsBuffered() {
         mHandler.removeCallbacks(mUpdateSuggestionsTask);
         long delay = getConfig().getTypingUpdateSuggestionsDelayMillis();
         mHandler.postDelayed(mUpdateSuggestionsTask, delay);
     }
 
-    private void gotSuggestions(BlendedSuggestions suggestions) {
+    private void gotSuggestions(Suggestions suggestions) {
         if (mStarting) {
             mStarting = false;
             String source = getIntent().getStringExtra(Search.SOURCE);
@@ -808,50 +784,47 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected ShortcutCursor getShortcutsForQuery(String query, Corpus singleCorpus) {
+    private List<Corpus> getCorporaToQuery() {
+        if (mCorpus == null) {
+            // No corpus selected, use all enabled corpora
+            return getCorpusRanker().getRankedCorpora();
+        } else {
+            List<Corpus> corpora = new ArrayList<Corpus>();
+            if (separateResults()) {
+                // In two-pane mode, we always need to query the web corpus.
+                Corpus webCorpus = getCorpora().getWebCorpus();
+                if (webCorpus != null && webCorpus != mCorpus) corpora.add(webCorpus);
+            }
+            // Query the selected corpus
+            corpora.add(mCorpus);
+            return corpora;
+        }
+    }
+
+    protected ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery) {
         ShortcutRepository shortcutRepo = getShortcutRepository();
         if (shortcutRepo == null) return null;
-        Collection<Corpus> allowedCorpora;
-        if (singleCorpus == null) {
-            allowedCorpora = getCorpora().getEnabledCorpora();
-        } else {
-            allowedCorpora = Collections.singletonList(singleCorpus);
-        }
-        return shortcutRepo.getShortcutsForQuery(query, allowedCorpora);
+        return shortcutRepo.getShortcutsForQuery(query, corporaToQuery);
     }
 
     protected void updateSuggestions(String query) {
-
         query = CharMatcher.WHITESPACE.trimLeadingFrom(query);
-        if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ","+getMaxSuggestions()+")");
+        if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ")");
         getQsbApplication().getSourceTaskExecutor().cancelPendingTasks();
-        if (!separateResults()) {
-            ShortcutCursor shortcuts = getShortcutsForQuery(query, mCorpus);
-            Suggestions suggestions = getSuggestionsProvider().getSuggestions(
-                    query, mCorpus, getMaxSuggestions());
-            suggestions.setShortcuts(shortcuts);
-            // Log start latency if this is the first suggestions update
-            gotSuggestions(blendedOrNothing(suggestions));
-            mSuggestionsAdapter.setSuggestions(suggestions);
-        } else {
-            // TODO: if we have a corpus selector in 2 pane UI, need to filter shortcuts by corpus
-            //for results somewhere.
-            ShortcutCursor shortcuts = getShortcutsForQuery(query, null);
-            // TODO: getMaxSuggestions() - different for suggestions & results?
-            Suggestions webSuggestions = getSuggestionsProvider().getSuggestions(
-                    query, null, getMaxSuggestions());
-            webSuggestions.setShortcuts(ShortcutCursor.getRef(shortcuts));
-            Suggestions results = getResultsProvider().getSuggestions(
-                    query, mCorpus, getMaxSuggestions());
-            results.setShortcuts(ShortcutCursor.getRef(shortcuts));
-            // TODO: gotSuggestions(webSuggestions, results)
-            gotSuggestions(pickBlended(results, webSuggestions));
 
-            mSuggestionsAdapter.setSuggestions(webSuggestions);
-            mResultsAdapter.setSuggestions(results);
-            if (shortcuts != null) {
-                shortcuts.close();
-            }
+        List<Corpus> corporaToQuery = getCorporaToQuery();
+        ShortcutCursor shortcuts = getShortcutsForQuery(query, corporaToQuery);
+        Suggestions suggestions = getSuggestionsProvider().getSuggestions(
+                query, corporaToQuery);
+        suggestions.setShortcuts(shortcuts);
+        // Log start latency if this is the first suggestions update
+        gotSuggestions(suggestions);
+
+        suggestions.acquire();
+        mSuggestionsAdapter.setSuggestions(suggestions);
+        if (mResultsAdapter != null) {
+            suggestions.acquire();
+            mResultsAdapter.setSuggestions(suggestions);
         }
     }
 
@@ -864,14 +837,15 @@ public class SearchActivity extends Activity {
         if (imm == null || !imm.isFullscreenMode()) return;
         Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
         if (suggestions == null) return;
-        SuggestionCursor cursor = suggestions.getPromoted();
-        if (cursor == null) return;
-        CompletionInfo[] completions = webSuggestionsToCompletions(cursor);
+        CompletionInfo[] completions = webSuggestionsToCompletions(suggestions);
         if (DBG) Log.d(TAG, "displayCompletions(" + Arrays.toString(completions) + ")");
         imm.displayCompletions(mQueryTextView, completions);
     }
 
-    private CompletionInfo[] webSuggestionsToCompletions(SuggestionCursor cursor) {
+    private CompletionInfo[] webSuggestionsToCompletions(Suggestions suggestions) {
+        // TODO: This should also include include web search shortcuts
+        CorpusResult cursor = suggestions.getWebResult();
+        if (cursor == null) return null;
         int count = cursor.getCount();
         ArrayList<CompletionInfo> completions = new ArrayList<CompletionInfo>(count);
         boolean usingWebCorpus = isSearchCorpusWeb();

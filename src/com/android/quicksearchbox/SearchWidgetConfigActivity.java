@@ -134,9 +134,7 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
     }
 
     private CorpusRanker getCorpusRanker() {
-        QsbApplication app = QsbApplication.get(this);
-        //TODO should we use getResultsCorpora() instead of getAllCorpora() when appropriate?
-        return app.getCorpusRanker(app.getAllCorpora());
+        return QsbApplication.get(this).getCorpusRanker();
     }
 
     private CorpusViewFactory getViewFactory() {

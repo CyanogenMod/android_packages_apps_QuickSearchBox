@@ -16,6 +16,13 @@
 
 package com.android.quicksearchbox;
 
+import static com.google.common.base.Objects.equal;
+
+import com.google.common.collect.UnmodifiableIterator;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import junit.framework.Assert;
 
 /**
@@ -64,8 +71,8 @@ public class SuggestionCursorUtil extends Assert {
     public static void assertSameSuggestions(
             String message, SuggestionCursor expected, SuggestionCursor observed,
             boolean allowExtras) {
-        assertNotNull(expected);
-        assertNotNull(message, observed);
+        assertNotNull(expected + ", observed == null", expected);
+        assertNotNull(message + ", observed == null", observed);
         if (!allowExtras) {
             assertEquals(message + ", count", expected.getCount(), observed.getCount());
         } else {
@@ -78,10 +85,72 @@ public class SuggestionCursorUtil extends Assert {
         }
     }
 
+    public static void assertSameSuggestionsNoOrder(SuggestionCursor expected,
+            SuggestionCursor observed) {
+        assertSameSuggestionsNoOrder("", expected, observed);
+    }
+
+    public static void assertSameSuggestionsNoOrder(String message,
+            SuggestionCursor expected, SuggestionCursor observed) {
+        for (Suggestion expectedSuggestion : iterable(expected)) {
+            assertContainsSuggestion(expectedSuggestion, observed);
+        }
+        for (Suggestion observedSuggestion : iterable(observed)) {
+            assertContainsSuggestion(observedSuggestion, expected);
+        }
+    }
+
+    public static void assertContainsSuggestion(Suggestion expected, SuggestionCursor observed) {
+        for (Suggestion observedSuggestion : iterable(observed)) {
+            if (checkSuggestionEquals(expected, observedSuggestion)) {
+                return;
+            }
+        }
+        fail(expected + " not found in " + observed);
+    }
+
+    public static Iterable<Suggestion> iterable(final SuggestionCursor cursor) {
+        return new Iterable<Suggestion>() {
+            @Override
+            public Iterator<Suggestion> iterator() {
+                return SuggestionCursorUtil.iterator(cursor);
+            }
+        };
+    }
+
+    public static UnmodifiableIterator<Suggestion> iterator(final SuggestionCursor cursor) {
+        return new UnmodifiableIterator<Suggestion>() {
+            private int mPos = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor.getPosition() < cursor.getCount() - 1;
+            }
+            @Override
+            public Suggestion next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                mPos++;
+                return new SuggestionPosition(cursor, mPos);
+            }
+        };
+    }
+
     public static ListSuggestionCursor slice(SuggestionCursor cursor, int start, int length) {
         ListSuggestionCursor out = new ListSuggestionCursor(cursor.getUserQuery());
         for (int i = start; i < start + length; i++) {
             out.add(new SuggestionPosition(cursor, i));
+        }
+        return out;
+    }
+
+    public static ListSuggestionCursor concat(SuggestionCursor... cursors) {
+        ListSuggestionCursor out = new ListSuggestionCursor(cursors[0].getUserQuery());
+        for (SuggestionCursor cursor : cursors) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                out.add(new SuggestionPosition(cursor, i));
+            }
         }
         return out;
     }
@@ -135,4 +204,22 @@ public class SuggestionCursorUtil extends Assert {
             to.add(new SuggestionPosition(from, i));
         }
     }
+
+    public static boolean checkSuggestionEquals(Suggestion expected, Suggestion observed) {
+        return equal(expected.getSuggestionSource(), observed.getSuggestionSource())
+                && equal(expected.getShortcutId(), observed.getShortcutId())
+                && equal(expected.isSpinnerWhileRefreshing(), observed.isSpinnerWhileRefreshing())
+                && equal(expected.getSuggestionFormat(), observed.getSuggestionFormat())
+                && equal(expected.getSuggestionIcon1(), observed.getSuggestionIcon1())
+                && equal(expected.getSuggestionIcon2(), observed.getSuggestionIcon2())
+                && equal(expected.getSuggestionText1(), observed.getSuggestionText1())
+                && equal(expected.getSuggestionText2(), observed.getSuggestionText2())
+                && equal(expected.getSuggestionText2Url(), observed.getSuggestionText2Url())
+                && equal(expected.getSuggestionIntentAction(), observed.getSuggestionIntentAction())
+                && equal(expected.getSuggestionIntentDataString(), observed.getSuggestionIntentDataString())
+                && equal(expected.getSuggestionIntentExtraData(), observed.getSuggestionIntentExtraData())
+                && equal(expected.getSuggestionQuery(), observed.getSuggestionQuery())
+                && equal(expected.getSuggestionLogType(), observed.getSuggestionLogType());
+    }
+
 }

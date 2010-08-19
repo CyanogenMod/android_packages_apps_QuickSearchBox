@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,18 @@
 
 package com.android.quicksearchbox;
 
-
 /**
- * A promoter that first promotes any shortcuts, and then delegates to another
- * promoter.
+ * A blending promoter that only promotes non-web suggestions.
  */
-public class ShortcutPromoter<C extends SuggestionCursor> extends ShortcutFilteringPromoter<C> {
+public class ResultPromoter extends BlendingPromoter {
 
-    /**
-     * Creates a new ShortcutPromoter.
-     *
-     * @param nextPromoter The promoter to use when there are no more shortcuts.
-     *        May be {@code null}.
-     */
-    public ShortcutPromoter(Promoter<C> nextPromoter) {
-        super(nextPromoter);
+    public ResultPromoter(Config config) {
+        super(config);
     }
 
     @Override
     protected boolean accept(Suggestion s) {
-        return true;
+        return !s.isWebSearchSuggestion();
     }
 
 }

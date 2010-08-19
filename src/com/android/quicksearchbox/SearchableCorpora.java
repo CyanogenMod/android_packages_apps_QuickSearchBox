@@ -70,7 +70,7 @@ public class SearchableCorpora implements Corpora {
         return Collections.unmodifiableCollection(mCorporaByName.values());
     }
 
-    public Collection<Corpus> getEnabledCorpora() {
+    public List<Corpus> getEnabledCorpora() {
         return mEnabledCorpora;
     }
 

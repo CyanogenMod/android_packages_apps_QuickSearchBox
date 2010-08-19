@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.Suggestions;
 
@@ -35,8 +36,9 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
 
     private Suggestions mPendingSuggestions;
 
-    public DelayingSuggestionsAdapter(SuggestionViewFactory viewFactory) {
-        super(viewFactory);
+    public DelayingSuggestionsAdapter(Promoter promoter, SuggestionViewFactory viewFactory,
+            int maxPromoted) {
+        super(promoter, viewFactory, maxPromoted);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
         }
         if (isClosed()) {
             if (suggestions != null) {
-                suggestions.close();
+                suggestions.release();
             }
             return;
         }
@@ -90,7 +92,7 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
             // Close old suggestions, but only if they are not also the current
             // suggestions.
             if (mPendingSuggestions != getSuggestions()) {
-                mPendingSuggestions.close();
+                mPendingSuggestions.release();
             }
         }
         mPendingSuggestions = suggestions;

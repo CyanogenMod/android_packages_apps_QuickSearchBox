@@ -34,6 +34,8 @@ public class MockCorpus implements Corpus {
 
     public static final Corpus CORPUS_2 = new MockCorpus(MockSource.SOURCE_2);
 
+    public static final Corpus WEB_CORPUS = new MockCorpus(MockSource.WEB_SOURCE);
+
     private final String mName;
 
     private final Source mSource;
@@ -132,7 +134,7 @@ public class MockCorpus implements Corpus {
     }
 
     public boolean isWebCorpus() {
-        return false;
+        return mSource.isWebSuggestionSource();
     }
 
     public boolean queryAfterZeroResults() {

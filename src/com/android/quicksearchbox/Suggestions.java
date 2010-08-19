@@ -16,20 +16,27 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.util.Log;
 
-public abstract class Suggestions {
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Collects all corpus results for a single query.
+ */
+public class Suggestions {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.Suggestions";
 
     /** True if {@link Suggestions#close} has been called. */
     private boolean mClosed = false;
     protected final String mQuery;
-
-    private final int mMaxPromoted;
-    private SuggestionCursor mPromoted;
 
     private ShortcutCursor mShortcuts;
 
@@ -41,16 +48,64 @@ public abstract class Suggestions {
      */
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
-    protected Suggestions(String query, int maxPromoted) {
+    /** The sources that are expected to report. */
+    private final List<Corpus> mExpectedCorpora;
+
+    /**
+     * All {@link SuggestionCursor} objects that have been published so far,
+     * in the order that they were published.
+     * This object may only be accessed on the UI thread.
+     * */
+    private final ArrayList<CorpusResult> mCorpusResults;
+
+    private CorpusResult mWebResult;
+
+    private int mRefCount = 0;
+
+    public Suggestions(String query, List<Corpus> expectedCorpora) {
         mQuery = query;
-        mMaxPromoted = maxPromoted;
+        mExpectedCorpora = expectedCorpora;
+        mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpora.size());
+        if (DBG) {
+            Log.d(TAG, "new Suggestions [" + hashCode() + "] query \"" + query
+                    + "\" expected corpora: " + mExpectedCorpora);
+        }
     }
 
-    private void clearPromoted() {
-        if (mPromoted != null) {
-            mPromoted.close();
+    public void acquire() {
+        mRefCount++;
+    }
+
+    public void release() {
+        mRefCount--;
+        if (mRefCount <= 0) {
+            close();
         }
-        mPromoted = null;
+    }
+
+    public List<Corpus> getExpectedCorpora() {
+        return mExpectedCorpora;
+    }
+
+    /**
+     * Gets the number of corpora that are expected to report.
+     */
+    @VisibleForTesting
+    public int getExpectedResultCount() {
+        return mExpectedCorpora.size();
+    }
+
+    /**
+     * Gets the set of corpora that have reported results to this suggestions set.
+     *
+     * @return A collection of corpora.
+     */
+    public Set<Corpus> getIncludedCorpora() {
+        HashSet<Corpus> corpora = new HashSet<Corpus>();
+        for (CorpusResult result : mCorpusResults) {
+            corpora.add(result.getCorpus());
+        }
+        return corpora;
     }
 
     /**
@@ -62,10 +117,47 @@ public abstract class Suggestions {
     public void setShortcuts(ShortcutCursor shortcuts) {
         if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
         mShortcuts = shortcuts;
-        clearPromoted();
         if (shortcuts != null) {
             mShortcuts.registerDataSetObserver(mShortcutsObserver);
         }
+    }
+
+    /**
+     * Checks whether all sources have reported.
+     * Must be called on the UI thread, or before this object is seen by the UI thread.
+     */
+    public boolean isDone() {
+        // TODO: Handle early completion because we have all the results we want.
+        return mCorpusResults.size() >= mExpectedCorpora.size();
+    }
+
+    /**
+     * Adds a list of corpus results. Must be called on the UI thread, or before this
+     * object is seen by the UI thread.
+     */
+    public void addCorpusResults(List<CorpusResult> corpusResults) {
+        if (isClosed()) {
+            for (CorpusResult corpusResult : corpusResults) {
+                corpusResult.close();
+            }
+            return;
+        }
+
+        for (CorpusResult corpusResult : corpusResults) {
+            if (DBG) {
+                Log.d(TAG, "addCorpusResult["+ hashCode() + "] corpus:" +
+                        corpusResult.getCorpus().getName() + " results:" + corpusResult.getCount());
+            }
+            if (!mQuery.equals(corpusResult.getUserQuery())) {
+              throw new IllegalArgumentException("Got result for wrong query: "
+                    + mQuery + " != " + corpusResult.getUserQuery());
+            }
+            mCorpusResults.add(corpusResult);
+            if (corpusResult.getCorpus().isWebCorpus()) {
+                mWebResult = corpusResult;
+            }
+        }
+        notifyDataSetChanged();
     }
 
     /**
@@ -92,23 +184,28 @@ public abstract class Suggestions {
      */
     protected void notifyDataSetChanged() {
         if (DBG) Log.d(TAG, "notifyDataSetChanged()");
-        clearPromoted();
         mDataSetObservable.notifyChanged();
     }
 
-    public void close() {
+    /**
+     * Closes all the source results and unregisters all observers.
+     */
+    private void close() {
+        if (DBG) Log.d(TAG, "close() [" + hashCode() + "]");
         if (mClosed) {
             throw new IllegalStateException("Double close()");
         }
         mClosed = true;
         mDataSetObservable.unregisterAll();
-        if (mPromoted != null) {
-            mPromoted.close();
-        }
         if (mShortcuts != null) {
             mShortcuts.close();
             mShortcuts = null;
         }
+
+        for (CorpusResult result : mCorpusResults) {
+            result.close();
+        }
+        mCorpusResults.clear();
     }
 
     public boolean isClosed() {
@@ -119,16 +216,12 @@ public abstract class Suggestions {
         return mShortcuts;
     }
 
-    protected int getMaxPromoted() {
-        return mMaxPromoted;
-    }
-
-    private void refreshShortcuts() {
-        if (DBG) Log.d(TAG, "refreshShortcuts(" + mPromoted + ")");
-        for (int i = 0; i < mPromoted.getCount(); ++i) {
-            mPromoted.moveTo(i);
-            if (mPromoted.isSuggestionShortcut()) {
-                getShortcuts().refresh(mPromoted);
+    private void refreshShortcuts(SuggestionCursor promoted) {
+        if (DBG) Log.d(TAG, "refreshShortcuts(" + promoted + ")");
+        for (int i = 0; i < promoted.getCount(); ++i) {
+            promoted.moveTo(i);
+            if (promoted.isSuggestionShortcut()) {
+                getShortcuts().refresh(promoted);
             }
         }
     }
@@ -138,24 +231,68 @@ public abstract class Suggestions {
         if (!mClosed) {
             Log.e(TAG, "LEAK! Finalized without being closed: Suggestions[" + getQuery() + "]");
         }
-        
     }
 
     public String getQuery() {
         return mQuery;
     }
 
-    public SuggestionCursor getPromoted() {
-        if (mPromoted == null) {
-            mPromoted = buildPromoted();
-            refreshShortcuts();
-        }
-        return mPromoted;
+    public SuggestionCursor getPromoted(Promoter promoter, int maxPromoted) {
+        SuggestionCursor promoted = buildPromoted(promoter, maxPromoted);
+        refreshShortcuts(promoted);
+        return promoted;
     }
 
-    protected abstract SuggestionCursor buildPromoted();
+    protected SuggestionCursor buildPromoted(Promoter promoter, int maxPromoted) {
+        ListSuggestionCursor promoted = new ListSuggestionCursorNoDuplicates(mQuery);
+        if (promoter == null) {
+            return promoted;
+        }
+        promoter.pickPromoted(this, maxPromoted, promoted);
+        if (DBG) {
+            Log.d(TAG, "pickPromoted(" + getShortcuts() + "," + mCorpusResults + ","
+                    + maxPromoted + ") = " + promoted);
+        }
+        return promoted;
+    }
 
-    public abstract boolean isDone();
+    /**
+     * Gets the list of corpus results reported so far. Do not modify or hang on to
+     * the returned iterator.
+     */
+    public Iterable<CorpusResult> getCorpusResults() {
+        return mCorpusResults;
+    }
+
+    public CorpusResult getCorpusResult(Corpus corpus) {
+        for (CorpusResult result : mCorpusResults) {
+            if (result.getCorpus().equals(corpus)) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    public CorpusResult getWebResult() {
+        return mWebResult;
+    }
+
+    /**
+     * Gets the number of source results.
+     * Must be called on the UI thread, or before this object is seen by the UI thread.
+     */
+    public int getResultCount() {
+        if (isClosed()) {
+            throw new IllegalStateException("Called getSourceCount() when closed.");
+        }
+        return mCorpusResults == null ? 0 : mCorpusResults.size();
+    }
+
+    @Override
+    public String toString() {
+        return "Suggestions@" + hashCode() + "{expectedCorpora=" + mExpectedCorpora
+                + ",mCorpusResults.size()=" + mCorpusResults.size() + "}";
+    }
 
     private class MyShortcutsObserver extends DataSetObserver {
         @Override
