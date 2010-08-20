@@ -22,6 +22,7 @@ import com.android.quicksearchbox.ui.QueryTextView;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 
 import android.app.Activity;
@@ -132,6 +133,8 @@ public class SearchActivity extends Activity {
             showInputMethodForQuery();
         }
     };
+
+    private OnDestroyListener mDestroyListener;
 
     /** Called when the activity is first created. */
     @Override
@@ -386,14 +389,22 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getLogger();
     }
 
+    @VisibleForTesting
+    public void setOnDestroyListener(OnDestroyListener l) {
+        mDestroyListener = l;
+    }
+
     @Override
     protected void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy()");
-        super.onDestroy();
         getCorpora().unregisterDataSetObserver(mCorporaObserver);
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
         if (mResultsView != null) {
             mResultsView.setAdapter(null);
+        }
+        super.onDestroy();
+        if (mDestroyListener != null) {
+            mDestroyListener.onDestroyed();
         }
     }
 
@@ -1047,6 +1058,10 @@ public class SearchActivity extends Activity {
         public void onChanged() {
             updateInputMethodSuggestions();
         }
+    }
+
+    public interface OnDestroyListener {
+        void onDestroyed();
     }
 
 }
