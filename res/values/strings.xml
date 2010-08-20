@@ -113,6 +113,7 @@
     <string name="google_suggest_base" translatable="false">
         http://www.google.com/complete/search?hl=%1$s&amp;gl=%2$s&amp;</string>
 
-    <!-- Title for shorcuts pane -->
+    <!-- Title for shorcuts pane that shows search results and search history for directly 
+         launching the details page. [CHAR LIMIT=22] -->
     <string name="shortcuts_label">Search results</string>
 </resources>
