@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Consumer;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -31,6 +33,15 @@ public class MockShortcutRepository implements ShortcutRepository {
     public void close() {
     }
 
+    public void getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery,
+            Consumer<ShortcutCursor> consumer) {
+        ShortcutCursor cursor = getShortcutsForQuery(query, corporaToQuery);
+        consumer.consume(cursor);
+    }
+
+    /**
+     * Synchronous version for use in tests that just need a ShortcutCursor.
+     */
     public ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery) {
         // TODO: should look at corporaToQuery
         ShortcutCursor cursor = new ShortcutCursor(query, null, null, null);

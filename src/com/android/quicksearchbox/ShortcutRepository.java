@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Consumer;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -27,6 +29,7 @@ public interface ShortcutRepository {
 
     /**
      * Checks whether there is any stored history.
+     * TODO: change to async API
      */
     boolean hasHistory();
 
@@ -51,9 +54,15 @@ public interface ShortcutRepository {
      *
      * @param query The query. May be empty.
      * @param allowedCorpora The corpora to get shortcuts for.
-     * @return A cursor containing shortcutted results for the query.
+     * @param consumer Consumer that the shortcuts cursor will be passed to.
+     *        The shortcut cursor passed to the consumer may be null if there are no shortcuts.
+     *        If non-null, and the consumer returns {@code true}, the consumer must ensure that
+     *        the shortcut cursor will get closed eventually.
+     *        The consumer will be called on an unspecified thread, and will always
+     *        get called eventually.
      */
-    ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora);
+    void getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora,
+            Consumer<ShortcutCursor> consumer);
 
     /**
      * Updates a shortcut in the repository after it's been refreshed.
@@ -65,6 +74,9 @@ public interface ShortcutRepository {
     void updateShortcut(Source source, String shortcutId, SuggestionCursor refreshed);
 
     /**
+     * Gets scores for all corpora in the click log.
+     * TODO: change to async API
+     *
      * @return A map for corpus name to score. A higher score means that the corpus
      *         is more important.
      */

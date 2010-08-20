@@ -116,10 +116,24 @@ public class Suggestions {
      */
     public void setShortcuts(ShortcutCursor shortcuts) {
         if (DBG) Log.d(TAG, "setShortcuts(" + shortcuts + ")");
+        if (mShortcuts != null) {
+            throw new IllegalStateException("Got duplicate shortcuts: old: " + mShortcuts
+                    + ", new: " + shortcuts);
+        }
+        if (shortcuts == null) return;
+        if (isClosed()) {
+            shortcuts.close();
+            return;
+        }
+        if (!mQuery.equals(shortcuts.getUserQuery())) {
+            throw new IllegalArgumentException("Got shortcuts for wrong query: "
+                    + mQuery + " != " + shortcuts.getUserQuery());
+        }
         mShortcuts = shortcuts;
         if (shortcuts != null) {
             mShortcuts.registerDataSetObserver(mShortcutsObserver);
         }
+        notifyDataSetChanged();
     }
 
     /**

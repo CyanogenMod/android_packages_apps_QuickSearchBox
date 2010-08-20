@@ -45,6 +45,9 @@ public abstract class AbstractCorpusRanker implements CorpusRanker {
     protected abstract List<Corpus> rankCorpora(Corpora corpora);
 
     public List<Corpus> getRankedCorpora() {
+        // TODO: If the corpora aren't changed, the ranked corpora list is
+        // cached as long as the app is running. This means that it doesn't
+        // adapt to new clicks.
         if (mRankedCorpora == null) {
             mRankedCorpora = Collections.unmodifiableList(rankCorpora(mCorpora));
         }

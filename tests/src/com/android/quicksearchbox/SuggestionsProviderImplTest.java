@@ -36,7 +36,7 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
     private List<Corpus> mCorpora;
     private MockNamedTaskExecutor mTaskExecutor;
     private SuggestionsProviderImpl mProvider;
-    private ShortcutRepository mShortcutRepo;
+    private MockShortcutRepository mShortcutRepo;
 
     @Override
     protected void setUp() throws Exception {

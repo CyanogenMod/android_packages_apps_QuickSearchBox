@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.Consumers;
 import com.android.quicksearchbox.util.NamedTask;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 
@@ -65,18 +66,7 @@ public class QueryTask<C extends SuggestionCursor> implements NamedTask {
     public void run() {
         final C cursor = mProvider.getSuggestions(mQuery, mQueryLimit, mTheOnlyOne);
         if (DBG) Log.d(TAG, "Suggestions from " + mProvider + " = " + cursor);
-        if (mHandler == null) {
-            mConsumer.consume(cursor);
-        } else {
-            mHandler.post(new Runnable() {
-                public void run() {
-                    boolean accepted = mConsumer.consume(cursor);
-                    if (!accepted) {
-                        cursor.close();
-                    }
-                }
-            });
-        }
+        Consumers.consumeCloseableAsync(mHandler, mConsumer, cursor);
     }
 
     @Override

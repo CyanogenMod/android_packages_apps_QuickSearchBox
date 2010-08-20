@@ -15,12 +15,14 @@
  */
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.QuietlyCloseable;
+
 import android.database.DataSetObserver;
 
 /**
  * A sequence of suggestions, with a current position.
  */
-public interface SuggestionCursor extends Suggestion {
+public interface SuggestionCursor extends Suggestion, QuietlyCloseable {
 
     /**
      * Gets the query that the user typed to get this suggestion.

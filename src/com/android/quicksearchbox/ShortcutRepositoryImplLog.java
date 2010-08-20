@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.Consumers;
 import com.android.quicksearchbox.util.SQLiteTransaction;
 import com.android.quicksearchbox.util.Util;
 import com.google.common.annotations.VisibleForTesting;
@@ -75,8 +77,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private final DbOpenHelper mOpenHelper;
     private final String mSearchSpinner;
 
-    private final UpdateScheduler mUpdateScheduler;
-
     /**
      * Create an instance to the repo.
      */
@@ -100,17 +100,10 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         mRefresher = refresher;
         mUiThread = uiThread;
         mLogExecutor = logExecutor;
-        mUpdateScheduler = new UpdateScheduler(uiThread);
         mOpenHelper = new DbOpenHelper(context, name, DB_VERSION, config);
         buildShortcutQueries();
 
         mSearchSpinner = Util.getResourceUri(mContext, R.drawable.search_spinner).toString();
-    }
-
-    @VisibleForTesting
-    ShortcutRepositoryImplLog disableUpdateDelay() {
-        mUpdateScheduler.disable();
-        return this;
     }
 
     // clicklog first, since that's where restrict the result set
@@ -204,7 +197,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private void runTransactionAsync(final SQLiteTransaction transaction) {
         mLogExecutor.execute(new Runnable() {
             public void run() {
-                mUpdateScheduler.waitUntilUpdatesCanBeRun();
                 transaction.run(mOpenHelper.getWritableDatabase());
             }
         });
@@ -249,11 +241,15 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         reportClickAtTime(suggestions, position, now);
     }
 
-    public ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora) {
-        ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora,
-                        System.currentTimeMillis());
-        mUpdateScheduler.delayUpdates();
-        return shortcuts;
+    public void getShortcutsForQuery(final String query, final Collection<Corpus> allowedCorpora,
+            final Consumer<ShortcutCursor> consumer) {
+        final long now = System.currentTimeMillis();
+        mLogExecutor.execute(new Runnable() {
+            public void run() {
+                ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora, now);
+                Consumers.consumeCloseable(consumer, shortcuts);
+            }
+        });
     }
 
     public void updateShortcut(Source source, String shortcutId, SuggestionCursor refreshed) {
@@ -553,43 +549,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         });
     }
 
-    private class UpdateScheduler implements Runnable {
-        private static final int UPDATE_DELAY_MILLIS = 300;
-        private final Handler mHandler;
-        private boolean mCanUpdateNow;
-        private boolean mDisabled;
-
-        public UpdateScheduler(Handler handler) {
-            mHandler = handler;
-            mCanUpdateNow = false;
-        }
-
-        // for testing only
-        public void disable() {
-            mDisabled = true;
-        }
-
-        public synchronized void run() {
-            mCanUpdateNow = true;
-            notifyAll();
-        }
-
-        public synchronized void delayUpdates() {
-            mCanUpdateNow = false;
-            mHandler.removeCallbacks(this);
-            mHandler.postDelayed(this, UPDATE_DELAY_MILLIS);
-        }
-
-        public synchronized void waitUntilUpdatesCanBeRun() {
-            if (mDisabled) return;
-            while (!mCanUpdateNow) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {}
-            }
-        }
-    }
-
 // -------------------------- TABLES --------------------------
 
     /**
@@ -703,10 +662,6 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         public DbOpenHelper(Context context, String name, int version, Config config) {
             super(context, name, null, version);
             mConfig = config;
-        }
-
-        public String getPath() {
-            return mPath;
         }
 
         @Override

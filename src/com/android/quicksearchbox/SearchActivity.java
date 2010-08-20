@@ -22,6 +22,8 @@ import com.android.quicksearchbox.ui.QueryTextView;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionsView;
+import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.Consumers;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 
@@ -798,6 +800,7 @@ public class SearchActivity extends Activity {
     private List<Corpus> getCorporaToQuery() {
         if (mCorpus == null) {
             // No corpus selected, use all enabled corpora
+            // TODO: This should be done asynchronously, since it can be expensive
             return getCorpusRanker().getRankedCorpora();
         } else {
             List<Corpus> corpora = new ArrayList<Corpus>();
@@ -812,10 +815,18 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery) {
+    protected void getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery,
+            final Suggestions suggestions) {
         ShortcutRepository shortcutRepo = getShortcutRepository();
-        if (shortcutRepo == null) return null;
-        return shortcutRepo.getShortcutsForQuery(query, corporaToQuery);
+        if (shortcutRepo == null) return;
+        Consumer<ShortcutCursor> consumer = Consumers.createAsyncCloseableConsumer(mHandler,
+                new Consumer<ShortcutCursor>() {
+            public boolean consume(ShortcutCursor shortcuts) {
+                suggestions.setShortcuts(shortcuts);
+                return true;
+            }
+        });
+        shortcutRepo.getShortcutsForQuery(query, corporaToQuery, consumer);
     }
 
     protected void updateSuggestions(String query) {
@@ -824,10 +835,10 @@ public class SearchActivity extends Activity {
         getQsbApplication().getSourceTaskExecutor().cancelPendingTasks();
 
         List<Corpus> corporaToQuery = getCorporaToQuery();
-        ShortcutCursor shortcuts = getShortcutsForQuery(query, corporaToQuery);
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
                 query, corporaToQuery);
-        suggestions.setShortcuts(shortcuts);
+        getShortcutsForQuery(query, corporaToQuery, suggestions);
+
         // Log start latency if this is the first suggestions update
         gotSuggestions(suggestions);
 
