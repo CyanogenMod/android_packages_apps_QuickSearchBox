@@ -100,7 +100,7 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
     }
 
     private SuggestionCursor promote(Suggestions suggestions) {
-        return suggestions.getPromoted(new ConcatPromoter(), 10);
+        return suggestions.getPromoted(new ConcatPromoter(0), 10);
     }
 
 }

@@ -54,7 +54,7 @@ public class WebPromoter implements Promoter {
         for (int i = 0; i < webCount && promoted.getCount() < maxPromoted; i++) {
             webResult.moveTo(i);
             if (webResult.isWebSearchSuggestion()) {
-                if (DBG) Log.d(TAG, "Skipping suggestion " + i);
+                if (DBG) Log.d(TAG, "Including suggestion " + i);
                 promoted.add(new SuggestionPosition(webResult, i));
             } else {
                 if (DBG) Log.d(TAG, "Skipping suggestion " + i);

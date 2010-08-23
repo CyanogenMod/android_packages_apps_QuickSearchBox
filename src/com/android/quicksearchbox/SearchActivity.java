@@ -162,19 +162,18 @@ public class SearchActivity extends Activity {
         mResultsView = (SuggestionsView) findViewById(R.id.shortcuts);
         mSeparateResults = mResultsView != null;
 
+        mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
+        mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler(mSuggestionsAdapter));
+        mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
+
         if (mSeparateResults) {
-            mSuggestionsAdapter = getQsbApplication().createWebSuggestionsAdapter();
-            mResultsAdapter = getQsbApplication().createResultSuggestionsAdapter();
+            mResultsAdapter = getQsbApplication().createSuggestionsAdapter();
             mResultsAdapter.setSuggestionClickListener(new ClickHandler(mResultsAdapter));
             mResultsAdapter.setOnFocusChangeListener(suggestionFocusListener);
             mResultsView.setOnScrollListener(imeCloser);
             mResultsView.setOnFocusChangeListener(suggestionFocusListener);
             mResultsView.setOnKeyListener(suggestionViewKeyListener);
-        } else {
-            mSuggestionsAdapter = getQsbApplication().createBlendingSuggestionsAdapter();
         }
-        mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler(mSuggestionsAdapter));
-        mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
@@ -336,15 +335,40 @@ public class SearchActivity extends Activity {
         } else {
             sourceIcon = mCorpus.getCorpusIcon();
         }
-        mSuggestionsAdapter.setCorpus(mCorpus);
-        if (mResultsAdapter != null) {
+        if (separateResults()) {
             mResultsAdapter.setCorpus(mCorpus);
+            mResultsAdapter.setPromoter(createResultsPromoter(mCorpus));
+        } else {
+            mSuggestionsAdapter.setCorpus(mCorpus);
+            mSuggestionsAdapter.setPromoter(createSuggestionsPromoter(mCorpus));
         }
         if (mCorpusIndicator != null) {
             mCorpusIndicator.setImageDrawable(sourceIcon);
         }
 
         updateUi(getQuery().length() == 0);
+    }
+
+    private Promoter createSuggestionsPromoter(Corpus corpus) {
+        if (separateResults()) {
+            return getQsbApplication().createWebPromoter();
+        } else if (corpus == null) {
+            return getQsbApplication().createBlendingPromoter();
+        } else {
+            return getQsbApplication().createSingleCorpusPromoter();
+        }
+    }
+
+    private Promoter createResultsPromoter(Corpus corpus) {
+        if (separateResults()) {
+            if (corpus == null) {
+                return getQsbApplication().createResultsPromoter();
+            } else {
+                return getQsbApplication().createSingleCorpusPromoter();
+            }
+        } else {
+            return null;
+        }
     }
 
     private String getCorpusName() {

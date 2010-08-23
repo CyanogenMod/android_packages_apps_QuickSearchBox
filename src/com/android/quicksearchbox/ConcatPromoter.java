@@ -18,12 +18,26 @@ package com.android.quicksearchbox;
 
 
 /**
- * A simple promoter that concatenates the source results and ignores the shortcuts.
+ * A simple promoter that concatenates the shortcuts and the source results.
  */
 public class ConcatPromoter implements Promoter {
 
+    private final int mMaxShortcuts;
+
+    public ConcatPromoter(int maxShortcuts) {
+        mMaxShortcuts = maxShortcuts;
+    }
+
     public void pickPromoted(Suggestions suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
+        // Add shortcuts
+        SuggestionCursor shortcuts = suggestions.getShortcuts();
+        int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
+        for (int i = 0; i < shortcutCount && promoted.getCount() < mMaxShortcuts; i++) {
+            promoted.add(new SuggestionPosition(shortcuts, i));
+        }
+
+        // Add suggestions
         for (SuggestionCursor c : suggestions.getCorpusResults()) {
             for (int i = 0; i < c.getCount(); i++) {
                 if (promoted.getCount() >= maxPromoted) {

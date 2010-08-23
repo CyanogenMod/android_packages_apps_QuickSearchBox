@@ -36,9 +36,8 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
 
     private Suggestions mPendingSuggestions;
 
-    public DelayingSuggestionsAdapter(Promoter promoter, SuggestionViewFactory viewFactory,
-            int maxPromoted) {
-        super(promoter, viewFactory, maxPromoted);
+    public DelayingSuggestionsAdapter(SuggestionViewFactory viewFactory, int maxPromoted) {
+        super(viewFactory, maxPromoted);
     }
 
     @Override
@@ -70,7 +69,7 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
      */
     private boolean shouldPublish(Suggestions suggestions) {
         if (suggestions.isDone()) return true;
-        SuggestionCursor cursor = getCorpusCursor(suggestions, getCorpus());
+        SuggestionCursor cursor = getPromoted(suggestions, getCorpus());
         return cursor != null && cursor.getCount() > 0;
     }
 

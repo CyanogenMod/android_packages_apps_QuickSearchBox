@@ -355,44 +355,28 @@ public class QsbApplication {
     }
 
     /**
-     * Creates a suggestions adapter that blends web suggestions and results.
-     * May only be called from the main thread.
-     */
-    public SuggestionsAdapter createBlendingSuggestionsAdapter() {
-        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
-        return new DelayingSuggestionsAdapter(createBlendingPromoter(), viewFactory,
-                getConfig().getMaxPromotedSuggestions());
-    }
-
-    /**
-     * Creates a suggestions adapter that shows web suggestions.
-     * May only be called from the main thread.
-     */
-    public SuggestionsAdapter createWebSuggestionsAdapter() {
-        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
-        return new DelayingSuggestionsAdapter(createWebPromoter(), viewFactory,
-                getConfig().getMaxPromotedSuggestions());
-    }
-
-    /**
      * Creates a suggestions adapter that shows results.
      * May only be called from the main thread.
      */
-    public SuggestionsAdapter createResultSuggestionsAdapter() {
-        SuggestionViewFactory viewFactory = getSuggestionViewFactory();
-        return new DelayingSuggestionsAdapter(createResultsPromoter(), viewFactory,
+    public SuggestionsAdapter createSuggestionsAdapter() {
+        checkThread();
+        return new DelayingSuggestionsAdapter(getSuggestionViewFactory(),
                 getConfig().getMaxPromotedSuggestions());
     }
 
-    private Promoter createBlendingPromoter() {
+    public Promoter createBlendingPromoter() {
         return new BlendingPromoter(getConfig());
     }
 
-    private Promoter createWebPromoter() {
+    public Promoter createSingleCorpusPromoter() {
+        return new ConcatPromoter(Integer.MAX_VALUE);
+    }
+
+    public Promoter createWebPromoter() {
         return new WebPromoter(getConfig().getMaxShortcutsPerWebSource());
     }
 
-    private Promoter createResultsPromoter() {
+    public Promoter createResultsPromoter() {
         return new ResultPromoter(getConfig());
     }
 

@@ -39,7 +39,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private DataSetObserver mDataSetObserver;
 
-    private final Promoter mPromoter;
+    private Promoter mPromoter;
 
     private final SuggestionViewFactory mViewFactory;
 
@@ -56,9 +56,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private boolean mClosed = false;
 
-    public SuggestionsAdapter(Promoter promoter, SuggestionViewFactory viewFactory,
-            int maxPromoted) {
-        mPromoter = promoter;
+    public SuggestionsAdapter(SuggestionViewFactory viewFactory, int maxPromoted) {
         mViewFactory = viewFactory;
         mMaxPromoted = maxPromoted;
     }
@@ -71,6 +69,11 @@ public class SuggestionsAdapter extends BaseAdapter {
         setSuggestions(null);
         mCorpus = null;
         mClosed = true;
+    }
+
+    public void setPromoter(Promoter promoter) {
+        mPromoter = promoter;
+        onSuggestionsChanged();
     }
 
     public void setSuggestionClickListener(SuggestionClickListener listener) {
@@ -183,7 +186,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     protected void onSuggestionsChanged() {
         if (DBG) Log.d(TAG, "onSuggestionsChanged(" + mSuggestions + ")");
-        SuggestionCursor cursor = getCorpusCursor(mSuggestions, mCorpus);
+        SuggestionCursor cursor = getPromoted(mSuggestions, mCorpus);
         changeCursor(cursor);
     }
 
@@ -198,7 +201,7 @@ public class SuggestionsAdapter extends BaseAdapter {
     /**
      * Gets the cursor for the given source.
      */
-    protected SuggestionCursor getCorpusCursor(Suggestions suggestions, Corpus corpus) {
+    protected SuggestionCursor getPromoted(Suggestions suggestions, Corpus corpus) {
         if (suggestions == null) return null;
         return suggestions.getPromoted(mPromoter, mMaxPromoted);
     }
