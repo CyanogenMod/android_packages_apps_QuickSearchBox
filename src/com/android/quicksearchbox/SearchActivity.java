@@ -336,6 +336,7 @@ public class SearchActivity extends Activity {
             sourceIcon = mCorpus.getCorpusIcon();
         }
         if (separateResults()) {
+            mSuggestionsAdapter.setPromoter(createSuggestionsPromoter(null));
             mResultsAdapter.setCorpus(mCorpus);
             mResultsAdapter.setPromoter(createResultsPromoter(mCorpus));
         } else {
