@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Consumer;
+
 import android.database.DataSetObserver;
 
 import java.util.List;
@@ -26,12 +28,19 @@ import java.util.List;
 public interface CorpusRanker {
 
     /**
+     * Clears any currently cached ranking.
+     */
+    void clear();
+
+    /**
      * Gets a an ordered list of corpora.
      *
-     * @return The most important corpora come first in the list. Callers should not mofify the
-     *         returned list.
+     * @param consumer Consumer that will be given the list of ranked corpora.
+     *        The consumer is called on an unspecified thread.
+     *        The most important corpora come first in the list. Callers should not modify the
+     *        list.
      */
-    List<Corpus> getRankedCorpora();
+    void getRankedCorpora(Consumer<List<Corpus>> consumer);
 
     /**
      * Registers an observer that is called when the corpus list changes.

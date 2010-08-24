@@ -32,13 +32,11 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     public static final int MAX_PROMOTED_SUGGESTIONS = 8;
     public static final String TEST_QUERY = "query";
 
-    private CorpusRanker mRanker;
+    private List<Corpus> mCorpora = createMockCorpora(5, MAX_PROMOTED_CORPORA);
     private RankAwarePromoter mPromoter;
 
     @Override
     public void setUp() {
-        Corpora corpora = createMockCorpora(5, MAX_PROMOTED_CORPORA);
-        mRanker = new LexicographicalCorpusRanker(corpora);
         mPromoter = new RankAwarePromoter(new Config(mContext){
             @Override
             public int getNumSuggestionsAboveKeyboard() {
@@ -68,25 +66,20 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         }
     }
 
-    private List<Corpus> getRankedCorpora() {
-        return mRanker.getRankedCorpora();
-    }
-
     private List<CorpusResult> getSuggestions(String query) {
         ArrayList<CorpusResult> results = new ArrayList<CorpusResult>();
-        List<Corpus> corpora = getRankedCorpora();
-        for (Corpus corpus : corpora) {
+        for (Corpus corpus : mCorpora) {
             results.add(corpus.getSuggestions(query, 10, false));
         }
         return results;
     }
 
-    private static MockCorpora createMockCorpora(int count, int defaultCount) {
-        MockCorpora corpora = new MockCorpora();
+    private static List<Corpus> createMockCorpora(int count, int defaultCount) {
+        ArrayList<Corpus> corpora = new ArrayList<Corpus>();
         for (int i = 0; i < count; i++) {
             Source mockSource = new MockSource("Source" + i);
             Corpus mockCorpus = new MockCorpus(mockSource, i < defaultCount);
-            corpora.addCorpus(mockCorpus);
+            corpora.add(mockCorpus);
         }
         return corpora;
     }

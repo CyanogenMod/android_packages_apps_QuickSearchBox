@@ -29,9 +29,13 @@ public interface ShortcutRepository {
 
     /**
      * Checks whether there is any stored history.
-     * TODO: change to async API
+     *
+     * @param consumer Consumer that the result will be passed to.
+     *        The value passed to the consumer will always be non-null.
+     *        The consumer will be called on an unspecified thread, and will always
+     *        get called eventually.
      */
-    boolean hasHistory();
+    void hasHistory(Consumer<Boolean> consumer);
 
     /**
      * Clears all shortcut history.
@@ -75,10 +79,13 @@ public interface ShortcutRepository {
 
     /**
      * Gets scores for all corpora in the click log.
-     * TODO: change to async API
      *
-     * @return A map for corpus name to score. A higher score means that the corpus
-     *         is more important.
+     * @param consumer Consumer that the result will be passed to.
+     *        The result is a map of corpus name to score. A higher score means that the corpus
+     *        is more important.
+     *        The value passed to the consumer may be non-null.
+     *        The consumer will be called on an unspecified thread, and will always
+     *        get called eventually.
      */
-    Map<String,Integer> getCorpusScores();
+    void getCorpusScores(Consumer<Map<String,Integer>> consumer);
 }

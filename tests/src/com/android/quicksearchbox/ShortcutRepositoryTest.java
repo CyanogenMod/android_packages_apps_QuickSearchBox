@@ -1,5 +1,5 @@
 /*
- * Copyright (C) The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.MockExecutor;
@@ -150,13 +149,12 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     public void testHasHistory() {
-        assertFalse(mRepo.hasHistory());
+        assertHasHistory(false);
         reportClickAtTime(mAppSuggestions, 0, NOW);
-        assertTrue(mRepo.hasHistory());
+        assertHasHistory(true);
         mRepo.clearHistory();
-        assertTrue(mRepo.hasHistory());
         mLogExecutor.runNext();
-        assertFalse(mRepo.hasHistory());
+        assertHasHistory(false);
     }
 
     public void testNoMatch() {
@@ -817,17 +815,31 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         assertShortcuts(message, query, mAllowedCorpora, expected);
     }
 
+    private void assertHasHistory(boolean expected) {
+        ConsumerTrap<Boolean> trap = new ConsumerTrap<Boolean>();
+        mRepo.hasHistory(trap);
+        mLogExecutor.runNext();
+        assertEquals("hasHistory() returned bad value", expected, (boolean) trap.getValue());
+    }
+
     void assertCorpusRanking(String message, Corpus... expected) {
         String[] expectedNames = new String[expected.length];
         for (int i = 0; i < expected.length; i++) {
             expectedNames[i] = expected[i].getName();
         }
-        Map<String,Integer> scores = mRepo.getCorpusScores();
+        Map<String,Integer> scores = getCorpusScores();
         List<String> observed = sortByValues(scores);
         // Highest scores should come first
         Collections.reverse(observed);
         Log.d(TAG, "scores=" + scores);
         MoreAsserts.assertContentsInOrder(message, observed, (Object[]) expectedNames);
+    }
+
+    private Map<String,Integer> getCorpusScores() {
+        ConsumerTrap<Map<String,Integer>> trap = new ConsumerTrap<Map<String,Integer>>();
+        mRepo.getCorpusScores(trap);
+        mLogExecutor.runNext();
+        return trap.getValue();
     }
 
     static <A extends Comparable<A>, B extends Comparable<B>> List<A> sortByValues(Map<A,B> map) {
