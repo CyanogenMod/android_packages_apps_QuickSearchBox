@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.Consumer;
 import com.android.quicksearchbox.util.Consumers;
+import com.android.quicksearchbox.util.SQLiteAsyncQuery;
 import com.android.quicksearchbox.util.SQLiteTransaction;
 import com.android.quicksearchbox.util.Util;
 import com.google.common.annotations.VisibleForTesting;
@@ -202,17 +203,23 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         });
     }
 
+    private <A> void runQueryAsync(final SQLiteAsyncQuery<A> query, final Consumer<A> consumer) {
+        mLogExecutor.execute(new Runnable() {
+            public void run() {
+                query.run(mOpenHelper.getReadableDatabase(), consumer);
+            }
+        });
+    }
+
 // --------------------- Interface ShortcutRepository ---------------------
 
-    public boolean hasHistory() {
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(HAS_HISTORY_QUERY, null);
-        try {
-            if (DBG) Log.d(TAG, "hasHistory(): cursor=" + cursor);
-            return cursor != null && cursor.getCount() > 0;
-        } finally {
-            if (cursor != null) cursor.close();
-        }
+    public void hasHistory(Consumer<Boolean> consumer) {
+        runQueryAsync(new SQLiteAsyncQuery<Boolean>() {
+            @Override
+            protected Boolean performQuery(SQLiteDatabase db) {
+                return hasHistory(db);
+            }
+        }, consumer);
     }
 
     public void clearHistory() {
@@ -256,11 +263,30 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         refreshShortcut(source, shortcutId, refreshed);
     }
 
-    public Map<String,Integer> getCorpusScores() {
-        return getCorpusScores(mConfig.getMinClicksForSourceRanking());
+    public void getCorpusScores(final Consumer<Map<String, Integer>> consumer) {
+        runQueryAsync(new SQLiteAsyncQuery<Map<String, Integer>>() {
+            @Override
+            protected Map<String, Integer> performQuery(SQLiteDatabase db) {
+                return getCorpusScores();
+            }
+        }, consumer);
     }
 
 // -------------------------- end ShortcutRepository --------------------------
+
+    private boolean hasHistory(SQLiteDatabase db) {
+        Cursor cursor = db.rawQuery(HAS_HISTORY_QUERY, null);
+        try {
+            if (DBG) Log.d(TAG, "hasHistory(): cursor=" + cursor);
+            return cursor != null && cursor.getCount() > 0;
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+    }
+
+    private Map<String,Integer> getCorpusScores() {
+        return getCorpusScores(mConfig.getMinClicksForSourceRanking());
+    }
 
     private boolean shouldRefresh(Suggestion suggestion) {
         return mRefresher.shouldRefresh(suggestion.getSuggestionSource(),

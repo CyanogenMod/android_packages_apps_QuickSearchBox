@@ -61,6 +61,16 @@ public class Consumers {
         }
     }
 
+    public static <A> Consumer<A> createAsyncConsumer(
+            final Handler handler, final Consumer<A> consumer) {
+        return new Consumer<A>() {
+            public boolean consume(A value) {
+                consumeAsync(handler, consumer, value);
+                return true;
+            }
+        };
+    }
+
     public static <A extends QuietlyCloseable> Consumer<A> createAsyncCloseableConsumer(
             final Handler handler, final Consumer<A> consumer) {
         return new Consumer<A>() {

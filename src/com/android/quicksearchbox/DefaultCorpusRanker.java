@@ -16,6 +16,12 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.AsyncCache;
+import com.android.quicksearchbox.util.AsyncDataSetObservable;
+import com.android.quicksearchbox.util.Consumer;
+
+import android.database.DataSetObserver;
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -25,16 +31,87 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultCorpusRanker extends AbstractCorpusRanker {
+/**
+ * A corpus ranker that uses corpus scores from the shortcut repository to rank
+ * corpora.
+ */
+public class DefaultCorpusRanker implements CorpusRanker {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.DefaultCorpusRanker";
 
     private final ShortcutRepository mShortcuts;
 
-    public DefaultCorpusRanker(Corpora corpora, ShortcutRepository shortcuts) {
-        super(corpora);
+    private final AsyncDataSetObservable mDataSetObservable;
+
+    private final Corpora mCorpora;
+
+    // Cached list of ranked corpora.
+    private final RankedCorporaCache mRankedCorpora;
+
+    /**
+     * Creates a new default corpus ranker.
+     *
+     * @param corpora Corpora to rank.
+     * @param shortcuts Shortcut repository for getting corpus scores.
+     * @param uiThread Handler to call DataSetObservers on.
+     */
+    public DefaultCorpusRanker(Corpora corpora, ShortcutRepository shortcuts,
+            Handler uiThread) {
+        mCorpora = corpora;
+        mCorpora.registerDataSetObserver(new CorporaObserver());
         mShortcuts = shortcuts;
+        mDataSetObservable = new AsyncDataSetObservable(uiThread);
+        mRankedCorpora = new RankedCorporaCache();
+    }
+
+    public void getRankedCorpora(Consumer<List<Corpus>> consumer) {
+        mRankedCorpora.get(consumer);
+    }
+
+    public void registerDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.registerObserver(observer);
+    }
+
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.unregisterObserver(observer);
+    }
+
+    protected void notifyDataSetChanged() {
+        mDataSetObservable.notifyChanged();
+    }
+
+    public void clear() {
+        mRankedCorpora.clear();
+    }
+
+    private class CorporaObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            clear();
+        }
+    }
+
+    private class RankedCorporaCache extends AsyncCache<List<Corpus>> {
+
+        protected void create() {
+            mShortcuts.getCorpusScores(new Consumer<Map<String,Integer>>(){
+                public boolean consume(Map<String, Integer> clickScores) {
+                    Collection<Corpus> enabledCorpora = mCorpora.getEnabledCorpora();
+                    if (DBG) Log.d(TAG, "Ranking: " + enabledCorpora);
+                    ArrayList<Corpus> ordered = new ArrayList<Corpus>(enabledCorpora);
+                    Collections.sort(ordered, new CorpusComparator(clickScores));
+
+                    if (DBG) Log.d(TAG, "Click scores: " + clickScores);
+                    if (DBG) Log.d(TAG, "Ordered: " + ordered);
+
+                    store(ordered);
+                    notifyDataSetChanged();
+                    return true;
+                }
+            });
+        }
+
     }
 
     private static class CorpusComparator implements Comparator<Corpus> {
@@ -51,10 +128,16 @@ public class DefaultCorpusRanker extends AbstractCorpusRanker {
             if (corpus1IsDefault != corpus2IsDefault) {
                 // Default corpora always come before non-default
                 return corpus1IsDefault ? -1 : 1;
-            } else {
-                // Then by descending score
-                return getCorpusScore(corpus2) - getCorpusScore(corpus1);
             }
+
+            // Then by descending score
+            int scoreDiff = getCorpusScore(corpus2) - getCorpusScore(corpus1);
+            if (scoreDiff != 0) {
+                return scoreDiff;
+            }
+
+            // Finally by name
+            return corpus1.getLabel().toString().compareTo(corpus2.getLabel().toString());
         }
 
         /**
@@ -66,26 +149,14 @@ public class DefaultCorpusRanker extends AbstractCorpusRanker {
                 return Integer.MAX_VALUE;
             }
             // Then use click score
-            Integer clickScore = mClickScores.get(corpus.getName());
-            if (clickScore != null) {
-                return clickScore;
-            }
-            return 0;
+            return getClickScore(corpus);
         }
-    }
 
-    @Override
-    public List<Corpus> rankCorpora(Corpora corpora) {
-        Collection<Corpus> enabledCorpora = corpora.getEnabledCorpora();
-        if (DBG) Log.d(TAG, "Ranking: " + enabledCorpora);
-
-        Map<String,Integer> clickScores = mShortcuts.getCorpusScores();
-        ArrayList<Corpus> ordered = new ArrayList<Corpus>(enabledCorpora);
-        Collections.sort(ordered, new CorpusComparator(clickScores));
-
-        if (DBG) Log.d(TAG, "Click scores: " + clickScores);
-        if (DBG) Log.d(TAG, "Ordered: " + ordered);
-        return ordered;
+        private int getClickScore(Corpus corpus) {
+            if (mClickScores == null) return 0;
+            Integer clickScore = mClickScores.get(corpus.getName());
+            return clickScore == null ? 0 : clickScore;
+        }
     }
 
 }

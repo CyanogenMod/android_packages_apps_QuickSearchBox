@@ -822,11 +822,11 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private List<Corpus> getCorporaToQuery() {
+    private void getCorporaToQuery(Consumer<List<Corpus>> consumer) {
         if (mCorpus == null) {
             // No corpus selected, use all enabled corpora
             // TODO: This should be done asynchronously, since it can be expensive
-            return getCorpusRanker().getRankedCorpora();
+            getCorpusRanker().getRankedCorpora(Consumers.createAsyncConsumer(mHandler, consumer));
         } else {
             List<Corpus> corpora = new ArrayList<Corpus>();
             if (separateResults()) {
@@ -836,7 +836,7 @@ public class SearchActivity extends Activity {
             }
             // Query the selected corpus
             corpora.add(mCorpus);
-            return corpora;
+            consumer.consume(corpora);
         }
     }
 
@@ -854,12 +854,20 @@ public class SearchActivity extends Activity {
         shortcutRepo.getShortcutsForQuery(query, corporaToQuery, consumer);
     }
 
-    protected void updateSuggestions(String query) {
-        query = CharMatcher.WHITESPACE.trimLeadingFrom(query);
+    protected void updateSuggestions(String untrimmedQuery) {
+        final String query = CharMatcher.WHITESPACE.trimLeadingFrom(untrimmedQuery);
         if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ")");
         getQsbApplication().getSourceTaskExecutor().cancelPendingTasks();
+        getCorporaToQuery(new Consumer<List<Corpus>>(){
+            @Override
+            public boolean consume(List<Corpus> corporaToQuery) {
+                updateSuggestions(query, corporaToQuery);
+                return true;
+            }
+        });
+    }
 
-        List<Corpus> corporaToQuery = getCorporaToQuery();
+    protected void updateSuggestions(String query, List<Corpus> corporaToQuery) {
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
                 query, corporaToQuery);
         getShortcutsForQuery(query, corporaToQuery, suggestions);

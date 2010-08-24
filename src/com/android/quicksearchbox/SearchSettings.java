@@ -16,6 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.Consumers;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
@@ -27,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
@@ -68,6 +72,8 @@ public class SearchSettings extends PreferenceActivity
 
     // Dialog ids
     private static final int CLEAR_SHORTCUTS_CONFIRM_DIALOG = 0;
+
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,18 +119,19 @@ public class SearchSettings extends PreferenceActivity
         return QsbApplication.get(this).getShortcutRepository();
     }
 
-    private Config getConfig() {
-        return QsbApplication.get(this).getConfig();
-    }
-
     /**
      * Enables/disables the "Clear search shortcuts" preference depending
      * on whether there is any search history.
      */
     private void updateClearShortcutsPreference() {
-        boolean hasHistory = getShortcuts().hasHistory();
-        if (DBG) Log.d(TAG, "hasHistory()=" + hasHistory);
-        mClearShortcutsPreference.setEnabled(hasHistory);
+        getShortcuts().hasHistory(Consumers.createAsyncConsumer(mHandler, new Consumer<Boolean>() {
+            @Override
+            public boolean consume(Boolean hasHistory) {
+                if (DBG) Log.d(TAG, "hasHistory()=" + hasHistory);
+                mClearShortcutsPreference.setEnabled(hasHistory);
+                return true;
+            }
+        }));
     }
 
     /**

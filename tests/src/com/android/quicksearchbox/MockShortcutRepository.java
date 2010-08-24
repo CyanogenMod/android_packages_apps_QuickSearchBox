@@ -27,6 +27,12 @@ import java.util.Map;
  */
 public class MockShortcutRepository implements ShortcutRepository {
 
+    private Map<String, Integer> mCorpusScores;
+
+    public void setCorpusScores(Map<String, Integer> corpusScores) {
+        mCorpusScores = corpusScores;
+    }
+
     public void clearHistory() {
     }
 
@@ -53,12 +59,12 @@ public class MockShortcutRepository implements ShortcutRepository {
     public void updateShortcut(Source source, String shortcutId, SuggestionCursor refreshed) {
     }
 
-    public Map<String, Integer> getCorpusScores() {
-        return null;
+    public void getCorpusScores(Consumer<Map<String, Integer>> consumer) {
+        consumer.consume(mCorpusScores);
     }
 
-    public boolean hasHistory() {
-        return false;
+    public void hasHistory(Consumer<Boolean> consumer) {
+        consumer.consume(false);
     }
 
     public void reportClick(SuggestionCursor suggestions, int position) {

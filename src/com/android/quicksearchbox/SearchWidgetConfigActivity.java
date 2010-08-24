@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.CorporaAdapter;
-import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -57,17 +56,11 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
         }
-
-        // If there is only All, or only All and one other corpus, there is no
-        // point in asking the user to select a corpus.
-        if (getCorpusRanker().getRankedCorpora().size() <= 1) {
-            selectCorpus(null);
-        }
     }
 
     @Override
     protected void onStart() {
-        setAdapter(CorporaAdapter.createListAdapter(getViewFactory(), getCorpusRanker()));
+        setAdapter(createCorporaListAdapter());
         super.onStart();
     }
 
@@ -133,12 +126,8 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         return r;
     }
 
-    private CorpusRanker getCorpusRanker() {
-        return QsbApplication.get(this).getCorpusRanker();
-    }
-
-    private CorpusViewFactory getViewFactory() {
-        return QsbApplication.get(this).getCorpusViewFactory();
+    private CorporaAdapter createCorporaListAdapter() {
+        return QsbApplication.get(this).createCorporaListAdapter();
     }
 
     private class SourceClickListener implements AdapterView.OnItemClickListener {

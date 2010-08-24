@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.google.GoogleSource;
 import com.android.quicksearchbox.google.GoogleSuggestClient;
+import com.android.quicksearchbox.ui.CorporaAdapter;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
@@ -226,7 +227,8 @@ public class QsbApplication {
     }
 
     protected CorpusRanker createCorpusRanker() {
-        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository());
+        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository(),
+                getMainThreadHandler());
     }
 
     /**
@@ -394,6 +396,16 @@ public class QsbApplication {
 
     protected GoogleSource createGoogleSource() {
         return new GoogleSuggestClient(getContext());
+    }
+
+    public CorporaAdapter createCorporaListAdapter() {
+        return new CorporaAdapter(getCorpusViewFactory(), getCorpusRanker(),
+                getMainThreadHandler(), false);
+    }
+
+    public CorporaAdapter createCorporaGridAdapter() {
+        return new CorporaAdapter(getCorpusViewFactory(), getCorpusRanker(),
+                getMainThreadHandler(), true);
     }
 
     /**

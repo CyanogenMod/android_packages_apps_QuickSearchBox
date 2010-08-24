@@ -18,9 +18,12 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.CorpusRanker;
+import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.Consumers;
 
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,39 +44,38 @@ public class CorporaAdapter extends BaseAdapter {
 
     private final CorpusRanker mRanker;
 
+    private final Handler mUiThread;
+
+    private final boolean mGridView;
+
     private final DataSetObserver mCorporaObserver = new CorporaObserver();
 
     private List<Corpus> mRankedEnabledCorpora;
 
-    private boolean mGridView;
-
-    private CorporaAdapter(CorpusViewFactory viewFactory,
-            CorpusRanker ranker, boolean gridView) {
+    public CorporaAdapter(CorpusViewFactory viewFactory,
+            CorpusRanker ranker, Handler uiThread, boolean gridView) {
         mViewFactory = viewFactory;
         mRanker = ranker;
         mGridView = gridView;
+        mUiThread = uiThread;
         mRanker.registerDataSetObserver(mCorporaObserver);
         updateCorpora();
     }
 
-    public static CorporaAdapter createListAdapter(CorpusViewFactory viewFactory,
-            CorpusRanker ranker) {
-        return new CorporaAdapter(viewFactory, ranker, false);
-    }
-
-    public static CorporaAdapter createGridAdapter(CorpusViewFactory viewFactory,
-            CorpusRanker ranker) {
-        return new CorporaAdapter(viewFactory, ranker, true);
-    }
-
     private void updateCorpora() {
-        mRankedEnabledCorpora = new ArrayList<Corpus>();
-        for (Corpus corpus : mRanker.getRankedCorpora()) {
-            if (!corpus.isCorpusHidden()) {
-                mRankedEnabledCorpora.add(corpus);
+        mRanker.getRankedCorpora(Consumers.createAsyncConsumer(mUiThread,
+                new Consumer<List<Corpus>>() {
+            public boolean consume(List<Corpus> rankedCorpora) {
+                mRankedEnabledCorpora = new ArrayList<Corpus>();
+                for (Corpus corpus : rankedCorpora) {
+                    if (!corpus.isCorpusHidden()) {
+                        mRankedEnabledCorpora.add(corpus);
+                    }
+                }
+                notifyDataSetChanged();
+                return true;
             }
-        }
-        notifyDataSetChanged();
+        }));
     }
 
     public void close() {
