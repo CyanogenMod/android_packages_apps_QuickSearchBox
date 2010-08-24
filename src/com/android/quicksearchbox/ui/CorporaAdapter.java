@@ -83,7 +83,7 @@ public class CorporaAdapter extends BaseAdapter {
     }
 
     public int getCount() {
-        return 1 + mRankedEnabledCorpora.size();
+        return 1 + (mRankedEnabledCorpora == null ? 0 : mRankedEnabledCorpora.size());
     }
 
     public Corpus getItem(int position) {
