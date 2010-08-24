@@ -31,7 +31,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:background="#00000000"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:splitMotionEvents="true">
 
         <!-- Begin left_pane for suggestions -->
         <RelativeLayout
