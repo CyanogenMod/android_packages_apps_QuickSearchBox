@@ -19,9 +19,6 @@
       the onscreen keyboard. These slots will be shared among
       the default sources. -->
   <integer name="num_suggestions_above_keyboard">6</integer>
-  <!-- Whether the keyboard should be dismissed when the results lists are touched or cursored
-       through -->
-  <bool name="dismiss_keyboard_on_scroll">false</bool>
   <!-- The maximum promoted suggestions -->
   <integer name="max_promoted_suggestions">18</integer>
 </resources>

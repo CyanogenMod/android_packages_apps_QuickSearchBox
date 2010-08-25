@@ -43,7 +43,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private final SuggestionViewFactory mViewFactory;
 
-    private final int mMaxPromoted;
+    private int mMaxPromoted;
 
     private SuggestionCursor mCursor;
 
@@ -56,9 +56,13 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private boolean mClosed = false;
 
-    public SuggestionsAdapter(SuggestionViewFactory viewFactory, int maxPromoted) {
+    public SuggestionsAdapter(SuggestionViewFactory viewFactory) {
         mViewFactory = viewFactory;
+    }
+
+    public void setMaxPromoted(int maxPromoted) {
         mMaxPromoted = maxPromoted;
+        onSuggestionsChanged();
     }
 
     public boolean isClosed() {
@@ -176,7 +180,7 @@ public class SuggestionsAdapter extends BaseAdapter {
         mCursor.moveTo(position);
         int viewType = mViewFactory.getSuggestionViewType(mCursor);
         SuggestionView view = mViewFactory.getSuggestionView(viewType, convertView, parent);
-        view.bindAsSuggestion(mCursor, mSuggestionClickListener);
+        view.bindAsSuggestion(mCursor, this);
         View v = (View) view;
         if (mOnFocusChangeListener != null) {
             v.setOnFocusChangeListener(mOnFocusChangeListener);
@@ -215,8 +219,10 @@ public class SuggestionsAdapter extends BaseAdapter {
     private void changeCursor(SuggestionCursor newCursor) {
         if (DBG) Log.d(TAG, "changeCursor(" + newCursor + ")");
         if (newCursor == mCursor) {
-            // Shortcuts may have changed without the cursor changing.
-            notifyDataSetChanged();
+            if (newCursor != null) {
+                // Shortcuts may have changed without the cursor changing.
+                notifyDataSetChanged();
+            }
             return;
         }
         mCursor = newCursor;
@@ -227,9 +233,28 @@ public class SuggestionsAdapter extends BaseAdapter {
         }
     }
 
-    public void onIcon2Clicked(int position) {
+    public void onSuggestionClicked(int position) {
         if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionQueryRefineClicked(position);
+            mSuggestionClickListener.onSuggestionClicked(this, position);
+        }
+    }
+
+    public void onSuggestionQuickContactClicked(int position) {
+        if (mSuggestionClickListener != null) {
+            mSuggestionClickListener.onSuggestionQuickContactClicked(this, position);
+        }
+    }
+
+    public boolean onSuggestionLongClicked(int position) {
+        if (mSuggestionClickListener != null) {
+            return mSuggestionClickListener.onSuggestionLongClicked(this, position);
+        }
+        return false;
+    }
+
+    public void onSuggestionQueryRefineClicked(int position) {
+        if (mSuggestionClickListener != null) {
+            mSuggestionClickListener.onSuggestionQueryRefineClicked(this, position);
         }
     }
 

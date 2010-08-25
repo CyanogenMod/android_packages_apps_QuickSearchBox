@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.quicksearchbox.ui.SearchActivityView
+<com.android.quicksearchbox.ui.SearchActivityViewTwoPane
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_activity_view"
     android:layout_width="720dp"
@@ -190,4 +190,4 @@
         </RelativeLayout>
 
     </LinearLayout>
-</com.android.quicksearchbox.ui.SearchActivityView>
+</com.android.quicksearchbox.ui.SearchActivityViewTwoPane>

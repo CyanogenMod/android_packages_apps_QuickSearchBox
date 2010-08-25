@@ -17,11 +17,9 @@
 package com.android.quicksearchbox;
 
 import com.android.common.Search;
-import com.android.quicksearchbox.ui.CorpusViewFactory;
-import com.android.quicksearchbox.ui.QueryTextView;
+import com.android.quicksearchbox.ui.SearchActivityView;
 import com.android.quicksearchbox.ui.SuggestionClickListener;
 import com.android.quicksearchbox.ui.SuggestionsAdapter;
-import com.android.quicksearchbox.ui.SuggestionsView;
 import com.android.quicksearchbox.util.Consumer;
 import com.android.quicksearchbox.util.Consumers;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,28 +30,17 @@ import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
-import android.view.inputmethod.CompletionInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -73,11 +60,6 @@ public class SearchActivity extends Activity {
     public static final String INTENT_ACTION_QSB_AND_SELECT_CORPUS
             = "com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS";
 
-    // The string used for privateImeOptions to identify to the IME that it should not show
-    // a microphone button since one already exists in the search dialog.
-    // TODO: This should move to android-common or something.
-    private static final String IME_OPTION_NO_MICROPHONE = "nm";
-
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_CORPUS = "corpus";
     private static final String INSTANCE_KEY_QUERY = "query";
@@ -90,38 +72,14 @@ public class SearchActivity extends Activity {
     // or suggestions, since QSB was last started.
     private boolean mTookAction;
 
+    private SearchActivityView mSearchActivityView;
+
     private CorpusSelectionDialog mCorpusSelectionDialog;
-
-    protected SuggestionsAdapter mSuggestionsAdapter;
-
-    // The list adapter for showing results other than query completion
-    // suggestions
-    protected SuggestionsAdapter mResultsAdapter;
 
     private CorporaObserver mCorporaObserver;
 
-    protected QueryTextView mQueryTextView;
-    // True if the query was empty on the previous call to updateQuery()
-    protected boolean mQueryWasEmpty = true;
-    protected Drawable mQueryTextEmptyBg;
-    protected Drawable mQueryTextNotEmptyBg;
-
-    protected SuggestionsView mSuggestionsView;
-
-    // View that shows the results other than the query completions
-    protected SuggestionsView mResultsView;
-
-    protected boolean mSeparateResults;
-
-    protected ImageButton mSearchGoButton;
-    protected ImageButton mVoiceSearchButton;
-    protected ImageButton mCorpusIndicator;
-
-    protected ImageView mSettingsButton;
-
     private Corpus mCorpus;
     private Bundle mAppSearchData;
-    private boolean mUpdateSuggestions;
 
     private final Handler mHandler = new Handler();
     private final Runnable mUpdateSuggestionsTask = new Runnable() {
@@ -132,7 +90,7 @@ public class SearchActivity extends Activity {
 
     private final Runnable mShowInputMethodTask = new Runnable() {
         public void run() {
-            showInputMethodForQuery();
+            mSearchActivityView.showInputMethodForQuery();
         }
     };
 
@@ -148,64 +106,39 @@ public class SearchActivity extends Activity {
 
         setContentView();
 
-        SuggestListFocusListener suggestionFocusListener = new SuggestListFocusListener();
-        SuggestionsViewKeyListener suggestionViewKeyListener = new SuggestionsViewKeyListener();
-        InputMethodCloser imeCloser = new InputMethodCloser();
+        mSearchActivityView.setMaxPromoted(getConfig().getMaxPromotedSuggestions());
 
-        mQueryTextView = (QueryTextView) findViewById(R.id.search_src_text);
+        mSearchActivityView.setSearchClickListener(new SearchActivityView.SearchClickListener() {
+            public boolean onSearchClicked(int method) {
+                return SearchActivity.this.onSearchClicked(method);
+            }
+        });
 
-        mSuggestionsView = (SuggestionsView) findViewById(R.id.suggestions);
-        mSuggestionsView.setOnScrollListener(imeCloser);
-        mSuggestionsView.setOnKeyListener(suggestionViewKeyListener);
-        mSuggestionsView.setOnFocusChangeListener(suggestionFocusListener);
+        mSearchActivityView.setQueryListener(new SearchActivityView.QueryListener() {
+            public void onQueryChanged() {
+                updateSuggestionsBuffered();
+            }
+        });
 
-        mResultsView = (SuggestionsView) findViewById(R.id.shortcuts);
-        mSeparateResults = mResultsView != null;
+        mSearchActivityView.setSuggestionClickListener(new ClickHandler());
 
-        mSuggestionsAdapter = getQsbApplication().createSuggestionsAdapter();
-        mSuggestionsAdapter.setSuggestionClickListener(new ClickHandler(mSuggestionsAdapter));
-        mSuggestionsAdapter.setOnFocusChangeListener(suggestionFocusListener);
+        mSearchActivityView.setSettingsButtonClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                onSettingsClicked();
+            }
+        });
 
-        if (mSeparateResults) {
-            mResultsAdapter = getQsbApplication().createSuggestionsAdapter();
-            mResultsAdapter.setSuggestionClickListener(new ClickHandler(mResultsAdapter));
-            mResultsAdapter.setOnFocusChangeListener(suggestionFocusListener);
-            mResultsView.setOnScrollListener(imeCloser);
-            mResultsView.setOnFocusChangeListener(suggestionFocusListener);
-            mResultsView.setOnKeyListener(suggestionViewKeyListener);
-        }
+        mSearchActivityView.setCorpusIndicatorClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showCorpusSelectionDialog();
+            }
+        });
 
-        mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
-        mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-        mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
-        mSettingsButton = (ImageView) findViewById(R.id.settings_icon);
-
-        mQueryTextView.addTextChangedListener(new SearchTextWatcher());
-        mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
-        mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
-        mQueryTextView.setSuggestionClickListener(new ClickHandler(mSuggestionsAdapter));
-        mQueryTextEmptyBg = mQueryTextView.getBackground();
-
-        if (mCorpusIndicator != null) {
-            mCorpusIndicator.setOnClickListener(new CorpusIndicatorClickListener());
-        }
-
-        mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
-
-        mVoiceSearchButton.setOnClickListener(new VoiceSearchButtonClickListener());
-
-        if (mSettingsButton != null) {
-            mSettingsButton.setOnClickListener(new SettingsButtonClickListener());
-        }
-
-        ButtonsKeyListener buttonsKeyListener = new ButtonsKeyListener();
-        mSearchGoButton.setOnKeyListener(buttonsKeyListener);
-        mVoiceSearchButton.setOnKeyListener(buttonsKeyListener);
-        if (mCorpusIndicator != null) {
-            mCorpusIndicator.setOnKeyListener(buttonsKeyListener);
-        }
-
-        mUpdateSuggestions = true;
+        mSearchActivityView.setVoiceSearchButtonClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                onVoiceSearchClicked();
+            }
+        });
 
         // First get setup from intent
         Intent intent = getIntent();
@@ -213,22 +146,17 @@ public class SearchActivity extends Activity {
         // Then restore any saved instance state
         restoreInstanceState(savedInstanceState);
 
-        mSuggestionsAdapter.registerDataSetObserver(new SuggestionsObserver());
-
         // Do this at the end, to avoid updating the list view when setSource()
         // is called.
-        mSuggestionsView.setAdapter(mSuggestionsAdapter);
+        mSearchActivityView.start();
 
-        if (mSeparateResults) {
-            mResultsAdapter.registerDataSetObserver(new SuggestionsObserver());
-            mResultsView.setAdapter(mResultsAdapter);
-        }
         mCorporaObserver = new CorporaObserver();
         getCorpora().registerDataSetObserver(mCorporaObserver);
     }
 
     protected void setContentView() {
         setContentView(R.layout.search_activity);
+        mSearchActivityView = (SearchActivityView) findViewById(R.id.search_activity_view);
     }
 
     private void startMethodTracing() {
@@ -329,47 +257,8 @@ public class SearchActivity extends Activity {
     private void setCorpus(String corpusName) {
         if (DBG) Log.d(TAG, "setCorpus(" + corpusName + ")");
         mCorpus = getCorpus(corpusName);
-        Drawable sourceIcon;
-        if (mCorpus == null) {
-            sourceIcon = getCorpusViewFactory().getGlobalSearchIcon();
-        } else {
-            sourceIcon = mCorpus.getCorpusIcon();
-        }
-        if (separateResults()) {
-            mSuggestionsAdapter.setPromoter(createSuggestionsPromoter(null));
-            mResultsAdapter.setCorpus(mCorpus);
-            mResultsAdapter.setPromoter(createResultsPromoter(mCorpus));
-        } else {
-            mSuggestionsAdapter.setCorpus(mCorpus);
-            mSuggestionsAdapter.setPromoter(createSuggestionsPromoter(mCorpus));
-        }
-        if (mCorpusIndicator != null) {
-            mCorpusIndicator.setImageDrawable(sourceIcon);
-        }
 
-        updateUi(getQuery().length() == 0);
-    }
-
-    private Promoter createSuggestionsPromoter(Corpus corpus) {
-        if (separateResults()) {
-            return getQsbApplication().createWebPromoter();
-        } else if (corpus == null) {
-            return getQsbApplication().createBlendingPromoter();
-        } else {
-            return getQsbApplication().createSingleCorpusPromoter();
-        }
-    }
-
-    private Promoter createResultsPromoter(Corpus corpus) {
-        if (separateResults()) {
-            if (corpus == null) {
-                return getQsbApplication().createResultsPromoter();
-            } else {
-                return getQsbApplication().createSingleCorpusPromoter();
-            }
-        } else {
-            return null;
-        }
+        mSearchActivityView.setCorpus(mCorpus);
     }
 
     private String getCorpusName() {
@@ -378,10 +267,6 @@ public class SearchActivity extends Activity {
 
     private QsbApplication getQsbApplication() {
         return QsbApplication.get(this);
-    }
-
-    protected boolean separateResults() {
-        return mSeparateResults;
     }
 
     private Config getConfig() {
@@ -404,14 +289,6 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getSuggestionsProvider();
     }
 
-    private CorpusViewFactory getCorpusViewFactory() {
-        return getQsbApplication().getCorpusViewFactory();
-    }
-
-    private VoiceSearch getVoiceSearch() {
-        return QsbApplication.get(this).getVoiceSearch();
-    }
-
     private Logger getLogger() {
         return getQsbApplication().getLogger();
     }
@@ -425,10 +302,7 @@ public class SearchActivity extends Activity {
     protected void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy()");
         getCorpora().unregisterDataSetObserver(mCorporaObserver);
-        mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
-        if (mResultsView != null) {
-            mResultsView.setAdapter(null);
-        }
+        mSearchActivityView.destroy();
         super.onDestroy();
         if (mDestroyListener != null) {
             mDestroyListener.onDestroyed();
@@ -446,10 +320,7 @@ public class SearchActivity extends Activity {
         }
         // Close all open suggestion cursors. The query will be redone in onResume()
         // if we come back to this activity.
-        mSuggestionsAdapter.setSuggestions(null);
-        if (mResultsAdapter != null) {
-            mResultsAdapter.setSuggestions(null);
-        }
+        mSearchActivityView.clearSuggestions();
         getQsbApplication().getShortcutRefresher().reset();
         dismissCorpusSelectionDialog();
         super.onStop();
@@ -467,7 +338,7 @@ public class SearchActivity extends Activity {
         super.onResume();
         updateSuggestionsBuffered();
         if (!isCorpusSelectionDialogShowing()) {
-            mQueryTextView.requestFocus();
+            mSearchActivityView.focusQueryTextView();
         }
         if (TRACE) Debug.stopMethodTracing();
     }
@@ -489,60 +360,11 @@ public class SearchActivity extends Activity {
     }
 
     protected String getQuery() {
-        CharSequence q = mQueryTextView.getText();
-        return q == null ? "" : q.toString();
+        return mSearchActivityView.getQuery();
     }
 
-    /**
-     * Sets the text in the query box. Does not update the suggestions.
-     */
-    private void setQuery(String query, boolean selectAll) {
-        mUpdateSuggestions = false;
-        mQueryTextView.setText(query);
-        mQueryTextView.setTextSelection(selectAll);
-        mUpdateSuggestions = true;
-    }
-
-    protected void updateUi(boolean queryEmpty) {
-        updateQueryTextView(queryEmpty);
-        updateSearchGoButton(queryEmpty);
-        updateVoiceSearchButton(queryEmpty);
-    }
-
-    private void updateQueryTextView(boolean queryEmpty) {
-        if (queryEmpty) {
-            if (isSearchCorpusWeb()) {
-                mQueryTextView.setBackgroundDrawable(mQueryTextEmptyBg);
-                mQueryTextView.setHint(null);
-            } else {
-                if (mQueryTextNotEmptyBg == null) {
-                    mQueryTextNotEmptyBg =
-                            getResources().getDrawable(R.drawable.textfield_search_empty);
-                }
-                mQueryTextView.setBackgroundDrawable(mQueryTextNotEmptyBg);
-                mQueryTextView.setHint(mCorpus.getHint());
-            }
-        } else {
-            mQueryTextView.setBackgroundResource(R.drawable.textfield_search);
-        }
-    }
-
-    private void updateSearchGoButton(boolean queryEmpty) {
-        if (queryEmpty) {
-            mSearchGoButton.setVisibility(View.GONE);
-        } else {
-            mSearchGoButton.setVisibility(View.VISIBLE);
-        }
-    }
-
-    protected void updateVoiceSearchButton(boolean queryEmpty) {
-        if (queryEmpty && getVoiceSearch().shouldShowVoiceSearch(mCorpus)) {
-            mVoiceSearchButton.setVisibility(View.VISIBLE);
-            mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
-        } else {
-            mVoiceSearchButton.setVisibility(View.GONE);
-            mQueryTextView.setPrivateImeOptions(null);
-        }
+    protected void setQuery(String query, boolean selectAll) {
+        mSearchActivityView.setQuery(query, selectAll);
     }
 
     protected void showCorpusSelectionDialog() {
@@ -620,33 +442,13 @@ public class SearchActivity extends Activity {
         SearchSettings.launchSettings(this);
     }
 
-    /**
-     * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
-     * and the selected corpus otherwise.
-     */
     protected Corpus getSearchCorpus() {
-        if (mCorpus != null) {
-            return mCorpus;
-        } else {
-            Corpus webCorpus = getCorpora().getWebCorpus();
-            if (webCorpus == null) {
-                Log.e(TAG, "No web corpus");
-            }
-            return webCorpus;
-        }
-    }
-
-    /**
-     * Checks if the corpus used for typed searches is the web corpus.
-     */
-    protected boolean isSearchCorpusWeb() {
-        Corpus corpus = getSearchCorpus();
-        return corpus != null && corpus.isWebCorpus();
+        return mSearchActivityView.getSearchCorpus();
     }
 
     @Deprecated
     protected SuggestionCursor getCurrentSuggestions() {
-        return mSuggestionsAdapter.getCurrentSuggestions();
+        return mSearchActivityView.getCurrentSuggestions();
     }
 
     protected SuggestionCursor getCurrentSuggestions(SuggestionsAdapter adapter, int position) {
@@ -663,12 +465,8 @@ public class SearchActivity extends Activity {
         return suggestions;
     }
 
-    private Suggestions getSuggestions() {
-        return mSuggestionsAdapter.getSuggestions();
-    }
-
     protected Set<Corpus> getCurrentIncludedCorpora() {
-        Suggestions suggestions = getSuggestions();
+        Suggestions suggestions = mSearchActivityView.getSuggestions();
         return suggestions == null  ? null : suggestions.getIncludedCorpora();
     }
 
@@ -685,7 +483,7 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected boolean launchSuggestion(SuggestionsAdapter adapter, int position) {
+    private boolean launchSuggestion(SuggestionsAdapter adapter, int position) {
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
         if (suggestions == null) return false;
 
@@ -722,23 +520,6 @@ public class SearchActivity extends Activity {
         getShortcutRepository().reportClick(suggestions, position);
     }
 
-    protected boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position) {
-        if (DBG) Log.d(TAG, "Long clicked on suggestion " + position);
-        return false;
-    }
-
-    protected boolean onSuggestionKeyDown(SuggestionsAdapter adapter,
-            int position, int keyCode, KeyEvent event) {
-        // Treat enter or search as a click
-        if (       keyCode == KeyEvent.KEYCODE_ENTER
-                || keyCode == KeyEvent.KEYCODE_SEARCH
-                || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-            return launchSuggestion(adapter, position);
-        }
-
-        return false;
-    }
-
     protected void refineSuggestion(SuggestionsAdapter adapter, int position) {
         if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
@@ -758,51 +539,12 @@ public class SearchActivity extends Activity {
         String queryWithSpace = query + ' ';
         setQuery(queryWithSpace, false);
         updateSuggestions(queryWithSpace);
-        mQueryTextView.requestFocus();
+        mSearchActivityView.focusQueryTextView();
     }
 
-    /**
-     * Hides the input method.
-     */
-    protected void considerHidingInputMethod() {
-        if (getConfig().isKeyboardDismissedOnScroll()) {
-            mQueryTextView.hideInputMethod();
-        }
-    }
-
-    protected void showInputMethodForQuery() {
-        mQueryTextView.showInputMethod();
-    }
-
-    protected void onSuggestionListFocusChange(SuggestionsView suggestions, boolean focused) {
-    }
-
-    protected void onQueryTextViewFocusChange(boolean focused) {
-    }
-
-    /**
-     * Hides the input method when the suggestions get focus.
-     */
-    private class SuggestListFocusListener implements OnFocusChangeListener {
-        public void onFocusChange(View v, boolean focused) {
-            if (DBG) Log.d(TAG, "Suggestions focus change, now: " + focused);
-            if (focused && v instanceof SuggestionsView) {
-                SuggestionsView view = (SuggestionsView) v;
-                considerHidingInputMethod();
-                onSuggestionListFocusChange(view, focused);
-            }
-        }
-    }
-
-    private class QueryTextViewFocusListener implements OnFocusChangeListener {
-        public void onFocusChange(View v, boolean focused) {
-            if (DBG) Log.d(TAG, "Query focus change, now: " + focused);
-            if (focused) {
-                // The query box got focus, show the input method
-                showInputMethodForQuery();
-            }
-            onQueryTextViewFocusChange(focused);
-        }
+    protected boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position) {
+        if (DBG) Log.d(TAG, "Long clicked on suggestion " + position);
+        return false;
     }
 
     private void updateSuggestionsBuffered() {
@@ -829,13 +571,11 @@ public class SearchActivity extends Activity {
             getCorpusRanker().getRankedCorpora(Consumers.createAsyncConsumer(mHandler, consumer));
         } else {
             List<Corpus> corpora = new ArrayList<Corpus>();
-            if (separateResults()) {
-                // In two-pane mode, we always need to query the web corpus.
-                Corpus webCorpus = getCorpora().getWebCorpus();
-                if (webCorpus != null && webCorpus != mCorpus) corpora.add(webCorpus);
-            }
-            // Query the selected corpus
-            corpora.add(mCorpus);
+            Corpus searchCorpus = getSearchCorpus();
+            // Query the selected corpus, and also the search corpus if it'
+            // different (= web corpus).
+            if (searchCorpus != null) corpora.add(searchCorpus);
+            if (mCorpus != searchCorpus) corpora.add(mCorpus);
             consumer.consume(corpora);
         }
     }
@@ -875,182 +615,25 @@ public class SearchActivity extends Activity {
         // Log start latency if this is the first suggestions update
         gotSuggestions(suggestions);
 
-        suggestions.acquire();
-        mSuggestionsAdapter.setSuggestions(suggestions);
-        if (mResultsAdapter != null) {
-            suggestions.acquire();
-            mResultsAdapter.setSuggestions(suggestions);
-        }
-    }
-
-    /**
-     * If the input method is in fullscreen mode, and the selector corpus
-     * is All or Web, use the web search suggestions as completions.
-     */
-    protected void updateInputMethodSuggestions() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (imm == null || !imm.isFullscreenMode()) return;
-        Suggestions suggestions = mSuggestionsAdapter.getSuggestions();
-        if (suggestions == null) return;
-        CompletionInfo[] completions = webSuggestionsToCompletions(suggestions);
-        if (DBG) Log.d(TAG, "displayCompletions(" + Arrays.toString(completions) + ")");
-        imm.displayCompletions(mQueryTextView, completions);
-    }
-
-    private CompletionInfo[] webSuggestionsToCompletions(Suggestions suggestions) {
-        // TODO: This should also include include web search shortcuts
-        CorpusResult cursor = suggestions.getWebResult();
-        if (cursor == null) return null;
-        int count = cursor.getCount();
-        ArrayList<CompletionInfo> completions = new ArrayList<CompletionInfo>(count);
-        boolean usingWebCorpus = isSearchCorpusWeb();
-        for (int i = 0; i < count; i++) {
-            cursor.moveTo(i);
-            if (!usingWebCorpus || cursor.isWebSearchSuggestion()) {
-                String text1 = cursor.getSuggestionText1();
-                completions.add(new CompletionInfo(i, i, text1));
-            }
-        }
-        return completions.toArray(new CompletionInfo[completions.size()]);
-    }
-
-    private boolean forwardKeyToQueryTextView(int keyCode, KeyEvent event) {
-        if (!event.isSystem() && !isDpadKey(keyCode)) {
-            if (DBG) Log.d(TAG, "Forwarding key to query box: " + event);
-            if (mQueryTextView.requestFocus()) {
-                return mQueryTextView.dispatchKeyEvent(event);
-            }
-        }
-        return false;
-    }
-
-    private boolean isDpadKey(int keyCode) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_UP:
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Filters the suggestions list when the search text changes.
-     */
-    private class SearchTextWatcher implements TextWatcher {
-        public void afterTextChanged(Editable s) {
-            boolean empty = s.length() == 0;
-            if (empty != mQueryWasEmpty) {
-                mQueryWasEmpty = empty;
-                updateUi(empty);
-            }
-            if (mUpdateSuggestions) {
-                updateSuggestionsBuffered();
-            }
-        }
-
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-    }
-
-    /**
-     * Handles non-text keys in the query text view.
-     */
-    private class QueryTextViewKeyListener implements View.OnKeyListener {
-        public boolean onKey(View view, int keyCode, KeyEvent event) {
-            // Handle IME search action key
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                // if no action was taken, consume the key event so that the keyboard
-                // remains on screen.
-                return !onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
-            }
-            return false;
-        }
-    }
-
-    /**
-     * Handles key events on the search and voice search buttons,
-     * by refocusing to EditText.
-     */
-    private class ButtonsKeyListener implements View.OnKeyListener {
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-            return forwardKeyToQueryTextView(keyCode, event);
-        }
-    }
-
-    /**
-     * Handles key events on the suggestions list view.
-     */
-    private class SuggestionsViewKeyListener implements View.OnKeyListener {
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && v instanceof SuggestionsView) {
-                SuggestionsView view = ((SuggestionsView) v);
-                int position = view.getSelectedPosition();
-                if (onSuggestionKeyDown(view.getAdapter(), position, keyCode, event)) {
-                    return true;
-                }
-            }
-            return forwardKeyToQueryTextView(keyCode, event);
-        }
-    }
-
-    private class InputMethodCloser implements SuggestionsView.OnScrollListener {
-
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-                int totalItemCount) {
-        }
-
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-            considerHidingInputMethod();
-        }
+        mSearchActivityView.setSuggestions(suggestions);
     }
 
     private class ClickHandler implements SuggestionClickListener {
-        private final SuggestionsAdapter mAdapter;
 
-        public ClickHandler(SuggestionsAdapter suggestionsAdapter) {
-            mAdapter = suggestionsAdapter;
+        public void onSuggestionQuickContactClicked(SuggestionsAdapter adapter, int position) {
+            clickedQuickContact(adapter, position);
         }
 
-        public void onSuggestionQuickContactClicked(int position) {
-            clickedQuickContact(mAdapter, position);
+        public void onSuggestionClicked(SuggestionsAdapter adapter, int position) {
+            launchSuggestion(adapter, position);
         }
 
-        public void onSuggestionClicked(int position) {
-            launchSuggestion(mAdapter, position);
+        public boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position) {
+            return SearchActivity.this.onSuggestionLongClicked(adapter, position);
         }
 
-        public boolean onSuggestionLongClicked(int position) {
-            return SearchActivity.this.onSuggestionLongClicked(mAdapter, position);
-        }
-
-        public void onSuggestionQueryRefineClicked(int position) {
-            refineSuggestion(mAdapter, position);
-        }
-    }
-
-    /**
-     * Listens for clicks on the source selector.
-     */
-    private class SearchGoButtonClickListener implements View.OnClickListener {
-        public void onClick(View view) {
-            onSearchClicked(Logger.SEARCH_METHOD_BUTTON);
-        }
-    }
-
-    /**
-     * Listens for clicks on the search button.
-     */
-    private class CorpusIndicatorClickListener implements View.OnClickListener {
-        public void onClick(View view) {
-            showCorpusSelectionDialog();
+        public void onSuggestionQueryRefineClicked(SuggestionsAdapter adapter, int position) {
+            refineSuggestion(adapter, position);
         }
     }
 
@@ -1066,26 +649,8 @@ public class SearchActivity extends Activity {
         public void onCorpusSelected(String corpusName) {
             setCorpus(corpusName);
             updateSuggestions(getQuery());
-            mQueryTextView.requestFocus();
-            showInputMethodForQuery();
-        }
-    }
-
-    /**
-     * Listens for clicks on the voice search button.
-     */
-    private class VoiceSearchButtonClickListener implements View.OnClickListener {
-        public void onClick(View view) {
-            onVoiceSearchClicked();
-        }
-    }
-
-    /**
-     * Listens for clicks on the settings button.
-     */
-    private class SettingsButtonClickListener implements View.OnClickListener {
-        public void onClick(View view) {
-            onSettingsClicked();
+            mSearchActivityView.focusQueryTextView();
+            mSearchActivityView.showInputMethodForQuery();
         }
     }
 
@@ -1094,13 +659,6 @@ public class SearchActivity extends Activity {
         public void onChanged() {
             setCorpus(getCorpusName());
             updateSuggestions(getQuery());
-        }
-    }
-
-    private class SuggestionsObserver extends DataSetObserver {
-        @Override
-        public void onChanged() {
-            updateInputMethodSuggestions();
         }
     }
 

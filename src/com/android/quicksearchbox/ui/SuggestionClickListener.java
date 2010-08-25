@@ -24,28 +24,32 @@ public interface SuggestionClickListener {
     /**
      * Called when a suggestion is clicked.
      *
+     * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the clicked suggestion.
      */
-    void onSuggestionClicked(int position);
+    void onSuggestionClicked(SuggestionsAdapter adapter, int position);
 
     /**
      * Called when a quick contact badge in a suggestion is clicked.
      *
+     * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the suggestion.
      */
-    void onSuggestionQuickContactClicked(int position);
+    void onSuggestionQuickContactClicked(SuggestionsAdapter adapter, int position);
 
     /**
      * Called when a suggestion is long clicked.
      *
+     * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the long clicked suggestion.
      */
-    boolean onSuggestionLongClicked(int position);
+    boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position);
 
     /**
      * Called when the "query refine" button of a suggestion is clicked.
      *
+     * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the suggestion.
      */
-    void onSuggestionQueryRefineClicked(int position);
+    void onSuggestionQueryRefineClicked(SuggestionsAdapter adapter, int position);
 }

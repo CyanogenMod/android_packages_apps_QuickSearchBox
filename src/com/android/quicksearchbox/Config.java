@@ -294,13 +294,4 @@ public class Config {
         return VOICE_SEARCH_HINT_CHANGE_PERIOD;
     }
 
-    public boolean isKeyboardDismissedOnScroll() {
-        try {
-            // Get the keyboard dismiss policy
-            return mContext.getResources().getBoolean(R.bool.dismiss_keyboard_on_scroll);
-        } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load dismiss_keyboard_on_scroll", ex);
-            return DISMISS_KEYBOARD_ON_SCROLL;
-        }
-    }
 }

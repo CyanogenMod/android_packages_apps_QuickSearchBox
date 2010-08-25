@@ -50,15 +50,15 @@ public class ContactSuggestionView extends DefaultSuggestionView {
     }
 
     @Override
-    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionClickListener onClick) {
-        super.bindAsSuggestion(suggestion, onClick);
+    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionsAdapter adapter) {
+        super.bindAsSuggestion(suggestion, adapter);
         mQuickContact.assignContactUri(Uri.parse(suggestion.getSuggestionIntentDataString()));
         mQuickContact.setExtraOnClickListener(new ContactBadgeClickListener());
     }
 
     private class ContactBadgeClickListener implements View.OnClickListener {
         public void onClick(View v) {
-            fireOnSuggestionQuickContactClicked();
+            onSuggestionQuickContactClicked();
         }
     }
 }
