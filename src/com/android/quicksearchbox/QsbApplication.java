@@ -21,10 +21,8 @@ import com.android.quicksearchbox.google.GoogleSuggestClient;
 import com.android.quicksearchbox.ui.CorporaAdapter;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
-import com.android.quicksearchbox.ui.DelayingSuggestionsAdapter;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
-import com.android.quicksearchbox.ui.SuggestionsAdapter;
 import com.android.quicksearchbox.util.Factory;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
@@ -354,16 +352,6 @@ public class QsbApplication {
 
     protected CorpusViewFactory createCorpusViewFactory() {
         return new CorpusViewInflater(getContext());
-    }
-
-    /**
-     * Creates a suggestions adapter that shows results.
-     * May only be called from the main thread.
-     */
-    public SuggestionsAdapter createSuggestionsAdapter() {
-        checkThread();
-        return new DelayingSuggestionsAdapter(getSuggestionViewFactory(),
-                getConfig().getMaxPromotedSuggestions());
     }
 
     public Promoter createBlendingPromoter() {

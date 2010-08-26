@@ -30,7 +30,7 @@ public class QueryTextView extends EditText {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.QueryTextView";
 
-    private SuggestionClickListener mSuggestionClickListener;
+    private CommitCompletionListener mCommitCompletionListener;
 
     public QueryTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -65,8 +65,8 @@ public class QueryTextView extends EditText {
         setTextSelection(false);
     }
 
-    public void setSuggestionClickListener(SuggestionClickListener listener) {
-        mSuggestionClickListener = listener;
+    public void setCommitCompletionListener(CommitCompletionListener listener) {
+        mCommitCompletionListener = listener;
     }
 
     private InputMethodManager getInputMethodManager() {
@@ -92,9 +92,13 @@ public class QueryTextView extends EditText {
         if (DBG) Log.d(TAG, "onCommitCompletion(" + completion + ")");
         hideInputMethod();
         replaceText(completion.getText());
-        if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionClicked(completion.getPosition());
+        if (mCommitCompletionListener != null) {
+            mCommitCompletionListener.onCommitCompletion(completion.getPosition());
         }
+    }
+
+    public interface CommitCompletionListener {
+        void onCommitCompletion(int position);
     }
 
 }

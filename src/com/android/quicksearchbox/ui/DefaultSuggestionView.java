@@ -36,7 +36,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -56,7 +55,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     private final SuggestionFormatter mSuggestionFormatter;
     private boolean mRefineable;
     private int mPosition;
-    private SuggestionClickListener mClickListener;
+    private SuggestionsAdapter mAdapter;
     private KeyListener mKeyListener;
 
     public DefaultSuggestionView(Context context, AttributeSet attrs, int defStyle) {
@@ -87,11 +86,11 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         setOnKeyListener(mKeyListener);
     }
 
-    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionClickListener onClick) {
+    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionsAdapter adapter) {
         setOnClickListener(new ClickListener());
         setOnLongClickListener(new LongClickListener());
         mPosition = suggestion.getPosition();
-        mClickListener = onClick;
+        mAdapter = adapter;
 
         CharSequence text1 = formatText(suggestion.getSuggestionText1(), suggestion, true);
         CharSequence text2 = suggestion.getSuggestionText2Url();
@@ -135,10 +134,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         if (refinable) {
             mIcon2.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    Log.d(TAG, "Clicked query refine");
-                    SuggestionsAdapter adapter =
-                            (SuggestionsAdapter) ((ListView) getParent()).getAdapter();
-                    adapter.onIcon2Clicked(mPosition);
+                    onSuggestionQueryRefineClicked();
                 }
             });
             mIcon2.setFocusable(true);
@@ -256,28 +252,40 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
-    protected void fireOnSuggestionQuickContactClicked() {
-        if (mClickListener != null) {
-            mClickListener.onSuggestionQuickContactClicked(mPosition);
+    protected void onSuggestionClicked() {
+        if (mAdapter != null) {
+            mAdapter.onSuggestionClicked(mPosition);
+        }
+    }
+
+    protected void onSuggestionQuickContactClicked() {
+        if (mAdapter != null) {
+            mAdapter.onSuggestionQuickContactClicked(mPosition);
+        }
+    }
+
+    protected boolean onSuggestionLongClicked() {
+        if (mAdapter != null) {
+            return mAdapter.onSuggestionLongClicked(mPosition);
+        }
+        return false;
+    }
+
+    protected void onSuggestionQueryRefineClicked() {
+        if (mAdapter != null) {
+            mAdapter.onSuggestionQueryRefineClicked(mPosition);
         }
     }
 
     private class ClickListener implements OnClickListener {
         public void onClick(View v) {
-            if (DBG) Log.d(TAG, "onItemClick(" + mPosition + ")");
-            if (mClickListener != null) {
-                mClickListener.onSuggestionClicked(mPosition);
-            }
+            onSuggestionClicked();
         }
     }
 
     private class LongClickListener implements OnLongClickListener {
         public boolean onLongClick(View v) {
-            if (DBG) Log.d(TAG, "onItemLongClick(" + mPosition + ")");
-            if (mClickListener != null) {
-                return mClickListener.onSuggestionLongClicked(mPosition);
-            }
-            return false;
+            return onSuggestionLongClicked();
         }
     }
 
