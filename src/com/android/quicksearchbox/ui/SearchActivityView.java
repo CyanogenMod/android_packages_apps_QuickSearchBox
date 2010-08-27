@@ -135,6 +135,14 @@ public class SearchActivityView extends RelativeLayout {
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 
+    public void registerSuggestionsObserver(DataSetObserver observer) {
+        mSuggestionsAdapter.registerDataSetObserver(observer);
+    }
+
+    public void unregisterSuggestionsObserver(DataSetObserver observer) {
+        mSuggestionsAdapter.unregisterDataSetObserver(observer);
+    }
+
     // TODO: Get rid of this. To make it more easily testable,
     // the SearchActivityView should not depend on QsbApplication.
     protected QsbApplication getQsbApplication() {

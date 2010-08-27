@@ -104,7 +104,7 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
-        setContentView();
+        mSearchActivityView = setupContentView();
 
         mSearchActivityView.setMaxPromoted(getConfig().getMaxPromotedSuggestions());
 
@@ -154,9 +154,13 @@ public class SearchActivity extends Activity {
         getCorpora().registerDataSetObserver(mCorporaObserver);
     }
 
-    protected void setContentView() {
+    protected SearchActivityView setupContentView() {
         setContentView(R.layout.search_activity);
-        mSearchActivityView = (SearchActivityView) findViewById(R.id.search_activity_view);
+        return (SearchActivityView) findViewById(R.id.search_activity_view);
+    }
+
+    protected SearchActivityView getSearchActivityView() {
+        return mSearchActivityView;
     }
 
     private void startMethodTracing() {
@@ -446,7 +450,6 @@ public class SearchActivity extends Activity {
         return mSearchActivityView.getSearchCorpus();
     }
 
-    @Deprecated
     protected SuggestionCursor getCurrentSuggestions() {
         return mSearchActivityView.getCurrentSuggestions();
     }
@@ -615,6 +618,10 @@ public class SearchActivity extends Activity {
         // Log start latency if this is the first suggestions update
         gotSuggestions(suggestions);
 
+        showSuggestions(suggestions);
+    }
+
+    protected void showSuggestions(Suggestions suggestions) {
         mSearchActivityView.setSuggestions(suggestions);
     }
 
