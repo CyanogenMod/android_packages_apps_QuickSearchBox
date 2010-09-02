@@ -22,6 +22,7 @@ import com.android.quicksearchbox.CorpusResult;
 import com.android.quicksearchbox.Logger;
 import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SearchActivity;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.Suggestions;
 import com.android.quicksearchbox.VoiceSearch;
@@ -46,33 +47,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Finishes the containing activity on BACK, even if input method is showing.
+ *
  */
-public class SearchActivityView extends RelativeLayout {
-
-    private static final boolean DBG = false;
-    private static final String TAG = "QSB.SearchActivityView";
+public abstract class SearchActivityView extends RelativeLayout {
+    protected static final boolean DBG = false;
+    protected static final String TAG = "QSB.SearchActivityView";
 
     // The string used for privateImeOptions to identify to the IME that it should not show
     // a microphone button since one already exists in the search dialog.
     // TODO: This should move to android-common or something.
     private static final String IME_OPTION_NO_MICROPHONE = "nm";
 
-    private Corpus mCorpus;
-
-    private QueryTextView mQueryTextView;
+    protected QueryTextView mQueryTextView;
     // True if the query was empty on the previous call to updateQuery()
-    private boolean mQueryWasEmpty = true;
-    private Drawable mQueryTextEmptyBg;
-    private Drawable mQueryTextNotEmptyBg;
+    protected boolean mQueryWasEmpty = true;
+    protected Drawable mQueryTextEmptyBg;
+    protected Drawable mQueryTextNotEmptyBg;
 
-    private SuggestionsView mSuggestionsView;
+    protected SuggestionsView mSuggestionsView;
 
-    private SuggestionsAdapter mSuggestionsAdapter;
+    protected SuggestionsAdapter mSuggestionsAdapter;
 
-    private ImageButton mSearchGoButton;
-    private ImageButton mVoiceSearchButton;
-    private ImageButton mCorpusIndicator;
+    protected ImageButton mSearchGoButton;
+    protected ImageButton mVoiceSearchButton;
+
+    protected ButtonsKeyListener mButtonsKeyListener;
 
     private boolean mUpdateSuggestions;
 
@@ -107,7 +106,6 @@ public class SearchActivityView extends RelativeLayout {
 
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
-        mCorpusIndicator = (ImageButton) findViewById(R.id.corpus_indicator);
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
@@ -116,15 +114,16 @@ public class SearchActivityView extends RelativeLayout {
 
         mSearchGoButton.setOnClickListener(new SearchGoButtonClickListener());
 
-        ButtonsKeyListener buttonsKeyListener = new ButtonsKeyListener();
-        mSearchGoButton.setOnKeyListener(buttonsKeyListener);
-        mVoiceSearchButton.setOnKeyListener(buttonsKeyListener);
-        if (mCorpusIndicator != null) {
-            mCorpusIndicator.setOnKeyListener(buttonsKeyListener);
-        }
+        mButtonsKeyListener = new ButtonsKeyListener();
+        mSearchGoButton.setOnKeyListener(mButtonsKeyListener);
+        mVoiceSearchButton.setOnKeyListener(mButtonsKeyListener);
 
         mUpdateSuggestions = true;
     }
+
+    public abstract void onResume();
+
+    public abstract void onStop();
 
     public void start() {
         mSuggestionsAdapter.registerDataSetObserver(new SuggestionsObserver());
@@ -149,7 +148,7 @@ public class SearchActivityView extends RelativeLayout {
         return QsbApplication.get(getContext());
     }
 
-    private CorpusViewFactory getCorpusViewFactory() {
+    protected CorpusViewFactory getCorpusViewFactory() {
         return getQsbApplication().getCorpusViewFactory();
     }
 
@@ -162,47 +161,36 @@ public class SearchActivityView extends RelativeLayout {
         return new DelayingSuggestionsAdapter(getQsbApplication().getSuggestionViewFactory());
     }
 
-    private Corpora getCorpora() {
+
+    protected Corpora getCorpora() {
         return getQsbApplication().getCorpora();
     }
 
-    public void setCorpus(Corpus corpus) {
-        mCorpus = corpus;
-        setSuggestionsCorpus(corpus);
+    public abstract void setCorpus(Corpus corpus);
 
-        if (mCorpusIndicator != null) {
-            Drawable sourceIcon;
-            if (corpus == null) {
-                sourceIcon = getCorpusViewFactory().getGlobalSearchIcon();
-            } else {
-                sourceIcon = corpus.getCorpusIcon();
-            }
-            mCorpusIndicator.setImageDrawable(sourceIcon);
-        }
+    public abstract Corpus getCorpus();
 
-        updateUi(getQuery().length() == 0);
-    }
-
-    protected void setSuggestionsCorpus(Corpus corpus) {
-        mSuggestionsAdapter.setCorpus(corpus);
+    protected Corpus getCorpus(String sourceName) {
+        if (sourceName == null) return null;
+        Corpus corpus = getCorpora().getCorpus(sourceName);
         if (corpus == null) {
-            mSuggestionsAdapter.setPromoter(getQsbApplication().createBlendingPromoter());
-        } else {
-            mSuggestionsAdapter.setPromoter(getQsbApplication().createSingleCorpusPromoter());
+            Log.w(TAG, "Unknown corpus " + sourceName);
+            return null;
         }
+        return corpus;
     }
 
-    /**
-     * Gets the corpus to use for any searches. This is the web corpus in "All" mode,
-     * and the selected corpus otherwise.
-     */
-    public Corpus getSearchCorpus() {
-        if (mCorpus == null) {
-            return getWebCorpus();
-        } else {
-            return mCorpus;
-        }
+    public void setCorpus(String corpusName) {
+        if (DBG) Log.d(TAG, "setCorpus(" + corpusName + ")");
+        Corpus corpus = getCorpus(corpusName);
+        setCorpus(corpus);
     }
+
+    public String getCorpusName() {
+        return getCorpus() == null ? null : getCorpus().getName();
+    }
+
+    public abstract Corpus getSearchCorpus();
 
     public Corpus getWebCorpus() {
         Corpus webCorpus = getCorpora().getWebCorpus();
@@ -224,14 +212,9 @@ public class SearchActivityView extends RelativeLayout {
         mSearchClickListener = listener;
     }
 
-    public void setSettingsButtonClickListener(View.OnClickListener listener) {
-    }
+    public abstract void showCorpusSelectionDialog();
 
-    public void setCorpusIndicatorClickListener(View.OnClickListener listener) {
-        if (mCorpusIndicator != null) {
-            mCorpusIndicator.setOnClickListener(listener);
-        }
-    }
+    public abstract void setSettingsButtonClickListener(View.OnClickListener listener);
 
     public void setVoiceSearchButtonClickListener(View.OnClickListener listener) {
         if (mVoiceSearchButton != null) {
@@ -285,10 +268,10 @@ public class SearchActivityView extends RelativeLayout {
         mUpdateSuggestions = true;
     }
 
-    private Activity getActivity() {
+    protected SearchActivity getActivity() {
         Context context = getContext();
-        if (context instanceof Activity) {
-            return (Activity) context;
+        if (context instanceof SearchActivity) {
+            return (SearchActivity) context;
         } else {
             return null;
         }
@@ -315,7 +298,8 @@ public class SearchActivityView extends RelativeLayout {
                             getResources().getDrawable(R.drawable.textfield_search_empty);
                 }
                 mQueryTextView.setBackgroundDrawable(mQueryTextNotEmptyBg);
-                mQueryTextView.setHint(mCorpus.getHint());
+                Corpus corpus = getCorpus();
+                mQueryTextView.setHint(corpus == null ? "" : corpus.getHint());
             }
         } else {
             mQueryTextView.setBackgroundResource(R.drawable.textfield_search);
@@ -331,7 +315,7 @@ public class SearchActivityView extends RelativeLayout {
     }
 
     protected void updateVoiceSearchButton(boolean queryEmpty) {
-        if (queryEmpty && getVoiceSearch().shouldShowVoiceSearch(mCorpus)) {
+        if (queryEmpty && getVoiceSearch().shouldShowVoiceSearch(getCorpus())) {
             mVoiceSearchButton.setVisibility(View.VISIBLE);
             mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
         } else {
@@ -351,9 +335,7 @@ public class SearchActivityView extends RelativeLayout {
         }
     }
 
-    protected void considerHidingInputMethod() {
-        mQueryTextView.hideInputMethod();
-    }
+    protected abstract void considerHidingInputMethod();
 
     public void showInputMethodForQuery() {
         mQueryTextView.showInputMethod();
@@ -429,8 +411,8 @@ public class SearchActivityView extends RelativeLayout {
         if (       keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == KeyEvent.KEYCODE_SEARCH
                 || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-            if (adapter != null && adapter instanceof SuggestionsAdapter) {
-                SuggestionsAdapter suggestionsAdapter = (SuggestionsAdapter) adapter;
+            if (adapter != null) {
+                SuggestionsAdapter suggestionsAdapter = adapter;
                 suggestionsAdapter.onSuggestionClicked(position);
                 return true;
             } else {

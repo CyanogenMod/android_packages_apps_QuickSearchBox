@@ -25,7 +25,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
- * Finishes the containing activity on BACK, even if input method is showing.
+ * Two-pane variant for the search activity view.
  */
 public class SearchActivityViewTwoPane extends SearchActivityView {
 
@@ -59,6 +59,14 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     }
 
     @Override
+    public void onResume() {
+    }
+
+    @Override
+    public void onStop() {
+    }
+
+    @Override
     public void start() {
         super.start();
         mResultsView.setAdapter(mResultsAdapter);
@@ -73,6 +81,11 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     protected void considerHidingInputMethod() {
         // Don't hide keyboard when interacting with suggestions list
+    }
+
+    @Override
+    public void showCorpusSelectionDialog() {
+        // not used
     }
 
     @Override
@@ -106,19 +119,27 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     }
 
     @Override
-    public void setSuggestionsCorpus(Corpus corpus) {
+    public void setCorpus(Corpus corpus) {
         getSuggestionsAdapter().setPromoter(getQsbApplication().createWebPromoter());
+
         mResultsAdapter.setCorpus(corpus);
         if (corpus == null) {
             mResultsAdapter.setPromoter(getQsbApplication().createResultsPromoter());
         } else {
             mResultsAdapter.setPromoter(getQsbApplication().createSingleCorpusPromoter());
         }
+
+        updateUi(getQuery().length() == 0);
     }
 
     @Override
     public Corpus getSearchCorpus() {
         return getWebCorpus();
+    }
+
+    @Override
+    public Corpus getCorpus() {
+        return null;
     }
 
 }

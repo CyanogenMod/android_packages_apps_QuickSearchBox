@@ -14,46 +14,39 @@
      limitations under the License.
 -->
 
-<com.android.quicksearchbox.ui.SearchActivityViewSinglePane
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/search_activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFFFF"
->
+    >
 
-    <view
-        class="com.android.quicksearchbox.ui.SuggestionsView"
-        android:id="@+id/suggestions"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/search_edit_frame"
-        android:layout_alignParentBottom="true"
-        >
-    </view>
-
-    <!-- The search plate is after the suggestions, to give it a higher
-         z-index. -->
     <LinearLayout
-        android:id="@+id/search_edit_frame"
+        android:id="@+id/search_plate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="-10dip"
-        android:paddingRight="4dip"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:paddingRight="14dip"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@drawable/search_plate_global"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        >
+        android:background="@drawable/search_floater" >
 
-        <include layout="@layout/corpus_indicator" />
+        <!-- This has to have the same ID as the corpus indicator so that the code
+        which configures the widget remote view still works properly.
+        TODO: can this be improved? -->
+        <ImageView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/corpus_indicator"
+            android:layout_width="48dip"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:focusable="false"
+            android:clickable="true"
+            android:src="@drawable/search_app_icon"
+            />
 
-        <com.android.quicksearchbox.ui.QueryTextView
-            android:id="@+id/search_src_text"
+        <TextView
+            android:id="@+id/search_widget_text"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
@@ -66,34 +59,37 @@
             android:gravity="center_vertical|left"
             android:singleLine="true"
             android:ellipsize="end"
-            android:inputType="text|textAutoComplete"
+            android:editable="false"
+            android:focusable="true"
+            android:inputType="none"
             android:background="@drawable/textfield_search_empty_google"
             android:textSize="18sp"
             android:textStyle="normal"
             android:textColor="@android:color/primary_text_light"
             android:textColorHint="@color/search_hint"
-            android:imeOptions="actionGo"
         />
 
-        <ImageButton 
-            android:id="@+id/search_go_btn"
-            android:background="@drawable/btn_search_dialog"
-            android:src="@drawable/ic_btn_search"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+        <include
+            android:id="@+id/voice_search_hint_container"
+            layout="@layout/voice_search_hint"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:layout_marginLeft="6dip"
             android:layout_marginTop="6dip"
             android:layout_marginBottom="6dip"
-            android:visibility="gone"
+            android:layout_marginRight="-4dip"
         />
 
         <ImageButton
-            android:id="@+id/search_voice_btn"
+            android:id="@+id/search_widget_voice_btn"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="@drawable/btn_search_dialog_voice"
             android:src="@drawable/ic_btn_speak_now"
             android:layout_marginRight="-4dip"
         />
+
     </LinearLayout>
 
-</com.android.quicksearchbox.ui.SearchActivityViewSinglePane>
+</RelativeLayout>

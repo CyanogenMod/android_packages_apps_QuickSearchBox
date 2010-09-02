@@ -74,11 +74,8 @@ public class SearchActivity extends Activity {
 
     private SearchActivityView mSearchActivityView;
 
-    private CorpusSelectionDialog mCorpusSelectionDialog;
-
     private CorporaObserver mCorporaObserver;
 
-    private Corpus mCorpus;
     private Bundle mAppSearchData;
 
     private final Handler mHandler = new Handler();
@@ -125,12 +122,6 @@ public class SearchActivity extends Activity {
         mSearchActivityView.setSettingsButtonClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 onSettingsClicked();
-            }
-        });
-
-        mSearchActivityView.setCorpusIndicatorClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                showCorpusSelectionDialog();
             }
         });
 
@@ -213,7 +204,7 @@ public class SearchActivity extends Activity {
         mAppSearchData = appSearchData;
 
         if (startedIntoCorpusSelectionDialog()) {
-            showCorpusSelectionDialog();
+            mSearchActivityView.showCorpusSelectionDialog();
         }
     }
 
@@ -225,7 +216,7 @@ public class SearchActivity extends Activity {
      * Removes corpus selector intent action, so that BACK works normally after
      * dismissing and reopening the corpus selector.
      */
-    private void clearStartedIntoCorpusSelectionDialog() {
+    public void clearStartedIntoCorpusSelectionDialog() {
         Intent oldIntent = getIntent();
         if (SearchActivity.INTENT_ACTION_QSB_AND_SELECT_CORPUS.equals(oldIntent.getAction())) {
             Intent newIntent = new Intent(oldIntent);
@@ -248,25 +239,16 @@ public class SearchActivity extends Activity {
         return uri.getAuthority();
     }
 
-    private Corpus getCorpus(String sourceName) {
-        if (sourceName == null) return null;
-        Corpus corpus = getCorpora().getCorpus(sourceName);
-        if (corpus == null) {
-            Log.w(TAG, "Unknown corpus " + sourceName);
-            return null;
-        }
-        return corpus;
-    }
-
-    private void setCorpus(String corpusName) {
-        if (DBG) Log.d(TAG, "setCorpus(" + corpusName + ")");
-        mCorpus = getCorpus(corpusName);
-
-        mSearchActivityView.setCorpus(mCorpus);
+    private Corpus getCorpus() {
+        return mSearchActivityView.getCorpus();
     }
 
     private String getCorpusName() {
-        return mCorpus == null ? null : mCorpus.getName();
+        return mSearchActivityView.getCorpusName();
+    }
+
+    private void setCorpus(String name) {
+        mSearchActivityView.setCorpus(name);
     }
 
     private QsbApplication getQsbApplication() {
@@ -326,7 +308,7 @@ public class SearchActivity extends Activity {
         // if we come back to this activity.
         mSearchActivityView.clearSuggestions();
         getQsbApplication().getShortcutRefresher().reset();
-        dismissCorpusSelectionDialog();
+        mSearchActivityView.onStop();
         super.onStop();
     }
 
@@ -341,9 +323,7 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onResume()");
         super.onResume();
         updateSuggestionsBuffered();
-        if (!isCorpusSelectionDialogShowing()) {
-            mSearchActivityView.focusQueryTextView();
-        }
+        mSearchActivityView.onResume();
         if (TRACE) Debug.stopMethodTracing();
     }
 
@@ -371,28 +351,15 @@ public class SearchActivity extends Activity {
         mSearchActivityView.setQuery(query, selectAll);
     }
 
-    protected void showCorpusSelectionDialog() {
-        if (mCorpusSelectionDialog == null) {
-            mCorpusSelectionDialog = createCorpusSelectionDialog();
-            mCorpusSelectionDialog.setOwnerActivity(this);
-            mCorpusSelectionDialog.setOnDismissListener(new CorpusSelectorDismissListener());
-            mCorpusSelectionDialog.setOnCorpusSelectedListener(new CorpusSelectionListener());
-        }
-        mCorpusSelectionDialog.show(mCorpus);
+    public CorpusSelectionDialog getCorpusSelectionDialog() {
+        CorpusSelectionDialog dialog = createCorpusSelectionDialog();
+        dialog.setOwnerActivity(this);
+        dialog.setOnDismissListener(new CorpusSelectorDismissListener());
+        return dialog;
     }
 
     protected CorpusSelectionDialog createCorpusSelectionDialog() {
         return new CorpusSelectionDialog(this);
-    }
-
-    protected boolean isCorpusSelectionDialogShowing() {
-        return mCorpusSelectionDialog != null && mCorpusSelectionDialog.isShowing();
-    }
-
-    protected void dismissCorpusSelectionDialog() {
-        if (mCorpusSelectionDialog != null) {
-            mCorpusSelectionDialog.dismiss();
-        }
     }
 
     /**
@@ -411,7 +378,7 @@ public class SearchActivity extends Activity {
         mTookAction = true;
 
         // Log search start
-        getLogger().logSearch(mCorpus, method, query.length());
+        getLogger().logSearch(getCorpus(), method, query.length());
 
         // Create shortcut
         SuggestionData searchShortcut = searchCorpus.createSearchShortcut(query);
@@ -561,14 +528,15 @@ public class SearchActivity extends Activity {
             mStarting = false;
             String source = getIntent().getStringExtra(Search.SOURCE);
             int latency = mStartLatencyTracker.getLatency();
-            getLogger().logStart(latency, source, mCorpus, 
+            getLogger().logStart(latency, source, getCorpus(),
                     suggestions == null ? null : suggestions.getExpectedCorpora());
             getQsbApplication().onStartupComplete();
         }
     }
 
     private void getCorporaToQuery(Consumer<List<Corpus>> consumer) {
-        if (mCorpus == null) {
+        Corpus corpus = getCorpus();
+        if (corpus == null) {
             // No corpus selected, use all enabled corpora
             // TODO: This should be done asynchronously, since it can be expensive
             getCorpusRanker().getRankedCorpora(Consumers.createAsyncConsumer(mHandler, consumer));
@@ -578,7 +546,7 @@ public class SearchActivity extends Activity {
             // Query the selected corpus, and also the search corpus if it'
             // different (= web corpus).
             if (searchCorpus != null) corpora.add(searchCorpus);
-            if (mCorpus != searchCorpus) corpora.add(mCorpus);
+            if (corpus != searchCorpus) corpora.add(corpus);
             consumer.consume(corpora);
         }
     }
@@ -597,9 +565,9 @@ public class SearchActivity extends Activity {
         shortcutRepo.getShortcutsForQuery(query, corporaToQuery, consumer);
     }
 
-    protected void updateSuggestions(String untrimmedQuery) {
+    public void updateSuggestions(String untrimmedQuery) {
         final String query = CharMatcher.WHITESPACE.trimLeadingFrom(untrimmedQuery);
-        if (DBG) Log.d(TAG, "getSuggestions(\""+query+"\","+mCorpus + ")");
+        if (DBG) Log.d(TAG, "getSuggestions(\"" + query+"\"," + getCorpus() + ")");
         getQsbApplication().getSourceTaskExecutor().cancelPendingTasks();
         getCorporaToQuery(new Consumer<List<Corpus>>(){
             @Override
@@ -648,16 +616,6 @@ public class SearchActivity extends Activity {
         public void onDismiss(DialogInterface dialog) {
             if (DBG) Log.d(TAG, "Corpus selector dismissed");
             clearStartedIntoCorpusSelectionDialog();
-        }
-    }
-
-    private class CorpusSelectionListener
-            implements CorpusSelectionDialog.OnCorpusSelectedListener {
-        public void onCorpusSelected(String corpusName) {
-            setCorpus(corpusName);
-            updateSuggestions(getQuery());
-            mSearchActivityView.focusQueryTextView();
-            mSearchActivityView.showInputMethodForQuery();
         }
     }
 

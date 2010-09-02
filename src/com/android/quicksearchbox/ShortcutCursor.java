@@ -27,7 +27,7 @@ import java.util.HashSet;
  * A SuggestionCursor that allows shortcuts to be updated by overlaying
  * with results from another cursor.
  */
-class ShortcutCursor extends ListSuggestionCursor {
+public class ShortcutCursor extends ListSuggestionCursor {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.ShortcutCursor";
