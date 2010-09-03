@@ -389,9 +389,13 @@ public class SearchActivity extends Activity {
         }
 
         // Start search
+        startSearch(searchCorpus, query);
+        return true;
+    }
+
+    protected void startSearch(Corpus searchCorpus, String query) {
         Intent intent = searchCorpus.createSearchIntent(query, mAppSearchData);
         launchIntent(intent);
-        return true;
     }
 
     protected void onVoiceSearchClicked() {
@@ -468,11 +472,15 @@ public class SearchActivity extends Activity {
         getShortcutRepository().reportClick(suggestions, position);
 
         // Launch intent
+        launchSuggestion(suggestions, position);
+
+        return true;
+    }
+
+    protected void launchSuggestion(SuggestionCursor suggestions, int position) {
         suggestions.moveTo(position);
         Intent intent = SuggestionUtils.getSuggestionIntent(suggestions, mAppSearchData);
         launchIntent(intent);
-
-        return true;
     }
 
     protected void clickedQuickContact(SuggestionsAdapter adapter, int position) {
