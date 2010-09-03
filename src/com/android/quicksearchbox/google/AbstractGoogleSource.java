@@ -48,6 +48,10 @@ public abstract class AbstractGoogleSource extends AbstractSource implements Goo
 
     public abstract ComponentName getIntentComponent();
 
+    public String getSuggestUri() {
+        return null;
+    }
+
     public abstract SuggestionCursor refreshShortcut(String shortcutId, String extraData);
 
     public abstract boolean isLocationAware();

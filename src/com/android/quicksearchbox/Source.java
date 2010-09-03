@@ -34,6 +34,11 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
     ComponentName getIntentComponent();
 
     /**
+     * Gets the suggestion URI for getting suggestions from this Source.
+     */
+    String getSuggestUri();
+
+    /**
      * Gets the version code of the source. This is expected to change when the app that
      * this source is for is upgraded.
      */

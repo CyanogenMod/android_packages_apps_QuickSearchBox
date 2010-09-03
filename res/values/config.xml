@@ -22,8 +22,15 @@
   <string-array name="default_corpora" translatable="false">
     <item>web</item>
     <item>apps</item>
-    <item>com.android.contacts/.SearchResultsActivity</item>
     <item>com.android.providers.applications/.ApplicationLauncher</item>
+  </string-array>
+
+  <!-- Suggestion URIs for which the corresponding content provider will be used as a default
+       corpus. Using a URI instead of hard-coding the activity class (in default_corpora above)
+       allows it to work on devices where the content provider has been replaced with a non-standard
+       one. -->
+  <string-array name="default_corpora_suggest_uris" translatable="false">
+    <item>content://com.android.contacts/search_suggest_query</item>
   </string-array>
 
   <!-- Names of corpora that are not shown in the corpus selector, even if they are

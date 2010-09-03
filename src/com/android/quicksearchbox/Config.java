@@ -34,6 +34,7 @@ import java.util.HashSet;
 public class Config {
 
     private static final String TAG = "QSB.Config";
+    private static final boolean DBG = false;
 
     protected static final long SECOND_MILLIS = 1000L;
     protected static final long MINUTE_MILLIS = 60L * SECOND_MILLIS;
@@ -75,6 +76,7 @@ public class Config {
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
     private HashSet<String> mHiddenCorpora;
+    private HashSet<String> mDefaultCorporaSuggestUris;
 
     /**
      * Creates a new config that uses hard-coded default values.
@@ -100,6 +102,7 @@ public class Config {
         try {
             String[] corpora = mContext.getResources().getStringArray(res);
             for (String corpus : corpora) {
+                if (DBG) Log.d(TAG, "Default corpus: " + corpus);
                 defaultCorpora.add(corpus);
             }
             return defaultCorpora;
@@ -112,11 +115,31 @@ public class Config {
     /**
      * Checks if we trust the given source not to be spammy.
      */
-    public synchronized boolean isCorpusEnabledByDefault(String corpusName) {
+    public synchronized boolean isCorpusEnabledByDefault(Corpus corpus) {
+        if (DBG) Log.d(TAG, "isCorpusEnabledByDefault(" + corpus.getName() + ")");
         if (mDefaultCorpora == null) {
             mDefaultCorpora = loadResourceStringSet(R.array.default_corpora);
         }
-        return mDefaultCorpora.contains(corpusName);
+        if (mDefaultCorpora.contains(corpus.getName())) {
+            if (DBG) Log.d(TAG, "Corpus " + corpus.getName() + " IS default");
+            return true;
+        }
+
+        if (mDefaultCorporaSuggestUris == null) {
+            mDefaultCorporaSuggestUris = loadResourceStringSet(
+                    R.array.default_corpora_suggest_uris);
+        }
+
+        for (Source s : corpus.getSources()) {
+            String uri = s.getSuggestUri();
+            if (DBG) Log.d(TAG, "Suggest URI for " + corpus.getName() + ": " + uri);
+            if (mDefaultCorporaSuggestUris.contains(uri)) {
+                if (DBG) Log.d(TAG, "Corpus " + corpus.getName() + " IS default");
+                return true;
+            }
+        }
+        if (DBG) Log.d(TAG, "Corpus " + corpus.getName() + " is NOT default");
+        return false;
     }
 
     /**

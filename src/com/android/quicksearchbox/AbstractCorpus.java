@@ -46,7 +46,7 @@ public abstract class AbstractCorpus implements Corpus {
     }
 
     public boolean isCorpusDefaultEnabled() {
-        return mConfig.isCorpusEnabledByDefault(getName());
+        return mConfig.isCorpusEnabledByDefault(this);
     }
 
     public boolean isCorpusHidden() {

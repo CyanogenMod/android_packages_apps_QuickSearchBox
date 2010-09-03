@@ -60,6 +60,10 @@ public class MockSource implements Source {
                 getClass().getName() + "." + mName);
     }
 
+    public String getSuggestUri() {
+        return null;
+    }
+
     public int getVersionCode() {
         return mVersionCode;
     }

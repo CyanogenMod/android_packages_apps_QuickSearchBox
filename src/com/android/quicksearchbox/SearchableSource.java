@@ -28,9 +28,9 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -65,6 +65,8 @@ public class SearchableSource extends AbstractSource {
 
     // Cached icon for the activity
     private Drawable.ConstantState mSourceIcon = null;
+
+    private Uri mSuggestUriBase;
 
     public SearchableSource(Context context, SearchableInfo searchable)
             throws NameNotFoundException {
@@ -338,32 +340,49 @@ public class SearchableSource extends AbstractSource {
         }
     }
 
-    /**
-     * This is a copy of {@link SearchManager#getSuggestions(SearchableInfo, String)}.
-     */
-    private static Cursor getSuggestions(Context context, SearchableInfo searchable, String query,
-            int queryLimit) {
+    public String getSuggestUri() {
+        Uri uri = getSuggestUriBase(mSearchable);
+        if (uri == null) return null;
+        return uri.toString();
+    }
+
+    private synchronized Uri getSuggestUriBase(SearchableInfo searchable) {
         if (searchable == null) {
             return null;
         }
+        if (mSuggestUriBase == null) {
 
-        String authority = searchable.getSuggestAuthority();
-        if (authority == null) {
-            return null;
+            String authority = searchable.getSuggestAuthority();
+            if (authority == null) {
+                return null;
+            }
+
+            Uri.Builder uriBuilder = new Uri.Builder()
+                    .scheme(ContentResolver.SCHEME_CONTENT)
+                    .authority(authority);
+
+            // if content path provided, insert it now
+            final String contentPath = searchable.getSuggestPath();
+            if (contentPath != null) {
+                uriBuilder.appendEncodedPath(contentPath);
+            }
+
+            // append standard suggestion query path
+            uriBuilder.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY);
+            mSuggestUriBase = uriBuilder.build();
         }
+        return mSuggestUriBase;
+    }
 
-        Uri.Builder uriBuilder = new Uri.Builder()
-                .scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(authority);
+    /**
+     * This is a copy of {@link SearchManager#getSuggestions(SearchableInfo, String)}.
+     */
+    private Cursor getSuggestions(Context context, SearchableInfo searchable, String query,
+            int queryLimit) {
 
-        // if content path provided, insert it now
-        final String contentPath = searchable.getSuggestPath();
-        if (contentPath != null) {
-            uriBuilder.appendEncodedPath(contentPath);
-        }
-
-        // append standard suggestion query path
-        uriBuilder.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY);
+        Uri base = getSuggestUriBase(searchable);
+        if (base == null) return null;
+        Uri.Builder uriBuilder = base.buildUpon();
 
         // get the query selection, may be null
         String selection = searchable.getSuggestSelection();
