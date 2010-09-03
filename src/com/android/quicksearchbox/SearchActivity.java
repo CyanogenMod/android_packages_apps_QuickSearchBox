@@ -538,7 +538,6 @@ public class SearchActivity extends Activity {
         Corpus corpus = getCorpus();
         if (corpus == null) {
             // No corpus selected, use all enabled corpora
-            // TODO: This should be done asynchronously, since it can be expensive
             getCorpusRanker().getRankedCorpora(Consumers.createAsyncConsumer(mHandler, consumer));
         } else {
             List<Corpus> corpora = new ArrayList<Corpus>();
