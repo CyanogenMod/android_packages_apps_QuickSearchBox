@@ -47,6 +47,5 @@
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Prova a dire:"</string>
     <string name="voice_search_hint_quotation_start" msgid="566545847023692214">"\""</string>
     <string name="voice_search_hint_quotation_end" msgid="4840921425933402938">"\""</string>
-    <!-- no translation found for shortcuts_label (5395719245008935521) -->
-    <skip />
+    <string name="shortcuts_label" msgid="5395719245008935521">"Risultati di ricerca"</string>
 </resources>
