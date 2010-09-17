@@ -24,6 +24,7 @@ import com.android.quicksearchbox.util.Util;
 import com.google.common.annotations.VisibleForTesting;
 
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -56,7 +57,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 30;
+    private static final int DB_VERSION = 31;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -125,6 +126,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             Shortcuts.icon1 + AS + SearchManager.SUGGEST_COLUMN_ICON_1,
             Shortcuts.icon2 + AS + SearchManager.SUGGEST_COLUMN_ICON_2,
             Shortcuts.intent_action + AS + SearchManager.SUGGEST_COLUMN_INTENT_ACTION,
+            Shortcuts.intent_component.fullName,
             Shortcuts.intent_data + AS + SearchManager.SUGGEST_COLUMN_INTENT_DATA,
             Shortcuts.intent_query + AS + SearchManager.SUGGEST_COLUMN_QUERY,
             Shortcuts.intent_extradata + AS + SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA,
@@ -362,8 +364,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         @Override
         public Source getSuggestionSource() {
-            // TODO: Using ordinal() is hacky, look up the column instead
-            String srcStr = mCursor.getString(Shortcuts.source.ordinal());
+            int srcCol = mCursor.getColumnIndex(Shortcuts.source.name());
+            String srcStr = mCursor.getString(srcCol);
             if (srcStr == null) {
                 throw new NullPointerException("Missing source for shortcut.");
             }
@@ -384,6 +386,15 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                 return null;
             }
             return source;
+        }
+
+        @Override
+        public ComponentName getSuggestionIntentComponent() {
+            int componentCol = mCursor.getColumnIndex(Shortcuts.intent_component.name());
+            // We don't fall back to getSuggestionSource().getIntentComponent() because
+            // we want to return the same value that getSuggestionIntentComponent() did for the
+            // original suggestion.
+            return stringToComponentName(mCursor.getString(componentCol));
         }
 
         @Override
@@ -462,6 +473,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
     private ContentValues makeShortcutRow(Suggestion suggestion) {
         String intentAction = suggestion.getSuggestionIntentAction();
+        String intentComponent = componentNameToString(suggestion.getSuggestionIntentComponent());
         String intentData = suggestion.getSuggestionIntentDataString();
         String intentQuery = suggestion.getSuggestionQuery();
         String intentExtraData = suggestion.getSuggestionIntentExtraData();
@@ -476,6 +488,10 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         key.append("#");
         if (intentAction != null) {
             key.append(intentAction);
+        }
+        key.append("#");
+        if (intentComponent != null) {
+            key.append(intentComponent);
         }
         key.append("#");
         if (intentQuery != null) {
@@ -500,6 +516,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         cv.put(Shortcuts.icon1.name(), icon1Uri);
         cv.put(Shortcuts.icon2.name(), icon2Uri);
         cv.put(Shortcuts.intent_action.name(), intentAction);
+        cv.put(Shortcuts.intent_component.name(), intentComponent);
         cv.put(Shortcuts.intent_data.name(), intentData);
         cv.put(Shortcuts.intent_query.name(), intentQuery);
         cv.put(Shortcuts.intent_extradata.name(), intentExtraData);
@@ -510,6 +527,14 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         cv.put(Shortcuts.log_type.name(), suggestion.getSuggestionLogType());
 
         return cv;
+    }
+
+    private String componentNameToString(ComponentName component) {
+        return component == null ? null : component.flattenToShortString();
+    }
+
+    private ComponentName stringToComponentName(String str) {
+        return str == null ? null : ComponentName.unflattenFromString(str);
     }
 
     private String getIconUriString(Source source, String drawableId) {
@@ -591,6 +616,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         icon1,
         icon2,
         intent_action,
+        intent_component,
         intent_data,
         intent_query,
         intent_extradata,
@@ -747,6 +773,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     Shortcuts.icon1.name() + " TEXT, " +
                     Shortcuts.icon2.name() + " TEXT, " +
                     Shortcuts.intent_action.name() + " TEXT, " +
+                    Shortcuts.intent_component.name() + " TEXT, " +
                     Shortcuts.intent_data.name() + " TEXT, " +
                     Shortcuts.intent_query.name() + " TEXT, " +
                     Shortcuts.intent_extradata.name() + " TEXT, " +

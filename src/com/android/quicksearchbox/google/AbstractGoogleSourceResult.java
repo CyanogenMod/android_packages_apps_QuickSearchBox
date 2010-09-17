@@ -19,6 +19,7 @@ import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SourceResult;
 
+import android.content.ComponentName;
 import android.database.DataSetObserver;
 
 public abstract class AbstractGoogleSourceResult implements SourceResult {
@@ -101,6 +102,10 @@ public abstract class AbstractGoogleSourceResult implements SourceResult {
 
     public String getSuggestionIntentAction() {
         return mSource.getDefaultIntentAction();
+    }
+
+    public ComponentName getSuggestionIntentComponent() {
+        return mSource.getIntentComponent();
     }
 
     public String getSuggestionIntentDataString() {

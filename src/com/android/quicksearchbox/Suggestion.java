@@ -15,6 +15,8 @@
  */
 package com.android.quicksearchbox;
 
+import android.content.ComponentName;
+
 /**
  * Interface for individual suggestions.
  */
@@ -76,6 +78,11 @@ public interface Suggestion {
      * Gets the intent action for the current suggestion.
      */
     String getSuggestionIntentAction();
+
+    /**
+     * Gets the name of the activity that the intent for the current suggestion will be sent to.
+     */
+    ComponentName getSuggestionIntentComponent();
 
     /**
      * Gets the extra data associated with this suggestion's intent.

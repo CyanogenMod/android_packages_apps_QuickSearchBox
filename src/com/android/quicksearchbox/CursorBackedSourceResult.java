@@ -15,6 +15,7 @@
  */
 package com.android.quicksearchbox;
 
+import android.content.ComponentName;
 import android.database.Cursor;
 
 public class CursorBackedSourceResult extends CursorBackedSuggestionCursor
@@ -38,6 +39,11 @@ public class CursorBackedSourceResult extends CursorBackedSuggestionCursor
     @Override
     public Source getSuggestionSource() {
         return mSource;
+    }
+
+    @Override
+    public ComponentName getSuggestionIntentComponent() {
+        return mSource.getIntentComponent();
     }
 
     public boolean isSuggestionShortcut() {

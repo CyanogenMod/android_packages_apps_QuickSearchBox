@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import android.content.ComponentName;
 import android.content.Intent;
 
 
@@ -90,6 +91,10 @@ public class SuggestionData implements Suggestion {
     public String getSuggestionIntentAction() {
         if (mIntentAction != null) return mIntentAction;
         return mSource.getDefaultIntentAction();
+    }
+
+    public ComponentName getSuggestionIntentComponent() {
+        return mSource.getIntentComponent();
     }
 
     public String getSuggestionIntentDataString() {

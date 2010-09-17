@@ -30,7 +30,6 @@ public class SuggestionUtils {
     }
 
     public static Intent getSuggestionIntent(SuggestionCursor suggestion, Bundle appSearchData) {
-        Source source = suggestion.getSuggestionSource();
         String action = suggestion.getSuggestionIntentAction();
 
         String data = suggestion.getSuggestionIntentDataString();
@@ -58,7 +57,7 @@ public class SuggestionUtils {
             intent.putExtra(SearchManager.APP_DATA, appSearchData);
         }
 
-        intent.setComponent(source.getIntentComponent());
+        intent.setComponent(suggestion.getSuggestionIntentComponent());
         return intent;
     }
 

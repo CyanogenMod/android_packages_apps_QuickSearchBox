@@ -15,6 +15,8 @@
  */
 package com.android.quicksearchbox;
 
+import android.content.ComponentName;
+
 /**
  * A Suggestion that delegates all calls to other suggestions.
  */
@@ -43,6 +45,10 @@ public abstract class AbstractSuggestionWrapper implements Suggestion {
 
     public String getSuggestionIntentAction() {
         return current().getSuggestionIntentAction();
+    }
+
+    public ComponentName getSuggestionIntentComponent() {
+        return current().getSuggestionIntentComponent();
     }
 
     public String getSuggestionIntentDataString() {
