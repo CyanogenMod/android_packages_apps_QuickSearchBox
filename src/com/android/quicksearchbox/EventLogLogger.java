@@ -125,6 +125,7 @@ public class EventLogLogger implements Logger {
     }
 
     private String getCorpusLogNames(Collection<Corpus> corpora) {
+        if (corpora == null) return "";
         StringBuilder sb = new StringBuilder();
         for (Corpus corpus : corpora) {
             if (sb.length() > 0) sb.append(LIST_SEPARATOR);
