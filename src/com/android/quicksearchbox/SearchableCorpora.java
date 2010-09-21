@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.text.TextUtils;
@@ -40,6 +41,7 @@ public class SearchableCorpora implements Corpora {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
     private final Context mContext;
+    private final SearchSettings mSettings;
     private final CorpusFactory mCorpusFactory;
 
     private Sources mSources;
@@ -56,8 +58,10 @@ public class SearchableCorpora implements Corpora {
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableCorpora(Context context, Sources sources, CorpusFactory corpusFactory) {
+    public SearchableCorpora(Context context, SearchSettings settings, Sources sources,
+            CorpusFactory corpusFactory) {
         mContext = context;
+        mSettings = settings;
         mCorpusFactory = corpusFactory;
         mSources = sources;
     }
@@ -109,7 +113,7 @@ public class SearchableCorpora implements Corpora {
             for (Source source : corpus.getSources()) {
                 mCorporaBySource.put(source, corpus);
             }
-            if (corpus.isCorpusEnabled()) {
+            if (mSettings.isCorpusEnabled(corpus)) {
                 mEnabledCorpora.add(corpus);
             }
             if (corpus.isWebCorpus()) {

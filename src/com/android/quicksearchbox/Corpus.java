@@ -80,11 +80,6 @@ public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
     Collection<Source> getSources();
 
     /**
-     * Checks if this corpus is enabled.
-     */
-    boolean isCorpusEnabled();
-
-    /**
      * Checks if this corpus is enabled by default.
      */
     boolean isCorpusDefaultEnabled();

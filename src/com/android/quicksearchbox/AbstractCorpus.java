@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 
 /**
@@ -36,13 +35,6 @@ public abstract class AbstractCorpus implements Corpus {
 
     protected Context getContext() {
         return mContext;
-    }
-
-    public boolean isCorpusEnabled() {
-        boolean defaultEnabled = isCorpusDefaultEnabled();
-        String sourceEnabledPref = SearchSettings.getCorpusEnabledPreference(this);
-        SharedPreferences prefs = SearchSettings.getSearchPreferences(mContext);
-        return prefs.getBoolean(sourceEnabledPref, defaultEnabled);
     }
 
     public boolean isCorpusDefaultEnabled() {

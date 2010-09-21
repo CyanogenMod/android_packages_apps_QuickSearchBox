@@ -28,16 +28,19 @@ import java.util.Collection;
 @MediumTest
 public class SearchableCorporaTest extends AndroidTestCase {
 
+    protected SearchSettings mSettings;
+
     protected SearchableCorpora mCorpora;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
+        mSettings = new MockSearchSettings();
         MockSources sources = new MockSources();
         sources.addSource(MockSource.SOURCE_1);
         sources.addSource(MockSource.SOURCE_2);
-        mCorpora = new SearchableCorpora(mContext, sources, new MockCorpusFactory());
+        mCorpora = new SearchableCorpora(mContext, mSettings, sources, new MockCorpusFactory());
         mCorpora.update();
     }
 

@@ -41,18 +41,25 @@ public class WebCorpus extends MultiSourceCorpus {
 
     private static final String WEB_CORPUS_NAME = "web";
 
+    private final SearchSettings mSettings;
+
     private Source mWebSearchSource;
 
     private final Source mBrowserSource;
 
-    public WebCorpus(Context context, Config config, Executor executor,
+    public WebCorpus(Context context, Config config, SearchSettings settings, Executor executor,
             Source webSearchSource, Source browserSource) {
         super(context, config, executor, webSearchSource, browserSource);
         if (DBG) {
             Log.d(TAG, "init webSource=" + webSearchSource + "; browser source = " + browserSource);
         }
+        mSettings = settings;
         mWebSearchSource = webSearchSource;
         mBrowserSource = browserSource;
+    }
+
+    protected SearchSettings getSettings() {
+        return mSettings;
     }
 
     public void setWebSource(Source web) {
@@ -163,7 +170,7 @@ public class WebCorpus extends MultiSourceCorpus {
     @Override
     protected List<Source> getSourcesToQuery(String query, boolean onlyCorpus) {
         ArrayList<Source> sourcesToQuery = new ArrayList<Source>(2);
-        if (SearchSettings.getShowWebSuggestions(getContext())) {
+        if (getSettings().getShowWebSuggestions()) {
             if (mWebSearchSource != null) sourcesToQuery.add(mWebSearchSource);
         }
         if (mBrowserSource != null && query.length() > 0) {

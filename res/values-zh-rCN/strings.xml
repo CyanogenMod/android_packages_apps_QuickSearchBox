@@ -27,7 +27,6 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"搜索应用程序"</string>
     <string name="menu_settings" msgid="5600043319144155953">"搜索设置"</string>
     <string name="search_settings" msgid="4101951238194600323">"搜索设置"</string>
-    <string name="web_search_category_title" msgid="3696363552067530526">"网络"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"电话"</string>
     <string name="search_sources" msgid="505874718206340313">"可搜索的项"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"选择要在手机上搜索的内容"</string>
@@ -40,7 +39,6 @@
     <string name="google_app_label" msgid="7877830942664670350">"Google 搜索"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Google 搜索"</string>
     <string name="google_search_description" msgid="6583849182671608994">"Google 搜索建议"</string>
-    <string name="google_search_settings" msgid="4169698045412400949">"Google 搜索"</string>
     <string name="google_show_web_suggestions" msgid="9018281734662733247">"显示网页建议"</string>
     <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"输入时显示 Google 提供的建议"</string>
     <string name="google_show_web_suggestions_summary_disabled" msgid="3768151514600543003">"输入时不显示 Google 提供的建议"</string>

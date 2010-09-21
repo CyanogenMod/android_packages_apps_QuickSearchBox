@@ -259,6 +259,10 @@ public class SearchActivity extends Activity {
         return getQsbApplication().getConfig();
     }
 
+    protected SearchSettings getSettings() {
+        return getQsbApplication().getSettings();
+    }
+
     private Corpora getCorpora() {
         return getQsbApplication().getCorpora();
     }
@@ -330,7 +334,14 @@ public class SearchActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        SearchSettings.addSearchSettingsMenuItem(this, menu);
+        getSettings().addMenuItems(menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        getSettings().updateMenuItems(menu);
         return true;
     }
 
@@ -359,7 +370,7 @@ public class SearchActivity extends Activity {
     }
 
     protected CorpusSelectionDialog createCorpusSelectionDialog() {
-        return new CorpusSelectionDialog(this);
+        return new CorpusSelectionDialog(this, getSettings());
     }
 
     /**
@@ -414,7 +425,7 @@ public class SearchActivity extends Activity {
     }
 
     protected void onSettingsClicked() {
-        SearchSettings.launchSettings(this);
+        startActivity(getSettings().getSearchSettingsIntent());
     }
 
     protected Corpus getSearchCorpus() {

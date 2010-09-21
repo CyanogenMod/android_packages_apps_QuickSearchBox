@@ -42,7 +42,7 @@ public class SearchableItemsSettings extends PreferenceActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getPreferenceManager().setSharedPreferencesName(SearchSettings.PREFERENCES_NAME);
+        getPreferenceManager().setSharedPreferencesName(SearchSettingsImpl.PREFERENCES_NAME);
 
         addPreferencesFromResource(R.xml.preferences_searchable_items);
 
@@ -50,6 +50,10 @@ public class SearchableItemsSettings extends PreferenceActivity
                 SEARCH_CORPORA_PREF);
 
         populateSourcePreference();
+    }
+
+    private SearchSettings getSettings() {
+        return QsbApplication.get(this).getSettings();
     }
 
     private Corpora getCorpora() {
@@ -75,7 +79,7 @@ public class SearchableItemsSettings extends PreferenceActivity
      */
     private Preference createCorpusPreference(Corpus corpus) {
         SearchableItemPreference sourcePref = new SearchableItemPreference(this);
-        sourcePref.setKey(SearchSettings.getCorpusEnabledPreference(corpus));
+        sourcePref.setKey(SearchSettingsImpl.getCorpusEnabledPreference(corpus));
         // Put web corpus first. The rest are alphabetical.
         if (corpus.isWebCorpus()) {
             sourcePref.setOrder(0);
@@ -92,7 +96,7 @@ public class SearchableItemsSettings extends PreferenceActivity
     }
 
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        SearchSettings.broadcastSettingsChanged(this);
+        getSettings().broadcastSettingsChanged();
         return true;
     }
 

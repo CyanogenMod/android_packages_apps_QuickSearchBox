@@ -27,7 +27,6 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Поиск приложений"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Настройки поиска"</string>
     <string name="search_settings" msgid="4101951238194600323">"Настройки поиска"</string>
-    <string name="web_search_category_title" msgid="3696363552067530526">"Интернет"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Телефон"</string>
     <string name="search_sources" msgid="505874718206340313">"Источники поиска"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Выберите источники, по которым будет осуществляться поиск."</string>
@@ -40,7 +39,6 @@
     <string name="google_app_label" msgid="7877830942664670350">"Поиск Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Поиск Google"</string>
     <string name="google_search_description" msgid="6583849182671608994">"Поисковые подсказки Google"</string>
-    <string name="google_search_settings" msgid="4169698045412400949">"Поиск Google"</string>
     <string name="google_show_web_suggestions" msgid="9018281734662733247">"Поисковые подсказки"</string>
     <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"Показывать подсказки при вводе поискового запроса"</string>
     <string name="google_show_web_suggestions_summary_disabled" msgid="3768151514600543003">"Не показывать подсказки при вводе поискового запроса"</string>

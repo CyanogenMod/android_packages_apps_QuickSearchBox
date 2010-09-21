@@ -48,6 +48,7 @@ public class QsbApplication {
     private int mVersionCode;
     private Handler mUiThreadHandler;
     private Config mConfig;
+    private SearchSettings mSettings;
     private Sources mSources;
     private Corpora mCorpora;
     private CorpusRanker mCorpusRanker;
@@ -154,6 +155,18 @@ public class QsbApplication {
         return new Config(getContext());
     }
 
+    public synchronized SearchSettings getSettings() {
+        if (mSettings == null) {
+            mSettings = createSettings();
+            mSettings.upgradeSettingsIfNeeded();
+        }
+        return mSettings;
+    }
+
+    protected SearchSettings createSettings() {
+        return new SearchSettingsImpl(getContext(), getConfig());
+    }
+
     /**
      * Gets all corpora.
      *
@@ -168,7 +181,7 @@ public class QsbApplication {
     }
 
     protected Corpora createCorpora(Sources sources) {
-        SearchableCorpora corpora = new SearchableCorpora(getContext(), sources,
+        SearchableCorpora corpora = new SearchableCorpora(getContext(), getSettings(), sources,
                 createCorpusFactory());
         corpora.update();
         return corpora;
@@ -199,7 +212,7 @@ public class QsbApplication {
 
     protected CorpusFactory createCorpusFactory() {
         int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
-        return new SearchableCorpusFactory(getContext(), getConfig(),
+        return new SearchableCorpusFactory(getContext(), getConfig(), getSettings(),
                 createExecutorFactory(numWebCorpusThreads));
     }
 

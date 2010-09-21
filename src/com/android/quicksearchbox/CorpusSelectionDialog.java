@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.CorporaAdapter;
-import com.android.quicksearchbox.ui.CorpusViewFactory;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -42,6 +41,8 @@ public class CorpusSelectionDialog extends Dialog {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SelectSearchSourceDialog";
 
+    private final SearchSettings mSettings;
+
     private GridView mCorpusGrid;
 
     private ImageView mEditItems;
@@ -52,8 +53,13 @@ public class CorpusSelectionDialog extends Dialog {
 
     private CorporaAdapter mAdapter;
 
-    public CorpusSelectionDialog(Context context) {
+    public CorpusSelectionDialog(Context context, SearchSettings settings) {
         super(context, R.style.Theme_SelectSearchSource);
+        mSettings = settings;
+    }
+
+    protected SearchSettings getSettings() {
+        return mSettings;
     }
 
     /**
@@ -109,7 +115,14 @@ public class CorpusSelectionDialog extends Dialog {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        SearchSettings.addSearchSettingsMenuItem(getContext(), menu);
+        getSettings().addMenuItems(menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        getSettings().updateMenuItems(menu);
         return true;
     }
 
@@ -187,7 +200,7 @@ public class CorpusSelectionDialog extends Dialog {
 
     private class CorpusEditListener implements View.OnClickListener {
         public void onClick(View v) {
-            Intent intent = SearchSettings.getSearchableItemsIntent(getContext());
+            Intent intent = getSettings().getSearchableItemsIntent();
             getContext().startActivity(intent);
         }
     }

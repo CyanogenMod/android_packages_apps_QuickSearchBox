@@ -18,28 +18,39 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-            android:title="@string/web_search_category_title">
-            
-        <PreferenceScreen
-                android:key="search_engine_settings" />
-
-    </PreferenceCategory>
-    
-    <PreferenceCategory
             android:title="@string/system_search_category_title">
 
         <PreferenceScreen
                 android:key="search_corpora"
                 android:title="@string/search_sources"
-                android:summary="@string/search_sources_summary" />
+                android:summary="@string/search_sources_summary"
+                />
 
-        <!-- TODO: Use DialogPreference instead. -->
-        <Preference
+        <com.android.quicksearchbox.OkCancelPreference
                 android:key="clear_shortcuts"
                 android:persistent="false"
-                android:title="@string/clear_shortcuts" 
-                android:summary="@string/clear_shortcuts_summary" />
-                
+                android:title="@string/clear_shortcuts"
+                android:summary="@string/clear_shortcuts_summary"
+                android:dialogTitle="@string/clear_shortcuts"
+                android:dialogMessage="@string/clear_shortcuts_prompt"
+                android:positiveButtonText="@string/agree"
+                android:negativeButtonText="@string/disagree"
+                />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:key="google_settings"
+            android:title="@string/google_search_category_title">
+
+        <CheckBoxPreference
+                android:key="show_web_suggestions"
+                android:title="@string/google_show_web_suggestions"
+                android:summaryOn="@string/google_show_web_suggestions_summary_enabled"
+                android:summaryOff="@string/google_show_web_suggestions_summary_disabled"
+                android:defaultValue="true"
+                />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

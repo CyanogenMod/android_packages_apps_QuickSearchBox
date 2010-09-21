@@ -37,12 +37,15 @@ public class SearchableCorpusFactory implements CorpusFactory {
 
     private final Config mConfig;
 
+    private final SearchSettings mSettings;
+
     private final Factory<Executor> mWebCorpusExecutorFactory;
 
-    public SearchableCorpusFactory(Context context, Config config,
+    public SearchableCorpusFactory(Context context, Config config, SearchSettings settings,
             Factory<Executor> webCorpusExecutorFactory) {
         mContext = context;
         mConfig = config;
+        mSettings = settings;
         mWebCorpusExecutorFactory = webCorpusExecutorFactory;
     }
 
@@ -114,7 +117,7 @@ public class SearchableCorpusFactory implements CorpusFactory {
             browserSource = null;
         }
         Executor executor = createWebCorpusExecutor();
-        return new WebCorpus(mContext, mConfig, executor, webSource, browserSource);
+        return new WebCorpus(mContext, mConfig, mSettings, executor, webSource, browserSource);
     }
 
     protected Corpus createAppsCorpus(Sources sources) {

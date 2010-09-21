@@ -45,8 +45,9 @@
     <!-- Search settings title -->
     <string name="search_settings">Search settings</string>
 
-    <!-- Title for 'web search' category of search settings -->
-    <string name="web_search_category_title">Web</string>
+    <!-- Title for 'Google' category of search settings.
+         [CHAR LIMIT=20] -->
+    <string name="google_search_category_title">Google</string>
 
     <!-- Title for 'system search' category of search settings -->
     <string name="system_search_category_title">Phone</string>
@@ -79,9 +80,6 @@
 
     <!-- Search settings description for the Google search source. -->
     <string name="google_search_description">Google search suggestions</string>
-
-    <!-- Settings category title for 'Google search settings' settings activity -->
-    <string name="google_search_settings">Google search</string>
 
     <!-- Title and summaries for 'show web suggestions' check box setting -->
     <string name="google_show_web_suggestions">Show web suggestions</string>

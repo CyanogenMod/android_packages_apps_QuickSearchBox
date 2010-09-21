@@ -29,8 +29,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -90,21 +88,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             "com.android.quicksearchbox.action.debugonly.SHOW_HINT_TEMPORARILY";
 
     /**
-     * Preference key used for storing the index of the next voice search hint to show.
-     */
-    private static final String NEXT_VOICE_SEARCH_HINT_INDEX_PREF = "next_voice_search_hint";
-
-    /**
-     * Preference key used to store the time at which the first voice search hint was displayed.
-     */
-    private static final String FIRST_VOICE_HINT_DISPLAY_TIME = "first_voice_search_hint_time";
-
-    /**
-     * Preference key for the version of voice search we last got hints from.
-     */
-    private static final String LAST_SEEN_VOICE_SEARCH_VERSION = "voice_search_version";
-
-    /**
      * The {@link Search#SOURCE} value used when starting searches from the search widget.
      */
     private static final String WIDGET_SEARCH_SOURCE = "launcher-widget";
@@ -127,11 +110,11 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             hideVoiceSearchHint(context);
         } else if (ACTION_SHOW_VOICE_SEARCH_HINT_NOW.equals(action)) {
             showVoiceSearchHintNow(context);
-            resetVoiceSearchHintFirstSeenTime(context);
+            getSettings(context).resetVoiceSearchHintFirstSeenTime();
         } else if (ACTION_SHOW_HINT_TEMPORARILY.equals(action)) {
             showVoiceSearchHintNow(context);
         } else if (ACTION_RESET_VOICE_SEARCH_HINT_FIRST_SEEN.equals(action)) {
-            resetVoiceSearchHintFirstSeenTime(context);
+            getSettings(context).resetVoiceSearchHintFirstSeenTime();
         } else {
             if (DBG) Log.d(TAG, "Unhandled intent action=" + action);
         }
@@ -144,44 +127,10 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         return sRandom;
     }
 
-    private static void resetVoiceSearchHintFirstSeenTime(Context context) {
-        SharedPreferences prefs = SearchSettings.getSearchPreferences(context);
-        Editor e = prefs.edit();
-        e.putLong(FIRST_VOICE_HINT_DISPLAY_TIME, System.currentTimeMillis());
-        e.commit();
-    }
-
-    private static boolean haveVoiceSearchHintsExpired(Context context) {
-        SharedPreferences prefs = SearchSettings.getSearchPreferences(context);
-        QsbApplication app = QsbApplication.get(context);
-        int currentVoiceSearchVersion = app.getVoiceSearch().getVersion();
-
-        if (currentVoiceSearchVersion != 0) {
-            long currentTime = System.currentTimeMillis();
-            int lastVoiceSearchVersion = prefs.getInt(LAST_SEEN_VOICE_SEARCH_VERSION, 0);
-            long firstHintTime = prefs.getLong(FIRST_VOICE_HINT_DISPLAY_TIME, 0);
-            if (firstHintTime == 0 || currentVoiceSearchVersion != lastVoiceSearchVersion) {
-                Editor e = prefs.edit();
-                e.putInt(LAST_SEEN_VOICE_SEARCH_VERSION, currentVoiceSearchVersion);
-                e.putLong(FIRST_VOICE_HINT_DISPLAY_TIME, currentTime);
-                e.commit();
-                firstHintTime = currentTime;
-            }
-            if (currentTime - firstHintTime > getConfig(context).getVoiceSearchHintActivePeriod()) {
-                if (DBG) Log.d(TAG, "Voice seach hint period expired; not showing hints.");
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if (DBG) Log.d(TAG, "Could not determine voice search version; not showing hints.");
-            return true;
-        }
-    }
-
     private static boolean shouldShowVoiceSearchHints(Context context) {
         return (getConfig(context).allowVoiceSearchHints()
-                && !haveVoiceSearchHintsExpired(context));
+                && !getSettings(context).haveVoiceSearchHintsExpired(
+                        getVoiceSearch(context).getVersion()));
     }
 
     private static SearchWidgetState[] getSearchWidgetStates
@@ -464,26 +413,16 @@ public class SearchWidgetProvider extends BroadcastReceiver {
      */
     private static CharSequence getNextHint(Context context, ArrayList<CharSequence> hints) {
         if (hints == null || hints.isEmpty()) return null;
-        int i = getNextVoiceSearchHintIndex(context, hints.size());
+        int i = getSettings(context).getNextVoiceSearchHintIndex(hints.size());
         return hints.get(i);
-    }
-
-    private static int getNextVoiceSearchHintIndex(Context context, int size) {
-        int i = getAndIncrementIntPreference(
-                SearchSettings.getSearchPreferences(context),
-                NEXT_VOICE_SEARCH_HINT_INDEX_PREF);
-        return i % size;
-    }
-
-    // TODO: Could this be made atomic to avoid races?
-    private static int getAndIncrementIntPreference(SharedPreferences prefs, String name) {
-        int i = prefs.getInt(name, 0);
-        prefs.edit().putInt(name, i + 1).commit();
-        return i;
     }
 
     private static Config getConfig(Context context) {
         return QsbApplication.get(context).getConfig();
+    }
+
+    private static SearchSettings getSettings(Context context) {
+        return QsbApplication.get(context).getSettings();
     }
 
     private static Corpora getCorpora(Context context) {
@@ -492,6 +431,10 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static CorpusViewFactory getCorpusViewFactory(Context context) {
         return QsbApplication.get(context).getCorpusViewFactory();
+    }
+
+    private static VoiceSearch getVoiceSearch(Context context) {
+        return QsbApplication.get(context).getVoiceSearch();
     }
 
     private static class SearchWidgetState {
