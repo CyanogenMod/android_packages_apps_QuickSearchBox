@@ -24,10 +24,6 @@ import com.android.quicksearchbox.SuggestionCursor;
  */
 public interface GoogleSource extends Source {
 
-    Source getWebSuggestOnlySource();
-
-    Source getNonWebSuggestSource();
-
     SuggestionCursor refreshShortcut(String shortcutId, String extraData);
 
     /**

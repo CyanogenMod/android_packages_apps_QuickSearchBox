@@ -46,10 +46,6 @@ public abstract class AbstractGoogleSource extends AbstractSource implements Goo
         super(context);
     }
 
-    public abstract GoogleSource getWebSuggestOnlySource();
-
-    public abstract GoogleSource getNonWebSuggestSource();
-
     public abstract ComponentName getIntentComponent();
 
     public abstract SuggestionCursor refreshShortcut(String shortcutId, String extraData);

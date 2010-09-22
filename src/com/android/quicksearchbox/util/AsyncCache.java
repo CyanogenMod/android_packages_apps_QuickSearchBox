@@ -30,7 +30,7 @@ import java.util.List;
 public abstract class AsyncCache<A> {
 
     private static final String TAG = "QSB.AsyncCache";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private final Object mLock = new Object();
 

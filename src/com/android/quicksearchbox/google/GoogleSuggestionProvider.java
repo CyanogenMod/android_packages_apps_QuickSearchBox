@@ -29,12 +29,15 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * A suggestion provider which provides content from Genie, a service that offers
  * a superset of the content provided by Google Suggest.
  */
 public class GoogleSuggestionProvider extends ContentProvider {
+    private static final boolean DBG = false;
+    private static final String TAG = "QSB.GoogleSuggestionProvider";
 
     // UriMatcher constants
     private static final int SEARCH_SUGGEST = 0;
@@ -68,6 +71,7 @@ public class GoogleSuggestionProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
 
+        if (DBG) Log.d(TAG, "query uri=" + uri);
         int match = mUriMatcher.match(uri);
 
         if (match == SEARCH_SUGGEST) {

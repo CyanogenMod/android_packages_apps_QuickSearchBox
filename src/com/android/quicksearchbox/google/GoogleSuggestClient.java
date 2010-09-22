@@ -82,17 +82,6 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
         return false;
     }
 
-
-    @Override
-    public GoogleSource getNonWebSuggestSource() {
-        return null;
-    }
-
-    @Override
-    public GoogleSource getWebSuggestOnlySource() {
-        return this; // we don't provide anything else
-    }
-
     @Override
     public SourceResult queryInternal(String query) {
         return query(query);

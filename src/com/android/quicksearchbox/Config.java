@@ -72,8 +72,6 @@ public class Config {
 
     private static final long VOICE_SEARCH_HINT_VISIBLE_PERIOD = 6L * MINUTE_MILLIS;
 
-    private static final boolean DISMISS_KEYBOARD_ON_SCROLL = true;
-
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
     private HashSet<String> mHiddenCorpora;

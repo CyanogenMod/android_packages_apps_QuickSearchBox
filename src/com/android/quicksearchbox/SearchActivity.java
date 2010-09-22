@@ -445,6 +445,7 @@ public class SearchActivity extends Activity {
     }
 
     protected void launchIntent(Intent intent) {
+        if (DBG) Log.d(TAG, "launchIntent " + intent);
         if (intent == null) {
             return;
         }
