@@ -27,6 +27,8 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Αναζήτηση στις Εφαρμογές Google"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Ρυθμίσεις αναζήτησης"</string>
     <string name="search_settings" msgid="4101951238194600323">"Ρυθμίσεις αναζήτησης"</string>
+    <!-- no translation found for google_search_category_title (2997358135219618688) -->
+    <skip />
     <string name="system_search_category_title" msgid="1507902891285388819">"Τηλέφωνο"</string>
     <string name="search_sources" msgid="505874718206340313">"Στοιχεία με δυνατότητα αναζήτησης"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Επιλέξτε το αντικείμενο αναζήτησης στο τηλέφωνο"</string>
