@@ -27,17 +27,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 
 /**
  * The configuration screen for search widgets.
  */
-public class SearchWidgetConfigActivity extends ChoiceActivity {
+public class SearchWidgetConfigActivity extends DialogActivity {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchWidgetConfigActivity";
 
     private static final String PREFS_NAME = "SearchWidgetConfig";
     private static final String WIDGET_CORPUS_NAME_PREFIX = "widget_corpus_";
     private static final String WIDGET_CORPUS_SHOWING_HINT_PREFIX = "widget_showing_hint_";
+
+    private ListView mChoicesView;
 
     private CorporaAdapter mAdapter;
 
@@ -48,7 +51,12 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         super.onCreate(icicle);
 
         setHeading(R.string.search_widget);
-        setOnItemClickListener(new SourceClickListener());
+        setDialogContent(R.layout.search_widget_config);
+        mChoicesView = (ListView) findViewById(R.id.list);
+        mChoicesView.setOnItemClickListener(new SourceClickListener());
+        // TODO: for some reason, putting this in the XML layout instead makes
+        // the list items unclickable.
+        mChoicesView.setFocusable(true);
 
         Intent intent = getIntent();
         mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -70,12 +78,11 @@ public class SearchWidgetConfigActivity extends ChoiceActivity {
         super.onStop();
     }
 
-    @Override
-    public void setAdapter(ListAdapter adapter) {
+    private void setAdapter(ListAdapter adapter) {
         if (adapter == mAdapter) return;
         if (mAdapter != null) mAdapter.close();
         mAdapter = (CorporaAdapter) adapter;
-        super.setAdapter(adapter);
+        mChoicesView.setAdapter(adapter);
     }
 
     protected void selectCorpus(Corpus corpus) {

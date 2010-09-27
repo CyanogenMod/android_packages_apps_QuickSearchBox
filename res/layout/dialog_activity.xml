@@ -58,12 +58,10 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ListView android:id="@+id/list"
+    <FrameLayout android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:cacheColorHint="@null"
+        android:layout_height="wrap_content"
         android:background="@drawable/popup_bottom_bright"
-        android:divider="@drawable/divider_horizontal_bright"
-        android:scrollbars="vertical" />
+        />
 
 </LinearLayout>
