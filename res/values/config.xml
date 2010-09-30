@@ -55,4 +55,8 @@
 
   <!-- The maximum promoted suggestions -->
   <integer name="max_promoted_suggestions">8</integer>
+
+  <!-- The number of columns in the corpus selection dialog -->
+  <integer name="corpus_selection_dialog_columns">4</integer>
+
 </resources>

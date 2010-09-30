@@ -15,48 +15,36 @@
 -->
 
 <resources>
-    <style name="Theme.QuickSearchBox" parent="@android:style/Theme.Light.NoTitleBar">
-        <!-- Get rid of status bar shadow. -->
-        <item name="android:windowSoftInputMode">stateUnchanged|adjustResize</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+
+    <style name="Suggestion">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:background">@drawable/suggestion_background</item>
+        <item name="android:layout_height">56dip</item>
+        <item name="android:focusable">true</item>
     </style>
 
-    <style name="Theme.SearchWidgetConfig" parent="@android:style/Theme.Dialog">
-        <item name="android:windowBackground">@android:color/transparent</item>
+    <style name="SuggestionText1">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="Theme.SelectSearchSource" parent="@android:style/Theme.Light.NoTitleBar">
-        <item name="android:windowSoftInputMode">stateUnchanged|adjustResize</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@style/Animation.SelectSearchSource</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+    <style name="SuggestionText2">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="SuggestionText1.Query" parent="@style/SuggestionText1">
+    </style>
+
+    <style name="SuggestionText1.Suggested" parent="@style/SuggestionText1">
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="Animation.SelectSearchSource" parent="@android:style/Animation">
         <item name="android:windowEnterAnimation">@anim/corpus_selector_open</item>
         <item name="android:windowExitAnimation">@anim/corpus_selector_close</item>
-    </style>
-
-    <!-- The number of columns in the business listing launcher GridView -->
-    <integer name="corpus_selection_dialog_columns">4</integer>
-
-    <style name="SuggestionQueryTextAppearance">
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#ff000000</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="SuggestionSuggestedTextAppearance">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#ff000000</item>
-        <item name="android:textSize">16sp</item>
     </style>
 
 </resources>
