@@ -37,6 +37,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
+import android.view.ContextThemeWrapper;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -66,7 +67,8 @@ public class QsbApplication {
     private TextAppearanceFactory mTextAppearanceFactory;
 
     public QsbApplication(Context context) {
-        mContext = context;
+        // the application context does not use the theme from the <application> tag
+        mContext = new ContextThemeWrapper(context, R.style.Theme_QuickSearchBox);
     }
 
     public static boolean isFroyoOrLater() {

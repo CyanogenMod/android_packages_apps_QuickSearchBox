@@ -31,13 +31,13 @@ public class TextAppearanceFactory {
 
     public Object[] createSuggestionQueryTextAppearance() {
         return new Object[]{
-                new TextAppearanceSpan(mContext, R.style.SuggestionQueryTextAppearance)
+                new TextAppearanceSpan(mContext, R.style.SuggestionText1_Query)
         };
     }
 
     public Object[] createSuggestionSuggestedTextAppearance() {
         return new Object[]{
-                new TextAppearanceSpan(mContext, R.style.SuggestionSuggestedTextAppearance)
+                new TextAppearanceSpan(mContext, R.style.SuggestionText1_Suggested)
         };
     }
 
