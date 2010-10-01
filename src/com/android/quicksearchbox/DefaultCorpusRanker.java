@@ -17,11 +17,9 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.AsyncCache;
-import com.android.quicksearchbox.util.AsyncDataSetObservable;
 import com.android.quicksearchbox.util.Consumer;
 
 import android.database.DataSetObserver;
-import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -42,8 +40,6 @@ public class DefaultCorpusRanker implements CorpusRanker {
 
     private final ShortcutRepository mShortcuts;
 
-    private final AsyncDataSetObservable mDataSetObservable;
-
     private final Corpora mCorpora;
 
     // Cached list of ranked corpora.
@@ -54,31 +50,16 @@ public class DefaultCorpusRanker implements CorpusRanker {
      *
      * @param corpora Corpora to rank.
      * @param shortcuts Shortcut repository for getting corpus scores.
-     * @param uiThread Handler to call DataSetObservers on.
      */
-    public DefaultCorpusRanker(Corpora corpora, ShortcutRepository shortcuts,
-            Handler uiThread) {
+    public DefaultCorpusRanker(Corpora corpora, ShortcutRepository shortcuts) {
         mCorpora = corpora;
         mCorpora.registerDataSetObserver(new CorporaObserver());
         mShortcuts = shortcuts;
-        mDataSetObservable = new AsyncDataSetObservable(uiThread);
         mRankedCorpora = new RankedCorporaCache();
     }
 
     public void getRankedCorpora(Consumer<List<Corpus>> consumer) {
         mRankedCorpora.get(consumer);
-    }
-
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.registerObserver(observer);
-    }
-
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.unregisterObserver(observer);
-    }
-
-    protected void notifyDataSetChanged() {
-        mDataSetObservable.notifyChanged();
     }
 
     public void clear() {
@@ -106,7 +87,6 @@ public class DefaultCorpusRanker implements CorpusRanker {
                     if (DBG) Log.d(TAG, "Ordered: " + ordered);
 
                     store(ordered);
-                    notifyDataSetChanged();
                     return true;
                 }
             });

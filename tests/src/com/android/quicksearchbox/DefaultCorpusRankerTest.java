@@ -43,7 +43,7 @@ public class DefaultCorpusRankerTest extends AndroidTestCase {
         mCorpora.addCorpus(MockCorpus.CORPUS_2);
         mCorpora.addCorpus(MockCorpus.WEB_CORPUS);
         mRepo = new MockShortcutRepository();
-        mRanker = new DefaultCorpusRanker(mCorpora, mRepo, null);
+        mRanker = new DefaultCorpusRanker(mCorpora, mRepo);
     }
 
     public void testRankNoScores() {

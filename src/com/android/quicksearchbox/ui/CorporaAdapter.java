@@ -16,20 +16,19 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.Corpus;
-import com.android.quicksearchbox.CorpusRanker;
-import com.android.quicksearchbox.util.Consumer;
-import com.android.quicksearchbox.util.Consumers;
 
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -42,55 +41,61 @@ public class CorporaAdapter extends BaseAdapter {
 
     private final CorpusViewFactory mViewFactory;
 
-    private final CorpusRanker mRanker;
-
-    private final Handler mUiThread;
+    private final Corpora mCorpora;
 
     private final boolean mGridView;
 
     private final DataSetObserver mCorporaObserver = new CorporaObserver();
 
-    private List<Corpus> mRankedEnabledCorpora;
+    private List<Corpus> mSortedCorpora;
 
     public CorporaAdapter(CorpusViewFactory viewFactory,
-            CorpusRanker ranker, Handler uiThread, boolean gridView) {
+            Corpora corpora, boolean gridView) {
         mViewFactory = viewFactory;
-        mRanker = ranker;
+        mCorpora = corpora;
         mGridView = gridView;
-        mUiThread = uiThread;
-        mRanker.registerDataSetObserver(mCorporaObserver);
+        mCorpora.registerDataSetObserver(mCorporaObserver);
         updateCorpora();
     }
 
     private void updateCorpora() {
-        mRanker.getRankedCorpora(Consumers.createAsyncConsumer(mUiThread,
-                new Consumer<List<Corpus>>() {
-            public boolean consume(List<Corpus> rankedCorpora) {
-                mRankedEnabledCorpora = new ArrayList<Corpus>();
-                for (Corpus corpus : rankedCorpora) {
-                    if (!corpus.isCorpusHidden()) {
-                        mRankedEnabledCorpora.add(corpus);
-                    }
-                }
-                notifyDataSetChanged();
-                return true;
+        List<Corpus> enabledCorpora = mCorpora.getEnabledCorpora();
+        ArrayList<Corpus> sorted = new ArrayList<Corpus>(enabledCorpora.size());
+        for (Corpus corpus : enabledCorpora) {
+            if (!corpus.isCorpusHidden()) {
+                sorted.add(corpus);
             }
-        }));
+        }
+        Collections.sort(sorted, new CorpusComparator());
+        mSortedCorpora = sorted;
+        notifyDataSetChanged();
+    }
+
+    private static class CorpusComparator implements Comparator<Corpus> {
+        public int compare(Corpus corpus1, Corpus corpus2) {
+            // Comparing a corpus against itself
+            if (corpus1 == corpus2) return 0;
+            // Web always comes first
+            if (corpus1.isWebCorpus()) return -1;
+            if (corpus2.isWebCorpus()) return 1;
+            // Alphabetically by name
+            return corpus1.getLabel().toString().compareTo(corpus2.getLabel().toString());
+        }
     }
 
     public void close() {
-        mRanker.unregisterDataSetObserver(mCorporaObserver);
+        mCorpora.unregisterDataSetObserver(mCorporaObserver);
     }
 
     public int getCount() {
-        return 1 + (mRankedEnabledCorpora == null ? 0 : mRankedEnabledCorpora.size());
+        return 1 + (mSortedCorpora == null ? 0 : mSortedCorpora.size());
     }
 
     public Corpus getItem(int position) {
         if (position == 0) {
             return null;
         } else {
-            return mRankedEnabledCorpora.get(position - 1);
+            return mSortedCorpora.get(position - 1);
         }
     }
 

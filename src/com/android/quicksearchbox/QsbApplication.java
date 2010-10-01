@@ -240,8 +240,7 @@ public class QsbApplication {
     }
 
     protected CorpusRanker createCorpusRanker() {
-        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository(),
-                getMainThreadHandler());
+        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository());
     }
 
     /**
@@ -402,13 +401,11 @@ public class QsbApplication {
     }
 
     public CorporaAdapter createCorporaListAdapter() {
-        return new CorporaAdapter(getCorpusViewFactory(), getCorpusRanker(),
-                getMainThreadHandler(), false);
+        return new CorporaAdapter(getCorpusViewFactory(), getCorpora(), false);
     }
 
     public CorporaAdapter createCorporaGridAdapter() {
-        return new CorporaAdapter(getCorpusViewFactory(), getCorpusRanker(),
-                getMainThreadHandler(), true);
+        return new CorporaAdapter(getCorpusViewFactory(), getCorpora(), true);
     }
 
     /**
