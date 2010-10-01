@@ -43,6 +43,7 @@ public class SuggestionData implements Suggestion {
     private String mSuggestionQuery;
     private String mLogType;
     private boolean mIsShortcut;
+    private SuggestionExtras mExtras;
 
     public SuggestionData(Source source) {
         mSource = source;
@@ -320,6 +321,15 @@ public class SuggestionData implements Suggestion {
         if (value != null) {
             builder.append(",").append(name).append("=").append(value);
         }
+    }
+
+    @VisibleForTesting
+    public void setExtras(SuggestionExtras extras) {
+        mExtras = extras;
+    }
+
+    public SuggestionExtras getExtras() {
+        return mExtras;
     }
 
 }

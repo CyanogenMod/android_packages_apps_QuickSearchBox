@@ -13,26 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.quicksearchbox;
 
-package com.android.quicksearchbox.ui;
-
-import com.android.quicksearchbox.Suggestion;
+import org.json.JSONException;
 
 /**
- * Interface to be implemented by any view appearing in the list of suggestions.
+ * Abstract SuggestionExtras supporting flattening to JSON.
  */
-public interface SuggestionView {
-    /**
-     * Set the view's contents based on the given suggestion.
-     */
-    void bindAsSuggestion(Suggestion suggestion, String userQuery);
+public abstract class AbstractSuggestionExtras implements SuggestionExtras {
 
-    /**
-     * Binds this view to a list adapter.
-     *
-     * @param adapter The adapter of the list which the view is appearing in
-     * @param position The position of this view with the list.
-     */
-    void bindAdapter(SuggestionsAdapter adapter, int position);
+    public String toJsonString() throws JSONException {
+        return new JsonBackedSuggestionExtras(this).toString();
+    }
 
 }

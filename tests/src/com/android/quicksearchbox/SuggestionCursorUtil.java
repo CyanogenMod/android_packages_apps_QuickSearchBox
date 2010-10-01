@@ -20,6 +20,7 @@ import static com.google.common.base.Objects.equal;
 
 import com.google.common.collect.UnmodifiableIterator;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -71,12 +72,12 @@ public class SuggestionCursorUtil extends Assert {
     public static void assertSameSuggestions(
             String message, SuggestionCursor expected, SuggestionCursor observed,
             boolean allowExtras) {
-        assertNotNull(expected + ", observed == null", expected);
+        assertNotNull(message + ", expected == null", expected);
         assertNotNull(message + ", observed == null", observed);
         if (!allowExtras) {
             assertEquals(message + ", count", expected.getCount(), observed.getCount());
         } else {
-            assertTrue(message + "count", expected.getCount() <= observed.getCount());
+            assertTrue(message + ", count", expected.getCount() <= observed.getCount());
         }
         assertEquals(message + ", userQuery", expected.getUserQuery(), observed.getUserQuery());
         int count = expected.getCount();
@@ -220,6 +221,24 @@ public class SuggestionCursorUtil extends Assert {
                 && equal(expected.getSuggestionIntentExtraData(), observed.getSuggestionIntentExtraData())
                 && equal(expected.getSuggestionQuery(), observed.getSuggestionQuery())
                 && equal(expected.getSuggestionLogType(), observed.getSuggestionLogType());
+    }
+
+    public static void assertSuggestionExtras(String message, SuggestionCursor observed,
+            String extraColumn, Object expectedExtra) {
+        assertNotNull(message + ", observed == null", observed);
+        assertTrue(message + ", no suggestions", observed.getCount() > 0);
+        for (int i = 0; i < observed.getCount(); ++i) {
+            observed.moveTo(i);
+            SuggestionExtras extras = observed.getExtras();
+            assertNotNull(message + ", no extras at position " + i, extras);
+            Collection<String> columns = extras.getExtraColumnNames();
+            assertNotNull(message + ", extras columns is null at position " + i, columns);
+            assertTrue(message + ", column '" + extraColumn +
+                    "' not reported by extras at position " + i, columns.contains(extraColumn));
+            Object extra = extras.getExtra(extraColumn);
+            assertEquals(message + ", extra value", expectedExtra == null ? null :
+                    expectedExtra.toString(), extra);
+        }
     }
 
 }

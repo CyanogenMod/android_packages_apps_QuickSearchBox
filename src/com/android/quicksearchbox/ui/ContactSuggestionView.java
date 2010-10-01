@@ -17,7 +17,7 @@
 package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.Suggestion;
 
 import android.content.Context;
 import android.net.Uri;
@@ -28,6 +28,8 @@ import android.view.View;
  * View for contacts appearing in the suggestions list.
  */
 public class ContactSuggestionView extends DefaultSuggestionView {
+
+    public static final String VIEW_ID = "contact";
 
     private ContactBadge mQuickContact;
 
@@ -50,8 +52,8 @@ public class ContactSuggestionView extends DefaultSuggestionView {
     }
 
     @Override
-    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionsAdapter adapter) {
-        super.bindAsSuggestion(suggestion, adapter);
+    public void bindAsSuggestion(Suggestion suggestion, String userQuery) {
+        super.bindAsSuggestion(suggestion, userQuery);
         mQuickContact.assignContactUri(Uri.parse(suggestion.getSuggestionIntentDataString()));
         mQuickContact.setExtraOnClickListener(new ContactBadgeClickListener());
     }

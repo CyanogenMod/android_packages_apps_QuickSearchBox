@@ -23,6 +23,8 @@ import com.android.quicksearchbox.util.SQLiteTransaction;
 import com.android.quicksearchbox.util.Util;
 import com.google.common.annotations.VisibleForTesting;
 
+import org.json.JSONException;
+
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -57,7 +59,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private static final String TAG = "QSB.ShortcutRepositoryImplLog";
 
     private static final String DB_NAME = "qsb-log.db";
-    private static final int DB_VERSION = 31;
+    private static final int DB_VERSION = 32;
 
     private static final String HAS_HISTORY_QUERY =
         "SELECT " + Shortcuts.intent_key.fullName + " FROM " + Shortcuts.TABLE_NAME;
@@ -134,6 +136,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             Shortcuts.spinner_while_refreshing + AS +
                     SearchManager.SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING,
             Shortcuts.log_type + AS + CursorBackedSuggestionCursor.SUGGEST_COLUMN_LOG_TYPE,
+            Shortcuts.custom_columns.fullName,
         };
 
     // Avoid GLOB by using >= AND <, with some manipulation (see nextString(String)).
@@ -355,11 +358,13 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     private class SuggestionCursorImpl extends CursorBackedSuggestionCursor {
 
         private final HashMap<String, Source> mAllowedSources;
+        private final int mExtrasColumn;
 
         public SuggestionCursorImpl(HashMap<String,Source> allowedSources,
                 String userQuery, Cursor cursor) {
             super(userQuery, cursor);
             mAllowedSources = allowedSources;
+            mExtrasColumn = cursor.getColumnIndex(Shortcuts.custom_columns.name());
         }
 
         @Override
@@ -411,6 +416,32 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return true;
         }
 
+        @Override
+        public SuggestionExtras getExtras() {
+            String json = mCursor.getString(mExtrasColumn);
+            if (!TextUtils.isEmpty(json)) {
+                try {
+                    return new JsonBackedSuggestionExtras(json);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Could not parse JSON extras from DB: " + json);
+                }
+            }
+            return null;
+        }
+
+        public Collection<String> getExtraColumns() {
+            /*
+             * We always return null here because:
+             * - to return an accurate value, we'd have to aggregate all the extra columns in all
+             *   shortcuts in the shortcuts table, which would mean parsing ALL the JSON contained
+             *   therein
+             * - ListSuggestionCursor does this aggregation, and does it lazily
+             * - All shortcuts are put into a ListSuggestionCursor during the promotion process, so
+             *   relying on ListSuggestionCursor to do the aggregation means that we only parse the
+             *   JSON for shortcuts that are actually displayed.
+             */
+            return null;
+        }
     }
 
     /**
@@ -505,6 +536,18 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         String icon1Uri = getIconUriString(source, suggestion.getSuggestionIcon1());
         String icon2Uri = getIconUriString(source, suggestion.getSuggestionIcon2());
 
+        String extrasJson = null;
+        SuggestionExtras extras = suggestion.getExtras();
+        if (extras != null) {
+            // flatten any custom columns to JSON. We need to keep any custom columns so that
+            // shortcuts for custom suggestion views work properly.
+            try {
+                extrasJson = extras.toJsonString();
+            } catch (JSONException e) {
+                Log.e(TAG, "Could not flatten extras to JSON from " + suggestion, e);
+            }
+        }
+
         ContentValues cv = new ContentValues();
         cv.put(Shortcuts.intent_key.name(), intentKey);
         cv.put(Shortcuts.source.name(), sourceName);
@@ -525,6 +568,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             cv.put(Shortcuts.spinner_while_refreshing.name(), "true");
         }
         cv.put(Shortcuts.log_type.name(), suggestion.getSuggestionLogType());
+        cv.put(Shortcuts.custom_columns.name(), extrasJson);
 
         return cv;
     }
@@ -622,7 +666,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         intent_extradata,
         shortcut_id,
         spinner_while_refreshing,
-        log_type;
+        log_type,
+        custom_columns;
 
         static final String TABLE_NAME = "shortcuts";
 
@@ -779,7 +824,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
                     Shortcuts.intent_extradata.name() + " TEXT, " +
                     Shortcuts.shortcut_id.name() + " TEXT, " +
                     Shortcuts.spinner_while_refreshing.name() + " TEXT, " +
-                    Shortcuts.log_type.name() + " TEXT" +
+                    Shortcuts.log_type.name() + " TEXT, " +
+                    Shortcuts.custom_columns.name() + " TEXT" +
                     ");");
 
             // index for fast lookup of shortcuts by shortcut_id

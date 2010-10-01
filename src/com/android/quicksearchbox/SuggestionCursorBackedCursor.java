@@ -19,9 +19,14 @@ import android.app.SearchManager;
 import android.database.AbstractCursor;
 import android.database.CursorIndexOutOfBoundsException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 public class SuggestionCursorBackedCursor extends AbstractCursor {
 
-    private static final String[] COLUMNS = {
+    // This array also used in CursorBackedSuggestionExtras to avoid duplication.
+    public static final String[] COLUMNS = {
         "_id",  // 0, This will contain the row number. CursorAdapter, used by SuggestionsAdapter,
                 // used by SearchDialog, expects an _id column.
         SearchManager.SUGGEST_COLUMN_TEXT_1,  // 1
@@ -53,6 +58,7 @@ public class SuggestionCursorBackedCursor extends AbstractCursor {
     private static final int COLUMN_INDEX_SPINNER_WHILE_REFRESHING = 12;
 
     private final SuggestionCursor mCursor;
+    private ArrayList<String> mExtraColumns;
 
     public SuggestionCursorBackedCursor(SuggestionCursor cursor) {
         mCursor = cursor;
@@ -60,7 +66,17 @@ public class SuggestionCursorBackedCursor extends AbstractCursor {
 
     @Override
     public String[] getColumnNames() {
-        return COLUMNS;
+        Collection<String> extraColumns = mCursor.getExtraColumns();
+        if (extraColumns != null) {
+            ArrayList<String> allColumns = new ArrayList<String>(COLUMNS.length +
+                    extraColumns.size());
+            mExtraColumns = new ArrayList<String>(extraColumns);
+            allColumns.addAll(Arrays.asList(COLUMNS));
+            allColumns.addAll(mExtraColumns);
+            return allColumns.toArray(new String[allColumns.size()]);
+        } else {
+            return COLUMNS;
+        }
     }
 
     @Override
@@ -73,55 +89,75 @@ public class SuggestionCursorBackedCursor extends AbstractCursor {
         return mCursor;
     }
 
+    private String getExtra(int columnIdx) {
+        int extraColumn = columnIdx - COLUMNS.length;
+        SuggestionExtras extras = get().getExtras();
+        if (extras != null) {
+            return extras.getExtra(mExtraColumns.get(extraColumn));
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public int getInt(int column) {
-        switch (column) {
-            case COLUMN_INDEX_ID:
-                return getPosition();
-            default:
-                throw new CursorIndexOutOfBoundsException("Requested column " + column
-                        + " of " + COLUMNS.length);
+        if (column == COLUMN_INDEX_ID) {
+            return getPosition();
+        } else {
+            try {
+                return Integer.valueOf(getString(column));
+            } catch (NumberFormatException e) {
+                return 0;
+            }
         }
     }
 
     @Override
     public String getString(int column) {
-        switch (column) {
-            case COLUMN_INDEX_ID:
-                return String.valueOf(getPosition());
-            case COLUMN_INDEX_TEXT1:
-                return get().getSuggestionText1();
-            case COLUMN_INDEX_TEXT2:
-                return get().getSuggestionText2();
-            case COLUMN_INDEX_TEXT2_URL:
-                return get().getSuggestionText2Url();
-            case COLUMN_INDEX_ICON1:
-                return get().getSuggestionIcon1();
-            case COLUMN_INDEX_ICON2:
-                return get().getSuggestionIcon2();
-            case COLUMN_INDEX_INTENT_ACTION:
-                return get().getSuggestionIntentAction();
-            case COLUMN_INDEX_INTENT_DATA:
-                return get().getSuggestionIntentDataString();
-            case COLUMN_INDEX_INTENT_EXTRA_DATA:
-                return get().getSuggestionIntentExtraData();
-            case COLUMN_INDEX_QUERY:
-                return get().getSuggestionQuery();
-            case COLUMN_INDEX_FORMAT:
-                return get().getSuggestionFormat();
-            case COLUMN_INDEX_SHORTCUT_ID:
-                return get().getShortcutId();
-            case COLUMN_INDEX_SPINNER_WHILE_REFRESHING:
-                return String.valueOf(get().isSpinnerWhileRefreshing());
-            default:
-                throw new CursorIndexOutOfBoundsException("Requested column " + column
-                        + " of " + COLUMNS.length);
+        if (column < COLUMNS.length) {
+            switch (column) {
+                case COLUMN_INDEX_ID:
+                    return String.valueOf(getPosition());
+                case COLUMN_INDEX_TEXT1:
+                    return get().getSuggestionText1();
+                case COLUMN_INDEX_TEXT2:
+                    return get().getSuggestionText2();
+                case COLUMN_INDEX_TEXT2_URL:
+                    return get().getSuggestionText2Url();
+                case COLUMN_INDEX_ICON1:
+                    return get().getSuggestionIcon1();
+                case COLUMN_INDEX_ICON2:
+                    return get().getSuggestionIcon2();
+                case COLUMN_INDEX_INTENT_ACTION:
+                    return get().getSuggestionIntentAction();
+                case COLUMN_INDEX_INTENT_DATA:
+                    return get().getSuggestionIntentDataString();
+                case COLUMN_INDEX_INTENT_EXTRA_DATA:
+                    return get().getSuggestionIntentExtraData();
+                case COLUMN_INDEX_QUERY:
+                    return get().getSuggestionQuery();
+                case COLUMN_INDEX_FORMAT:
+                    return get().getSuggestionFormat();
+                case COLUMN_INDEX_SHORTCUT_ID:
+                    return get().getShortcutId();
+                case COLUMN_INDEX_SPINNER_WHILE_REFRESHING:
+                    return String.valueOf(get().isSpinnerWhileRefreshing());
+                default:
+                    throw new CursorIndexOutOfBoundsException("Requested column " + column
+                            + " of " + COLUMNS.length);
+            }
+        } else {
+            return getExtra(column);
         }
     }
 
     @Override
     public long getLong(int column) {
-        return getInt(column);
+        try {
+            return Long.valueOf(getString(column));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override
@@ -131,17 +167,28 @@ public class SuggestionCursorBackedCursor extends AbstractCursor {
 
     @Override
     public short getShort(int column) {
-        throw new UnsupportedOperationException();
+        try {
+            return Short.valueOf(getString(column));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override
     public double getDouble(int column) {
-        throw new UnsupportedOperationException();
+        try {
+            return Double.valueOf(getString(column));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override
     public float getFloat(int column) {
-        throw new UnsupportedOperationException();
+        try {
+            return Float.valueOf(getString(column));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
-
 }

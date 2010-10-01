@@ -55,7 +55,14 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
         mResultsView = (SuggestionsView) findViewById(R.id.shortcuts);
         mResultsAdapter = createSuggestionsAdapter();
+        mResultsAdapter.setSuggestionAdapterChangeListener(this);
         mResultsView.setOnKeyListener(new SuggestionsViewKeyListener());
+    }
+
+    @Override
+    public void onSuggestionAdapterChanged() {
+        mResultsView.setAdapter(mResultsAdapter);
+        super.onSuggestionAdapterChanged();
     }
 
     @Override

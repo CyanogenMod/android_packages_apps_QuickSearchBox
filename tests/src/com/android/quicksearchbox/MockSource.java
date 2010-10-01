@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.SuggestionViewFactory;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -219,6 +221,11 @@ public class MockSource implements Source {
 
     public Source getRoot() {
         return this;
+    }
+
+    @Override
+    public SuggestionViewFactory getSuggestionViewFactory() {
+        return null;
     }
 
 }

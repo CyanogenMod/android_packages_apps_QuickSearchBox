@@ -20,7 +20,6 @@ import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.Suggestion;
-import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionFormatter;
 
 import android.content.Context;
@@ -47,6 +46,8 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionView";
+
+    public static final String VIEW_ID = "default";
 
     private TextView mText1;
     private TextView mText2;
@@ -86,18 +87,16 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         setOnKeyListener(mKeyListener);
     }
 
-    public void bindAsSuggestion(SuggestionCursor suggestion, SuggestionsAdapter adapter) {
+    public void bindAsSuggestion(Suggestion suggestion, String userQuery) {
         setOnClickListener(new ClickListener());
         setOnLongClickListener(new LongClickListener());
-        mPosition = suggestion.getPosition();
-        mAdapter = adapter;
 
-        CharSequence text1 = formatText(suggestion.getSuggestionText1(), suggestion, true);
+        CharSequence text1 = formatText(suggestion.getSuggestionText1(), suggestion, userQuery);
         CharSequence text2 = suggestion.getSuggestionText2Url();
         if (text2 != null) {
             text2 = formatUrl(text2);
         } else {
-            text2 = formatText(suggestion.getSuggestionText2(), suggestion, false);
+            text2 = formatText(suggestion.getSuggestionText2(), suggestion, null);
         }
         Drawable icon1 = getSuggestionDrawableIcon1(suggestion);
         Drawable icon2 = getSuggestionDrawableIcon2(suggestion);
@@ -122,7 +121,12 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         updateRefinable(suggestion);
     }
 
-    protected void updateRefinable(SuggestionCursor suggestion) {
+    public void bindAdapter(SuggestionsAdapter adapter, int position) {
+        mAdapter = adapter;
+        mPosition = position;
+    }
+
+    protected void updateRefinable(Suggestion suggestion) {
         mRefineable =
                 suggestion.isWebSearchSuggestion()
                 && mIcon2.getDrawable() == null
@@ -130,7 +134,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         setRefinable(suggestion, mRefineable);
     }
 
-    protected void setRefinable(SuggestionCursor suggestion, boolean refinable) {
+    protected void setRefinable(Suggestion suggestion, boolean refinable) {
         if (refinable) {
             mIcon2.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -172,14 +176,13 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         return iconId == null ? null : source.getIcon(iconId);
     }
 
-    private CharSequence formatText(String str, SuggestionCursor suggestion,
-                boolean highlightSuggested) {
+    private CharSequence formatText(String str, Suggestion suggestion,
+                String userQuery) {
         boolean isHtml = "html".equals(suggestion.getSuggestionFormat());
         if (isHtml && looksLikeHtml(str)) {
             return Html.fromHtml(str);
-        } else if (highlightSuggested && suggestion.isWebSearchSuggestion() &&
-                !TextUtils.isEmpty(suggestion.getUserQuery())) {
-            return mSuggestionFormatter.formatSuggestion(suggestion.getUserQuery(), str);
+        } else if (suggestion.isWebSearchSuggestion() && !TextUtils.isEmpty(userQuery)) {
+            return mSuggestionFormatter.formatSuggestion(userQuery, str);
         } else {
             return str;
         }

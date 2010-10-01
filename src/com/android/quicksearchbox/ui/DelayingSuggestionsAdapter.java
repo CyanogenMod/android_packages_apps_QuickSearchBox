@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.Suggestions;
 
@@ -35,8 +36,8 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
 
     private Suggestions mPendingSuggestions;
 
-    public DelayingSuggestionsAdapter(SuggestionViewFactory viewFactory) {
-        super(viewFactory);
+    public DelayingSuggestionsAdapter(SuggestionViewFactory fallbackFactory, Corpora corpora) {
+        super(fallbackFactory, corpora);
     }
 
     @Override

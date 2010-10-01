@@ -21,6 +21,8 @@ import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.provider.ContactsContract;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Collection;
@@ -117,14 +119,32 @@ public class SearchableSources implements Sources {
         return QsbApplication.get(getContext()).getGoogleSource();
     }
 
+    protected boolean isSearchableContacts(SearchableInfo searchable) {
+        if (DBG) {
+            Log.d(TAG, "isSearchableContacts " + searchable.getSuggestAuthority() + " == " +
+                    ContactsContract.AUTHORITY + " ?");
+        }
+        return TextUtils.equals(ContactsContract.AUTHORITY, searchable.getSuggestAuthority());
+    }
+
     protected SearchableSource createSearchableSource(SearchableInfo searchable) {
         if (searchable == null) return null;
         try {
-            return new SearchableSource(mContext, searchable);
+            // special case for contacts which has a different suggestion view factory
+            if (isSearchableContacts(searchable)) {
+                return new ContactsSource(mContext, searchable);
+            } else {
+                return createDefaultSearchableSource(searchable);
+            }
         } catch (NameNotFoundException ex) {
             Log.e(TAG, "Source not found: " + ex);
             return null;
         }
+    }
+
+    protected SearchableSource createDefaultSearchableSource(SearchableInfo searchable)
+            throws NameNotFoundException {
+        return new SearchableSource(mContext, searchable);
     }
 
     public Source createSourceFor(ComponentName component) {

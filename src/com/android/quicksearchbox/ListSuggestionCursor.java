@@ -22,6 +22,8 @@ import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * A SuggestionCursor that is backed by a list of Suggestions.
@@ -32,7 +34,9 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
 
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
 
-    private final ArrayList<Suggestion> mSuggestions;
+    private final ArrayList<Entry> mSuggestions;
+
+    private HashSet<String> mExtraColumns;
 
     private int mPos = 0;
 
@@ -44,13 +48,13 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
     public ListSuggestionCursor(String userQuery, Suggestion...suggestions) {
         this(userQuery, suggestions.length);
         for (Suggestion suggestion : suggestions) {
-            mSuggestions.add(suggestion);
+            add(suggestion);
         }
     }
 
     public ListSuggestionCursor(String userQuery, int capacity) {
         super(userQuery);
-        mSuggestions = new ArrayList<Suggestion>(capacity);
+        mSuggestions = new ArrayList<Entry>(capacity);
     }
 
     /**
@@ -59,7 +63,7 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
      * @return {@code true} if the suggestion was added.
      */
     public boolean add(Suggestion suggestion) {
-        mSuggestions.add(suggestion);
+        mSuggestions.add(new Entry(suggestion));
         return true;
     }
 
@@ -90,7 +94,7 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
     }
 
     public void replaceRow(Suggestion suggestion) {
-        mSuggestions.set(mPos, suggestion);
+        mSuggestions.set(mPos, new Entry(suggestion));
     }
 
     public int getCount() {
@@ -99,7 +103,7 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
 
     @Override
     protected Suggestion current() {
-        return mSuggestions.get(mPos);
+        return mSuggestions.get(mPos).get();
     }
 
     @Override
@@ -129,4 +133,48 @@ public class ListSuggestionCursor extends AbstractSuggestionCursorWrapper {
     protected void notifyDataSetChanged() {
         mDataSetObservable.notifyChanged();
     }
+
+    @Override
+    public SuggestionExtras getExtras() {
+        // override with caching to avoid re-parsing the extras
+        return mSuggestions.get(mPos).getExtras();
+    }
+
+   public Collection<String> getExtraColumns() {
+        if (mExtraColumns == null) {
+            mExtraColumns = new HashSet<String>();
+            for (Entry e : mSuggestions) {
+                SuggestionExtras extras = e.getExtras();
+                Collection<String> extraColumns = extras == null ? null
+                        : extras.getExtraColumnNames();
+                if (extraColumns != null) {
+                    for (String column : extras.getExtraColumnNames()) {
+                        mExtraColumns.add(column);
+                    }
+                }
+            }
+        }
+        return mExtraColumns.isEmpty() ? null : mExtraColumns;
+    }
+
+    /**
+     * This class exists purely to cache the suggestion extras.
+     */
+    private static class Entry {
+        private final Suggestion mSuggestion;
+        private SuggestionExtras mExtras;
+        public Entry(Suggestion s) {
+            mSuggestion = s;
+        }
+        public Suggestion get() {
+            return mSuggestion;
+        }
+        public SuggestionExtras getExtras() {
+            if (mExtras == null) {
+                mExtras = mSuggestion.getExtras();
+            }
+            return mExtras;
+        }
+    }
+
 }

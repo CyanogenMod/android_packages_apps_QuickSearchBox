@@ -13,26 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.quicksearchbox;
 
-package com.android.quicksearchbox.ui;
+import org.json.JSONException;
 
-import com.android.quicksearchbox.Suggestion;
+import java.util.Collection;
 
 /**
- * Interface to be implemented by any view appearing in the list of suggestions.
+ * Extra data that can be attached to a suggestion.
  */
-public interface SuggestionView {
-    /**
-     * Set the view's contents based on the given suggestion.
-     */
-    void bindAsSuggestion(Suggestion suggestion, String userQuery);
+public interface SuggestionExtras {
 
     /**
-     * Binds this view to a list adapter.
-     *
-     * @param adapter The adapter of the list which the view is appearing in
-     * @param position The position of this view with the list.
+     * Return the names of custom columns present in these extras.
      */
-    void bindAdapter(SuggestionsAdapter adapter, int position);
+    Collection<String> getExtraColumnNames();
+
+    /**
+     * @param columnName The column to get a value from.
+     */
+    String getExtra(String columnName);
+
+    /**
+     * Flatten these extras as a JSON object.
+     */
+    String toJsonString() throws JSONException;
 
 }

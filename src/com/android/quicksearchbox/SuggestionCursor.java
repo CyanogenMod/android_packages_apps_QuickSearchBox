@@ -19,6 +19,8 @@ import com.android.quicksearchbox.util.QuietlyCloseable;
 
 import android.database.DataSetObserver;
 
+import java.util.Collection;
+
 /**
  * A sequence of suggestions, with a current position.
  */
@@ -75,4 +77,9 @@ public interface SuggestionCursor extends Suggestion, QuietlyCloseable {
      * @param observer the observer to unregister.
      */
     void unregisterDataSetObserver(DataSetObserver observer);
+
+    /**
+     * Return the extra columns present in this cursor, or null if none exist.
+     */
+    Collection<String> getExtraColumns();
 }

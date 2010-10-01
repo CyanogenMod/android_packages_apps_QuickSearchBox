@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.SuggestionViewFactory;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -143,7 +145,7 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
     SourceResult getSuggestions(String query, int queryLimit, boolean onlySource);
 
     /**
-     * Updates a shorcut.
+     * Updates a shortcut.
      *
      * @param shortcutId The id of the shortcut to update.
      * @param extraData associated with this shortcut.
@@ -171,5 +173,10 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      * source.
      */
     Source getRoot();
+
+    /**
+     * Get the factory used to create views for suggestions from this source.
+     */
+    SuggestionViewFactory getSuggestionViewFactory();
 
 }

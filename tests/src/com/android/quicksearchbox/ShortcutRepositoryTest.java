@@ -18,6 +18,8 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.MockExecutor;
 import com.android.quicksearchbox.util.Util;
 
+import org.json.JSONArray;
+
 import android.app.SearchManager;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
@@ -686,6 +688,33 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 "a", mAllowedCorpora, mApp1, mContact1);
     }
 
+    public void testExtraDataNull() {
+        assertExtra("Null extra", "extra_null", null);
+    }
+
+    public void testExtraDataString() {
+        assertExtra("String extra", "extra_string", "stringy-stringy-string");
+    }
+
+    public void testExtraDataInteger() {
+        assertExtra("Integer extra", "extra_int", new Integer(42));
+    }
+
+    public void testExtraDataFloat() {
+        assertExtra("Float extra", "extra_float", new Float(Math.PI));
+    }
+
+    public void testExtraDataStringWithDodgyChars() {
+        assertExtra("String extra with newlines", "extra_string", "line\nline\nline\n");
+        JSONArray a = new JSONArray();
+        a.put(true);
+        a.put(42);
+        a.put("hello");
+        a.put("hello \"again\"");
+        assertExtra("String extra with JSON", "extra_string", a.toString());
+        assertExtra("String extra with control chars", "extra_string", "\0\b\t\f\r");
+    }
+
     // Utilities
 
     protected ListSuggestionCursor makeCursor(String query, SuggestionData... suggestions) {
@@ -742,6 +771,13 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         sourceImpression(source, click, NOW);
     }
 
+    protected SuggestionData sourceSuggestion(Source source) {
+        return new SuggestionData(source)
+            .setIntentAction("view")
+            .setIntentData("data/id")
+            .setShortcutId("shortcutid");
+    }
+
     /**
      * Simulate an impression, and optionally a click, on a source.
      *
@@ -750,11 +786,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
      */
     protected void sourceImpression(Source source, boolean click, long now) {
         SuggestionData suggestionClicked = !click ?
-                null :
-                new SuggestionData(source)
-                    .setIntentAction("view")
-                    .setIntentData("data/id")
-                    .setShortcutId("shortcutid");
+                null : sourceSuggestion(source);
 
         reportClick("a", suggestionClicked);
     }
@@ -865,6 +897,18 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     static void assertContentsInOrder(Iterable<?> actual, Object... expected) {
         MoreAsserts.assertContentsInOrder(null, actual, expected);
+    }
+
+    void assertExtra(String message, String extraColumn, Object extraValue) {
+        SuggestionData s = sourceSuggestion(APP_SOURCE);
+        s.setExtras(new MockSuggestionExtras().put(extraColumn, extraValue));
+        reportClick("a", s);
+        assertShortcutExtra(message, "a", extraColumn, extraValue);
+    }
+
+    void assertShortcutExtra(String message, String query, String extraColumn, Object extraValue) {
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
+        SuggestionCursorUtil.assertSuggestionExtras(message, cursor, extraColumn, extraValue);
     }
 
 }

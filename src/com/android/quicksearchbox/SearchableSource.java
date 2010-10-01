@@ -72,6 +72,7 @@ public class SearchableSource extends AbstractSource {
             throws NameNotFoundException {
         super(context);
         ComponentName componentName = searchable.getSearchActivity();
+        if (DBG) Log.d(TAG, "created Searchable for " + componentName);
         mSearchable = searchable;
         mName = componentName.flattenToShortString();
         PackageManager pm = context.getPackageManager();

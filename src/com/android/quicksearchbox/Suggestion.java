@@ -116,4 +116,9 @@ public interface Suggestion {
      */
     boolean isWebSearchSuggestion();
 
+    /**
+     * Returns any extras associated with this suggestion, or {@code null} if there are none.
+     */
+    SuggestionExtras getExtras();
+
 }

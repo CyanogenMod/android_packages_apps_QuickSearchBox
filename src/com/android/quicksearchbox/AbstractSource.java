@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.ui.SuggestionViewFactory;
+
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,6 +37,8 @@ public abstract class AbstractSource implements Source {
     private final Context mContext;
 
     private IconLoader mIconLoader;
+
+    private SuggestionViewFactory mViewFactory;
 
     public AbstractSource(Context context) {
         mContext = context;
@@ -120,4 +124,14 @@ public abstract class AbstractSource implements Source {
         return "Source{name=" + getName() + "}";
     }
 
+    public SuggestionViewFactory getSuggestionViewFactory() {
+        if (mViewFactory == null) {
+            mViewFactory = createSuggestionViewFactory();
+        }
+        return mViewFactory;
+    }
+
+    protected SuggestionViewFactory createSuggestionViewFactory() {
+        return QsbApplication.get(getContext()).getDefaultSuggestionViewFactory();
+    }
 }

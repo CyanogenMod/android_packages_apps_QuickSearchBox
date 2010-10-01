@@ -18,6 +18,8 @@ package com.android.quicksearchbox;
 
 import android.database.DataSetObserver;
 
+import java.util.Collection;
+
 /**
  * A suggestion cursor that delegates all methods to another SuggestionCursor.
  */
@@ -73,6 +75,10 @@ public class SuggestionCursorWrapper extends AbstractSuggestionCursorWrapper {
     @Override
     protected SuggestionCursor current() {
         return mCursor;
+    }
+
+    public Collection<String> getExtraColumns() {
+        return mCursor.getExtraColumns();
     }
 
 }

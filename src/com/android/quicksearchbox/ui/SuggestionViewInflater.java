@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,38 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Suggestion;
+import com.android.quicksearchbox.SuggestionCursor;
 
 import android.content.Context;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
- * Inflates suggestion views.
+ * Suggestion view factory that inflates views from XML.
  */
 public class SuggestionViewInflater implements SuggestionViewFactory {
 
-    // The suggestion view classes that may be returned by this factory.
-    private static final Class<?>[] SUGGESTION_VIEW_CLASSES = {
-            DefaultSuggestionView.class,
-            ContactSuggestionView.class,
-    };
-
-    // The layout ids associated with each of the above classes.
-    private static final int[] SUGGESTION_VIEW_LAYOUTS = {
-            R.layout.suggestion,
-            R.layout.contact_suggestion,
-    };
-
-    private static final String CONTACT_LOOKUP_URI
-            = ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString();
-
+    private final String mViewType;
+    private final Class<?> mViewClass;
+    private final int mLayoutId;
     private final Context mContext;
 
-    public SuggestionViewInflater(Context context) {
+    /**
+     * @param viewType The unique type of views inflated by this factory
+     * @param viewClass The expected type of view classes.
+     * @param layoutId resource ID of layout to use.
+     * @param context Context to use for inflating the views.
+     */
+    public SuggestionViewInflater(String viewType, Class<? extends SuggestionView> viewClass,
+            int layoutId, Context context) {
+        mViewType = viewType;
+        mViewClass = viewClass;
+        mLayoutId = layoutId;
         mContext = context;
     }
 
@@ -55,26 +55,28 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public int getSuggestionViewTypeCount() {
-        return SUGGESTION_VIEW_CLASSES.length;
+    @Override
+    public Collection<String> getSuggestionViewTypes() {
+        return Collections.singletonList(mViewType);
     }
 
-    public int getSuggestionViewType(Suggestion suggestion) {
-        return isContactSuggestion(suggestion) ? 1 : 0;
-    }
-
-    public SuggestionView getSuggestionView(int viewType, View convertView,
-            ViewGroup parentViewType) {
-        if (convertView == null || !convertView.getClass().equals(
-                SUGGESTION_VIEW_CLASSES[viewType])) {
-            int layoutId = SUGGESTION_VIEW_LAYOUTS[viewType];
-            convertView = getInflater().inflate(layoutId, parentViewType, false);
+    @Override
+    public View getView(SuggestionCursor suggestion, String userQuery,
+            View convertView, ViewGroup parent) {
+        if (convertView == null || !convertView.getClass().equals(mViewClass)) {
+            int layoutId = mLayoutId;
+            convertView = getInflater().inflate(layoutId, parent, false);
         }
-        return (SuggestionView) convertView;
+        if (!(convertView instanceof SuggestionView)) {
+            throw new IllegalArgumentException("Not a SuggestionView: " + convertView);
+        }
+        ((SuggestionView) convertView).bindAsSuggestion(suggestion, userQuery);
+        return convertView;
     }
 
-    private boolean isContactSuggestion(Suggestion suggestion) {
-        String intentData = suggestion.getSuggestionIntentDataString();
-        return intentData != null && intentData.startsWith(CONTACT_LOOKUP_URI);
+    @Override
+    public String getViewType(Suggestion suggestion) {
+        return mViewType;
     }
+
 }

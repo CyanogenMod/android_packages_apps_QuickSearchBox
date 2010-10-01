@@ -21,6 +21,7 @@ import com.android.quicksearchbox.google.GoogleSuggestClient;
 import com.android.quicksearchbox.ui.CorporaAdapter;
 import com.android.quicksearchbox.ui.CorpusViewFactory;
 import com.android.quicksearchbox.ui.CorpusViewInflater;
+import com.android.quicksearchbox.ui.DefaultSuggestionView;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.util.Factory;
@@ -58,7 +59,7 @@ public class QsbApplication {
     private NamedTaskExecutor mSourceTaskExecutor;
     private ThreadFactory mQueryThreadFactory;
     private SuggestionsProvider mSuggestionsProvider;
-    private SuggestionViewFactory mSuggestionViewFactory;
+    private SuggestionViewFactory mDefaultSuggestionViewFactory;
     private CorpusViewFactory mCorpusViewFactory;
     private GoogleSource mGoogleSource;
     private VoiceSearch mVoiceSearch;
@@ -337,19 +338,20 @@ public class QsbApplication {
     }
 
     /**
-     * Gets the suggestion view factory.
+     * Gets the default suggestion view factory.
      * May only be called from the main thread.
      */
-    public SuggestionViewFactory getSuggestionViewFactory() {
+    public SuggestionViewFactory getDefaultSuggestionViewFactory() {
         checkThread();
-        if (mSuggestionViewFactory == null) {
-            mSuggestionViewFactory = createSuggestionViewFactory();
+        if (mDefaultSuggestionViewFactory == null) {
+            mDefaultSuggestionViewFactory = createDefaultSuggestionViewFactory();
         }
-        return mSuggestionViewFactory;
+        return mDefaultSuggestionViewFactory;
     }
 
-    protected SuggestionViewFactory createSuggestionViewFactory() {
-        return new SuggestionViewInflater(getContext());
+    protected SuggestionViewFactory createDefaultSuggestionViewFactory() {
+        return new SuggestionViewInflater(DefaultSuggestionView.VIEW_ID,
+                DefaultSuggestionView.class, R.layout.suggestion, getContext());
     }
 
     /**

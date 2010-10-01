@@ -18,9 +18,12 @@ package com.android.quicksearchbox.google;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SourceResult;
+import com.android.quicksearchbox.SuggestionExtras;
 
 import android.content.ComponentName;
 import android.database.DataSetObserver;
+
+import java.util.Collection;
 
 public abstract class AbstractGoogleSourceResult implements SourceResult {
 
@@ -136,4 +139,11 @@ public abstract class AbstractGoogleSourceResult implements SourceResult {
         return true;
     }
 
+    public SuggestionExtras getExtras() {
+        return null;
+    }
+
+    public Collection<String> getExtraColumns() {
+        return null;
+    }
 }
