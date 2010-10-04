@@ -28,7 +28,7 @@
         android:scaleType="centerInside"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="2dip"
+        android:layout_marginBottom="1dip"
         />
 
    <TextView android:id="@+id/source_label"

@@ -15,7 +15,9 @@
 -->
 
 <resources>
-    <!-- The number of columns in the business listing launcher GridView -->
-    <integer name="corpus_selection_dialog_columns">6</integer>
+
+  <integer name="num_suggestions_above_keyboard">2</integer>
+
+  <integer name="corpus_selection_dialog_columns">3</integer>
 
 </resources>
