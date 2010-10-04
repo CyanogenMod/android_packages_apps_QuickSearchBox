@@ -111,6 +111,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         if (DBG) Log.d(TAG, "getSuggestions(" + query + ")");
         corporaToQuery = filterCorpora(query, corporaToQuery);
         final Suggestions suggestions = new Suggestions(query, corporaToQuery);
+        Log.i(TAG, "chars:" + query.length() + ",corpora:" + corporaToQuery);
 
         // Fast path for the zero sources case
         if (corporaToQuery.size() == 0) {

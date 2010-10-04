@@ -149,15 +149,15 @@ public class MockCorpus implements Corpus {
         return mDefaultEnabled;
     }
 
+    public boolean includeInAll() {
+        return true;
+    }
+
     public boolean isCorpusEnabled() {
         return true;
     }
 
     public boolean isCorpusHidden() {
-        return false;
-    }
-
-    public boolean isLocationAware() {
         return false;
     }
 

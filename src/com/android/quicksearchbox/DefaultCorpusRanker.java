@@ -58,7 +58,7 @@ public class DefaultCorpusRanker implements CorpusRanker {
         mRankedCorpora = new RankedCorporaCache();
     }
 
-    public void getRankedCorpora(Consumer<List<Corpus>> consumer) {
+    public void getCorporaInAll(Consumer<List<Corpus>> consumer) {
         mRankedCorpora.get(consumer);
     }
 
@@ -78,7 +78,7 @@ public class DefaultCorpusRanker implements CorpusRanker {
         protected void create() {
             mShortcuts.getCorpusScores(new Consumer<Map<String,Integer>>(){
                 public boolean consume(Map<String, Integer> clickScores) {
-                    Collection<Corpus> enabledCorpora = mCorpora.getEnabledCorpora();
+                    Collection<Corpus> enabledCorpora = mCorpora.getCorporaInAll();
                     if (DBG) Log.d(TAG, "Ranking: " + enabledCorpora);
                     ArrayList<Corpus> ordered = new ArrayList<Corpus>(enabledCorpora);
                     Collections.sort(ordered, new CorpusComparator(clickScores));

@@ -15,9 +15,8 @@
  */
 package com.android.quicksearchbox.google;
 
-import com.android.quicksearchbox.AbstractSource;
+import com.android.quicksearchbox.AbstractInternalSource;
 import com.android.quicksearchbox.CursorBackedSourceResult;
-import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.SourceResult;
 import com.android.quicksearchbox.SuggestionCursor;
@@ -25,14 +24,12 @@ import com.android.quicksearchbox.SuggestionCursor;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 
 /**
  * Special source implementation for Google suggestions.
  */
-public abstract class AbstractGoogleSource extends AbstractSource implements GoogleSource {
+public abstract class AbstractGoogleSource extends AbstractInternalSource implements GoogleSource {
 
     /*
      * This name corresponds to what was used in previous version of quick search box. We use the
@@ -48,13 +45,7 @@ public abstract class AbstractGoogleSource extends AbstractSource implements Goo
 
     public abstract ComponentName getIntentComponent();
 
-    public String getSuggestUri() {
-        return null;
-    }
-
     public abstract SuggestionCursor refreshShortcut(String shortcutId, String extraData);
-
-    public abstract boolean isLocationAware();
 
     /**
      * Called by QSB to get web suggestions for a query.
@@ -66,10 +57,6 @@ public abstract class AbstractGoogleSource extends AbstractSource implements Goo
      */
     public abstract SourceResult queryExternal(String query);
 
-    public boolean canRead() {
-        return true;
-    }
-
     public Intent createVoiceSearchIntent(Bundle appData) {
         return createVoiceWebSearchIntent(appData);
     }
@@ -78,17 +65,8 @@ public abstract class AbstractGoogleSource extends AbstractSource implements Goo
         return Intent.ACTION_WEB_SEARCH;
     }
 
-    public String getDefaultIntentData() {
-        return null;
-    }
-
     public CharSequence getHint() {
         return getContext().getString(R.string.google_search_hint);
-    }
-
-    @Override
-    protected String getIconPackage() {
-        return getContext().getPackageName();
     }
 
     public CharSequence getLabel() {
@@ -99,24 +77,11 @@ public abstract class AbstractGoogleSource extends AbstractSource implements Goo
         return GOOGLE_SOURCE_NAME;
     }
 
-    public int getQueryThreshold() {
-        return 0;
-    }
-
     public CharSequence getSettingsDescription() {
         return getContext().getString(R.string.google_search_description);
     }
 
-    public Drawable getSourceIcon() {
-        return getContext().getResources().getDrawable(getSourceIconResource());
-    }
-
-    public Uri getSourceIconUri() {
-        return Uri.parse("android.resource://" + getContext().getPackageName()
-                + "/" +  getSourceIconResource());
-    }
-
-    private int getSourceIconResource() {
+    protected int getSourceIconResource() {
         return R.drawable.google_icon;
     }
 
@@ -132,29 +97,15 @@ public abstract class AbstractGoogleSource extends AbstractSource implements Goo
         return result == null ? new CursorBackedSourceResult(this, query) : result;
     }
 
-    public int getVersionCode() {
-        return QsbApplication.get(getContext()).getVersionCode();
-    }
-
-    /**
-     * Shortcuts from previous version are compatible with shortcuts from this version, so we just
-     * return true. If shortcuts become incompatible during an upgrade, some examination of the
-     * version code should be added here.
-     */
-    @Override
-    public boolean isVersionCodeCompatible(int version) {
-        return true;
-    }
-
-    public boolean queryAfterZeroResults() {
-        return true;
-    }
-
     public boolean voiceSearchEnabled() {
         return true;
     }
 
     public boolean isWebSuggestionSource() {
+        return true;
+    }
+
+    public boolean includeInAll() {
         return true;
     }
 

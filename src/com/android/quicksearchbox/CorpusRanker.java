@@ -26,11 +26,6 @@ import java.util.List;
 public interface CorpusRanker {
 
     /**
-     * Clears any currently cached ranking.
-     */
-    void clear();
-
-    /**
      * Gets a an ordered list of corpora.
      *
      * @param consumer Consumer that will be given the list of ranked corpora.
@@ -38,6 +33,6 @@ public interface CorpusRanker {
      *        The most important corpora come first in the list. Callers should not modify the
      *        list.
      */
-    void getRankedCorpora(Consumer<List<Corpus>> consumer);
+    void getCorporaInAll(Consumer<List<Corpus>> consumer);
 
 }

@@ -78,11 +78,6 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
     }
 
     @Override
-    public boolean isLocationAware() {
-        return false;
-    }
-
-    @Override
     public SourceResult queryInternal(String query) {
         return query(query);
     }

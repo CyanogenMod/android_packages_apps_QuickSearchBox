@@ -120,10 +120,6 @@ public class MockSource implements Source {
         return true;
     }
 
-    public boolean isLocationAware() {
-        return false;
-    }
-
     public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
         if (query.length() == 0) {
             return null;
@@ -215,6 +211,10 @@ public class MockSource implements Source {
 
     public boolean voiceSearchEnabled() {
         return false;
+    }
+
+    public boolean includeInAll() {
+        return true;
     }
 
     public Source getRoot() {

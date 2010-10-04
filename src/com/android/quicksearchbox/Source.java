@@ -116,9 +116,13 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
 
     boolean voiceSearchEnabled();
 
-    boolean isWebSuggestionSource();
+    /**
+     * Whether this source should be included in the blended All mode. The source must
+     * also be enabled to be included in All.
+     */
+    boolean includeInAll();
 
-    boolean isLocationAware();
+    boolean isWebSuggestionSource();
 
     Intent createSearchIntent(String query, Bundle appData);
 
