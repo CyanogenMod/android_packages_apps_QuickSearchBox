@@ -70,6 +70,7 @@ public abstract class SearchActivityView extends RelativeLayout
 
     protected SuggestionsAdapter mSuggestionsAdapter;
 
+    protected ImageButton mSearchCloseButton;
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
 
@@ -107,6 +108,7 @@ public abstract class SearchActivityView extends RelativeLayout
         // suggestions?
         mSuggestionsAdapter.setOnFocusChangeListener(new SuggestListFocusListener());
 
+        mSearchCloseButton = (ImageButton) findViewById(R.id.search_close_btn);
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
 
@@ -120,6 +122,10 @@ public abstract class SearchActivityView extends RelativeLayout
         mButtonsKeyListener = new ButtonsKeyListener();
         mSearchGoButton.setOnKeyListener(mButtonsKeyListener);
         mVoiceSearchButton.setOnKeyListener(mButtonsKeyListener);
+        if (mSearchCloseButton != null) {
+            mSearchCloseButton.setOnKeyListener(mButtonsKeyListener);
+            mSearchCloseButton.setOnClickListener(new CloseClickListener());
+        }
 
         mUpdateSuggestions = true;
     }
@@ -584,4 +590,10 @@ public abstract class SearchActivityView extends RelativeLayout
         boolean onSearchClicked(int method);
     }
 
+    private class CloseClickListener implements OnClickListener {
+
+        public void onClick(View v) {
+            mQueryTextView.setText("");
+        }
+    }
 }
