@@ -85,12 +85,13 @@ public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
     boolean isCorpusDefaultEnabled();
 
     /**
+     * Whether this corpus should be included in the blended All mode.
+     */
+    boolean includeInAll();
+
+    /**
      * Checks if this corpus should be hidden from the corpus selector.
      */
     boolean isCorpusHidden();
 
-    /**
-     * Checks if this corpus is location aware.
-     */
-    boolean isLocationAware();
 }

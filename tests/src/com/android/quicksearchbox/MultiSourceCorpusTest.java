@@ -60,6 +60,10 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
         SuggestionCursorUtil.assertSameSuggestions(expected, observed);
     }
 
+    public void testIncludeInAll() {
+        assertTrue(mCorpus.includeInAll());
+    }
+
     private static ListSuggestionCursor concatSuggestionCursors(String query,
             SuggestionCursor... cursors) {
         ListSuggestionCursor out = new ListSuggestionCursor("foo");

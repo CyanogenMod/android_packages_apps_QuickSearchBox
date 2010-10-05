@@ -237,10 +237,6 @@ public class SearchableSource extends AbstractSource {
         return mSearchable.getVoiceSearchEnabled();
     }
 
-    public boolean isLocationAware() {
-        return false;
-    }
-
     public Intent createVoiceSearchIntent(Bundle appData) {
         if (mSearchable.getVoiceSearchLaunchWebSearch()) {
             return createVoiceWebSearchIntent(appData);
@@ -438,6 +434,10 @@ public class SearchableSource extends AbstractSource {
 
     public boolean isWebSuggestionSource() {
         return false;
+    }
+
+    public boolean includeInAll() {
+        return true;
     }
 
     public boolean queryAfterZeroResults() {

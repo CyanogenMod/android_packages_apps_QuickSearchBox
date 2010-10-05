@@ -17,7 +17,6 @@
 package com.android.quicksearchbox;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.text.TextUtils;
@@ -76,6 +75,16 @@ public class SearchableCorpora implements Corpora {
 
     public List<Corpus> getEnabledCorpora() {
         return mEnabledCorpora;
+    }
+
+    public List<Corpus> getCorporaInAll() {
+        ArrayList<Corpus> corpora = new ArrayList<Corpus>(mEnabledCorpora.size());
+        for (Corpus corpus : mEnabledCorpora) {
+            if (corpus.includeInAll()) {
+                corpora.add(corpus);
+            }
+        }
+        return corpora;
     }
 
     public Corpus getCorpus(String name) {

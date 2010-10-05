@@ -83,10 +83,15 @@ public class SearchableSources implements Sources {
 
         addSearchableSources();
 
+        addInternalSources();
+
         mWebSearchSource = createWebSearchSource();
         if (mWebSearchSource != null) {
             addSource(mWebSearchSource);
         }
+    }
+
+    protected void addInternalSources() {
     }
 
     private void addSearchableSources() {
@@ -104,7 +109,7 @@ public class SearchableSources implements Sources {
         }
     }
 
-    private void addSource(Source source) {
+    protected void addSource(Source source) {
         mSources.put(source.getName(), source);
     }
 

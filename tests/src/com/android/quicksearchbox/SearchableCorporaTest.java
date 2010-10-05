@@ -17,8 +17,10 @@
 package com.android.quicksearchbox;
 
 import android.test.AndroidTestCase;
+import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -32,40 +34,70 @@ public class SearchableCorporaTest extends AndroidTestCase {
 
     protected SearchableCorpora mCorpora;
 
+    private static final MockCorpus CORPUS_1 = new MockCorpus(MockSource.SOURCE_1);
+    private static final MockCorpus CORPUS_DISABLED = new MockCorpus(MockSource.SOURCE_2);
+    private static final MockCorpus CORPUS_NOT_IN_ALL = new MockCorpus(MockSource.SOURCE_3) {
+        @Override
+        public boolean includeInAll() {
+            return false;
+        }
+    };
+    private static final MockCorpus CORPUS_WEB = new MockCorpus(MockSource.WEB_SOURCE);
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mSettings = new MockSearchSettings();
+        mSettings = new MockSearchSettings() {
+            @Override
+            public boolean isCorpusEnabled(Corpus corpus) {
+                return !CORPUS_DISABLED.equals(corpus);
+            }
+        };
         MockSources sources = new MockSources();
         sources.addSource(MockSource.SOURCE_1);
         sources.addSource(MockSource.SOURCE_2);
+        sources.addSource(MockSource.SOURCE_3);
+        sources.addSource(MockSource.WEB_SOURCE);
         mCorpora = new SearchableCorpora(mContext, mSettings, sources, new MockCorpusFactory());
         mCorpora.update();
     }
 
     public void testGetAllCorpora() {
-        assertNotEmpty(mCorpora.getAllCorpora());
+        MoreAsserts.assertContentsInAnyOrder(mCorpora.getAllCorpora(),
+                CORPUS_1, CORPUS_DISABLED, CORPUS_NOT_IN_ALL, CORPUS_WEB);
     }
 
-    public void testEnabledSuggestionSources() {
-        assertNotNull(mCorpora.getEnabledCorpora());
+    public void testEnabledCorpora() {
+        MoreAsserts.assertContentsInAnyOrder(mCorpora.getEnabledCorpora(),
+                CORPUS_1, CORPUS_NOT_IN_ALL, CORPUS_WEB);
+    }
+
+    public void testCorporaIncludedInAll() {
+        MoreAsserts.assertContentsInAnyOrder(mCorpora.getCorporaInAll(),
+                CORPUS_1, CORPUS_WEB);
+    }
+
+    public void testGetWebCorpus() {
+        assertEquals(CORPUS_WEB, mCorpora.getWebCorpus());
     }
 
     public void testGetCorpusForSource() {
-        assertNotNull(mCorpora.getCorpusForSource(MockSource.SOURCE_1));
-        assertNotNull(mCorpora.getCorpusForSource(MockSource.SOURCE_2));
-        assertNull(mCorpora.getCorpusForSource(MockSource.SOURCE_3));
+        assertEquals(CORPUS_1, mCorpora.getCorpusForSource(MockSource.SOURCE_1));
+        assertNull(mCorpora.getCorpusForSource(new MockSource("foo")));
     }
 
-    static void assertEmpty(Collection<?> collection) {
-        assertNotNull(collection);
-        assertTrue(collection.isEmpty());
+    public void testGetCorpus() {
+        assertEquals(CORPUS_WEB, mCorpora.getCorpus(CORPUS_WEB.getName()));
     }
 
-    static void assertNotEmpty(Collection<?> collection) {
-        assertNotNull(collection);
-        assertFalse(collection.isEmpty());
+    /**
+     * Mock implementation of {@link CorpusFactory}.
+     */
+    private static class MockCorpusFactory implements CorpusFactory {
+        public Collection<Corpus> createCorpora(Sources sources) {
+            return Arrays.<Corpus>asList(CORPUS_1, CORPUS_DISABLED, CORPUS_NOT_IN_ALL, CORPUS_WEB);
+        }
     }
 
 }

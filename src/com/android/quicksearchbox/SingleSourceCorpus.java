@@ -93,12 +93,12 @@ public class SingleSourceCorpus extends AbstractCorpus {
         return null;
     }
 
-    public boolean isWebCorpus() {
-        return false;
+    public boolean includeInAll() {
+        return mSource.includeInAll();
     }
 
-    public boolean isLocationAware() {
-        return mSource.isLocationAware();
+    public boolean isWebCorpus() {
+        return false;
     }
 
     public Collection<Source> getSources() {

@@ -84,6 +84,10 @@ public class MockCorpora implements Corpora {
         return getAllCorpora();
     }
 
+    public List<Corpus> getCorporaInAll() {
+        return getAllCorpora();
+    }
+
     public Source getSource(String name) {
         for (Corpus corpus : mCorporaByName.values()) {
             for (Source source : corpus.getSources()) {

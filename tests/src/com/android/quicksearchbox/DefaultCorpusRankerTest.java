@@ -75,7 +75,7 @@ public class DefaultCorpusRankerTest extends AndroidTestCase {
 
     private List<Corpus> getRankedCorpora() {
         ConsumerTrap<List<Corpus>> consumer = new ConsumerTrap<List<Corpus>>();
-        mRanker.getRankedCorpora(consumer);
+        mRanker.getCorporaInAll(consumer);
         return consumer.getValue();
     }
 

@@ -41,6 +41,13 @@ public interface Corpora {
     List<Corpus> getEnabledCorpora();
 
     /**
+     * Gets all corpora that should be included in the blended All mode.
+     *
+     * @return Callers must not modify the returned list.
+     */
+    List<Corpus> getCorporaInAll();
+
+    /**
      * Gets a corpus by name.
      *
      * @return A corpus, or null.
