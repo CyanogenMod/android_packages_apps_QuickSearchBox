@@ -160,7 +160,7 @@
                         android:layout_centerVertical="true"
                         android:gravity="center_vertical|left"
                         android:textSize="18sp"
-                        android:text="@string/shortcuts_label"/>
+                        android:text="@string/non_web_pane_label"/>
 
                 <ImageView
                     android:id="@+id/settings_icon"
