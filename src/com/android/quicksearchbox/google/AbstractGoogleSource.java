@@ -20,8 +20,6 @@ import com.android.quicksearchbox.CursorBackedSourceResult;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.SourceResult;
 import com.android.quicksearchbox.SuggestionCursor;
-import com.android.quicksearchbox.ui.SuggestionViewFactory;
-import com.google.android.googlequicksearchbox.ui.GoogleSuggestionViewFactory;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -112,9 +110,4 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
         return true;
     }
 
-    @Override
-    public SuggestionViewFactory createSuggestionViewFactory() {
-        return new GoogleSuggestionViewFactory(getContext(),
-                super.createSuggestionViewFactory());
-    }
 }
