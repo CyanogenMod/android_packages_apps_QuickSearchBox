@@ -56,8 +56,8 @@ public class ResultPromoterTest extends AndroidTestCase {
         mS12 = MockSource.SOURCE_1.createSuggestion(mQuery + "_1_2");
         mS21 = MockSource.SOURCE_2.createSuggestion(mQuery + "_1_1");
         mS22 = MockSource.SOURCE_2.createSuggestion(mQuery + "_1_2");
-        mWeb1 = MockSource.WEB_SOURCE.createWebSuggestion(mQuery + "_web_1");
-        mWeb2 = MockSource.WEB_SOURCE.createWebSuggestion(mQuery + "_web_2");
+        mWeb1 = MockSource.WEB_SOURCE.createSuggestion(mQuery + "_web_1");
+        mWeb2 = MockSource.WEB_SOURCE.createSuggestion(mQuery + "_web_2");
         mShortcuts = cursor(mS11, mS12, mS21, mS22, mWeb1, mWeb2);
         mCorpusResult1 = MockCorpus.CORPUS_1.getSuggestions(mQuery, 10, false);
         mCorpusResult2 = MockCorpus.CORPUS_2.getSuggestions(mQuery, 10, false);

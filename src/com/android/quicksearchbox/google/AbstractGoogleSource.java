@@ -16,6 +16,7 @@
 package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.AbstractInternalSource;
+import com.android.quicksearchbox.Config;
 import com.android.quicksearchbox.CursorBackedSourceResult;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.SourceResult;
@@ -102,8 +103,8 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
         return true;
     }
 
-    public boolean isWebSuggestionSource() {
-        return true;
+    public int getMaxShortcuts(Config config) {
+        return config.getMaxShortcutsPerWebSource();
     }
 
     public boolean includeInAll() {

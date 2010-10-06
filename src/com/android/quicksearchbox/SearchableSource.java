@@ -433,8 +433,8 @@ public class SearchableSource extends AbstractSource {
         return context.getContentResolver().query(uri, null, null, null, null);
     }
 
-    public boolean isWebSuggestionSource() {
-        return false;
+    public int getMaxShortcuts(Config config) {
+        return config.getMaxShortcuts(getName());
     }
 
     public boolean includeInAll() {

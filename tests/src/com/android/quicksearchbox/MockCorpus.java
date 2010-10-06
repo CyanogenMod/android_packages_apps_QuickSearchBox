@@ -134,7 +134,7 @@ public class MockCorpus implements Corpus {
     }
 
     public boolean isWebCorpus() {
-        return mSource.isWebSuggestionSource();
+        return mSource.getName().equals(MockSource.WEB_SOURCE.getName());
     }
 
     public boolean queryAfterZeroResults() {

@@ -38,8 +38,16 @@ public class MockSource implements Source {
 
     public static final MockSource WEB_SOURCE = new MockSource("WEB") {
         @Override
-        public boolean isWebSuggestionSource() {
-            return true;
+        public SuggestionData createSuggestion(String query) {
+            return new SuggestionData(this)
+                    .setText1(query)
+                    .setIntentAction(Intent.ACTION_WEB_SEARCH)
+                    .setSuggestionQuery(query);
+        }
+
+        @Override
+        public int getMaxShortcuts(Config config) {
+            return config.getMaxShortcutsPerWebSource();
         }
     };
 
@@ -127,13 +135,8 @@ public class MockSource implements Source {
             return null;
         }
         ListSuggestionCursor cursor = new ListSuggestionCursor(query);
-        if (isWebSuggestionSource()) {
-            cursor.add(createWebSuggestion(query + "_1"));
-            cursor.add(createWebSuggestion(query + "_2"));
-        } else {
-            cursor.add(createSuggestion(query + "_1"));
-            cursor.add(createSuggestion(query + "_2"));
-        }
+        cursor.add(createSuggestion(query + "_1"));
+        cursor.add(createSuggestion(query + "_2"));
         return new Result(query, cursor);
     }
 
@@ -143,13 +146,6 @@ public class MockSource implements Source {
                 .setText1(query)
                 .setIntentAction(Intent.ACTION_VIEW)
                 .setIntentData(data.toString());
-    }
-
-    public SuggestionData createWebSuggestion(String query) {
-        return new SuggestionData(this)
-                .setText1(query)
-                .setIntentAction(Intent.ACTION_WEB_SEARCH)
-                .setSuggestionQuery(query);
     }
 
     @Override
@@ -191,8 +187,8 @@ public class MockSource implements Source {
         return false;
     }
 
-    public boolean isWebSuggestionSource() {
-        return false;
+    public int getMaxShortcuts(Config config) {
+        return config.getMaxShortcutsPerNonWebSource();
     }
 
     public boolean queryAfterZeroResults() {

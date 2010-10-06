@@ -124,7 +124,10 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      */
     boolean includeInAll();
 
-    boolean isWebSuggestionSource();
+    /**
+     * Gets the maximum number of shortcuts that will be shown from this source.
+     */
+    int getMaxShortcuts(Config config);
 
     Intent createSearchIntent(String query, Bundle appData);
 

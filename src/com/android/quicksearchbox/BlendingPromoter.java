@@ -43,16 +43,13 @@ public class BlendingPromoter extends RankAwarePromoter {
             ListSuggestionCursor promoted) {
         int shortcutCount = shortcuts == null ? 0 : shortcuts.getCount();
         if (shortcutCount == 0) return;
-        int maxShortcutsPerWebSource = getConfig().getMaxShortcutsPerWebSource();
-        int maxShortcutsPerNonWebSource = getConfig().getMaxShortcutsPerNonWebSource();
         HashMultiset<Source> sourceShortcutCounts = HashMultiset.create(shortcutCount);
         for (int i = 0; i < shortcutCount && promoted.getCount() < maxPromoted; i++) {
             shortcuts.moveTo(i);
             Source source = shortcuts.getSuggestionSource();
             if (source != null && accept(shortcuts)) {
                 int prevCount = sourceShortcutCounts.add(source, 1);
-                int maxShortcuts = source.isWebSuggestionSource()
-                        ? maxShortcutsPerWebSource : maxShortcutsPerNonWebSource;
+                int maxShortcuts = source.getMaxShortcuts(getConfig());
                 if (prevCount < maxShortcuts) {
                     promoted.add(new SuggestionPosition(shortcuts));
                 }

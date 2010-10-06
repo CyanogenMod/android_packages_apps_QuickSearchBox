@@ -206,6 +206,13 @@ public class Config {
     }
 
     /**
+     * Gets the maximum number of shortcuts that will be shown from the given source.
+     */
+    public int getMaxShortcuts(String sourceName) {
+        return getMaxShortcutsPerNonWebSource();
+    }
+
+    /**
      * The timeout for querying each source, in milliseconds.
      */
     public long getSourceTimeoutMillis() {
