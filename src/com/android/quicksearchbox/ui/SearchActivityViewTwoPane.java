@@ -86,8 +86,18 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     }
 
     @Override
-    protected void considerHidingInputMethod() {
+    public void considerHidingInputMethod() {
         // Don't hide keyboard when interacting with suggestions list
+    }
+
+    @Override
+    public void hideSuggestions() {
+        // Never hiding suggestions view in two-pane UI
+    }
+
+    @Override
+    public void showSuggestions() {
+        // Never hiding suggestions view in two-pane UI
     }
 
     @Override

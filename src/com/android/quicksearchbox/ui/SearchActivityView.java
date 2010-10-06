@@ -291,6 +291,14 @@ public abstract class SearchActivityView extends RelativeLayout
         }
     }
 
+    public void hideSuggestions() {
+        mSuggestionsView.setVisibility(GONE);
+    }
+
+    public void showSuggestions() {
+        mSuggestionsView.setVisibility(VISIBLE);
+    }
+
     public void focusQueryTextView() {
         mQueryTextView.requestFocus();
     }
@@ -349,7 +357,7 @@ public abstract class SearchActivityView extends RelativeLayout
         }
     }
 
-    protected abstract void considerHidingInputMethod();
+    public abstract void considerHidingInputMethod();
 
     public void showInputMethodForQuery() {
         mQueryTextView.showInputMethod();

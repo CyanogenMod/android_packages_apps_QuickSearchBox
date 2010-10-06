@@ -137,7 +137,7 @@ public class SearchActivityViewSinglePane extends SearchActivityView {
     }
 
     @Override
-    protected void considerHidingInputMethod() {
+    public void considerHidingInputMethod() {
         mQueryTextView.hideInputMethod();
     }
 
