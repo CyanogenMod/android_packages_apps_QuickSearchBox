@@ -71,6 +71,7 @@
                 <data android:scheme="qsb.corpus" />
             </intent-filter>
             <meta-data android:name="android.app.search.shortcut.provider" android:value="content://com.android.quicksearchbox.shortcuts/shortcuts" />
+            <meta-data android:name="com.android.launcher.toolbar_icon" android:resource="@drawable/toolbar_icon" />
         </activity>
 
         <provider android:name=".ShortcutsProvider"
