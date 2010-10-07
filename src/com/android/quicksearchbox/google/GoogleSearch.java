@@ -38,9 +38,10 @@ import java.util.Locale;
  */
 public class GoogleSearch extends Activity {
     private static final String TAG = "GoogleSearch";
+    private static final boolean DBG = false;
 
     // The template URL we should use to format google search requests.
-    private String googleSearchUrlBase = null;
+    private String mGoogleSearchUrlBase = null;
 
     // "source" parameter for Google search requests from unknown sources (e.g. apps). This will get
     // prefixed with the string 'android-' before being sent on the wire.
@@ -58,10 +59,20 @@ public class GoogleSearch extends Activity {
     }
 
     /**
-     * NOTE: This function is similar to the one found in
-     * com.google.android.providers.enhancedgooglesearch.Launcher. If you are changing this
-     * make sure you change both.
+     * Construct the language code (hl= paramater) for the given locale.
      */
+    public static String getLanguage(Locale locale) {
+        String language = locale.getLanguage();
+        StringBuilder hl = new StringBuilder(language);
+        String country = locale.getCountry();
+        if (!TextUtils.isEmpty(country)) {
+            hl.append('-');
+            hl.append(country);
+        }
+        if (DBG) Log.d(TAG, "language " + language + ", country " + country + " -> hl=" + hl);
+        return hl.toString();
+    }
+
     private void handleWebSearchIntent(Intent intent) {
         String query = intent.getStringExtra(SearchManager.QUERY);
         if (TextUtils.isEmpty(query)) {
@@ -69,26 +80,11 @@ public class GoogleSearch extends Activity {
             return;
         }
 
-        if (googleSearchUrlBase == null) {
+        if (mGoogleSearchUrlBase == null) {
             Locale l = Locale.getDefault();
-            String language = l.getLanguage();
-            String country = l.getCountry().toLowerCase();
-            // Chinese and Portuguese have two langauge variants.
-            if ("zh".equals(language)) {
-                if ("cn".equals(country)) {
-                    language = "zh-CN";
-                } else if ("tw".equals(country)) {
-                    language = "zh-TW";
-                }
-            } else if ("pt".equals(language)) {
-                if ("br".equals(country)) {
-                    language = "pt-BR";
-                } else if ("pt".equals(country)) {
-                    language = "pt-PT";
-                }
-            }
-            googleSearchUrlBase = getResources().getString(
-                    R.string.google_search_base, language, country);
+            String language = getLanguage(l);
+            mGoogleSearchUrlBase = getResources().getString(
+                    R.string.google_search_base, language);
         }
 
         // If the caller specified a 'source' url parameter, use that and if not use default.
@@ -108,7 +104,7 @@ public class GoogleSearch extends Activity {
         }
 
         try {
-            String searchUri = googleSearchUrlBase
+            String searchUri = mGoogleSearchUrlBase
                     + "&source=android-" + source
                     + "&q=" + URLEncoder.encode(query, "UTF-8");
             Intent launchUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri));

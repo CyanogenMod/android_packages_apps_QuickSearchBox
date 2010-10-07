@@ -101,35 +101,11 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
         }
         try {
             query = URLEncoder.encode(query, "UTF-8");
-            // NOTE:  This code uses resources to optionally select the search Uri, based on the
-            // MCC value from the SIM.  iThe default string will most likely be fine.  It is
-            // paramerterized to accept info from the Locale, the language code is the first
-            // parameter (%1$s) and the country code is the second (%2$s).  This code *must*
-            // function in the same way as a similar lookup in
-            // com.android.browser.BrowserActivity#onCreate().  If you change
-            // either of these functions, change them both.  (The same is true for the underlying
-            // resource strings, which are stored in mcc-specific xml files.)
             if (mSuggestUri == null) {
                 Locale l = Locale.getDefault();
-                String language = l.getLanguage();
-                String country = l.getCountry().toLowerCase();
-                // Chinese and Portuguese have two langauge variants.
-                if ("zh".equals(language)) {
-                    if ("cn".equals(country)) {
-                        language = "zh-CN";
-                    } else if ("tw".equals(country)) {
-                        language = "zh-TW";
-                    }
-                } else if ("pt".equals(language)) {
-                    if ("br".equals(country)) {
-                        language = "pt-BR";
-                    } else if ("pt".equals(country)) {
-                        language = "pt-PT";
-                    }
-                }
+                String language = GoogleSearch.getLanguage(l);
                 mSuggestUri = getContext().getResources().getString(R.string.google_suggest_base,
-                                                                    language,
-                                                                    country)
+                                                                    language)
                         + "json=true&q=";
             }
 
