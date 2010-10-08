@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @param <A> The type of the data held in the cache.
  */
-public abstract class AsyncCache<A> {
+public abstract class CachedLater<A> implements NowOrLater<A> {
 
     private static final String TAG = "QSB.AsyncCache";
     private static final boolean DBG = false;
@@ -36,9 +36,10 @@ public abstract class AsyncCache<A> {
 
     private A mValue;
 
+    private boolean mCreating;
     private boolean mValid;
 
-    private List<Consumer<A>> mWaitingConsumers;
+    private List<Consumer<? super A>> mWaitingConsumers;
 
     /**
      * Creates the object to store in the cache. This method must call
@@ -51,7 +52,7 @@ public abstract class AsyncCache<A> {
      * Saves a new value to the cache.
      */
     protected void store(A value) {
-        List<Consumer<A>> waitingConsumers;
+        List<Consumer<? super A>> waitingConsumers;
         synchronized (mLock) {
             mValue = value;
             mValid = true;
@@ -59,7 +60,7 @@ public abstract class AsyncCache<A> {
             mWaitingConsumers = null;
         }
         if (waitingConsumers != null) {
-            for (Consumer<A> consumer : waitingConsumers) {
+            for (Consumer<? super A> consumer : waitingConsumers) {
                 if (DBG) Log.d(TAG, "Calling consumer: " + consumer);
                 consumer.consume(value);
             }
@@ -73,21 +74,30 @@ public abstract class AsyncCache<A> {
      *        The consumer may be called synchronously, or asynchronously on
      *        an unspecified thread.
      */
-    public void get(Consumer<A> consumer) {
+    public void getLater(Consumer<? super A> consumer) {
         boolean valid;
         A value;
         synchronized (mLock) {
             valid = mValid;
             value = mValue;
             if (!valid) {
-                if (mWaitingConsumers == null) mWaitingConsumers = new ArrayList<Consumer<A>>();
+                if (mWaitingConsumers == null) {
+                    mWaitingConsumers = new ArrayList<Consumer<? super A>>();
+                }
                 mWaitingConsumers.add(consumer);
             }
         }
         if (valid) {
             consumer.consume(value);
         } else {
-            create();
+            boolean create = false;
+            synchronized (mLock) {
+                if (!mCreating) {
+                    mCreating = true;
+                    create = true;
+                }
+            }
+            if (create) create();
         }
     }
 
@@ -98,6 +108,21 @@ public abstract class AsyncCache<A> {
         synchronized (mLock) {
             mValue = null;
             mValid = false;
+        }
+    }
+
+    public boolean haveNow() {
+        synchronized (mLock) {
+            return mValid;
+        }
+    }
+
+    public synchronized A getNow() {
+        synchronized (mLock) {
+            if (!haveNow()) {
+                throw new IllegalStateException("getNow() called when haveNow() is false");
+            }
+            return mValue;
         }
     }
 

@@ -35,6 +35,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -60,8 +61,8 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
 
     private final HttpClient mHttpClient;
 
-    public GoogleSuggestClient(Context context) {
-        super(context);
+    public GoogleSuggestClient(Context context, Handler uiThread) {
+        super(context, uiThread);
         mHttpClient = new DefaultHttpClient();
         HttpParams params = mHttpClient.getParams();
         HttpProtocolParams.setUserAgent(params, USER_AGENT);

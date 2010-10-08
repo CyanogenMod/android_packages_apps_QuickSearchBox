@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NowOrLater;
+
 import android.content.ContentResolver;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -37,15 +39,14 @@ public interface IconLoader {
      *
      * All resources and URIs are read using the suggestion provider's context.
      *
-     * If the ID is not formatted as expected, or no drawable can be found for
-     * the provided value, this method returns null.
+     * @return a {@link NowOrLater} for retrieving the icon. If the ID is not formatted as expected,
+     *      or no drawable can be found for the provided value, the value from this will be null.
      *
      * @param drawableId a string like "2130837524",
      *        "android.resource://com.android.alarmclock/2130837524",
      *        or "content://contacts/photos/253".
-     * @return a Drawable, or {@code null} if none found
      */
-    Drawable getIcon(String drawableId);
+    NowOrLater<Drawable> getIcon(String drawableId);
 
     /**
      * Converts a drawable ID to a Uri that can be used from other packages.

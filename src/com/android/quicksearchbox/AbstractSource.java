@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.util.NowOrLater;
 
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -25,6 +26,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 /**
@@ -35,13 +37,15 @@ public abstract class AbstractSource implements Source {
     private static final String TAG = "QSB.AbstractSource";
 
     private final Context mContext;
+    private final Handler mUiThread;
 
     private IconLoader mIconLoader;
 
     private SuggestionViewFactory mViewFactory;
 
-    public AbstractSource(Context context) {
+    public AbstractSource(Context context, Handler uiThread) {
         mContext = context;
+        mUiThread = uiThread;
     }
 
     protected Context getContext() {
@@ -51,7 +55,8 @@ public abstract class AbstractSource implements Source {
     protected IconLoader getIconLoader() {
         if (mIconLoader == null) {
             String iconPackage = getIconPackage();
-            mIconLoader = new CachingIconLoader(new PackageIconLoader(mContext, iconPackage));
+            mIconLoader = new CachingIconLoader(
+                    new PackageIconLoader(mContext, iconPackage, mUiThread));
         }
         return mIconLoader;
     }
@@ -62,7 +67,7 @@ public abstract class AbstractSource implements Source {
         return getVersionCode() == version;
     }
 
-    public Drawable getIcon(String drawableId) {
+    public NowOrLater<Drawable> getIcon(String drawableId) {
         return getIconLoader().getIcon(drawableId);
     }
 

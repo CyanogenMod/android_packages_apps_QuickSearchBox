@@ -21,6 +21,8 @@ import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.Suggestion;
 import com.android.quicksearchbox.SuggestionFormatter;
+import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.NowOrLater;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -45,14 +47,17 @@ import android.widget.TextView;
 public class DefaultSuggestionView extends RelativeLayout implements SuggestionView {
 
     private static final boolean DBG = false;
-    private static final String TAG = "QSB.SuggestionView";
 
     public static final String VIEW_ID = "default";
 
+    private static int sId = 0;
+    // give the TAG an unique ID to make debugging easier (there are lots of these!)
+    private final String TAG = "QSB.SuggestionView:" + (sId++);
+
     private TextView mText1;
     private TextView mText2;
-    private ImageView mIcon1;
-    private ImageView mIcon2;
+    private AsyncIcon mIcon1;
+    private AsyncIcon mIcon2;
     private final SuggestionFormatter mSuggestionFormatter;
     private boolean mRefineable;
     private int mPosition;
@@ -79,8 +84,18 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         super.onFinishInflate();
         mText1 = (TextView) findViewById(R.id.text1);
         mText2 = (TextView) findViewById(R.id.text2);
-        mIcon1 = (ImageView) findViewById(R.id.icon1);
-        mIcon2 = (ImageView) findViewById(R.id.icon2);
+        mIcon1 = new AsyncIcon((ImageView) findViewById(R.id.icon1)){
+            // override default icon (when no other available) with default source icon
+            @Override
+            protected String getFallbackIconId(Source source) {
+                return source.getSourceIconUri().toString();
+            }
+            @Override
+            protected Drawable getFallbackIcon(Source source) {
+                return source.getSourceIcon();
+            }
+        };
+        mIcon2 = new AsyncIcon((ImageView) findViewById(R.id.icon2));
         // for some reason, creating mKeyListener inside the constructor causes it not to work.
         mKeyListener = new KeyListener();
 
@@ -98,11 +113,9 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         } else {
             text2 = formatText(suggestion.getSuggestionText2(), suggestion, null);
         }
-        Drawable icon1 = getSuggestionDrawableIcon1(suggestion);
-        Drawable icon2 = getSuggestionDrawableIcon2(suggestion);
         if (DBG) {
-            Log.d(TAG, "bindAsSuggestion(), text1=" + text1 + ",text2=" + text2
-                    + ",icon1=" + icon1 + ",icon2=" + icon2);
+            Log.d(TAG, "bindAsSuggestion(), text1=" + text1 + ",text2=" + text2 + ", q='" +
+                    userQuery + "'");
         }
         // If there is no text for the second line, allow the first line to be up to two lines
         if (TextUtils.isEmpty(text2)) {
@@ -116,8 +129,8 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
         setText1(text1);
         setText2(text2);
-        setIcon1(icon1);
-        setIcon2(icon2, null);
+        mIcon1.set(suggestion.getSuggestionSource(), suggestion.getSuggestionIcon1());
+        mIcon2.set(suggestion.getSuggestionSource(), suggestion.getSuggestionIcon2());
         updateRefinable(suggestion);
     }
 
@@ -129,28 +142,28 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     protected void updateRefinable(Suggestion suggestion) {
         mRefineable =
                 suggestion.isWebSearchSuggestion()
-                && mIcon2.getDrawable() == null
+                && mIcon2.getView().getDrawable() == null
                 && !TextUtils.isEmpty(suggestion.getSuggestionQuery());
         setRefinable(suggestion, mRefineable);
     }
 
     protected void setRefinable(Suggestion suggestion, boolean refinable) {
         if (refinable) {
-            mIcon2.setOnClickListener(new View.OnClickListener() {
+            mIcon2.getView().setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     onSuggestionQueryRefineClicked();
                 }
             });
-            mIcon2.setFocusable(true);
-            mIcon2.setOnKeyListener(mKeyListener);
+            mIcon2.getView().setFocusable(true);
+            mIcon2.getView().setOnKeyListener(mKeyListener);
             Drawable icon2 = getContext().getResources().getDrawable(R.drawable.edit_query);
             Drawable background =
                     getContext().getResources().getDrawable(R.drawable.edit_query_background);
-            setIcon2(icon2, background);
+            mIcon2.setDrawable(icon2, background, String.valueOf(R.drawable.edit_query));
         } else {
-            mIcon2.setOnClickListener(null);
-            mIcon2.setFocusable(false);
-            mIcon2.setOnKeyListener(null);
+            mIcon2.getView().setOnClickListener(null);
+            mIcon2.getView().setFocusable(false);
+            mIcon2.getView().setOnKeyListener(null);
         }
     }
 
@@ -161,19 +174,6 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
                 0, url.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return text;
-    }
-
-    public Drawable getSuggestionDrawableIcon1(Suggestion suggestion) {
-        Source source = suggestion.getSuggestionSource();
-        String iconId = suggestion.getSuggestionIcon1();
-        Drawable icon1 = iconId == null ? null : source.getIcon(iconId);
-        return icon1 == null ? source.getSourceIcon() : icon1;
-    }
-
-    public Drawable getSuggestionDrawableIcon2(Suggestion suggestion) {
-        Source source = suggestion.getSuggestionSource();
-        String iconId = suggestion.getSuggestionIcon2();
-        return iconId == null ? null : source.getIcon(iconId);
     }
 
     private CharSequence formatText(String str, Suggestion suggestion,
@@ -214,21 +214,6 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         } else {
             mText2.setVisibility(VISIBLE);
         }
-    }
-
-    /**
-     * Sets the left-hand-side icon.
-     */
-    private void setIcon1(Drawable icon) {
-        setViewDrawable(mIcon1, icon);
-    }
-
-    /**
-     * Sets the right-hand-side icon and its background.
-     */
-    private void setIcon2(Drawable icon, Drawable background) {
-        setViewDrawable(mIcon2, icon);
-        mIcon2.setBackgroundDrawable(background);
     }
 
     /**
@@ -296,10 +281,10 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             boolean consumed = false;
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v != mIcon2) {
-                    consumed = mIcon2.requestFocus();
+                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v != mIcon2.getView()) {
+                    consumed = mIcon2.getView().requestFocus();
                     if (DBG) Log.d(TAG, "onKey Icon2 accepted focus: " + consumed);
-                } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && v == mIcon2) {
+                } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && v == mIcon2.getView()) {
                     consumed = requestFocus();
                     if (DBG) Log.d(TAG, "onKey SuggestionView accepted focus: " + consumed);
                 }
@@ -308,4 +293,87 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
+    private class AsyncIcon {
+        private final ImageView mView;
+        private String mCurrentId;
+        private String mWantedId;
+
+        public AsyncIcon(ImageView view) {
+            mView = view;
+        }
+
+        public void set(final Source source, final String iconId) {
+            if (iconId != null) {
+                mWantedId = iconId;
+                if (!TextUtils.equals(mWantedId, mCurrentId)) {
+                    if (DBG) Log.d(TAG, "getting icon Id=" + iconId);
+                    NowOrLater<Drawable> icon = source.getIcon(iconId);
+                    if (icon.haveNow()) {
+                        if (DBG) Log.d(TAG, "getIcon ready now");
+                        handleNewDrawable(icon.getNow(), iconId, source);
+                    } else {
+                        // make sure old icon is not visible while new one is loaded
+                        if (DBG) Log.d(TAG , "getIcon getting later");
+                        clearDrawable();
+                        icon.getLater(new Consumer<Drawable>(){
+                            public boolean consume(Drawable icon) {
+                                if (DBG) {
+                                    Log.d(TAG, "IconConsumer.consume got id " + iconId +
+                                            " want id " + mWantedId);
+                                }
+                                // ensure we have not been re-bound since the request was made.
+                                if (TextUtils.equals(iconId, mWantedId)) {
+                                    handleNewDrawable(icon, iconId, source);
+                                    return true;
+                                }
+                                return false;
+                            }});
+                    }
+                }
+            } else {
+                mWantedId = null;
+                handleNewDrawable(null, null, source);
+            }
+        }
+
+        public ImageView getView() {
+            return mView;
+        }
+
+        private void handleNewDrawable(Drawable icon, String id, Source source) {
+            if (icon == null) {
+                mWantedId = getFallbackIconId(source);
+                if (TextUtils.equals(mWantedId, mCurrentId)) {
+                    return;
+                }
+                icon = getFallbackIcon(source);
+            }
+            setDrawable(icon, id);
+        }
+
+        public void setDrawable(Drawable icon, Drawable background, String id) {
+            mCurrentId = id;
+            mView.setImageDrawable(icon);
+            mView.setBackgroundDrawable(background);
+        }
+
+        private void setDrawable(Drawable icon, String id) {
+            mCurrentId = id;
+            setViewDrawable(mView, icon);
+        }
+
+        private void clearDrawable() {
+            mCurrentId = null;
+            mView.setImageDrawable(null);
+        }
+
+        protected String getFallbackIconId(Source source) {
+            return null;
+        }
+
+        protected Drawable getFallbackIcon(Source source) {
+            return null;
+        }
+
+    }
 }

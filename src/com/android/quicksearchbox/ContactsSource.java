@@ -22,14 +22,16 @@ import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Handler;
 
 /**
  * Special case SearchableSource for contacts to provide the custom contacts suggestion view.
  */
 public class ContactsSource extends SearchableSource {
 
-    public ContactsSource(Context context, SearchableInfo searchable) throws NameNotFoundException {
-        super(context, searchable);
+    public ContactsSource(Context context, SearchableInfo searchable, Handler uiThread)
+            throws NameNotFoundException {
+        super(context, searchable, uiThread);
     }
 
     @Override

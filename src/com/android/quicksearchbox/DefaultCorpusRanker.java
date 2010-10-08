@@ -16,7 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.util.AsyncCache;
+import com.android.quicksearchbox.util.CachedLater;
 import com.android.quicksearchbox.util.Consumer;
 
 import android.database.DataSetObserver;
@@ -59,7 +59,7 @@ public class DefaultCorpusRanker implements CorpusRanker {
     }
 
     public void getCorporaInAll(Consumer<List<Corpus>> consumer) {
-        mRankedCorpora.get(consumer);
+        mRankedCorpora.getLater(consumer);
     }
 
     public void clear() {
@@ -73,8 +73,9 @@ public class DefaultCorpusRanker implements CorpusRanker {
         }
     }
 
-    private class RankedCorporaCache extends AsyncCache<List<Corpus>> {
+    private class RankedCorporaCache extends CachedLater<List<Corpus>> {
 
+        @Override
         protected void create() {
             mShortcuts.getCorpusScores(new Consumer<Map<String,Integer>>(){
                 public boolean consume(Map<String, Integer> clickScores) {

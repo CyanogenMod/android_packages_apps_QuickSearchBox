@@ -35,6 +35,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 
@@ -68,9 +69,9 @@ public class SearchableSource extends AbstractSource {
 
     private Uri mSuggestUriBase;
 
-    public SearchableSource(Context context, SearchableInfo searchable)
+    public SearchableSource(Context context, SearchableInfo searchable, Handler uiThread)
             throws NameNotFoundException {
-        super(context);
+        super(context, uiThread);
         ComponentName componentName = searchable.getSearchActivity();
         if (DBG) Log.d(TAG, "created Searchable for " + componentName);
         mSearchable = searchable;
@@ -400,7 +401,9 @@ public class SearchableSource extends AbstractSource {
             Log.d(TAG, "query(" + uri + ",null," + selection + ","
                     + Arrays.toString(selArgs) + ",null)");
         }
-        return context.getContentResolver().query(uri, null, selection, selArgs, null);
+        Cursor c = context.getContentResolver().query(uri, null, selection, selArgs, null);
+        if (DBG) Log.d(TAG, "Got cursor from " + mName + ": " + c);
+        return c;
     }
 
     private static Cursor getValidationCursor(Context context, SearchableInfo searchable,

@@ -16,6 +16,12 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.CachedLater;
+import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.Now;
+import com.android.quicksearchbox.util.NowOrLater;
+import com.android.quicksearchbox.util.NowOrLaterWrapper;
+
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -34,7 +40,7 @@ public class CachingIconLoader implements IconLoader {
 
     private final IconLoader mWrapped;
 
-    private final WeakHashMap<String, Drawable.ConstantState> mIconCache;
+    private final WeakHashMap<String, Entry> mIconCache;
 
     /**
      * Creates a new caching icon loader.
@@ -43,20 +49,33 @@ public class CachingIconLoader implements IconLoader {
      */
     public CachingIconLoader(IconLoader wrapped) {
         mWrapped = wrapped;
-        mIconCache = new WeakHashMap<String, Drawable.ConstantState>();
+        mIconCache = new WeakHashMap<String, Entry>();
     }
 
-    public Drawable getIcon(String drawableId) {
+    public NowOrLater<Drawable> getIcon(String drawableId) {
         if (DBG) Log.d(TAG, "getIcon(" + drawableId + ")");
         if (TextUtils.isEmpty(drawableId) || "0".equals(drawableId)) {
-            return null;
+            return new Now<Drawable>(null);
         }
-        Drawable drawable = checkIconCache(drawableId);
-        if (drawable != null) {
-            return drawable;
+        Entry newEntry = null;
+        NowOrLater<Drawable.ConstantState> drawableState;
+        synchronized (this) {
+            drawableState = queryCache(drawableId);
+            if (drawableState == null) {
+                newEntry = new Entry();
+                storeInIconCache(drawableId, newEntry);
+            }
         }
-        drawable = mWrapped.getIcon(drawableId);
-        storeInIconCache(drawableId, drawable);
+        if (drawableState != null) {
+            return new NowOrLaterWrapper<Drawable.ConstantState, Drawable>(drawableState){
+                @Override
+                public Drawable get(Drawable.ConstantState value) {
+                    return value == null ? null : value.newDrawable();
+                }};
+        }
+        NowOrLater<Drawable> drawable = mWrapped.getIcon(drawableId);
+        newEntry.set(drawable);
+        storeInIconCache(drawableId, newEntry);
         return drawable;
     }
 
@@ -64,18 +83,58 @@ public class CachingIconLoader implements IconLoader {
         return mWrapped.getIconUri(drawableId);
     }
 
-    private Drawable checkIconCache(String drawableId) {
-        Drawable.ConstantState cached = mIconCache.get(drawableId);
-        if (cached == null) {
-            return null;
+    private synchronized NowOrLater<Drawable.ConstantState> queryCache(String drawableId) {
+        NowOrLater<Drawable.ConstantState> cached = mIconCache.get(drawableId);
+        if (DBG) {
+            if (cached != null) Log.d(TAG, "Found icon in cache: " + drawableId);
         }
-        if (DBG) Log.d(TAG, "Found icon in cache: " + drawableId);
-        return cached.newDrawable();
+        return cached;
     }
 
-    private void storeInIconCache(String resourceUri, Drawable drawable) {
+    private synchronized void storeInIconCache(String resourceUri, Entry drawable) {
         if (drawable != null) {
-            mIconCache.put(resourceUri, drawable.getConstantState());
+            mIconCache.put(resourceUri, drawable);
         }
     }
+
+    private static class Entry extends CachedLater<Drawable.ConstantState>
+            implements Consumer<Drawable>{
+        private NowOrLater<Drawable> mDrawable;
+        private boolean mGotDrawable;
+        private boolean mCreateRequested;
+
+        public Entry() {
+        }
+
+        public synchronized void set(NowOrLater<Drawable> drawable) {
+            if (mGotDrawable) throw new IllegalStateException("set() may only be called once.");
+            mGotDrawable = true;
+            mDrawable = drawable;
+            if (mCreateRequested) {
+                getLater();
+            }
+        }
+
+        @Override
+        protected synchronized void create() {
+            if (!mCreateRequested) {
+                mCreateRequested = true;
+                if (mGotDrawable) {
+                    getLater();
+                }
+            }
+        }
+
+        private void getLater() {
+            NowOrLater<Drawable> drawable = mDrawable;
+            mDrawable = null;
+            drawable.getLater(this);
+        }
+
+        public boolean consume(Drawable value) {
+            store(value == null ? null : value.getConstantState());
+            return true;
+        }
+    }
+
 }

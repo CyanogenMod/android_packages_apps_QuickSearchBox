@@ -16,6 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Consumer;
+import com.android.quicksearchbox.util.NowOrLater;
+
 import android.test.AndroidTestCase;
 
 /**
@@ -38,6 +41,59 @@ public abstract class IconLoaderTest extends AndroidTestCase {
         assertNull(mLoader.getIcon(""));
         assertNull(mLoader.getIcon("0"));
         assertNotNull(mLoader.getIcon(String.valueOf(android.R.drawable.star_on)));
+    }
+
+    public void assertNull(NowOrLater<?> value) {
+        if (value.haveNow()) {
+            assertNull(value.getNow());
+        } else {
+            AssertConsumer<Object> consumer = new AssertConsumer<Object>();
+            value.getLater(consumer);
+            consumer.assertNull();
+        }
+    }
+
+    public void assertNotNull(NowOrLater<?> value) {
+        if (value.haveNow()) {
+            assertNotNull(value.getNow());
+        } else {
+            AssertConsumer<Object> consumer = new AssertConsumer<Object>();
+            value.getLater(consumer);
+            consumer.assertNotNull();
+        }
+    }
+
+    protected static class AssertConsumer<C> implements Consumer<C> {
+        private boolean mConsumed = false;
+        private Object mValue;
+        public boolean consume(Object value) {
+            synchronized(this) {
+                mConsumed = true;
+                mValue = value;
+                this.notifyAll();
+            }
+            return true;
+        }
+        public synchronized Object waitFor() {
+            if (!mConsumed) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            return mValue;
+        }
+        public void assertNull() {
+            IconLoaderTest.assertNull(waitFor());
+        }
+        public void assertNotNull() {
+            IconLoaderTest.assertNotNull(waitFor());
+        }
+        public AssertConsumer<C> reset() {
+            mConsumed = false;
+            mValue = null;
+            return this;
+        }
     }
 
 }

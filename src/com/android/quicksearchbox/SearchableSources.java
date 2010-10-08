@@ -21,6 +21,7 @@ import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,6 +41,7 @@ public class SearchableSources implements Sources {
 
     private final Context mContext;
     private final SearchManager mSearchManager;
+    private final Handler mUiThread;
 
     // All suggestion sources, by name.
     private HashMap<String, Source> mSources;
@@ -51,13 +53,18 @@ public class SearchableSources implements Sources {
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableSources(Context context) {
+    public SearchableSources(Context context, Handler uiThread) {
         mContext = context;
         mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        mUiThread = uiThread;
     }
 
     protected Context getContext() {
         return mContext;
+    }
+
+    protected Handler getUiThreadHandler() {
+        return mUiThread;
     }
 
     protected SearchManager getSearchManager() {
@@ -132,7 +139,7 @@ public class SearchableSources implements Sources {
         try {
             // special case for contacts which has a different suggestion view factory
             if (isSearchableContacts(searchable)) {
-                return new ContactsSource(mContext, searchable);
+                return new ContactsSource(mContext, searchable, getUiThreadHandler());
             } else {
                 return createDefaultSearchableSource(searchable);
             }
@@ -144,7 +151,7 @@ public class SearchableSources implements Sources {
 
     protected SearchableSource createDefaultSearchableSource(SearchableInfo searchable)
             throws NameNotFoundException {
-        return new SearchableSource(mContext, searchable);
+        return new SearchableSource(mContext, searchable, getUiThreadHandler());
     }
 
     public Source createSourceFor(ComponentName component) {

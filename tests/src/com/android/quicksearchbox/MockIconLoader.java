@@ -16,6 +16,9 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.Now;
+import com.android.quicksearchbox.util.NowOrLater;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -34,11 +37,13 @@ public class MockIconLoader implements IconLoader {
         mContext = context;
     }
 
-    public Drawable getIcon(String drawableId) {
+    public NowOrLater<Drawable> getIcon(String drawableId) {
         if (TextUtils.isEmpty(drawableId) || "0".equals(drawableId)) {
-            return null;
+            return new Now<Drawable>(null);
+        } else {
+            return new Now<Drawable>(
+                    mContext.getResources().getDrawable(android.R.drawable.star_on));
         }
-        return mContext.getResources().getDrawable(android.R.drawable.star_on);
     }
 
     public Uri getIconUri(String drawableId) {

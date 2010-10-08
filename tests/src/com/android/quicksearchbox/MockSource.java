@@ -17,6 +17,8 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.util.Now;
+import com.android.quicksearchbox.util.NowOrLater;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -94,8 +96,9 @@ public class MockSource implements Source {
         return null;
     }
 
-    public Drawable getIcon(String drawableId) {
-        return null;
+    @Override
+    public NowOrLater<Drawable> getIcon(String drawableId) {
+        return new Now<Drawable>(null);
     }
 
     public Uri getIconUri(String drawableId) {

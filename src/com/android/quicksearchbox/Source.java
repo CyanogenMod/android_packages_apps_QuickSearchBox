@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.util.NowOrLater;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -76,7 +77,7 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      *
      * @param drawableId Resource ID or URI.
      */
-    Drawable getIcon(String drawableId);
+    NowOrLater<Drawable> getIcon(String drawableId);
 
     /**
      * Gets the URI for an icon form this suggestion source.

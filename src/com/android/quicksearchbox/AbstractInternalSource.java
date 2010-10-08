@@ -18,14 +18,15 @@ package com.android.quicksearchbox;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
 
 /**
  * Abstract implementation of a source that is not backed by a searchable activity.
  */
 public abstract class AbstractInternalSource extends AbstractSource {
 
-    public AbstractInternalSource(Context context) {
-        super(context);
+    public AbstractInternalSource(Context context, Handler uiThread) {
+        super(context, uiThread);
     }
 
     public String getSuggestUri() {

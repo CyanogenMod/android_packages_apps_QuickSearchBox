@@ -206,7 +206,7 @@ public class QsbApplication {
     }
 
     protected Sources createSources() {
-        return new SearchableSources(getContext());
+        return new SearchableSources(getContext(), getMainThreadHandler());
     }
 
     protected CorpusFactory createCorpusFactory() {
@@ -383,7 +383,7 @@ public class QsbApplication {
     }
 
     protected GoogleSource createGoogleSource() {
-        return new GoogleSuggestClient(getContext());
+        return new GoogleSuggestClient(getContext(), getMainThreadHandler());
     }
 
     /**

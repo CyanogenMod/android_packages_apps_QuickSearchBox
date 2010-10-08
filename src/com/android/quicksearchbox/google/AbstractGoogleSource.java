@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 
 /**
  * Special source implementation for Google suggestions.
@@ -40,8 +41,8 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
     private static final String GOOGLE_SOURCE_NAME =
         "com.android.quicksearchbox/.google.GoogleSearch";
 
-    public AbstractGoogleSource(Context context) {
-        super(context);
+    public AbstractGoogleSource(Context context, Handler uiThread) {
+        super(context, uiThread);
     }
 
     public abstract ComponentName getIntentComponent();
