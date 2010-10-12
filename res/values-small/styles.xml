@@ -16,6 +16,6 @@
 
 <resources>
 
-    <integer name="corpus_selection_dialog_columns">6</integer>
+    <integer name="corpus_selection_dialog_columns">3</integer>
 
 </resources>
