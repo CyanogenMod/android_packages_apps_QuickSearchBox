@@ -69,7 +69,7 @@ public class DelayingSuggestionsAdapter extends SuggestionsAdapter {
      */
     private boolean shouldPublish(Suggestions suggestions) {
         if (suggestions.isDone()) return true;
-        SuggestionCursor cursor = getPromoted(suggestions, getCorpus());
+        SuggestionCursor cursor = getPromoted(suggestions);
         return cursor != null && cursor.getCount() > 0;
     }
 

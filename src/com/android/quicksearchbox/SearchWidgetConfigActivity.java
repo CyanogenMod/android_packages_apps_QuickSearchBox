@@ -68,7 +68,10 @@ public class SearchWidgetConfigActivity extends DialogActivity {
 
     @Override
     protected void onStart() {
-        setAdapter(createCorporaListAdapter());
+        Corpora corpora = QsbApplication.get(this).getCorpora();
+        CorporaAdapter adapter = new CorporaAdapter(this, corpora,
+                R.layout.corpus_list_item);
+        setAdapter(adapter);
         super.onStart();
     }
 
@@ -131,10 +134,6 @@ public class SearchWidgetConfigActivity extends DialogActivity {
         boolean r = prefs.getBoolean(getShowingHintKey(appWidgetId), false);
         if (DBG) Log.d(TAG, "Widget " + appWidgetId + " showing hint: " + r);
         return r;
-    }
-
-    private CorporaAdapter createCorporaListAdapter() {
-        return QsbApplication.get(this).createCorporaListAdapter();
     }
 
     private class SourceClickListener implements AdapterView.OnItemClickListener {

@@ -53,8 +53,6 @@ public class SuggestionsAdapter extends BaseAdapter {
     private final HashMap<String, Integer> mViewTypeMap;
     private final SuggestionViewFactory mFallback;
 
-    private Corpus mCorpus = null;
-
     private Suggestions mSuggestions;
 
     private SuggestionClickListener mSuggestionClickListener;
@@ -112,7 +110,6 @@ public class SuggestionsAdapter extends BaseAdapter {
     public void close() {
         setSuggestions(null);
         mCorpora.unregisterDataSetObserver(mCorporaObserver);
-        mCorpus = null;
         mClosed = true;
     }
 
@@ -158,34 +155,6 @@ public class SuggestionsAdapter extends BaseAdapter {
         return mSuggestions;
     }
 
-    /**
-     * Gets the source whose results are displayed.
-     */
-    public Corpus getCorpus() {
-        return mCorpus;
-    }
-
-    /**
-     * Sets the source whose results are displayed.
-     */
-    public void setCorpus(Corpus corpus) {
-        if (mSuggestions != null) {
-            // TODO: if (mCorpus == null && corpus != null)
-            // we've just switched from the 'All' corpus to a specific corpus
-            // we can filter the existing results immediately.
-            if (corpus != null) {
-                // Note, when switching from a specific corpus to 'All' we do not change the
-                // suggestions, since they're still relevant for 'All'. Hence 'corpus != null'
-                if (DBG) Log.d(TAG, "setCorpus(" + corpus.getName() + ") Clear suggestions");
-                mSuggestions.unregisterDataSetObserver(mDataSetObserver);
-                mSuggestions.release();
-                mSuggestions = null;
-            }
-        }
-        mCorpus = corpus;
-        onSuggestionsChanged();
-    }
-
     public int getCount() {
         return mCursor == null ? 0 : mCursor.getCount();
     }
@@ -229,7 +198,6 @@ public class SuggestionsAdapter extends BaseAdapter {
             throw new IllegalStateException("getView() called with null cursor");
         }
         mCursor.moveTo(position);
-        String viewType = currentSuggestionViewType();
         SuggestionViewFactory factory = mCursor.getSuggestionSource().getSuggestionViewFactory();
         View v = factory.getView(mCursor, mCursor.getUserQuery(), convertView, parent);
         if (v == null) {
@@ -251,7 +219,7 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     protected void onSuggestionsChanged() {
         if (DBG) Log.d(TAG, "onSuggestionsChanged(" + mSuggestions + ")");
-        SuggestionCursor cursor = getPromoted(mSuggestions, mCorpus);
+        SuggestionCursor cursor = getPromoted(mSuggestions);
         changeCursor(cursor);
     }
 
@@ -266,7 +234,7 @@ public class SuggestionsAdapter extends BaseAdapter {
     /**
      * Gets the cursor for the given source.
      */
-    protected SuggestionCursor getPromoted(Suggestions suggestions, Corpus corpus) {
+    protected SuggestionCursor getPromoted(Suggestions suggestions) {
         if (suggestions == null) return null;
         return suggestions.getPromoted(mPromoter, mMaxPromoted);
     }

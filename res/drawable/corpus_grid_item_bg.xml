@@ -16,10 +16,13 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:state_pressed="true"
+    <item android:state_window_focused="true" android:state_pressed="true"
         android:drawable="@drawable/corpus_grid_item_bg_pressed" />
 
-    <item android:state_focused="true"
+    <item android:state_window_focused="true" android:state_focused="true"
         android:drawable="@drawable/corpus_grid_item_bg_focused" />
+
+    <item android:state_window_focused="true" android:state_checked="true"
+        android:drawable="@drawable/corpus_grid_item_bg_checked" />
 
 </selector>

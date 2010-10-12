@@ -20,6 +20,7 @@ import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.CorpusResult;
 import com.android.quicksearchbox.Logger;
+import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.SearchActivity;
@@ -59,6 +60,8 @@ public abstract class SearchActivityView extends RelativeLayout
     // a microphone button since one already exists in the search dialog.
     // TODO: This should move to android-common or something.
     private static final String IME_OPTION_NO_MICROPHONE = "nm";
+
+    private Corpus mCorpus;
 
     protected QueryTextView mQueryTextView;
     // True if the query was empty on the previous call to updateQuery()
@@ -148,22 +151,10 @@ public abstract class SearchActivityView extends RelativeLayout
         mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
     }
 
-    public void registerSuggestionsObserver(DataSetObserver observer) {
-        mSuggestionsAdapter.registerDataSetObserver(observer);
-    }
-
-    public void unregisterSuggestionsObserver(DataSetObserver observer) {
-        mSuggestionsAdapter.unregisterDataSetObserver(observer);
-    }
-
     // TODO: Get rid of this. To make it more easily testable,
     // the SearchActivityView should not depend on QsbApplication.
     protected QsbApplication getQsbApplication() {
         return QsbApplication.get(getContext());
-    }
-
-    protected CorpusViewFactory getCorpusViewFactory() {
-        return getQsbApplication().getCorpusViewFactory();
     }
 
     private VoiceSearch getVoiceSearch() {
@@ -180,9 +171,11 @@ public abstract class SearchActivityView extends RelativeLayout
         return getQsbApplication().getCorpora();
     }
 
-    public abstract void setCorpus(Corpus corpus);
+    public Corpus getCorpus() {
+        return mCorpus;
+    }
 
-    public abstract Corpus getCorpus();
+    protected abstract Promoter createSuggestionsPromoter();
 
     protected Corpus getCorpus(String sourceName) {
         if (sourceName == null) return null;
@@ -194,14 +187,27 @@ public abstract class SearchActivityView extends RelativeLayout
         return corpus;
     }
 
+    public void onCorpusSelected(String corpusName) {
+        setCorpus(corpusName);
+        focusQueryTextView();
+        showInputMethodForQuery();
+    }
+
     public void setCorpus(String corpusName) {
         if (DBG) Log.d(TAG, "setCorpus(" + corpusName + ")");
         Corpus corpus = getCorpus(corpusName);
         setCorpus(corpus);
+        updateUi();
+    }
+
+    protected void setCorpus(Corpus corpus) {
+        mCorpus = corpus;
+        mSuggestionsAdapter.setPromoter(createSuggestionsPromoter());
     }
 
     public String getCorpusName() {
-        return getCorpus() == null ? null : getCorpus().getName();
+        Corpus corpus = getCorpus();
+        return corpus == null ? null : corpus.getName();
     }
 
     public abstract Corpus getSearchCorpus();
@@ -301,6 +307,10 @@ public abstract class SearchActivityView extends RelativeLayout
 
     public void focusQueryTextView() {
         mQueryTextView.requestFocus();
+    }
+
+    protected void updateUi() {
+        updateUi(getQuery().length() == 0);
     }
 
     protected void updateUi(boolean queryEmpty) {
@@ -417,6 +427,10 @@ public abstract class SearchActivityView extends RelativeLayout
             }
         }
         return completions.toArray(new CompletionInfo[completions.size()]);
+    }
+
+    protected void onSuggestionsChanged() {
+        updateInputMethodSuggestions();
     }
 
     /**
@@ -586,7 +600,7 @@ public abstract class SearchActivityView extends RelativeLayout
     private class SuggestionsObserver extends DataSetObserver {
         @Override
         public void onChanged() {
-            updateInputMethodSuggestions();
+            onSuggestionsChanged();
         }
     }
 

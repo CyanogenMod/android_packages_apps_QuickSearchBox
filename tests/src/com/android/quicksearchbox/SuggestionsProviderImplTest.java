@@ -100,7 +100,22 @@ public class SuggestionsProviderImplTest extends AndroidTestCase {
     }
 
     private SuggestionCursor promote(Suggestions suggestions) {
-        return suggestions.getPromoted(new ConcatPromoter(0), 10);
+        return suggestions.getPromoted(new ConcatPromoter(), 10);
+    }
+
+    private static class ConcatPromoter implements Promoter {
+        public void pickPromoted(Suggestions suggestions, int maxPromoted,
+                ListSuggestionCursor promoted) {
+            // Add suggestions
+            for (SuggestionCursor c : suggestions.getCorpusResults()) {
+                for (int i = 0; i < c.getCount(); i++) {
+                    if (promoted.getCount() >= maxPromoted) {
+                        return;
+                    }
+                    promoted.add(new SuggestionPosition(c, i));
+                }
+            }
+        }
     }
 
 }

@@ -88,7 +88,7 @@
             android:horizontalSpacing="2dip"
             android:verticalSpacing="4dip"
             android:numColumns="@integer/corpus_selection_dialog_columns"
-            android:listSelector="@drawable/corpus_grid_item_bg"
+            android:listSelector="@null"
             />
 
     </RelativeLayout>

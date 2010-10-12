@@ -18,10 +18,14 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.Corpus;
+import com.android.quicksearchbox.R;
+import com.google.common.collect.Multiset;
 
+import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -39,23 +43,36 @@ public class CorporaAdapter extends BaseAdapter {
     private static final String TAG = "CorporaAdapter";
     private static final boolean DBG = false;
 
-    private final CorpusViewFactory mViewFactory;
+    private final Context mContext;
 
     private final Corpora mCorpora;
 
-    private final boolean mGridView;
+    private final int mCorpusViewRes;
 
     private final DataSetObserver mCorporaObserver = new CorporaObserver();
 
     private List<Corpus> mSortedCorpora;
 
-    public CorporaAdapter(CorpusViewFactory viewFactory,
-            Corpora corpora, boolean gridView) {
-        mViewFactory = viewFactory;
+    private String mCurrentCorpusName;
+
+    private Multiset<String> mCorpusResultCounts;
+
+    public CorporaAdapter(Context context, Corpora corpora, int corpusViewRes) {
+        mContext = context;
         mCorpora = corpora;
-        mGridView = gridView;
+        mCorpusViewRes = corpusViewRes;
         mCorpora.registerDataSetObserver(mCorporaObserver);
         updateCorpora();
+    }
+
+    public void setCorpusResultCounts(Multiset<String> corpusResultCounts) {
+        mCorpusResultCounts = corpusResultCounts;
+        notifyDataSetChanged();
+    }
+
+    public void setCurrentCorpus(Corpus corpus) {
+        mCurrentCorpusName = corpus == null ? null : corpus.getName();
+        notifyDataSetChanged();
     }
 
     private void updateCorpora() {
@@ -126,27 +143,58 @@ public class CorporaAdapter extends BaseAdapter {
             view = createView(parent);
         }
         Corpus corpus = getItem(position);
-        Drawable icon;
-        CharSequence label;
-        if (corpus == null) {
-            icon = mViewFactory.getGlobalSearchIcon();
-            label = mViewFactory.getGlobalSearchLabel();
-        } else {
-            icon = corpus.getCorpusIcon();
-            label = corpus.getLabel();
-        }
-        if (DBG) Log.d(TAG, "Binding " + position + ", label=" + label);
-        view.setIcon(icon);
-        view.setLabel(label);
+        if (DBG) Log.d(TAG, "Binding " + position + ", corpus=" + corpus);
+        bindView(view, corpus);
         return view;
     }
 
-    protected CorpusView createView(ViewGroup parent) {
-        if (mGridView) {
-            return mViewFactory.createGridCorpusView(parent);
+    protected void bindView(CorpusView view, Corpus corpus) {
+        Drawable icon = getCorpusIcon(corpus);
+        CharSequence label = getCorpusLabel(corpus);
+        boolean isCurrent = isCurrentCorpus(corpus);
+        if (DBG) Log.d(TAG, "bind:name=" + corpus + ",label=" + label + ",current=" + isCurrent);
+        view.setIcon(icon);
+        view.setLabel(label);
+        view.setChecked(isCurrent);
+    }
+
+    protected Drawable getCorpusIcon(Corpus corpus) {
+        if (corpus == null) {
+            return mContext.getResources().getDrawable(R.drawable.search_app_icon);
         } else {
-            return mViewFactory.createListCorpusView(parent);
+            return corpus.getCorpusIcon();
         }
+    }
+
+    protected CharSequence getCorpusLabel(Corpus corpus) {
+        if (corpus == null) {
+            return mContext.getText(R.string.corpus_label_global);
+        } else {
+            CharSequence label = corpus.getLabel();
+            if (mCorpusResultCounts != null) {
+                int resultCount = mCorpusResultCounts.count(corpus.getName());
+                if (resultCount > 0) {
+                    return mContext.getString(R.string.corpus_count_format, label, resultCount);
+                }
+            }
+            return label;
+        }
+    }
+
+    protected boolean isCurrentCorpus(Corpus corpus) {
+        if (corpus == null) {
+            return mCurrentCorpusName == null;
+        } else {
+            return corpus.getName().equals(mCurrentCorpusName);
+        }
+    }
+
+    protected CorpusView createView(ViewGroup parent) {
+        return (CorpusView) LayoutInflater.from(mContext).inflate(mCorpusViewRes, parent, false);
+    }
+
+    protected LayoutInflater getInflater() {
+        return (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     private class CorporaObserver extends DataSetObserver {

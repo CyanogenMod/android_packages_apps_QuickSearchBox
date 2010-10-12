@@ -18,7 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.common.Search;
 import com.android.common.speech.Recognition;
-import com.android.quicksearchbox.ui.CorpusViewFactory;
+import com.android.quicksearchbox.util.Util;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -330,7 +330,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static Uri getCorpusIconUri(Context context, Corpus corpus) {
         if (corpus == null) {
-            return getCorpusViewFactory(context).getGlobalSearchIconUri();
+            return Util.getResourceUri(context, R.drawable.search_app_icon);
         }
         return corpus.getCorpusIconUri();
     }
@@ -427,10 +427,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static Corpora getCorpora(Context context) {
         return QsbApplication.get(context).getCorpora();
-    }
-
-    private static CorpusViewFactory getCorpusViewFactory(Context context) {
-        return QsbApplication.get(context).getCorpusViewFactory();
     }
 
     private static VoiceSearch getVoiceSearch(Context context) {

@@ -40,7 +40,6 @@ import android.view.Menu;
 import android.view.View;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -555,19 +554,8 @@ public class SearchActivity extends Activity {
     }
 
     private void getCorporaToQuery(Consumer<List<Corpus>> consumer) {
-        Corpus corpus = getCorpus();
-        if (corpus == null) {
-            // No corpus selected, use all enabled corpora
-            getCorpusRanker().getCorporaInAll(Consumers.createAsyncConsumer(mHandler, consumer));
-        } else {
-            List<Corpus> corpora = new ArrayList<Corpus>();
-            Corpus searchCorpus = getSearchCorpus();
-            // Query the selected corpus, and also the search corpus if it'
-            // different (= web corpus).
-            if (searchCorpus != null) corpora.add(searchCorpus);
-            if (corpus != searchCorpus) corpora.add(corpus);
-            consumer.consume(corpora);
-        }
+        // Always query all corpora, so that all corpus result counts are valid
+        getCorpusRanker().getCorporaInAll(Consumers.createAsyncConsumer(mHandler, consumer));
     }
 
     protected void getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery,
@@ -586,7 +574,7 @@ public class SearchActivity extends Activity {
 
     public void updateSuggestions(String untrimmedQuery) {
         final String query = CharMatcher.WHITESPACE.trimLeadingFrom(untrimmedQuery);
-        if (DBG) Log.d(TAG, "getSuggestions(\"" + query+"\"," + getCorpus() + ")");
+        if (DBG) Log.d(TAG, "updateSuggestions(\"" + query+"\"," + getCorpus() + ")");
         getQsbApplication().getSourceTaskExecutor().cancelPendingTasks();
         getCorporaToQuery(new Consumer<List<Corpus>>(){
             @Override

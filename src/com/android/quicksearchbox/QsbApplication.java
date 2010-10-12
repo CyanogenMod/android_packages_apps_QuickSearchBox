@@ -18,9 +18,6 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.google.GoogleSource;
 import com.android.quicksearchbox.google.GoogleSuggestClient;
-import com.android.quicksearchbox.ui.CorporaAdapter;
-import com.android.quicksearchbox.ui.CorpusViewFactory;
-import com.android.quicksearchbox.ui.CorpusViewInflater;
 import com.android.quicksearchbox.ui.DefaultSuggestionView;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
@@ -60,7 +57,6 @@ public class QsbApplication {
     private ThreadFactory mQueryThreadFactory;
     private SuggestionsProvider mSuggestionsProvider;
     private SuggestionViewFactory mDefaultSuggestionViewFactory;
-    private CorpusViewFactory mCorpusViewFactory;
     private GoogleSource mGoogleSource;
     private VoiceSearch mVoiceSearch;
     private Logger mLogger;
@@ -354,28 +350,16 @@ public class QsbApplication {
                 DefaultSuggestionView.class, R.layout.suggestion, getContext());
     }
 
-    /**
-     * Gets the corpus view factory.
-     * May only be called from the main thread.
-     */
-    public CorpusViewFactory getCorpusViewFactory() {
-        checkThread();
-        if (mCorpusViewFactory == null) {
-            mCorpusViewFactory = createCorpusViewFactory();
-        }
-        return mCorpusViewFactory;
-    }
-
-    protected CorpusViewFactory createCorpusViewFactory() {
-        return new CorpusViewInflater(getContext());
-    }
-
     public Promoter createBlendingPromoter() {
         return new BlendingPromoter(getConfig());
     }
 
-    public Promoter createSingleCorpusPromoter() {
-        return new ConcatPromoter(Integer.MAX_VALUE);
+    public Promoter createSingleCorpusPromoter(Corpus corpus) {
+        return new SingleCorpusPromoter(corpus, Integer.MAX_VALUE);
+    }
+
+    public Promoter createSingleCorpusResultsPromoter(Corpus corpus) {
+        return new SingleCorpusResultsPromoter(corpus, Integer.MAX_VALUE);
     }
 
     public Promoter createWebPromoter() {
@@ -400,14 +384,6 @@ public class QsbApplication {
 
     protected GoogleSource createGoogleSource() {
         return new GoogleSuggestClient(getContext());
-    }
-
-    public CorporaAdapter createCorporaListAdapter() {
-        return new CorporaAdapter(getCorpusViewFactory(), getCorpora(), false);
-    }
-
-    public CorporaAdapter createCorporaGridAdapter() {
-        return new CorporaAdapter(getCorpusViewFactory(), getCorpora(), true);
     }
 
     /**

@@ -226,7 +226,7 @@ public class Suggestions {
         return mClosed;
     }
 
-    protected ShortcutCursor getShortcuts() {
+    public ShortcutCursor getShortcuts() {
         return mShortcuts;
     }
 

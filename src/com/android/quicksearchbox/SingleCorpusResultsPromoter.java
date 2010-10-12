@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.android.quicksearchbox.ui;
-
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.view.ViewGroup;
+package com.android.quicksearchbox;
 
 /**
- * Creates corpus views.
+ * Promotes non-web-search shortcuts and suggestions from a single corpus.
  */
-public interface CorpusViewFactory {
+public class SingleCorpusResultsPromoter extends SingleCorpusPromoter {
 
-    CorpusView createGridCorpusView(ViewGroup parentViewType);
+    public SingleCorpusResultsPromoter(Corpus corpus, int maxShortcuts) {
+        super(corpus, maxShortcuts);
+    }
 
-    CorpusView createListCorpusView(ViewGroup parentViewType);
+    protected boolean accept(Suggestion s) {
+        return !s.isWebSearchSuggestion() && super.accept(s);
+    }
 
-    String getGlobalSearchLabel();
-
-    Drawable getGlobalSearchIcon();
-
-    Uri getGlobalSearchIconUri();
 }

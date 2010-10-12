@@ -21,6 +21,8 @@ import com.android.quicksearchbox.R;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.ViewDebug;
+import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,10 +31,15 @@ import android.widget.TextView;
 /**
  * A corpus in the corpus selection list.
  */
-public class CorpusView extends RelativeLayout {
+public class CorpusView extends RelativeLayout implements Checkable {
 
     private ImageView mIcon;
     private TextView mLabel;
+    private boolean mChecked;
+
+    private static final int[] CHECKED_STATE_SET = {
+        android.R.attr.state_checked
+    };
 
     public CorpusView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,4 +63,30 @@ public class CorpusView extends RelativeLayout {
     public void setIcon(Drawable icon) {
         mIcon.setImageDrawable(icon);
     }
+
+    @ViewDebug.ExportedProperty
+    public boolean isChecked() {
+        return mChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        if (mChecked != checked) {
+            mChecked = checked;
+            refreshDrawableState();
+        }
+    }
+
+    public void toggle() {
+        setChecked(!mChecked);
+    }
+
+    @Override
+    protected int[] onCreateDrawableState(int extraSpace) {
+        final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
+        if (isChecked()) {
+            mergeDrawableStates(drawableState, CHECKED_STATE_SET);
+        }
+        return drawableState;
+    }
+
 }

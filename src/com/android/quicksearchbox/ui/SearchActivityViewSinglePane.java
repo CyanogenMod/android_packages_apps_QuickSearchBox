@@ -18,6 +18,7 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.CorpusSelectionDialog;
+import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.R;
 
 import android.content.Context;
@@ -30,8 +31,6 @@ import android.widget.ImageButton;
  * Finishes the containing activity on BACK, even if input method is showing.
  */
 public class SearchActivityViewSinglePane extends SearchActivityView {
-
-    private Corpus mCorpus;
 
     private CorpusSelectionDialog mCorpusSelectionDialog;
 
@@ -73,31 +72,28 @@ public class SearchActivityViewSinglePane extends SearchActivityView {
     }
 
     @Override
-    public Corpus getCorpus() {
-        return mCorpus;
-    }
-
-    @Override
-    public void setCorpus(Corpus corpus) {
-        mCorpus = corpus;
-        mSuggestionsAdapter.setCorpus(corpus);
-        if (corpus == null) {
-            mSuggestionsAdapter.setPromoter(getQsbApplication().createBlendingPromoter());
-        } else {
-            mSuggestionsAdapter.setPromoter(getQsbApplication().createSingleCorpusPromoter());
-        }
+    protected void setCorpus(Corpus corpus) {
+        super.setCorpus(corpus);
 
         if (mCorpusIndicator != null) {
             Drawable sourceIcon;
             if (corpus == null) {
-                sourceIcon = getCorpusViewFactory().getGlobalSearchIcon();
+                sourceIcon = getContext().getResources().getDrawable(R.drawable.search_app_icon);
             } else {
                 sourceIcon = corpus.getCorpusIcon();
             }
             mCorpusIndicator.setImageDrawable(sourceIcon);
         }
+    }
 
-        updateUi(getQuery().length() == 0);
+    @Override
+    protected Promoter createSuggestionsPromoter() {
+        Corpus corpus = getCorpus();
+        if (corpus == null) {
+            return getQsbApplication().createBlendingPromoter();
+        } else {
+            return getQsbApplication().createSingleCorpusPromoter(corpus);
+        }
     }
 
     /**
@@ -106,11 +102,8 @@ public class SearchActivityViewSinglePane extends SearchActivityView {
      */
     @Override
     public Corpus getSearchCorpus() {
-        if (mCorpus == null) {
-            return getWebCorpus();
-        } else {
-            return mCorpus;
-        }
+        Corpus corpus = getCorpus();
+        return corpus == null ? getWebCorpus() : corpus;
     }
 
     @Override
@@ -123,7 +116,7 @@ public class SearchActivityViewSinglePane extends SearchActivityView {
             mCorpusSelectionDialog = getActivity().getCorpusSelectionDialog();
             mCorpusSelectionDialog.setOnCorpusSelectedListener(new CorpusSelectionListener());
         }
-        mCorpusSelectionDialog.show(mCorpus);
+        mCorpusSelectionDialog.show(getCorpus());
     }
 
     protected boolean isCorpusSelectionDialogShowing() {
@@ -144,10 +137,7 @@ public class SearchActivityViewSinglePane extends SearchActivityView {
     private class CorpusSelectionListener
             implements CorpusSelectionDialog.OnCorpusSelectedListener {
         public void onCorpusSelected(String corpusName) {
-            setCorpus(corpusName);
-            getActivity().updateSuggestions(getQuery());
-            focusQueryTextView();
-            showInputMethodForQuery();
+            SearchActivityViewSinglePane.this.onCorpusSelected(corpusName);
         }
     }
 

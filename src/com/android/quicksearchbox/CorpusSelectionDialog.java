@@ -101,7 +101,10 @@ public class CorpusSelectionDialog extends Dialog {
     @Override
     protected void onStart() {
         super.onStart();
-        CorporaAdapter adapter = getQsbApplication().createCorporaGridAdapter();
+        Corpora corpora = getQsbApplication().getCorpora();
+        CorporaAdapter adapter =
+                new CorporaAdapter(getContext(), corpora, R.layout.corpus_grid_item);
+        adapter.setCurrentCorpus(mCorpus);
         setAdapter(adapter);
         mCorpusGrid.setSelection(adapter.getCorpusPosition(mCorpus));
     }
