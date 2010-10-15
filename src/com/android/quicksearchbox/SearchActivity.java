@@ -130,6 +130,12 @@ public class SearchActivity extends Activity {
             }
         });
 
+        mSearchActivityView.setExitClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         // First get setup from intent
         Intent intent = getIntent();
         setupFromIntent(intent);

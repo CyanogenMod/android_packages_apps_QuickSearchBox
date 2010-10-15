@@ -34,6 +34,7 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -83,6 +84,7 @@ public abstract class SearchActivityView extends RelativeLayout
 
     private QueryListener mQueryListener;
     private SearchClickListener mSearchClickListener;
+    private View.OnClickListener mExitClickListener;
 
     public SearchActivityView(Context context) {
         super(context);
@@ -250,6 +252,10 @@ public abstract class SearchActivityView extends RelativeLayout
                 mSuggestionsAdapter.onSuggestionClicked(position);
             }
         });
+    }
+
+    public void setExitClickListener(final View.OnClickListener listener) {
+        mExitClickListener = listener;
     }
 
     protected SuggestionsAdapter getSuggestionsAdapter() {
@@ -615,7 +621,11 @@ public abstract class SearchActivityView extends RelativeLayout
     private class CloseClickListener implements OnClickListener {
 
         public void onClick(View v) {
-            mQueryTextView.setText("");
+            if (!TextUtils.isEmpty(mQueryTextView.getText())) {
+                mQueryTextView.setText("");
+            } else {
+                mExitClickListener.onClick(v);
+            }
         }
     }
 }
