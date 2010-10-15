@@ -73,6 +73,10 @@ public class Config {
 
     private static final long VOICE_SEARCH_HINT_VISIBLE_PERIOD = 6L * MINUTE_MILLIS;
 
+    private static final boolean SHOW_SUGGESTIONS_FOR_ZERO_QUERY = false;
+
+    private static final boolean SHOW_SHORTCUTS_FOR_ZERO_QUERY = true;
+
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
     private HashSet<String> mHiddenCorpora;
@@ -320,6 +324,26 @@ public class Config {
      */
     public long getVoiceSearchHintChangePeriod() {
         return VOICE_SEARCH_HINT_CHANGE_PERIOD;
+    }
+
+    public boolean showSuggestionsForZeroQuery() {
+        try {
+            // Get the list of default corpora from a resource, which allows vendor overlays.
+            return mContext.getResources().getBoolean(R.bool.show_zero_query_suggestions);
+        } catch (Resources.NotFoundException ex) {
+            Log.e(TAG, "Could not load show_zero_query_suggestions", ex);
+            return SHOW_SUGGESTIONS_FOR_ZERO_QUERY;
+        }
+    }
+
+    public boolean showShortcutsForZeroQuery() {
+        try {
+            // Get the list of default corpora from a resource, which allows vendor overlays.
+            return mContext.getResources().getBoolean(R.bool.show_zero_query_shortcuts);
+        } catch (Resources.NotFoundException ex) {
+            Log.e(TAG, "Could not load show_zero_query_shortcuts", ex);
+            return SHOW_SHORTCUTS_FOR_ZERO_QUERY;
+        }
     }
 
 }

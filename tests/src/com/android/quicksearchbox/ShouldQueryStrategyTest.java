@@ -30,7 +30,15 @@ public class ShouldQueryStrategyTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mShouldQuery = new ShouldQueryStrategy();
+        mShouldQuery = new ShouldQueryStrategy(new Config(getContext()){
+            @Override
+            public boolean showSuggestionsForZeroQuery() {
+                return true;
+            }
+            @Override
+            public boolean showShortcutsForZeroQuery() {
+                return true;
+            }});
     }
 
     public static final Corpus CORPUS_1 = new MockCorpus(MockSource.SOURCE_1) {

@@ -43,7 +43,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
 
     private final Handler mPublishThread;
 
-    private final ShouldQueryStrategy mShouldQueryStrategy = new ShouldQueryStrategy();
+    private final ShouldQueryStrategy mShouldQueryStrategy;
 
     private final Logger mLogger;
 
@@ -57,6 +57,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         mQueryExecutor = queryExecutor;
         mPublishThread = publishThread;
         mLogger = logger;
+        mShouldQueryStrategy = new ShouldQueryStrategy(mConfig);
     }
 
     public void close() {
@@ -93,10 +94,6 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
     }
 
     protected boolean shouldQueryCorpus(Corpus corpus, String query) {
-        if (query.length() == 0 && !corpus.isWebCorpus()) {
-            // Only the web corpus sees zero length queries.
-            return false;
-        }
         return mShouldQueryStrategy.shouldQueryCorpus(corpus, query);
     }
 

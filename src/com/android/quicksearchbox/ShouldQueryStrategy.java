@@ -37,6 +37,8 @@ class ShouldQueryStrategy {
     // The last query we've seen
     private String mLastQuery = "";
 
+    private final Config mConfig;
+
     // The current implementation keeps a record of those corpora that have
     // returned zero results for some prefix of the current query. mEmptyCorpora
     // maps from corpus to the length of the query which returned
@@ -45,11 +47,20 @@ class ShouldQueryStrategy {
     private final HashMap<Corpus, Integer> mEmptyCorpora
             = new HashMap<Corpus, Integer>();
 
+    public ShouldQueryStrategy(Config config) {
+        mConfig = config;
+    }
+
     /**
      * Returns whether we should query the given source for the given query.
      */
     public boolean shouldQueryCorpus(Corpus corpus, String query) {
         updateQuery(query);
+        if (query.length() == 0
+                && !corpus.isWebCorpus() // always query web, to warm up connection
+                && !mConfig.showSuggestionsForZeroQuery()) {
+                return false;
+        }
         if (query.length() >= corpus.getQueryThreshold()) {
             if (!corpus.queryAfterZeroResults() && mEmptyCorpora.containsKey(corpus)) {
                 if (DBG) Log.i(TAG, "Not querying " + corpus + ", returned 0 after "

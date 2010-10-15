@@ -568,6 +568,9 @@ public class SearchActivity extends Activity {
             final Suggestions suggestions) {
         ShortcutRepository shortcutRepo = getShortcutRepository();
         if (shortcutRepo == null) return;
+        if (query.length() == 0 && !getConfig().showShortcutsForZeroQuery()) {
+            return;
+        }
         Consumer<ShortcutCursor> consumer = Consumers.createAsyncCloseableConsumer(mHandler,
                 new Consumer<ShortcutCursor>() {
             public boolean consume(ShortcutCursor shortcuts) {

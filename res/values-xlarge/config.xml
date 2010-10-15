@@ -21,4 +21,9 @@
   <integer name="num_suggestions_above_keyboard">6</integer>
   <!-- The maximum promoted suggestions -->
   <integer name="max_promoted_suggestions">18</integer>
+
+  <!-- Don't show zero-query suggestions -->
+  <bool name="show_zero_query_suggestions">false</bool>
+  <bool name="show_zero_query_shortcuts">false</bool>
+
 </resources>

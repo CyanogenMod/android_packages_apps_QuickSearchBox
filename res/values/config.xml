@@ -62,4 +62,10 @@
   <!-- The height of suggestions views. -->
   <dimen name="suggestion_view_height">56dip</dimen>
 
+  <!-- Whether or not to show zero-query suggestions -->
+  <bool name="show_zero_query_suggestions">false</bool>
+
+  <!-- Whether or not to show zero-query shortcuts -->
+  <bool name="show_zero_query_shortcuts">true</bool>
+
 </resources>
