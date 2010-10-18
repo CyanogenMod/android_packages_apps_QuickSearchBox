@@ -99,6 +99,7 @@ public class SuggestionsAdapter extends BaseAdapter {
     }
 
     public void setMaxPromoted(int maxPromoted) {
+        if (DBG) Log.d(TAG, "setMaxPromoted " + maxPromoted);
         mMaxPromoted = maxPromoted;
         onSuggestionsChanged();
     }
@@ -184,7 +185,6 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (DBG) Log.d(TAG, "getItemViewType(" + position + ") mCursor=" + mCursor);
         if (mCursor == null) {
             return 0;
         }
@@ -246,7 +246,10 @@ public class SuggestionsAdapter extends BaseAdapter {
      * {@link #setSuggestions(Suggestions)}.
      */
     private void changeCursor(SuggestionCursor newCursor) {
-        if (DBG) Log.d(TAG, "changeCursor(" + newCursor + ")");
+        if (DBG) {
+            Log.d(TAG, "changeCursor(" + newCursor + ") count=" +
+                    (newCursor == null ? 0 : newCursor.getCount()));
+        }
         if (newCursor == mCursor) {
             if (newCursor != null) {
                 // Shortcuts may have changed without the cursor changing.

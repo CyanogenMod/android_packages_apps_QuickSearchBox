@@ -68,4 +68,9 @@
   <!-- Whether or not to show zero-query shortcuts -->
   <bool name="show_zero_query_shortcuts">true</bool>
 
+  <!-- Whether or not to show scrolling suggestions. If this returns false, the number of
+   suggestions displayed will be limited by the height of the suggestions view, so that it
+   does not scroll. -->
+  <bool name="show_scrolling_suggestions">false</bool>
+
 </resources>

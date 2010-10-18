@@ -32,7 +32,8 @@ public class RankAwarePromoterTest extends AndroidTestCase {
     public static final int MAX_PROMOTED_SUGGESTIONS = 8;
     public static final String TEST_QUERY = "query";
 
-    private List<Corpus> mCorpora = createMockCorpora(5, MAX_PROMOTED_CORPORA);
+    private final List<Corpus> mCorpora = createMockCorpora(5, MAX_PROMOTED_CORPORA);
+    private final Corpus mShortcuts = createMockShortcutsCorpus();
     private RankAwarePromoter mPromoter;
 
     @Override
@@ -66,6 +67,18 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         }
     }
 
+    public void testPromotesRightNumberOfSuggestions() {
+        List<CorpusResult> suggestions = getSuggestions(TEST_QUERY);
+        ListSuggestionCursor promoted = new ListSuggestionCursor(TEST_QUERY);
+        SuggestionCursor shortcuts = mShortcuts.
+                getSuggestions(TEST_QUERY, MAX_PROMOTED_SUGGESTIONS / 2, true);
+        for (int i = 0; i < shortcuts.getCount(); ++i) {
+            promoted.add(new SuggestionPosition(shortcuts, 1));
+        }
+        mPromoter.promoteSuggestions(suggestions, MAX_PROMOTED_SUGGESTIONS, promoted);
+        assertEquals(MAX_PROMOTED_SUGGESTIONS, promoted.getCount());
+    }
+
     private List<CorpusResult> getSuggestions(String query) {
         ArrayList<CorpusResult> results = new ArrayList<CorpusResult>();
         for (Corpus corpus : mCorpora) {
@@ -83,4 +96,11 @@ public class RankAwarePromoterTest extends AndroidTestCase {
         }
         return corpora;
     }
+
+    private static Corpus createMockShortcutsCorpus() {
+        Source mockSource = new MockSource("Shortcuts");
+        Corpus mockCorpus = new MockCorpus(mockSource, true);
+        return mockCorpus;
+    }
+
 }

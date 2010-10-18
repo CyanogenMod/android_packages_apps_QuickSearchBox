@@ -66,29 +66,31 @@ public class RankAwarePromoter implements Promoter {
             }
         }
 
+        int slotsLeft = Math.max(0, maxPromoted - promoted.getCount());
+
         // Share the top slots equally among each of the default corpora
-        if (maxPromoted > 0 && !defaultResults.isEmpty()) {
-            int slotsToFill = Math.min(getSlotsAboveKeyboard() - promoted.getCount(), maxPromoted);
+        if (slotsLeft > 0 && !defaultResults.isEmpty()) {
+            int slotsToFill = Math.min(getSlotsAboveKeyboard() - promoted.getCount(), slotsLeft);
             if (slotsToFill > 0) {
                 int stripeSize = Math.max(1, slotsToFill / defaultResults.size());
-                maxPromoted -= roundRobin(defaultResults, slotsToFill, stripeSize, promoted);
+                slotsLeft -= roundRobin(defaultResults, slotsToFill, stripeSize, promoted);
             }
         }
 
         // Then try to fill with the remaining promoted results
-        if (maxPromoted > 0 && !defaultResults.isEmpty()) {
-            int stripeSize = Math.max(1, maxPromoted / defaultResults.size());
-            maxPromoted -= roundRobin(defaultResults, maxPromoted, stripeSize, promoted);
+        if (slotsLeft > 0 && !defaultResults.isEmpty()) {
+            int stripeSize = Math.max(1, slotsLeft / defaultResults.size());
+            slotsLeft -= roundRobin(defaultResults, slotsLeft, stripeSize, promoted);
             // We may still have a few slots left
-            maxPromoted -= roundRobin(defaultResults, maxPromoted, maxPromoted, promoted);
+            slotsLeft -= roundRobin(defaultResults, slotsLeft, slotsLeft, promoted);
         }
 
         // Then try to fill with the rest
-        if (maxPromoted > 0 && !otherResults.isEmpty()) {
-            int stripeSize = Math.max(1, maxPromoted / otherResults.size());
-            maxPromoted -= roundRobin(otherResults, maxPromoted, stripeSize, promoted);
+        if (slotsLeft > 0 && !otherResults.isEmpty()) {
+            int stripeSize = Math.max(1, slotsLeft / otherResults.size());
+            slotsLeft -= roundRobin(otherResults, slotsLeft, stripeSize, promoted);
             // We may still have a few slots left
-            maxPromoted -= roundRobin(otherResults, maxPromoted, maxPromoted, promoted);
+            slotsLeft -= roundRobin(otherResults, slotsLeft, slotsLeft, promoted);
         }
 
         if (DBG) Log.d(TAG, "Returning " + promoted.toString());

@@ -346,4 +346,13 @@ public class Config {
         }
     }
 
+    public boolean showScrollingSuggestions() {
+        try {
+            return mContext.getResources().getBoolean(R.bool.show_scrolling_suggestions);
+        } catch (Resources.NotFoundException ex) {
+            Log.e(TAG, "Could not load show_zero_query_shortcuts", ex);
+            return true;
+        }
+    }
+
 }
