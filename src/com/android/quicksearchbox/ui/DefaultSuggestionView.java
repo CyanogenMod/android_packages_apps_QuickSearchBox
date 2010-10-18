@@ -144,6 +144,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
                 suggestion.isWebSearchSuggestion()
                 && mIcon2.getView().getDrawable() == null
                 && !TextUtils.isEmpty(suggestion.getSuggestionQuery());
+        if (DBG) Log.d(TAG, "updateRefinable: " + mRefineable);
         setRefinable(suggestion, mRefineable);
     }
 
@@ -353,7 +354,8 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
 
         public void setDrawable(Drawable icon, Drawable background, String id) {
             mCurrentId = id;
-            mView.setImageDrawable(icon);
+            mWantedId = id;
+            setViewDrawable(mView, icon);
             mView.setBackgroundDrawable(background);
         }
 
