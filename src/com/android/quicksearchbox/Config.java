@@ -18,7 +18,6 @@ package com.android.quicksearchbox;
 
 import android.app.AlarmManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Process;
 import android.util.Log;
 
@@ -40,7 +39,6 @@ public class Config {
     protected static final long MINUTE_MILLIS = 60L * SECOND_MILLIS;
     protected static final long DAY_MILLIS = 86400000L;
 
-    private static final int NUM_SUGGESTIONS_ABOVE_KEYBOARD = 4;
     private static final int NUM_PROMOTED_SOURCES = 3;
     private static final int MAX_PROMOTED_SUGGESTIONS = 8;
     private static final int MAX_RESULTS_PER_SOURCE = 50;
@@ -73,10 +71,6 @@ public class Config {
 
     private static final long VOICE_SEARCH_HINT_VISIBLE_PERIOD = 6L * MINUTE_MILLIS;
 
-    private static final boolean SHOW_SUGGESTIONS_FOR_ZERO_QUERY = false;
-
-    private static final boolean SHOW_SHORTCUTS_FOR_ZERO_QUERY = true;
-
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
     private HashSet<String> mHiddenCorpora;
@@ -103,17 +97,12 @@ public class Config {
 
     private HashSet<String> loadResourceStringSet(int res) {
         HashSet<String> defaultCorpora = new HashSet<String>();
-        try {
-            String[] corpora = mContext.getResources().getStringArray(res);
-            for (String corpus : corpora) {
-                if (DBG) Log.d(TAG, "Default corpus: " + corpus);
-                defaultCorpora.add(corpus);
-            }
-            return defaultCorpora;
-        } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load resource string set", ex);
-            return defaultCorpora;
+        String[] corpora = mContext.getResources().getStringArray(res);
+        for (String corpus : corpora) {
+            if (DBG) Log.d(TAG, "Default corpus: " + corpus);
+            defaultCorpora.add(corpus);
         }
+        return defaultCorpora;
     }
 
     /**
@@ -167,25 +156,15 @@ public class Config {
      * The number of suggestions visible above the onscreen keyboard.
      */
     public int getNumSuggestionsAboveKeyboard() {
-        try {
-            // Get the list of default corpora from a resource, which allows vendor overlays.
-            return mContext.getResources().getInteger(R.integer.num_suggestions_above_keyboard);
-        } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load num_suggestions_above_keyboard", ex);
-            return NUM_SUGGESTIONS_ABOVE_KEYBOARD;
-        }
+        // Get the list of default corpora from a resource, which allows vendor overlays.
+        return mContext.getResources().getInteger(R.integer.num_suggestions_above_keyboard);
     }
 
     /**
      * The maximum number of suggestions to promote.
      */
     public int getMaxPromotedSuggestions() {
-        try {
-            return mContext.getResources().getInteger(R.integer.max_promoted_suggestions);
-        } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load max_promoted_suggestions", ex);
-            return MAX_PROMOTED_SUGGESTIONS;
-        }
+        return mContext.getResources().getInteger(R.integer.max_promoted_suggestions);
     }
 
     /**
@@ -327,32 +306,17 @@ public class Config {
     }
 
     public boolean showSuggestionsForZeroQuery() {
-        try {
-            // Get the list of default corpora from a resource, which allows vendor overlays.
-            return mContext.getResources().getBoolean(R.bool.show_zero_query_suggestions);
-        } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load show_zero_query_suggestions", ex);
-            return SHOW_SUGGESTIONS_FOR_ZERO_QUERY;
-        }
+        // Get the list of default corpora from a resource, which allows vendor overlays.
+        return mContext.getResources().getBoolean(R.bool.show_zero_query_suggestions);
     }
 
     public boolean showShortcutsForZeroQuery() {
-        try {
-            // Get the list of default corpora from a resource, which allows vendor overlays.
-            return mContext.getResources().getBoolean(R.bool.show_zero_query_shortcuts);
-        } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load show_zero_query_shortcuts", ex);
-            return SHOW_SHORTCUTS_FOR_ZERO_QUERY;
-        }
+        // Get the list of default corpora from a resource, which allows vendor overlays.
+        return mContext.getResources().getBoolean(R.bool.show_zero_query_shortcuts);
     }
 
     public boolean showScrollingSuggestions() {
-        try {
-            return mContext.getResources().getBoolean(R.bool.show_scrolling_suggestions);
-        } catch (Resources.NotFoundException ex) {
-            Log.e(TAG, "Could not load show_zero_query_shortcuts", ex);
-            return true;
-        }
+        return mContext.getResources().getBoolean(R.bool.show_scrolling_suggestions);
     }
 
 }
