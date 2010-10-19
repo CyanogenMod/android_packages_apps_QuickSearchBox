@@ -147,21 +147,6 @@
                 android:layout_marginBottom="12dip"
                 android:layout_marginLeft="12dp">
 
-            <!-- Corpus pane -->
-            <GridView
-                android:id="@+id/corpus_list"
-                android:layout_width="200dp"
-                android:layout_height="160dp"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentBottom="true"
-                android:numColumns="4"
-                android:cacheColorHint="@android:color/transparent"
-                android:listSelector="@null"
-                android:scrollbars="vertical"
-                android:background="#408080FF"
-                />
-
             <FrameLayout
                 android:id="@+id/shortcuts_container"
                 android:layout_width="match_parent"
@@ -169,7 +154,6 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"
                 android:layout_below="@+id/shortcut_title"
-                android:layout_above="@+id/corpus_list"
                 android:layout_alignWithParentIfMissing="true"
                 android:background="#00000000"
                 >

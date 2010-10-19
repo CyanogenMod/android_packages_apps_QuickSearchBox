@@ -17,22 +17,12 @@
 package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Corpus;
-import com.android.quicksearchbox.CorpusResult;
 import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.ShortcutCursor;
-import com.android.quicksearchbox.Suggestion;
-import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.Suggestions;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 
 /**
@@ -45,10 +35,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     // View that shows the results other than the query completions
     private SuggestionsView mResultsView;
     private SuggestionsAdapter mResultsAdapter;
-
-    // Corpus selection view
-    private AbsListView mCorpusListView;
-    private CorporaAdapter mCorporaAdapter;
 
     public SearchActivityViewTwoPane(Context context) {
         super(context);
@@ -72,12 +58,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         mResultsAdapter = createSuggestionsAdapter();
         mResultsAdapter.setSuggestionAdapterChangeListener(this);
         mResultsView.setOnKeyListener(new SuggestionsViewKeyListener());
-
-        mCorpusListView = (AbsListView) findViewById(R.id.corpus_list);
-        mCorpusListView.setOnItemClickListener(new CorpusClickListener());
-        mCorporaAdapter = new CorporaAdapter(getContext(), getCorpora(),
-                R.layout.corpus_grid_item);
-        mCorpusListView.setAdapter(mCorporaAdapter);
     }
 
     @Override
@@ -103,9 +83,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     public void destroy() {
         mResultsView.setAdapter(null);
-
-        mCorpusListView.setAdapter(null);
-        mCorporaAdapter.close();
 
         super.destroy();
     }
@@ -171,8 +148,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     protected void setCorpus(Corpus corpus) {
         super.setCorpus(corpus);
-
-        mCorporaAdapter.setCurrentCorpus(getCorpus());
         mResultsAdapter.setPromoter(createResultsPromoter());
     }
 
@@ -193,61 +168,11 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     protected void onSuggestionsChanged() {
         super.onSuggestionsChanged();
-        mCorporaAdapter.setCorpusResultCounts(getCorpusResultCounts(getSuggestions()));
-    }
-
-    private Multiset<String> getCorpusResultCounts(Suggestions suggestions) {
-        if (suggestions == null) return null;
-        Multiset<String> counts = HashMultiset.create();
-        ShortcutCursor shortcuts = suggestions.getShortcuts();
-        if (shortcuts != null) {
-            for (int i = 0; i < shortcuts.getCount(); i++) {
-                shortcuts.moveTo(i);
-                if (!shortcuts.isWebSearchSuggestion()) {
-                    counts.add(getSuggestionCorpusName(shortcuts));
-                }
-            }
-        }
-        for (CorpusResult corpusResult : suggestions.getCorpusResults()) {
-            int count = corpusResult.getCount();
-            if (corpusResult.getCorpus().isWebCorpus()) {
-                count = countNonWebSuggestions(corpusResult);
-            }
-            counts.add(corpusResult.getCorpus().getName(), count);
-        }
-        return counts;
-    }
-
-    private int countNonWebSuggestions(SuggestionCursor c) {
-        int count = 0;
-        for (int i = 0; i < c.getCount(); i++) {
-            c.moveTo(i);
-            if (!c.isWebSearchSuggestion()) count++;
-        }
-        return count;
-    }
-
-    private String getSuggestionCorpusName(Suggestion s) {
-        Corpus corpus = getSuggestionCorpus(s);
-        return corpus == null ? null : corpus.getName();
-    }
-
-    private Corpus getSuggestionCorpus(Suggestion s) {
-        return getCorpora().getCorpusForSource(s.getSuggestionSource());
     }
 
     @Override
     public Corpus getSearchCorpus() {
         return getWebCorpus();
-    }
-
-    private class CorpusClickListener implements AdapterView.OnItemClickListener {
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Corpus corpus = (Corpus) parent.getItemAtPosition(position);
-            if (DBG) Log.d(TAG, "Corpus selected: " + corpus);
-            String corpusName = corpus == null ? null : corpus.getName();
-            SearchActivityViewTwoPane.this.onCorpusSelected(corpusName);
-        }
     }
 
 }
