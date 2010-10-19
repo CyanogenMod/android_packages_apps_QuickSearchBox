@@ -108,6 +108,11 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     }
 
     @Override
+    protected boolean shouldShowVoiceSearch(boolean queryEmpty) {
+        return true;
+    }
+
+    @Override
     public void clearSuggestions() {
         super.clearSuggestions();
         mResultsAdapter.setSuggestions(null);

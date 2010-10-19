@@ -364,13 +364,18 @@ public abstract class SearchActivityView extends RelativeLayout
     }
 
     protected void updateVoiceSearchButton(boolean queryEmpty) {
-        if (queryEmpty && getVoiceSearch().shouldShowVoiceSearch(getCorpus())) {
+        if (shouldShowVoiceSearch(queryEmpty)
+                && getVoiceSearch().shouldShowVoiceSearch(getCorpus())) {
             mVoiceSearchButton.setVisibility(View.VISIBLE);
             mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
         } else {
             mVoiceSearchButton.setVisibility(View.GONE);
             mQueryTextView.setPrivateImeOptions(null);
         }
+    }
+
+    protected boolean shouldShowVoiceSearch(boolean queryEmpty) {
+        return queryEmpty;
     }
 
     /**
