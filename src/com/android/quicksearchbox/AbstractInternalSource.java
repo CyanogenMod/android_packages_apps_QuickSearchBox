@@ -15,6 +15,8 @@
  */
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -25,8 +27,8 @@ import android.os.Handler;
  */
 public abstract class AbstractInternalSource extends AbstractSource {
 
-    public AbstractInternalSource(Context context, Handler uiThread) {
-        super(context, uiThread);
+    public AbstractInternalSource(Context context, Handler uiThread, NamedTaskExecutor iconLoader) {
+        super(context, uiThread, iconLoader);
     }
 
     public String getSuggestUri() {

@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.ui.ContactSuggestionView;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewInflater;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.app.SearchableInfo;
 import android.content.Context;
@@ -29,9 +30,9 @@ import android.os.Handler;
  */
 public class ContactsSource extends SearchableSource {
 
-    public ContactsSource(Context context, SearchableInfo searchable, Handler uiThread)
-            throws NameNotFoundException {
-        super(context, searchable, uiThread);
+    public ContactsSource(Context context, SearchableInfo searchable, Handler uiThread,
+            NamedTaskExecutor iconLoader) throws NameNotFoundException {
+        super(context, searchable, uiThread, iconLoader);
     }
 
     @Override

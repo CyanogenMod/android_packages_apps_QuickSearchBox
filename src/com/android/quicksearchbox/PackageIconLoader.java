@@ -17,6 +17,8 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.util.CachedLater;
+import com.android.quicksearchbox.util.NamedTask;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.Now;
 import com.android.quicksearchbox.util.NowOrLater;
 import com.android.quicksearchbox.util.Util;
@@ -29,8 +31,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -49,8 +49,6 @@ public class PackageIconLoader implements IconLoader {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.PackageIconLoader";
 
-    private static final String RESOURCE_URI_SCHEME = "android.resource";
-
     private final Context mContext;
 
     private final String mPackageName;
@@ -59,8 +57,7 @@ public class PackageIconLoader implements IconLoader {
 
     private final Handler mUiThread;
 
-    private final HandlerThread mIconLoaderThread;
-    private final Handler mIconLoaderHandler;
+    private final NamedTaskExecutor mIconLoaderExecutor;
 
     /**
      * Creates a new icon loader.
@@ -70,14 +67,12 @@ public class PackageIconLoader implements IconLoader {
      *        Resource IDs without an explicit package will be resolved against the package
      *        of this context.
      */
-    public PackageIconLoader(Context context, String packageName, Handler uiThread) {
+    public PackageIconLoader(Context context, String packageName, Handler uiThread,
+            NamedTaskExecutor iconLoaderExecutor) {
         mContext = context;
         mPackageName = packageName;
         mUiThread = uiThread;
-        mIconLoaderThread = new HandlerThread("Icon loader " + packageName,
-                Process.THREAD_PRIORITY_BACKGROUND);
-        mIconLoaderThread.start();
-        mIconLoaderHandler = new Handler(mIconLoaderThread.getLooper());
+        mIconLoaderExecutor = iconLoaderExecutor;
     }
 
     private boolean ensurePackageContext() {
@@ -112,7 +107,7 @@ public class PackageIconLoader implements IconLoader {
         } catch (NumberFormatException nfe) {
             // It's not an integer, use it as a URI
             Uri uri = Uri.parse(drawableId);
-            if (RESOURCE_URI_SCHEME.equals(uri.getScheme())) {
+            if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(uri.getScheme())) {
                 // load all resources synchronously, to reduce UI flickering
                 drawable = new Now<Drawable>(getDrawable(uri));
             } else {
@@ -226,7 +221,7 @@ public class PackageIconLoader implements IconLoader {
         return res;
     }
 
-    private class IconLaterTask extends CachedLater<Drawable> implements Runnable {
+    private class IconLaterTask extends CachedLater<Drawable> implements NamedTask {
         private final Uri mUri;
 
         public IconLaterTask(Uri iconUri) {
@@ -235,7 +230,7 @@ public class PackageIconLoader implements IconLoader {
 
         @Override
         protected void create() {
-            mIconLoaderHandler.post(this);
+            mIconLoaderExecutor.execute(this);
         }
 
         @Override
@@ -245,6 +240,11 @@ public class PackageIconLoader implements IconLoader {
                 public void run() {
                     store(icon);
                 }});
+        }
+
+        @Override
+        public String getName() {
+            return mPackageName;
         }
 
         private Drawable getIcon() {

@@ -20,6 +20,7 @@ import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SourceResult;
 import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -61,8 +62,8 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
 
     private final HttpClient mHttpClient;
 
-    public GoogleSuggestClient(Context context, Handler uiThread) {
-        super(context, uiThread);
+    public GoogleSuggestClient(Context context, Handler uiThread, NamedTaskExecutor iconLoader) {
+        super(context, uiThread, iconLoader);
         mHttpClient = new DefaultHttpClient();
         HttpParams params = mHttpClient.getParams();
         HttpProtocolParams.setUserAgent(params, USER_AGENT);

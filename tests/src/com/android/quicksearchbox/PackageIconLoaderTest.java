@@ -17,9 +17,13 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.tests.CrashingIconProvider;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+import com.android.quicksearchbox.util.PriorityThreadFactory;
+import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.test.suitebuilder.annotation.MediumTest;
 
 /**
@@ -47,7 +51,10 @@ public class PackageIconLoaderTest extends IconLoaderTest {
 
     @Override
     protected IconLoader create() throws Exception {
-        return new PackageIconLoader(mContext, mContext.getPackageName(), mThread.getHandler());
+        NamedTaskExecutor executor = new SingleThreadNamedTaskExecutor(
+                new PriorityThreadFactory(Process.THREAD_PRIORITY_DEFAULT));
+        return new PackageIconLoader(mContext, mContext.getPackageName(), mThread.getHandler(),
+                executor);
     }
 
     public void testGetIconCrashingProvider() {

@@ -17,6 +17,7 @@
 package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.NowOrLater;
 
 import android.app.SearchManager;
@@ -42,10 +43,12 @@ public abstract class AbstractSource implements Source {
     private IconLoader mIconLoader;
 
     private SuggestionViewFactory mViewFactory;
+    private final NamedTaskExecutor mIconLoaderExecutor;
 
-    public AbstractSource(Context context, Handler uiThread) {
+    public AbstractSource(Context context, Handler uiThread, NamedTaskExecutor iconLoader) {
         mContext = context;
         mUiThread = uiThread;
+        mIconLoaderExecutor = iconLoader;
     }
 
     protected Context getContext() {
@@ -56,7 +59,7 @@ public abstract class AbstractSource implements Source {
         if (mIconLoader == null) {
             String iconPackage = getIconPackage();
             mIconLoader = new CachingIconLoader(
-                    new PackageIconLoader(mContext, iconPackage, mUiThread));
+                    new PackageIconLoader(mContext, iconPackage, mUiThread, mIconLoaderExecutor));
         }
         return mIconLoader;
     }

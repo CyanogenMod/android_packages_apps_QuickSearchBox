@@ -62,6 +62,7 @@ public class QsbApplication {
     private Logger mLogger;
     private SuggestionFormatter mSuggestionFormatter;
     private TextAppearanceFactory mTextAppearanceFactory;
+    private NamedTaskExecutor mIconLoaderExecutor;
 
     public QsbApplication(Context context) {
         // the application context does not use the theme from the <application> tag
@@ -131,6 +132,19 @@ public class QsbApplication {
 
     public void runOnUiThread(Runnable action) {
         getMainThreadHandler().post(action);
+    }
+
+    public synchronized NamedTaskExecutor getIconLoaderExecutor() {
+        if (mIconLoaderExecutor == null) {
+            mIconLoaderExecutor = createIconLoaderExecutor();
+        }
+        return mIconLoaderExecutor;
+    }
+
+    protected NamedTaskExecutor createIconLoaderExecutor() {
+        ThreadFactory iconThreadFactory = new PriorityThreadFactory(
+                    Process.THREAD_PRIORITY_BACKGROUND);
+        return new PerNameExecutor(SingleThreadNamedTaskExecutor.factory(iconThreadFactory));
     }
 
     /**
@@ -206,7 +220,7 @@ public class QsbApplication {
     }
 
     protected Sources createSources() {
-        return new SearchableSources(getContext(), getMainThreadHandler());
+        return new SearchableSources(getContext(), getMainThreadHandler(), getIconLoaderExecutor());
     }
 
     protected CorpusFactory createCorpusFactory() {
@@ -383,7 +397,8 @@ public class QsbApplication {
     }
 
     protected GoogleSource createGoogleSource() {
-        return new GoogleSuggestClient(getContext(), getMainThreadHandler());
+        return new GoogleSuggestClient(getContext(), getMainThreadHandler(),
+                getIconLoaderExecutor());
     }
 
     /**

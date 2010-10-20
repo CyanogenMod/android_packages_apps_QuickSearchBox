@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NamedTaskExecutor;
+
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
@@ -49,14 +51,17 @@ public class SearchableSources implements Sources {
     // The web search source to use.
     private Source mWebSearchSource;
 
+    private final NamedTaskExecutor mIconLoaderExecutor;
+
     /**
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableSources(Context context, Handler uiThread) {
+    public SearchableSources(Context context, Handler uiThread, NamedTaskExecutor iconLoader) {
         mContext = context;
         mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         mUiThread = uiThread;
+        mIconLoaderExecutor = iconLoader;
     }
 
     protected Context getContext() {
@@ -69,6 +74,10 @@ public class SearchableSources implements Sources {
 
     protected SearchManager getSearchManager() {
         return mSearchManager;
+    }
+
+    protected NamedTaskExecutor getIconLoaderExecutor() {
+        return mIconLoaderExecutor;
     }
 
     public Collection<Source> getSources() {
@@ -139,7 +148,8 @@ public class SearchableSources implements Sources {
         try {
             // special case for contacts which has a different suggestion view factory
             if (isSearchableContacts(searchable)) {
-                return new ContactsSource(mContext, searchable, getUiThreadHandler());
+                return new ContactsSource(mContext, searchable, getUiThreadHandler(),
+                        getIconLoaderExecutor());
             } else {
                 return createDefaultSearchableSource(searchable);
             }
@@ -151,7 +161,8 @@ public class SearchableSources implements Sources {
 
     protected SearchableSource createDefaultSearchableSource(SearchableInfo searchable)
             throws NameNotFoundException {
-        return new SearchableSource(mContext, searchable, getUiThreadHandler());
+        return new SearchableSource(mContext, searchable, getUiThreadHandler(),
+                getIconLoaderExecutor());
     }
 
     public Source createSourceFor(ComponentName component) {

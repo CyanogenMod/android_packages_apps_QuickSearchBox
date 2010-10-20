@@ -21,6 +21,7 @@ import com.android.quicksearchbox.CursorBackedSourceResult;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.SourceResult;
 import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,8 +42,8 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
     private static final String GOOGLE_SOURCE_NAME =
         "com.android.quicksearchbox/.google.GoogleSearch";
 
-    public AbstractGoogleSource(Context context, Handler uiThread) {
-        super(context, uiThread);
+    public AbstractGoogleSource(Context context, Handler uiThread, NamedTaskExecutor iconLoader) {
+        super(context, uiThread, iconLoader);
     }
 
     public abstract ComponentName getIntentComponent();

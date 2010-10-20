@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox;
 
+import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.Util;
 
 import android.app.PendingIntent;
@@ -69,9 +70,9 @@ public class SearchableSource extends AbstractSource {
 
     private Uri mSuggestUriBase;
 
-    public SearchableSource(Context context, SearchableInfo searchable, Handler uiThread)
-            throws NameNotFoundException {
-        super(context, uiThread);
+    public SearchableSource(Context context, SearchableInfo searchable, Handler uiThread,
+            NamedTaskExecutor iconLoader) throws NameNotFoundException {
+        super(context, uiThread, iconLoader);
         ComponentName componentName = searchable.getSearchActivity();
         if (DBG) Log.d(TAG, "created Searchable for " + componentName);
         mSearchable = searchable;
