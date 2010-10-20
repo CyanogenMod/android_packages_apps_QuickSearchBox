@@ -77,4 +77,8 @@
    used when the application is running in single pane mode. -->
   <bool name="show_scrolling_results">true</bool>
 
+  <!-- Indicates if the search activity should stay in the back stack. If false, the search activity
+   will finish() whenever you click search or click on a suggestion. -->
+  <bool name="keep_in_back_stack">false</bool>
+
 </resources>
