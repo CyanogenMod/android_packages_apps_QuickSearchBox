@@ -476,6 +476,9 @@ public class SearchActivity extends Activity {
         }
         try {
             startActivity(intent);
+            if (!getConfig().keepSearchActivityInBackStack()) {
+                finish();
+            }
         } catch (RuntimeException ex) {
             // Since the intents for suggestions specified by suggestion providers,
             // guard against them not being handled, not allowed, etc.

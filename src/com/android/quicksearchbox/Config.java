@@ -323,4 +323,8 @@ public class Config {
         return mContext.getResources().getBoolean(R.bool.show_scrolling_results);
     }
 
+    public boolean keepSearchActivityInBackStack() {
+        return mContext.getResources().getBoolean(R.bool.keep_in_back_stack);
+    }
+
 }
