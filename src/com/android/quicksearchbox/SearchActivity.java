@@ -40,6 +40,7 @@ import android.view.Menu;
 import android.view.View;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -545,7 +546,7 @@ public class SearchActivity extends Activity {
         // Put query + space in query text view
         String queryWithSpace = query + ' ';
         setQuery(queryWithSpace, false);
-        updateSuggestions(queryWithSpace);
+        updateSuggestions();
         mSearchActivityView.focusQueryTextView();
     }
 
@@ -572,8 +573,15 @@ public class SearchActivity extends Activity {
     }
 
     private void getCorporaToQuery(Consumer<List<Corpus>> consumer) {
-        // Always query all corpora, so that all corpus result counts are valid
-        getCorpusRanker().getCorporaInAll(Consumers.createAsyncConsumer(mHandler, consumer));
+        Corpus corpus = getCorpus();
+        if (corpus == null) {
+            getCorpusRanker().getCorporaInAll(Consumers.createAsyncConsumer(mHandler, consumer));
+        } else {
+            List<Corpus> corpora = new ArrayList<Corpus>();
+            Corpus searchCorpus = getSearchCorpus();
+            if (searchCorpus != null) corpora.add(searchCorpus);
+            consumer.consume(corpora);
+        }
     }
 
     protected void getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery,
@@ -591,6 +599,10 @@ public class SearchActivity extends Activity {
             }
         });
         shortcutRepo.getShortcutsForQuery(query, corporaToQuery, consumer);
+    }
+
+    public void updateSuggestions() {
+        updateSuggestions(getQuery());
     }
 
     public void updateSuggestions(String untrimmedQuery) {
@@ -651,7 +663,7 @@ public class SearchActivity extends Activity {
         @Override
         public void onChanged() {
             setCorpus(getCorpusName());
-            updateSuggestions(getQuery());
+            updateSuggestions();
         }
     }
 

@@ -205,6 +205,10 @@ public abstract class SearchActivityView extends RelativeLayout
     protected void setCorpus(Corpus corpus) {
         mCorpus = corpus;
         mSuggestionsAdapter.setPromoter(createSuggestionsPromoter());
+        Suggestions suggestions = getSuggestions();
+        if (corpus == null || suggestions == null || !suggestions.expectsCorpus(corpus)) {
+            getActivity().updateSuggestions();
+        }
     }
 
     public String getCorpusName() {

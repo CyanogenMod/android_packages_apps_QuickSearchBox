@@ -95,6 +95,13 @@ public class Suggestions {
         return mExpectedCorpora.size();
     }
 
+    public boolean expectsCorpus(Corpus corpus) {
+        for (Corpus expectedCorpus : mExpectedCorpora) {
+            if (expectedCorpus.equals(corpus)) return true;
+        }
+        return false;
+    }
+
     /**
      * Gets the set of corpora that have reported results to this suggestions set.
      *
