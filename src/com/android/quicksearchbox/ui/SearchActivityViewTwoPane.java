@@ -114,15 +114,13 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     }
 
     @Override
-    public void setMaxPromoted(int maxPromoted) {
-        super.setMaxPromoted(maxPromoted);
+    public void setMaxPromotedResults(int maxPromoted) {
         mResultsView.setLimitSuggestionsToViewHeight(false);
         mResultsAdapter.setMaxPromoted(maxPromoted);
     }
 
     @Override
-    public void limitSuggestionsToViewHeight() {
-        super.limitSuggestionsToViewHeight();
+    public void limitResultsToViewHeight() {
         mResultsView.setLimitSuggestionsToViewHeight(true);
     }
 

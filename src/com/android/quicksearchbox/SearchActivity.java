@@ -103,9 +103,14 @@ public class SearchActivity extends Activity {
         mSearchActivityView = setupContentView();
 
         if (getConfig().showScrollingSuggestions()) {
-            mSearchActivityView.setMaxPromoted(getConfig().getMaxPromotedSuggestions());
+            mSearchActivityView.setMaxPromotedSuggestions(getConfig().getMaxPromotedSuggestions());
         } else {
             mSearchActivityView.limitSuggestionsToViewHeight();
+        }
+        if (getConfig().showScrollingResults()) {
+            mSearchActivityView.setMaxPromotedResults(getConfig().getMaxPromotedSuggestions());
+        } else {
+            mSearchActivityView.limitResultsToViewHeight();
         }
 
         mSearchActivityView.setSearchClickListener(new SearchActivityView.SearchClickListener() {

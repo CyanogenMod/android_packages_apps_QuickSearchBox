@@ -222,13 +222,19 @@ public abstract class SearchActivityView extends RelativeLayout
         return webCorpus;
     }
 
-    public void setMaxPromoted(int maxPromoted) {
+    public void setMaxPromotedSuggestions(int maxPromoted) {
         mSuggestionsView.setLimitSuggestionsToViewHeight(false);
         mSuggestionsAdapter.setMaxPromoted(maxPromoted);
     }
 
     public void limitSuggestionsToViewHeight() {
         mSuggestionsView.setLimitSuggestionsToViewHeight(true);
+    }
+
+    public void setMaxPromotedResults(int maxPromoted) {
+    }
+
+    public void limitResultsToViewHeight() {
     }
 
     public void setQueryListener(QueryListener listener) {
