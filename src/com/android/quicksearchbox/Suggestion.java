@@ -117,6 +117,11 @@ public interface Suggestion {
     boolean isWebSearchSuggestion();
 
     /**
+     * Checks whether this suggestion comes from the user's search history.
+     */
+    boolean isHistorySuggestion();
+
+    /**
      * Returns any extras associated with this suggestion, or {@code null} if there are none.
      */
     SuggestionExtras getExtras();

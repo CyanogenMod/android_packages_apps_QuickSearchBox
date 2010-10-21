@@ -227,6 +227,19 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         }, consumer);
     }
 
+    public void removeFromHistory(SuggestionCursor suggestions, int position) {
+        suggestions.moveTo(position);
+        final String intentKey = makeIntentKey(suggestions);
+        runTransactionAsync(new SQLiteTransaction() {
+            @Override
+            public boolean performTransaction(SQLiteDatabase db) {
+                db.delete(Shortcuts.TABLE_NAME, Shortcuts.intent_key.fullName + " = ?",
+                        new String[]{ intentKey });
+                return true;
+            }
+        });
+    }
+
     public void clearHistory() {
         runTransactionAsync(new SQLiteTransaction() {
             @Override
@@ -418,6 +431,14 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
             return true;
         }
 
+        public boolean isHistorySuggestion() {
+            // This always returns false, even for suggestions that originally came
+            // from server-side history, since we'd otherwise have to parse the Genie
+            // extra data. This is ok, since this method is only used for the
+            // "Remove from history" UI, which is also shown for all shortcuts.
+            return false;
+        }
+
         @Override
         public SuggestionExtras getExtras() {
             String json = mCursor.getString(mExtrasColumn);
@@ -513,26 +534,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
 
         Source source = suggestion.getSuggestionSource();
         String sourceName = source.getName();
-        StringBuilder key = new StringBuilder(sourceName);
-        key.append("#");
-        if (intentData != null) {
-            key.append(intentData);
-        }
-        key.append("#");
-        if (intentAction != null) {
-            key.append(intentAction);
-        }
-        key.append("#");
-        if (intentComponent != null) {
-            key.append(intentComponent);
-        }
-        key.append("#");
-        if (intentQuery != null) {
-            key.append(intentQuery);
-        }
-        // A string of the form source#intentData#intentAction#intentQuery 
-        // for use as a unique identifier of a suggestion.
-        String intentKey = key.toString();
+
+        String intentKey = makeIntentKey(suggestion);
 
         // Get URIs for all icons, to make sure that they are stable
         String icon1Uri = getIconUriString(source, suggestion.getSuggestionIcon1());
@@ -573,6 +576,39 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         cv.put(Shortcuts.custom_columns.name(), extrasJson);
 
         return cv;
+    }
+
+    /**
+     * Makes a string of the form source#intentData#intentAction#intentQuery
+     * for use as a unique identifier of a suggestion.
+     * */
+    private String makeIntentKey(Suggestion suggestion) {
+        String intentAction = suggestion.getSuggestionIntentAction();
+        String intentComponent = componentNameToString(suggestion.getSuggestionIntentComponent());
+        String intentData = suggestion.getSuggestionIntentDataString();
+        String intentQuery = suggestion.getSuggestionQuery();
+
+        Source source = suggestion.getSuggestionSource();
+        String sourceName = source.getName();
+        StringBuilder key = new StringBuilder(sourceName);
+        key.append("#");
+        if (intentData != null) {
+            key.append(intentData);
+        }
+        key.append("#");
+        if (intentAction != null) {
+            key.append(intentAction);
+        }
+        key.append("#");
+        if (intentComponent != null) {
+            key.append(intentComponent);
+        }
+        key.append("#");
+        if (intentQuery != null) {
+            key.append(intentQuery);
+        }
+
+        return key.toString();
     }
 
     private String componentNameToString(ComponentName component) {

@@ -43,6 +43,7 @@ public class SuggestionData implements Suggestion {
     private String mSuggestionQuery;
     private String mLogType;
     private boolean mIsShortcut;
+    private boolean mIsHistory;
     private SuggestionExtras mExtras;
 
     public SuggestionData(Source source) {
@@ -120,6 +121,10 @@ public class SuggestionData implements Suggestion {
 
     public boolean isWebSearchSuggestion() {
         return Intent.ACTION_WEB_SEARCH.equals(getSuggestionIntentAction());
+    }
+
+    public boolean isHistorySuggestion() {
+        return mIsHistory;
     }
 
     @VisibleForTesting
@@ -203,6 +208,12 @@ public class SuggestionData implements Suggestion {
     @VisibleForTesting
     public SuggestionData setIsShortcut(boolean isShortcut) {
         mIsShortcut = isShortcut;
+        return this;
+    }
+
+    @VisibleForTesting
+    public SuggestionData setIsHistory(boolean isHistory) {
+        mIsHistory = isHistory;
         return this;
     }
 

@@ -36,6 +36,9 @@ public class MockShortcutRepository implements ShortcutRepository {
     public void clearHistory() {
     }
 
+    public void removeFromHistory(SuggestionCursor suggestions, int position) {
+    }
+
     public void close() {
     }
 

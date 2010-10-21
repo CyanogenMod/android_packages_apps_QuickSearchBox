@@ -95,6 +95,10 @@ public abstract class AbstractSuggestionWrapper implements Suggestion {
         return current().isWebSearchSuggestion();
     }
 
+    public boolean isHistorySuggestion() {
+        return current().isHistorySuggestion();
+    }
+
     public SuggestionExtras getExtras() {
         return current().getExtras();
     }

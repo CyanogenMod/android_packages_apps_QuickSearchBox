@@ -139,6 +139,10 @@ public abstract class AbstractGoogleSourceResult implements SourceResult {
         return true;
     }
 
+    public boolean isHistorySuggestion() {
+        return false;
+    }
+
     public SuggestionExtras getExtras() {
         return null;
     }

@@ -208,7 +208,6 @@ public class SuggestionsAdapter extends BaseAdapter {
         } else {
             SuggestionViewClickListener l = new SuggestionViewClickListener(position);
             v.setOnClickListener(l);
-            v.setOnLongClickListener(l);
         }
 
         if (mOnFocusChangeListener != null) {
@@ -277,11 +276,10 @@ public class SuggestionsAdapter extends BaseAdapter {
         }
     }
 
-    public boolean onSuggestionLongClicked(int position) {
+    public void onSuggestionRemoveFromHistoryClicked(int position) {
         if (mSuggestionClickListener != null) {
-            return mSuggestionClickListener.onSuggestionLongClicked(this, position);
+            mSuggestionClickListener.onSuggestionRemoveFromHistoryClicked(this, position);
         }
-        return false;
     }
 
     public void onSuggestionQueryRefineClicked(int position) {
@@ -308,17 +306,13 @@ public class SuggestionsAdapter extends BaseAdapter {
         }
     }
 
-    private class SuggestionViewClickListener
-            implements View.OnClickListener, View.OnLongClickListener {
+    private class SuggestionViewClickListener implements View.OnClickListener {
         private final int mPosition;
         public SuggestionViewClickListener(int position) {
             mPosition = position;
         }
         public void onClick(View v) {
             onSuggestionClicked(mPosition);
-        }
-        public boolean onLongClick(View v) {
-            return onSuggestionLongClicked(mPosition);
         }
     }
 

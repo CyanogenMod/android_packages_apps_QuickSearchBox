@@ -170,6 +170,38 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         assertHasHistory(false);
     }
 
+    public void testRemoveFromHistory() {
+        SuggestionData john = new SuggestionData(CONTACTS_SOURCE)
+                .setText1("john doe")
+                .setIntentAction("view")
+                .setIntentData("john_doe");
+        SuggestionData jane = new SuggestionData(CONTACTS_SOURCE)
+                .setText1("jane doe")
+                .setIntentAction("view")
+                .setIntentData("jane_doe");
+        reportClick("j", john);
+        reportClick("j", john);
+        reportClick("j", jane);
+        assertShortcuts("j", john, jane);
+        removeFromHistory(new ListSuggestionCursor("j", jane, john), 1);
+        assertShortcuts("j", jane);
+    }
+
+    public void testRemoveFromHistoryNonExisting() {
+        SuggestionData john = new SuggestionData(CONTACTS_SOURCE)
+                .setText1("john doe")
+                .setIntentAction("view")
+                .setIntentData("john_doe");
+        SuggestionData jane = new SuggestionData(CONTACTS_SOURCE)
+                .setText1("jane doe")
+                .setIntentAction("view")
+                .setIntentData("jane_doe");
+        reportClick("j", john);
+        assertShortcuts("j", john);
+        removeFromHistory(new ListSuggestionCursor("j", jane), 0);
+        assertShortcuts("j", john);
+    }
+
     public void testNoMatch() {
         SuggestionData clicked = new SuggestionData(CONTACTS_SOURCE)
                 .setText1("bob smith")
@@ -760,6 +792,11 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     protected void reportClickAtTime(SuggestionCursor suggestions, int position, long now) {
         mRepo.reportClickAtTime(suggestions, position, now);
+        mLogExecutor.runNext();
+    }
+
+    protected void removeFromHistory(SuggestionCursor suggestions, int position) {
+        mRepo.removeFromHistory(suggestions, position);
         mLogExecutor.runNext();
     }
 

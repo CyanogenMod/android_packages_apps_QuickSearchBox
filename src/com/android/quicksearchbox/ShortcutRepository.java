@@ -38,6 +38,11 @@ public interface ShortcutRepository {
     void hasHistory(Consumer<Boolean> consumer);
 
     /**
+     * Removes a single suggestion from the stored history.
+     */
+    void removeFromHistory(SuggestionCursor suggestions, int position);
+
+    /**
      * Clears all shortcut history.
      */
     void clearHistory();

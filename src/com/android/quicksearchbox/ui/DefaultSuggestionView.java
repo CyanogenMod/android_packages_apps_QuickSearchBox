@@ -34,7 +34,10 @@ import android.text.TextUtils;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.KeyEvent;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -59,6 +62,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     private AsyncIcon mIcon1;
     private AsyncIcon mIcon2;
     private final SuggestionFormatter mSuggestionFormatter;
+    private boolean mIsFromHistory;
     private boolean mRefineable;
     private int mPosition;
     private SuggestionsAdapter mAdapter;
@@ -104,7 +108,6 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
 
     public void bindAsSuggestion(Suggestion suggestion, String userQuery) {
         setOnClickListener(new ClickListener());
-        setOnLongClickListener(new LongClickListener());
 
         CharSequence text1 = formatText(suggestion.getSuggestionText1(), suggestion, userQuery);
         CharSequence text2 = suggestion.getSuggestionText2Url();
@@ -112,10 +115,6 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
             text2 = formatUrl(text2);
         } else {
             text2 = formatText(suggestion.getSuggestionText2(), suggestion, null);
-        }
-        if (DBG) {
-            Log.d(TAG, "bindAsSuggestion(), text1=" + text1 + ",text2=" + text2 + ", q='" +
-                    userQuery + "'");
         }
         // If there is no text for the second line, allow the first line to be up to two lines
         if (TextUtils.isEmpty(text2)) {
@@ -131,12 +130,32 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         setText2(text2);
         mIcon1.set(suggestion.getSuggestionSource(), suggestion.getSuggestionIcon1());
         mIcon2.set(suggestion.getSuggestionSource(), suggestion.getSuggestionIcon2());
+        updateIsFromHistory(suggestion);
         updateRefinable(suggestion);
+
+        setLongClickable(needsContextMenu());
+
+        if (DBG) {
+            Log.d(TAG, "bindAsSuggestion(), text1=" + text1 + ",text2=" + text2 + ",q='" +
+                    userQuery + "',refinable=" + mRefineable + ",fromHistory=" + mIsFromHistory);
+        }
     }
 
     public void bindAdapter(SuggestionsAdapter adapter, int position) {
         mAdapter = adapter;
         mPosition = position;
+    }
+
+    protected boolean needsContextMenu() {
+        return isFromHistory();
+    }
+
+    protected boolean isFromHistory() {
+        return mIsFromHistory;
+    }
+
+    protected void updateIsFromHistory(Suggestion suggestion) {
+        mIsFromHistory = suggestion.isSuggestionShortcut() || suggestion.isHistorySuggestion();
     }
 
     protected void updateRefinable(Suggestion suggestion) {
@@ -241,6 +260,17 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
+    @Override
+    protected void onCreateContextMenu(ContextMenu menu) {
+        super.onCreateContextMenu(menu);
+        if (isFromHistory()) {
+            MenuInflater inflater = new MenuInflater(getContext());
+            inflater.inflate(R.menu.remove_from_history, menu);
+            MenuItem removeFromHistory = menu.findItem(R.id.remove_from_history);
+            removeFromHistory.setOnMenuItemClickListener(new RemoveFromHistoryListener());
+        }
+    }
+
     protected void onSuggestionClicked() {
         if (mAdapter != null) {
             mAdapter.onSuggestionClicked(mPosition);
@@ -253,11 +283,10 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
-    protected boolean onSuggestionLongClicked() {
+    protected void onRemoveFromHistoryClicked() {
         if (mAdapter != null) {
-            return mAdapter.onSuggestionLongClicked(mPosition);
+            mAdapter.onSuggestionRemoveFromHistoryClicked(mPosition);
         }
-        return false;
     }
 
     protected void onSuggestionQueryRefineClicked() {
@@ -272,9 +301,10 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
-    private class LongClickListener implements OnLongClickListener {
-        public boolean onLongClick(View v) {
-            return onSuggestionLongClicked();
+    private class RemoveFromHistoryListener implements MenuItem.OnMenuItemClickListener {
+        public boolean onMenuItemClick(MenuItem item) {
+            onRemoveFromHistoryClicked();
+            return false;
         }
     }
 

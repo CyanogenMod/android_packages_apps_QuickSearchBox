@@ -52,6 +52,10 @@ public class CursorBackedSourceResult extends CursorBackedSuggestionCursor
         return false;
     }
 
+    public boolean isHistorySuggestion() {
+        return false;
+    }
+
     @Override
     public String toString() {
         return mSource + "[" + getUserQuery() + "]";

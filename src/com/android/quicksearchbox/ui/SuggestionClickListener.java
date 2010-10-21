@@ -38,12 +38,12 @@ public interface SuggestionClickListener {
     void onSuggestionQuickContactClicked(SuggestionsAdapter adapter, int position);
 
     /**
-     * Called when a suggestion is long clicked.
+     * Called when the user requests to remove a suggestion from the search history.
      *
      * @param adapter Adapter that contains the clicked suggestion.
-     * @param position Position of the long clicked suggestion.
+     * @param position Position of the clicked suggestion.
      */
-    boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position);
+    void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter adapter, int position);
 
     /**
      * Called when the "query refine" button of a suggestion is clicked.

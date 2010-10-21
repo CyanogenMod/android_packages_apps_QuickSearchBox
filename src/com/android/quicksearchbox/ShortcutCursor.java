@@ -81,6 +81,12 @@ public class ShortcutCursor extends ListSuggestionCursor {
         }
     }
 
+    @Override
+    public boolean isSuggestionShortcut() {
+        // Needed to make refreshed shortcuts be treated as shortcuts
+        return true;
+    }
+
     /**
      * Refresh a shortcut from this cursor.
      *

@@ -38,6 +38,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -513,6 +514,33 @@ public class SearchActivity extends Activity {
         launchIntent(intent);
     }
 
+    protected void removeFromHistory(SuggestionsAdapter adapter, int position) {
+        SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
+        if (suggestions == null) return;
+        removeFromHistory(suggestions, position);
+        // TODO: Log to event log?
+    }
+
+    protected void removeFromHistory(SuggestionCursor suggestions, int position) {
+        removeShortcut(suggestions, position);
+        removeFromHistoryDone(true);
+    }
+
+    protected void removeFromHistoryDone(boolean ok) {
+        Log.i(TAG, "Removed query from history, success=" + ok);
+        updateSuggestionsBuffered();
+        if (!ok) {
+            Toast.makeText(this, R.string.remove_from_history_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    protected void removeShortcut(SuggestionCursor suggestions, int position) {
+        if (suggestions.isSuggestionShortcut()) {
+            if (DBG) Log.d(TAG, "Removing suggestion " + position + " from shortcuts");
+            getShortcutRepository().removeFromHistory(suggestions, position);
+        }
+    }
+
     protected void clickedQuickContact(SuggestionsAdapter adapter, int position) {
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
         if (suggestions == null) return;
@@ -548,11 +576,6 @@ public class SearchActivity extends Activity {
         setQuery(queryWithSpace, false);
         updateSuggestions();
         mSearchActivityView.focusQueryTextView();
-    }
-
-    protected boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position) {
-        if (DBG) Log.d(TAG, "Long clicked on suggestion " + position);
-        return false;
     }
 
     private void updateSuggestionsBuffered() {
@@ -642,8 +665,8 @@ public class SearchActivity extends Activity {
             launchSuggestion(adapter, position);
         }
 
-        public boolean onSuggestionLongClicked(SuggestionsAdapter adapter, int position) {
-            return SearchActivity.this.onSuggestionLongClicked(adapter, position);
+        public void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter adapter, int position) {
+            removeFromHistory(adapter, position);
         }
 
         public void onSuggestionQueryRefineClicked(SuggestionsAdapter adapter, int position) {
