@@ -19,6 +19,7 @@ package com.android.quicksearchbox;
 import com.android.quicksearchbox.util.BatchingNamedTaskExecutor;
 import com.android.quicksearchbox.util.Consumer;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
+import com.android.quicksearchbox.util.NoOpConsumer;
 
 import android.os.Handler;
 import android.util.Log;
@@ -123,9 +124,15 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         mBatchingExecutor = new BatchingNamedTaskExecutor(mQueryExecutor);
 
         long publishResultDelayMillis = mConfig.getPublishResultDelayMillis();
-        SuggestionCursorReceiver receiver = new SuggestionCursorReceiver(
-                mBatchingExecutor, suggestions, initialBatchSize,
-                publishResultDelayMillis);
+
+        Consumer<CorpusResult> receiver;
+        if (shouldDisplayResults(query)) {
+            receiver = new SuggestionCursorReceiver(
+                    mBatchingExecutor, suggestions, initialBatchSize,
+                    publishResultDelayMillis);
+        } else {
+            receiver = new NoOpConsumer<CorpusResult>();
+        }
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
         QueryTask.startQueries(query, maxResultsPerSource, corporaToQuery, mBatchingExecutor,
@@ -144,6 +151,17 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
         }
         return count;
     }
+
+    private boolean shouldDisplayResults(String query) {
+        if (query.length() == 0 && !mConfig.showSuggestionsForZeroQuery()) {
+            // Note that even though we don't display such results, it's
+            // useful to run the query itself because it warms up the network
+            // connection.
+            return false;
+        }
+        return true;
+    }
+
 
     private class SuggestionCursorReceiver implements Consumer<CorpusResult> {
         private final BatchingNamedTaskExecutor mExecutor;
@@ -213,5 +231,4 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
             }
         }
     }
-
 }
