@@ -21,6 +21,7 @@ import com.android.quicksearchbox.util.Util;
 import org.json.JSONArray;
 
 import android.app.SearchManager;
+import android.content.Intent;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -68,6 +69,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     static final Corpus CONTACTS_CORPUS = new MockCorpus(CONTACTS_SOURCE);
 
+    static final Corpus WEB_CORPUS = new MockCorpus(MockSource.WEB_SOURCE);
+
     static final int MAX_SHORTCUTS = 8;
 
     protected Config mConfig;
@@ -89,6 +92,8 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     protected SuggestionData mContact1;
     protected SuggestionData mContact2;
 
+    protected SuggestionData mWeb1;
+
     protected ShortcutRepositoryImplLog createShortcutRepository() {
         return new ShortcutRepositoryImplLog(getContext(), mConfig, mCorpora,
                 mRefresher, new MockHandler(), mLogExecutor,
@@ -103,6 +108,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         mCorpora = new MockCorpora();
         mCorpora.addCorpus(APP_CORPUS);
         mCorpora.addCorpus(CONTACTS_CORPUS);
+        mCorpora.addCorpus(WEB_CORPUS);
         mRefresher = new MockShortcutRefresher();
         mLogExecutor = new MockExecutor();
         mRepo = createShortcutRepository();
@@ -124,6 +130,11 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
                 .setIntentAction("view")
                 .setIntentData("contacts/mikeJ")
                 .setShortcutId("mo-jo");
+
+        mWeb1 = new SuggestionData(MockSource.WEB_SOURCE)
+                .setText1("foo")
+                .setIntentAction(Intent.ACTION_WEB_SEARCH)
+                .setSuggestionQuery("foo");
 
         mContactSuggestions = new ListSuggestionCursor("foo", mContact1, mContact2);
     }
@@ -657,9 +668,9 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
             expected.add(contact);
         }
 
-        // Expect the app, and then all but one contact
-        assertShortcuts("app and all but one contact should be returned",
-                "a", mAllowedCorpora, SuggestionCursorUtil.slice(expected, 0, MAX_SHORTCUTS));
+        // Expect the app, and then all contacts
+        assertShortcuts("app and all contacts should be returned",
+                "a", mAllowedCorpora, expected);
 
         // Upgrade app corpus
         MockCorpus upgradedCorpus = new MockCorpus(APP_SOURCE_V2);
@@ -669,7 +680,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
         List<Corpus> newAllowedCorpora = new ArrayList<Corpus>(mCorpora.getAllCorpora());
         assertShortcuts("app shortcuts should be removed when the source was upgraded "
                 + "and a contact should take its place",
-                "a", newAllowedCorpora, SuggestionCursorUtil.slice(expected, 1, MAX_SHORTCUTS));
+                "a", newAllowedCorpora, SuggestionCursorUtil.slice(expected, 1));
     }
 
     public void testIrrelevantAppUpgrade() {
@@ -686,6 +697,16 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
         assertShortcuts("all shortcuts should be returned",
                 "a", mAllowedCorpora, mApp1, mContact1);
+    }
+
+    public void testAllowWebSearchShortcuts() {
+        reportClick("a", mApp1);
+        reportClick("a", mApp1);
+        reportClick("a", mWeb1);
+        assertShortcuts("web shortcuts should be included", "a",
+                mAllowedCorpora, true, mApp1, mWeb1);
+        assertShortcuts("web shortcuts should not be included", "a",
+                mAllowedCorpora, false, mApp1);
     }
 
     public void testExtraDataNull() {
@@ -796,7 +817,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertNoShortcuts(String message, String query) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
+        SuggestionCursor cursor = getShortcuts(query, mAllowedCorpora);
         try {
             assertNull(message + ", got shortcuts", cursor);
         } finally {
@@ -810,7 +831,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
 
     void assertShortcutAtPosition(String message, String query,
             int position, SuggestionData expected) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
+        SuggestionCursor cursor = getShortcuts(query, mAllowedCorpora);
         try {
             SuggestionCursor expectedCursor = new ListSuggestionCursor(query, expected);
             SuggestionCursorUtil.assertSameSuggestion(message, position, expectedCursor, cursor);
@@ -820,7 +841,7 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertShortcutCount(String message, String query, int expectedCount) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
+        SuggestionCursor cursor = getShortcuts(query, mAllowedCorpora);
         try {
             assertEquals(message, expectedCount, cursor.getCount());
         } finally {
@@ -829,13 +850,28 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
-            SuggestionCursor expected) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, allowedCorpora, NOW);
+            boolean allowWebSearchShortcuts, SuggestionCursor expected) {
+        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, allowedCorpora, allowWebSearchShortcuts, NOW);
         try {
-            SuggestionCursorUtil.assertSameSuggestions(message, expected, cursor, true);
+            SuggestionCursorUtil.assertSameSuggestions(message, expected, cursor);
         } finally {
             if (cursor != null) cursor.close();
         }
+    }
+
+    void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
+            SuggestionCursor expected) {
+        assertShortcuts(message, query, allowedCorpora, true, expected);
+    }
+
+    SuggestionCursor getShortcuts(String query, Collection<Corpus> allowedCorpora) {
+        return mRepo.getShortcutsForQuery(query, allowedCorpora, true, NOW);
+    }
+
+    void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
+            boolean allowWebSearchShortcuts, SuggestionData... expected) {
+        assertShortcuts(message, query, allowedCorpora, allowWebSearchShortcuts,
+                new ListSuggestionCursor(query, expected));
     }
 
     void assertShortcuts(String message, String query, Collection<Corpus> allowedCorpora,
@@ -907,8 +943,12 @@ public class ShortcutRepositoryTest extends AndroidTestCase {
     }
 
     void assertShortcutExtra(String message, String query, String extraColumn, Object extraValue) {
-        SuggestionCursor cursor = mRepo.getShortcutsForQuery(query, mAllowedCorpora, NOW);
-        SuggestionCursorUtil.assertSuggestionExtras(message, cursor, extraColumn, extraValue);
+        SuggestionCursor cursor = getShortcuts(query, mAllowedCorpora);
+        try {
+            SuggestionCursorUtil.assertSuggestionExtras(message, cursor, extraColumn, extraValue);
+        } finally {
+            if (cursor != null) cursor.close();
+        }
     }
 
 }

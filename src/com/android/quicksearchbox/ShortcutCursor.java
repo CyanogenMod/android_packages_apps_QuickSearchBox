@@ -62,17 +62,18 @@ public class ShortcutCursor extends ListSuggestionCursor {
 
     @VisibleForTesting
     ShortcutCursor(SuggestionCursor suggestions) {
-        this(suggestions, null, null, null);
+        this(suggestions, true, null, null, null);
     }
 
-    public ShortcutCursor(SuggestionCursor suggestions, Handler uiThread,
-            ShortcutRefresher refresher, ShortcutRepository repository) {
+    public ShortcutCursor(SuggestionCursor suggestions, boolean allowWebSearchShortcuts,
+            Handler uiThread, ShortcutRefresher refresher, ShortcutRepository repository) {
         this(suggestions.getUserQuery(), suggestions, uiThread, refresher, repository);
         int count = suggestions.getCount();
         if (DBG) Log.d(TAG, "Total shortcuts: " + count);
         for (int i = 0; i < count; i++) {
             suggestions.moveTo(i);
-            if (suggestions.getSuggestionSource() != null) {
+            if (suggestions.getSuggestionSource() != null
+                    && (allowWebSearchShortcuts || !suggestions.isWebSearchSuggestion())) {
                 add(new SuggestionPosition(suggestions));
             } else {
                 if (DBG) Log.d(TAG, "Skipping shortcut " + i);

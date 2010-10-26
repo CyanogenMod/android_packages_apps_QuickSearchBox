@@ -58,6 +58,7 @@ public interface ShortcutRepository {
      *
      * @param query The query. May be empty.
      * @param allowedCorpora The corpora to get shortcuts for.
+     * @param allowWebSearchShortcuts Whether to include web search shortcuts.
      * @param consumer Consumer that the shortcuts cursor will be passed to.
      *        The shortcut cursor passed to the consumer may be null if there are no shortcuts.
      *        If non-null, and the consumer returns {@code true}, the consumer must ensure that
@@ -66,6 +67,7 @@ public interface ShortcutRepository {
      *        get called eventually.
      */
     void getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora,
+            boolean allowWebSearchShortcuts,
             Consumer<ShortcutCursor> consumer);
 
     /**

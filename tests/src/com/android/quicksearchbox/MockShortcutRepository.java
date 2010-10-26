@@ -40,7 +40,7 @@ public class MockShortcutRepository implements ShortcutRepository {
     }
 
     public void getShortcutsForQuery(String query, Collection<Corpus> corporaToQuery,
-            Consumer<ShortcutCursor> consumer) {
+            boolean allowWebSearchShortcuts, Consumer<ShortcutCursor> consumer) {
         ShortcutCursor cursor = getShortcutsForQuery(query, corporaToQuery);
         consumer.consume(cursor);
     }

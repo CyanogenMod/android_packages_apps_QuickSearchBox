@@ -49,4 +49,6 @@ public interface SearchSettings {
 
     public Intent getSearchSettingsIntent();
 
+    public boolean allowWebSearchShortcuts();
+
 }

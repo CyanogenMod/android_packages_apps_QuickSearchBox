@@ -599,7 +599,8 @@ public class SearchActivity extends Activity {
                 return true;
             }
         });
-        shortcutRepo.getShortcutsForQuery(query, corporaToQuery, consumer);
+        shortcutRepo.getShortcutsForQuery(query, corporaToQuery,
+                getSettings().allowWebSearchShortcuts(), consumer);
     }
 
     public void updateSuggestions() {

@@ -254,11 +254,12 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     public void getShortcutsForQuery(final String query, final Collection<Corpus> allowedCorpora,
-            final Consumer<ShortcutCursor> consumer) {
+            final boolean allowWebSearchShortcuts, final Consumer<ShortcutCursor> consumer) {
         final long now = System.currentTimeMillis();
         mLogExecutor.execute(new Runnable() {
             public void run() {
-                ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora, now);
+                ShortcutCursor shortcuts = getShortcutsForQuery(query, allowedCorpora,
+                        allowWebSearchShortcuts, now);
                 Consumers.consumeCloseable(consumer, shortcuts);
             }
         });
@@ -299,7 +300,8 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
     }
 
     @VisibleForTesting
-    ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora, long now) {
+    ShortcutCursor getShortcutsForQuery(String query, Collection<Corpus> allowedCorpora,
+            boolean allowWebSearchShortcuts, long now) {
         if (DBG) Log.d(TAG, "getShortcutsForQuery(" + query + "," + allowedCorpora + ")");
         String sql = query.length() == 0 ? mEmptyQueryShortcutQuery : mShortcutQuery;
         String[] params = buildShortcutQueryParams(query, now);
@@ -321,7 +323,7 @@ public class ShortcutRepositoryImplLog implements ShortcutRepository {
         }
 
         return new ShortcutCursor(new SuggestionCursorImpl(allowedSources, query, cursor),
-                mUiThread, mRefresher, this);
+                allowWebSearchShortcuts, mUiThread, mRefresher, this);
     }
 
     @VisibleForTesting

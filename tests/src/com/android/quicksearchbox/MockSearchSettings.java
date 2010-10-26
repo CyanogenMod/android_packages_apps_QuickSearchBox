@@ -62,4 +62,8 @@ public class MockSearchSettings implements SearchSettings {
     public void updateMenuItems(Menu menu) {
     }
 
+    public boolean allowWebSearchShortcuts() {
+        return true;
+    }
+
 }

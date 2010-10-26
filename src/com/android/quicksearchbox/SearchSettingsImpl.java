@@ -198,4 +198,8 @@ public class SearchSettingsImpl implements SearchSettings {
         }
     }
 
+    public boolean allowWebSearchShortcuts() {
+        return true;
+    }
+
 }
