@@ -62,6 +62,8 @@ public class Suggestions {
 
     private int mRefCount = 0;
 
+    private boolean mDone = false;
+
     public Suggestions(String query, List<Corpus> expectedCorpora) {
         mQuery = query;
         mExpectedCorpora = expectedCorpora;
@@ -144,12 +146,20 @@ public class Suggestions {
     }
 
     /**
+     * Marks the suggestions set as complete, regardless of whether all corpora have
+     * returned.
+     */
+    public void done() {
+        mDone = true;
+    }
+
+    /**
      * Checks whether all sources have reported.
      * Must be called on the UI thread, or before this object is seen by the UI thread.
      */
     public boolean isDone() {
         // TODO: Handle early completion because we have all the results we want.
-        return mCorpusResults.size() >= mExpectedCorpora.size();
+        return mDone || mCorpusResults.size() >= mExpectedCorpora.size();
     }
 
     /**

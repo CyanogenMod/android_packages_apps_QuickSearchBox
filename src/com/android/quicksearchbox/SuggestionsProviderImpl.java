@@ -132,6 +132,7 @@ public class SuggestionsProviderImpl implements SuggestionsProvider {
                     publishResultDelayMillis);
         } else {
             receiver = new NoOpConsumer<CorpusResult>();
+            suggestions.done();
         }
 
         int maxResultsPerSource = mConfig.getMaxResultsPerSource();
