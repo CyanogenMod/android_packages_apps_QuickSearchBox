@@ -65,6 +65,12 @@ public class SuggestionCursorBackedCursor extends AbstractCursor {
     }
 
     @Override
+    public void close() {
+        super.close();
+        mCursor.close();
+    }
+
+    @Override
     public String[] getColumnNames() {
         Collection<String> extraColumns = mCursor.getExtraColumns();
         if (extraColumns != null) {

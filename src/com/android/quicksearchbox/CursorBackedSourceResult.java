@@ -59,10 +59,12 @@ public class CursorBackedSourceResult extends CursorBackedSuggestionCursor
 
     @Override
     public SuggestionExtras getExtras() {
+        if (mCursor == null) return null;
         return CursorBackedSuggestionExtras.createExtrasIfNecessary(mCursor, getPosition());
     }
 
     public Collection<String> getExtraColumns() {
+        if (mCursor == null) return null;
         return CursorBackedSuggestionExtras.getExtraColumns(mCursor);
     }
 
