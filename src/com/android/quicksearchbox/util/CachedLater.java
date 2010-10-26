@@ -52,10 +52,12 @@ public abstract class CachedLater<A> implements NowOrLater<A> {
      * Saves a new value to the cache.
      */
     protected void store(A value) {
+        if (DBG) Log.d(TAG, "store()");
         List<Consumer<? super A>> waitingConsumers;
         synchronized (mLock) {
             mValue = value;
             mValid = true;
+            mCreating = false;
             waitingConsumers = mWaitingConsumers;
             mWaitingConsumers = null;
         }
@@ -75,6 +77,7 @@ public abstract class CachedLater<A> implements NowOrLater<A> {
      *        an unspecified thread.
      */
     public void getLater(Consumer<? super A> consumer) {
+        if (DBG) Log.d(TAG, "getLater()");
         boolean valid;
         A value;
         synchronized (mLock) {
@@ -88,6 +91,7 @@ public abstract class CachedLater<A> implements NowOrLater<A> {
             }
         }
         if (valid) {
+            if (DBG) Log.d(TAG, "valid, calling consumer synchronously");
             consumer.consume(value);
         } else {
             boolean create = false;
@@ -97,7 +101,12 @@ public abstract class CachedLater<A> implements NowOrLater<A> {
                     create = true;
                 }
             }
-            if (create) create();
+            if (create) {
+                if (DBG) Log.d(TAG, "not valid, calling create()");
+                create();
+            } else {
+                if (DBG) Log.d(TAG, "not valid, already creating");
+            }
         }
     }
 
@@ -105,6 +114,7 @@ public abstract class CachedLater<A> implements NowOrLater<A> {
      * Clears the cache.
      */
     public void clear() {
+        if (DBG) Log.d(TAG, "clear()");
         synchronized (mLock) {
             mValue = null;
             mValid = false;

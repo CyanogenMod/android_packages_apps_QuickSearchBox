@@ -81,7 +81,7 @@ public class SearchActivity extends Activity {
     private final Handler mHandler = new Handler();
     private final Runnable mUpdateSuggestionsTask = new Runnable() {
         public void run() {
-            updateSuggestions(getQuery());
+            updateSuggestions();
         }
     };
 
@@ -556,6 +556,7 @@ public class SearchActivity extends Activity {
     }
 
     private void updateSuggestionsBuffered() {
+        if (DBG) Log.d(TAG, "updateSuggestionsBuffered()");
         mHandler.removeCallbacks(mUpdateSuggestionsTask);
         long delay = getConfig().getTypingUpdateSuggestionsDelayMillis();
         mHandler.postDelayed(mUpdateSuggestionsTask, delay);
@@ -602,12 +603,8 @@ public class SearchActivity extends Activity {
     }
 
     public void updateSuggestions() {
-        updateSuggestions(getQuery());
-    }
-
-    public void updateSuggestions(String untrimmedQuery) {
-        final String query = CharMatcher.WHITESPACE.trimLeadingFrom(untrimmedQuery);
-        if (DBG) Log.d(TAG, "updateSuggestions(\"" + query+"\"," + getCorpus() + ")");
+        if (DBG) Log.d(TAG, "updateSuggestions()");
+        final String query = CharMatcher.WHITESPACE.trimLeadingFrom(getQuery());
         getQsbApplication().getSourceTaskExecutor().cancelPendingTasks();
         getCorporaToQuery(new Consumer<List<Corpus>>(){
             @Override
@@ -619,6 +616,7 @@ public class SearchActivity extends Activity {
     }
 
     protected void updateSuggestions(String query, List<Corpus> corporaToQuery) {
+        if (DBG) Log.d(TAG, "updateSuggestions(\"" + query+"\"," + corporaToQuery + ")");
         Suggestions suggestions = getSuggestionsProvider().getSuggestions(
                 query, corporaToQuery);
         getShortcutsForQuery(query, corporaToQuery, suggestions);
