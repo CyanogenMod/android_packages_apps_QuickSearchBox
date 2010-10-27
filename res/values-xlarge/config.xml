@@ -26,4 +26,8 @@
   <bool name="show_zero_query_suggestions">false</bool>
   <bool name="show_zero_query_shortcuts">false</bool>
 
+  <!-- The xlarge UI has no corpus selector, so don't show corpora in Searchable Items
+       that can't be used. -->
+  <bool name="show_non_all_corpora_in_settings">false</bool>
+
 </resources>
