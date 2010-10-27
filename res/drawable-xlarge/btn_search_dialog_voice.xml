@@ -15,5 +15,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/textfield_default_holo_dark" />
+
+   <item android:drawable="@android:color/transparent" />
+
 </selector>

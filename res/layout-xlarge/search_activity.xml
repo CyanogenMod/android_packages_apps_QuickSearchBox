@@ -86,7 +86,7 @@
                     android:layout_weight="1.0"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:background="@drawable/textfield_default_holo_dark"
+                    android:background="@drawable/textfield_search_empty"
                     >
 
                     <ImageView
