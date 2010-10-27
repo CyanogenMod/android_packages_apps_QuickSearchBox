@@ -18,6 +18,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Αναζήτηση"</string>
     <string name="search_widget" msgid="323244086853110381">"Αναζήτηση"</string>
+    <!-- no translation found for remove_from_history (3812349065338505597) -->
+    <skip />
+    <!-- no translation found for remove_from_history_failed (5471604847849215215) -->
+    <skip />
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Αναζήτηση"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Όλα"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Ιστός"</string>
@@ -27,8 +31,7 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Αναζήτηση στις Εφαρμογές Google"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Ρυθμίσεις αναζήτησης"</string>
     <string name="search_settings" msgid="4101951238194600323">"Ρυθμίσεις αναζήτησης"</string>
-    <!-- no translation found for google_search_category_title (2997358135219618688) -->
-    <skip />
+    <string name="google_search_category_title" msgid="2997358135219618688">"Google"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Τηλέφωνο"</string>
     <string name="search_sources" msgid="505874718206340313">"Στοιχεία με δυνατότητα αναζήτησης"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Επιλέξτε το αντικείμενο αναζήτησης στο τηλέφωνο"</string>
@@ -47,5 +50,7 @@
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Δοκιμάστε να πείτε το εξής:"</string>
     <string name="voice_search_hint_quotation_start" msgid="566545847023692214">"“"</string>
     <string name="voice_search_hint_quotation_end" msgid="4840921425933402938">"”"</string>
-    <string name="shortcuts_label" msgid="5395719245008935521">"Αποτελ. αναζήτησης"</string>
+    <string name="non_web_pane_label" msgid="7886884433908365831">"Περισσότερα"</string>
+    <!-- no translation found for corpus_count_format (1659457893204655410) -->
+    <skip />
 </resources>

@@ -18,6 +18,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Tschertga"</string>
     <string name="search_widget" msgid="323244086853110381">"Tschertga"</string>
+    <!-- no translation found for remove_from_history (3812349065338505597) -->
+    <skip />
+    <!-- no translation found for remove_from_history_failed (5471604847849215215) -->
+    <skip />
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Tschertga"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Tut"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
@@ -51,6 +55,8 @@
     <skip />
     <!-- no translation found for voice_search_hint_quotation_end (4840921425933402938) -->
     <skip />
-    <!-- no translation found for shortcuts_label (5395719245008935521) -->
+    <!-- no translation found for non_web_pane_label (7886884433908365831) -->
+    <skip />
+    <!-- no translation found for corpus_count_format (1659457893204655410) -->
     <skip />
 </resources>
