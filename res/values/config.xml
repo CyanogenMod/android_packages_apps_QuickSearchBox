@@ -81,4 +81,8 @@
    will finish() whenever you click search or click on a suggestion. -->
   <bool name="keep_in_back_stack">false</bool>
 
+  <!-- Whether the Searchable Items list should show corpora that are not included
+       in All mode. -->
+  <bool name="show_non_all_corpora_in_settings">true</bool>
+
 </resources>

@@ -64,12 +64,16 @@ public class SearchableItemsSettings extends PreferenceActivity
      * Fills the suggestion source list.
      */
     private void populateSourcePreference() {
+        boolean includeNonAllCorpora =
+                getResources().getBoolean(R.bool.show_non_all_corpora_in_settings);
         mCorporaPreferences.setOrderingAsAdded(false);
         for (Corpus corpus : getCorpora().getAllCorpora()) {
-            Preference pref = createCorpusPreference(corpus);
-            if (pref != null) {
-                if (DBG) Log.d(TAG, "Adding corpus: " + corpus);
-                mCorporaPreferences.addPreference(pref);
+            if (includeNonAllCorpora || corpus.includeInAll()) {
+                Preference pref = createCorpusPreference(corpus);
+                if (pref != null) {
+                    if (DBG) Log.d(TAG, "Adding corpus: " + corpus);
+                    mCorporaPreferences.addPreference(pref);
+                }
             }
         }
     }
