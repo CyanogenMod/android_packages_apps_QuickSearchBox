@@ -219,17 +219,6 @@
                         android:layout_marginRight="-4dip"
                 />
 
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@+id/search_voice_btn"
-                        android:layout_toLeftOf="@+id/settings_icon"
-                        android:layout_centerVertical="true"
-                        android:layout_alignWithParentIfMissing="true"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:textSize="18sp"
-                        android:text="@string/non_web_pane_label"/>
-
                 <ImageButton
                     android:id="@+id/settings_icon"
                     android:layout_width="wrap_content"

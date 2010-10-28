@@ -116,9 +116,6 @@
     <string name="google_suggest_base" translatable="false">
         http://www.google.com/complete/search?hl=%1$s&amp;</string>
 
-    <!-- Title for pane that shows non-web suggestions. [CHAR LIMIT=20] -->
-    <string name="non_web_pane_label">More</string>
-
     <!-- Format string for corpus name and corpus result count in the corpus selection list.
          The name of a corpus and the number of results from that corpus are inserted into the
          string. An example final string would be "Contacts (12)".
