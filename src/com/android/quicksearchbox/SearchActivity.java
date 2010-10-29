@@ -67,6 +67,9 @@ public class SearchActivity extends Activity {
 
     // Measures time from for last onCreate()/onNewIntent() call.
     private LatencyTracker mStartLatencyTracker;
+    // Measures time spent inside onCreate()
+    private LatencyTracker mOnCreateTracker;
+    private int mOnCreateLatency;
     // Whether QSB is starting. True between the calls to onCreate()/onNewIntent() and onResume().
     private boolean mStarting;
     // True if the user has taken some action, e.g. launching a search, voice search,
@@ -159,6 +162,7 @@ public class SearchActivity extends Activity {
 
         mCorporaObserver = new CorporaObserver();
         getCorpora().registerDataSetObserver(mCorporaObserver);
+        recordOnCreateDone();
     }
 
     protected SearchActivityView setupContentView() {
@@ -186,8 +190,13 @@ public class SearchActivity extends Activity {
 
     private void recordStartTime() {
         mStartLatencyTracker = new LatencyTracker();
+        mOnCreateTracker = new LatencyTracker();
         mStarting = true;
         mTookAction = false;
+    }
+
+    private void recordOnCreateDone() {
+        mOnCreateLatency = mOnCreateTracker.getLatency();
     }
 
     protected void restoreInstanceState(Bundle savedInstanceState) {
@@ -590,7 +599,7 @@ public class SearchActivity extends Activity {
             mStarting = false;
             String source = getIntent().getStringExtra(Search.SOURCE);
             int latency = mStartLatencyTracker.getLatency();
-            getLogger().logStart(latency, source, getCorpus(),
+            getLogger().logStart(mOnCreateLatency, latency, source, getCorpus(),
                     suggestions == null ? null : suggestions.getExpectedCorpora());
             getQsbApplication().onStartupComplete();
         }

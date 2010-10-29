@@ -37,7 +37,7 @@ public interface Logger {
      *
      * @param latency User-visible start-up latency in milliseconds.
      */
-    void logStart(int latency, String intentSource, Corpus corpus,
+    void logStart(int onCreateLatency, int latency, String intentSource, Corpus corpus,
             List<Corpus> orderedCorpora);
 
     /**

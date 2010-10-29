@@ -27,7 +27,7 @@ public class MockLogger implements Logger {
     public MockLogger() {
     }
 
-    public void logStart(int latency, String intentSource, Corpus corpus,
+    public void logStart(int onCreateLatency, int latency, String intentSource, Corpus corpus,
             List<Corpus> orderedCorpora) {
     }
 

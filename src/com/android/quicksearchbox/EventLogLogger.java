@@ -57,14 +57,14 @@ public class EventLogLogger implements Logger {
         return mConfig;
     }
 
-    public void logStart(int latency, String intentSource, Corpus corpus,
+    public void logStart(int onCreateLatency, int latency, String intentSource, Corpus corpus,
             List<Corpus> orderedCorpora) {
         // TODO: Add more info to startMethod
         String startMethod = intentSource;
         String currentCorpus = getCorpusLogName(corpus);
         String enabledCorpora = getCorpusLogNames(orderedCorpora);
         EventLogTags.writeQsbStart(mPackageName, getVersionCode(), startMethod,
-                latency, currentCorpus, enabledCorpora);
+                latency, currentCorpus, enabledCorpora, onCreateLatency);
     }
 
     public void logSuggestionClick(int position, SuggestionCursor suggestionCursor,
