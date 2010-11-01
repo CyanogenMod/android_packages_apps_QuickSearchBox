@@ -120,6 +120,6 @@
          The name of a corpus and the number of results from that corpus are inserted into the
          string. An example final string would be "Contacts (12)".
          [CHAR LIMIT=15] -->
-    <string name="corpus_count_format"><xliff:g id="corpus_name" example="Contacts">%1$s</xliff:g> (<xliff:g id="result_count" example="13">%2$d</xliff:g>)</string>
+    <string name="corpus_count_format" translatable="false"><xliff:g id="corpus_name" example="Contacts">%1$s</xliff:g> (<xliff:g id="result_count" example="13">%2$d</xliff:g>)</string>
 
 </resources>
