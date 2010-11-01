@@ -21,7 +21,11 @@ import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Suggestions;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -29,6 +33,8 @@ import android.widget.ImageView;
  * Two-pane variant for the search activity view.
  */
 public class SearchActivityViewTwoPane extends SearchActivityView {
+
+    private static final int TINT_ANIMATION_DURATION = 400; // in millis
 
     private ImageView mSettingsButton;
 
@@ -68,6 +74,22 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
     @Override
     public void onResume() {
+        setupWallpaperTint();
+    }
+
+    private void setupWallpaperTint() {
+        // Alpha fade-in the background tint when the activity resumes.
+        final Drawable drawable = getBackground();
+        ValueAnimator animator = ObjectAnimator.ofInt(drawable, "alpha", 0, 255);
+        // TODO: Remove this listener when the alpha animation update issue is fixed.
+        animator.addUpdateListener(new AnimatorUpdateListener() {
+
+            public void onAnimationUpdate(ValueAnimator animator) {
+                drawable.invalidateSelf();
+            }
+        });
+        animator.setDuration(TINT_ANIMATION_DURATION);
+        animator.start();
     }
 
     @Override
