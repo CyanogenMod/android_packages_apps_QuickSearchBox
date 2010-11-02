@@ -144,11 +144,13 @@ public class SearchActivity extends Activity {
             }
         });
 
-        mSearchActivityView.setExitClickListener(new View.OnClickListener() {
+        View.OnClickListener finishOnClick = new View.OnClickListener() {
             public void onClick(View v) {
                 finish();
             }
-        });
+        };
+        mSearchActivityView.setExitClickListener(finishOnClick);
+        mSearchActivityView.setEmptySpaceClickListener(finishOnClick);
 
         // First get setup from intent
         Intent intent = getIntent();

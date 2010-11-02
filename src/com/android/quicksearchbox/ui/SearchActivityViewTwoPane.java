@@ -27,6 +27,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ImageView;
 
 /**
@@ -161,6 +162,11 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     public void setSuggestionClickListener(SuggestionClickListener listener) {
         super.setSuggestionClickListener(listener);
         mResultsAdapter.setSuggestionClickListener(listener);
+    }
+
+    @Override
+    public void setEmptySpaceClickListener(final View.OnClickListener listener) {
+        findViewById(R.id.panes).setOnClickListener(listener);
     }
 
     @Override
