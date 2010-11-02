@@ -68,10 +68,12 @@
     <string name="clear_shortcuts">Clear shortcuts</string>
     <string name="clear_shortcuts_summary">Clear shortcuts to recently chosen search suggestions</string>
 
-    <!-- Strings used in the dialog shown after choosing the 'clear search shortcuts' setting. -->
+    <!--[CHAR LIMIT=200] Title used in the dialog shown after choosing the 'clear search shortcuts' setting. -->
     <string name="clear_shortcuts_prompt">"This will clear all shortcuts to recently chosen search suggestions."\n\n"(To clear your Browser history, use the Browser's settings.)"</string>
-    <string name="agree">OK</string>
-    <string name="disagree">Cancel</string>
+    <!--[CHAR LIMIT=30] Text used on the button to clear shortcuts in the dialog shown after choosing the 'clear search shortcuts' setting. -->
+    <string name="clear_shortcuts_agree">Clear shortcuts</string>
+    <!--[CHAR LIMIT=30] Text used on the button to cancel in the dialog shown after choosing the 'clear search shortcuts' setting. -->
+    <string name="clear_shortcuts_disagree">"Don't clear shortcuts"</string>
 
 
     <!-- Search source label for the Google search source. -->

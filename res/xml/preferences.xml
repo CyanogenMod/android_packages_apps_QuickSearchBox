@@ -33,8 +33,8 @@
                 android:summary="@string/clear_shortcuts_summary"
                 android:dialogTitle="@string/clear_shortcuts"
                 android:dialogMessage="@string/clear_shortcuts_prompt"
-                android:positiveButtonText="@string/agree"
-                android:negativeButtonText="@string/disagree"
+                android:positiveButtonText="@string/clear_shortcuts_agree"
+                android:negativeButtonText="@string/clear_shortcuts_disagree"
                 />
 
     </PreferenceCategory>
