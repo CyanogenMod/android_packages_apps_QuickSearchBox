@@ -20,7 +20,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,8 +39,6 @@ public class SearchSettingsImpl implements SearchSettings {
     // Intent action that opens the "Searchable Items" preference
     private static final String ACTION_SEARCHABLE_ITEMS =
             "com.android.quicksearchbox.action.SEARCHABLE_ITEMS";
-
-    private static final String SHOW_WEB_SUGGESTIONS_PREF = "show_web_suggestions";
 
     /**
      * Preference key used for storing the index of the next voice search hint to show.
@@ -81,7 +78,6 @@ public class SearchSettingsImpl implements SearchSettings {
     }
 
     public void upgradeSettingsIfNeeded() {
-        upgradeShowWebSuggestionsIfNeeded();
     }
 
     public Intent getSearchableItemsIntent() {
@@ -107,24 +103,6 @@ public class SearchSettingsImpl implements SearchSettings {
 
     protected SharedPreferences getSearchPreferences() {
         return getContext().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
-    }
-
-    public boolean getShowWebSuggestions() {
-        return getSearchPreferences().getBoolean(SHOW_WEB_SUGGESTIONS_PREF, true);
-    }
-
-    /**
-     * Copies value from the old deprecated SHOW_WEB_SUGGESTIONS system setting.
-     */
-    private void upgradeShowWebSuggestionsIfNeeded() {
-        SharedPreferences prefs = getSearchPreferences();
-        if (!prefs.contains(SHOW_WEB_SUGGESTIONS_PREF)) {
-            // Default to true if the old setting is not set
-            boolean oldValue = Settings.System.getInt(getContext().getContentResolver(),
-                    Settings.System.SHOW_WEB_SUGGESTIONS, 1) == 1;
-            prefs.edit().putBoolean(SHOW_WEB_SUGGESTIONS_PREF, oldValue).commit();
-            Log.i(TAG, "Copied value from Settings.System.SHOW_WEB_SUGGESTIONS: " + oldValue);
-        }
     }
 
     /**

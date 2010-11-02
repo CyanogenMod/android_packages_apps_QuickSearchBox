@@ -170,9 +170,7 @@ public class WebCorpus extends MultiSourceCorpus {
     @Override
     protected List<Source> getSourcesToQuery(String query, boolean onlyCorpus) {
         ArrayList<Source> sourcesToQuery = new ArrayList<Source>(2);
-        if (getSettings().getShowWebSuggestions()) {
-            if (mWebSearchSource != null) sourcesToQuery.add(mWebSearchSource);
-        }
+        if (mWebSearchSource != null) sourcesToQuery.add(mWebSearchSource);
         if (mBrowserSource != null && query.length() > 0) {
             sourcesToQuery.add(mBrowserSource);
         }

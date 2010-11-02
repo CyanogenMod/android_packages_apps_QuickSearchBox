@@ -30,8 +30,6 @@ public interface SearchSettings {
 
     public boolean isCorpusEnabled(Corpus corpus);
 
-    public boolean getShowWebSuggestions();
-
     /**
      * Informs our listeners about the updated settings data.
      */

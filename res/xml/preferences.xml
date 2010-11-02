@@ -39,18 +39,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-            android:key="google_settings"
-            android:title="@string/google_search_category_title">
-
-        <CheckBoxPreference
-                android:key="show_web_suggestions"
-                android:title="@string/google_show_web_suggestions"
-                android:summaryOn="@string/google_show_web_suggestions_summary_enabled"
-                android:summaryOff="@string/google_show_web_suggestions_summary_disabled"
-                android:defaultValue="true"
-                />
-
-    </PreferenceCategory>
-
 </PreferenceScreen>

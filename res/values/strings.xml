@@ -88,11 +88,6 @@
     <!-- Search settings description for the Google search source. -->
     <string name="google_search_description">Google search suggestions</string>
 
-    <!-- Title and summaries for 'show web suggestions' check box setting -->
-    <string name="google_show_web_suggestions">Show web suggestions</string>
-    <string name="google_show_web_suggestions_summary_enabled">Show suggestions from Google as you type</string>
-    <string name="google_show_web_suggestions_summary_disabled">Don\'t show suggestions from Google as you type</string>
-
     <!-- Title for Voice Search hints bubble -->
     <string name="voice_search_hint_title">Try saying:</string>
     <!-- Starting quotation marks of the voice search hint -->

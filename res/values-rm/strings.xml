@@ -46,9 +46,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"Tschertga Google"</string>
     <!-- no translation found for google_search_description (6583849182671608994) -->
     <skip />
-    <string name="google_show_web_suggestions" msgid="9018281734662733247">"Mussar las propostas web"</string>
-    <string name="google_show_web_suggestions_summary_enabled" msgid="6978457517649501505">"Mussar las propostas da Google durant l\'endataziun"</string>
-    <string name="google_show_web_suggestions_summary_disabled" msgid="3768151514600543003">"Betg mussar propostas da Google durant l\'endataziun"</string>
     <!-- no translation found for voice_search_hint_title (9160095960228453779) -->
     <skip />
     <!-- no translation found for voice_search_hint_quotation_start (566545847023692214) -->
