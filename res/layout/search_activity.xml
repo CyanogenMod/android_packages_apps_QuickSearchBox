@@ -31,6 +31,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/search_edit_frame"
         android:layout_alignParentBottom="true"
+        android:scrollbars="none"
         >
     </view>
 

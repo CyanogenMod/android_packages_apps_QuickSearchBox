@@ -58,6 +58,7 @@
                     android:paddingRight="12dip"
                     android:background="@color/pane_background"
                     android:cacheColorHint="@android:color/transparent"
+                    android:scrollbars="none"
                     >
                 </view>
 
@@ -182,6 +183,7 @@
                     android:paddingRight="12dip"
                     android:background="@color/pane_background"
                     android:cacheColorHint="@android:color/transparent"
+                    android:scrollbars="none"
                     >
 
                  </view>
