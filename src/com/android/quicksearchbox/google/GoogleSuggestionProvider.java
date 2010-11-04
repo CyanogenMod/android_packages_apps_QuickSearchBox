@@ -59,7 +59,7 @@ public class GoogleSuggestionProvider extends ContentProvider {
     private static final int HTTP_TIMEOUT_MS = 1000;
 
     // TODO: this should be defined somewhere
-    private static final String HTTP_TIMEOUT = "http.connection-manager.timeout";
+    private static final String HTTP_TIMEOUT = "http.conn-manager.timeout";
 
     // Indexes into COLUMNS
     private static final int COL_ID = 0;
