@@ -13,48 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.quicksearchbox.preferences;
 
-package com.android.quicksearchbox;
+import com.android.quicksearchbox.QsbApplication;
+import com.android.quicksearchbox.R;
+import com.google.common.annotations.VisibleForTesting;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 
 /**
- * Activity for setting global search preferences.
+ * System search settings fragment.
  */
-public class SearchSettingsActivity extends PreferenceActivity {
+@VisibleForTesting
+public class SystemSearchFragment extends PreferenceFragment {
 
-    private SearchSettingsController mController;
+    private SystemSearchSettingsController mController;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mController = createController();
 
         getPreferenceManager().setSharedPreferencesName(mController.getPreferencesName());
 
-        addPreferencesFromResource(R.xml.preferences);
+        addPreferencesFromResource(R.xml.system_search_preferences);
 
         mController.setClearShortcutsPreference((OkCancelPreference)
                 findPreference(mController.getClearShortcutsPreferenceName()));
 
         mController.setCorporaPreference(findPreference(mController.getCorporaPreferenceName()));
+
     }
 
-    protected SearchSettingsController createController() {
-        QsbApplication app = QsbApplication.get(this);
-        return new SearchSettingsController(app.getSettings(), app.getShortcutRepository());
-    }
-
-    protected SearchSettingsController getController() {
-        return mController;
+    protected SystemSearchSettingsController createController() {
+        QsbApplication app = QsbApplication.get(getActivity());
+        return new SystemSearchSettingsController(app.getSettings(), app.getShortcutRepository());
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         mController.onResume();
     }
-
 }

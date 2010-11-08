@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.preferences;
+
+import com.android.quicksearchbox.R;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

@@ -78,7 +78,7 @@
                 android:authorities="com.android.quicksearchbox.shortcuts">
         </provider>
 
-        <activity android:name=".SearchSettingsActivity"
+        <activity android:name=".preferences.SearchSettingsActivityChooser"
                 android:label="@string/search_settings"
                 android:excludeFromRecents="true">
             <intent-filter>
@@ -94,7 +94,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SearchableItemsSettings"
+        <activity android:name=".preferences.SearchSettingsActivity"
+                android:label="@string/search_settings"
+                android:excludeFromRecents="true">
+        </activity>
+
+        <activity android:name=".preferences.LegacySearchSettingsActivity"
+                android:label="@string/search_settings"
+                android:excludeFromRecents="true">
+        </activity>
+
+        <activity android:name=".preferences.SearchableItemsActivity"
                 android:label="@string/search_sources"
                 android:excludeFromRecents="true">
             <intent-filter>

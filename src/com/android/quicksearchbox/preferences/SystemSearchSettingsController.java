@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.quicksearchbox;
+package com.android.quicksearchbox.preferences;
 
+import com.android.quicksearchbox.SearchSettings;
+import com.android.quicksearchbox.ShortcutRepository;
 import com.android.quicksearchbox.util.Consumer;
 import com.android.quicksearchbox.util.Consumers;
 
@@ -27,7 +29,7 @@ import android.util.Log;
 /**
  * Logic sitting behind SearchSettingsActivity
  */
-public class SearchSettingsController
+public class SystemSearchSettingsController
         implements OnPreferenceChangeListener, OnPreferenceClickListener {
 
     private static final boolean DBG = false;
@@ -52,7 +54,7 @@ public class SearchSettingsController
     // References to the top-level preference objects
     private OkCancelPreference mClearShortcutsPreference;
 
-    public SearchSettingsController(SearchSettings settings, ShortcutRepository shortcuts) {
+    public SystemSearchSettingsController(SearchSettings settings, ShortcutRepository shortcuts) {
         mSettings = settings;
         mShortcuts = shortcuts;
     }
@@ -82,7 +84,7 @@ public class SearchSettingsController
     }
 
     public void setCorporaPreference(Preference corpora) {
-        corpora.setIntent(getSettings().getSearchableItemsIntent());
+        // nothing needs doing.
     }
 
     public void onResume() {

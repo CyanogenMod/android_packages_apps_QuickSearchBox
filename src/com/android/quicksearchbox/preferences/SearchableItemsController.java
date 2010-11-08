@@ -13,21 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.quicksearchbox.preferences;
 
-package com.android.quicksearchbox;
+import com.android.quicksearchbox.Corpora;
+import com.android.quicksearchbox.Corpus;
+import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SearchSettings;
+import com.android.quicksearchbox.SearchSettingsImpl;
 
-import android.os.Bundle;
+import android.content.Context;
+import android.content.res.Resources;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.util.Log;
 
 /**
- * Activity for selecting searchable items.
+ * Logic backing the searchable items activity or fragment.
  */
-public class SearchableItemsSettings extends PreferenceActivity
-        implements OnPreferenceChangeListener {
+public class SearchableItemsController implements OnPreferenceChangeListener {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchableItemsSettings";
@@ -35,30 +39,45 @@ public class SearchableItemsSettings extends PreferenceActivity
     // Only used to find the preferences after inflating
     private static final String SEARCH_CORPORA_PREF = "search_corpora";
 
+    private final SearchSettings mSearchSettings;
+    private final Corpora mCorpora;
+    private final Context mContext;
+
     // References to the top-level preference objects
     private PreferenceGroup mCorporaPreferences;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public SearchableItemsController(SearchSettings searchSettings, Corpora corpora,
+            Context context) {
+        mSearchSettings = searchSettings;
+        mCorpora = corpora;
+        mContext = context;
+    }
 
-        getPreferenceManager().setSharedPreferencesName(SearchSettingsImpl.PREFERENCES_NAME);
-
-        addPreferencesFromResource(R.xml.preferences_searchable_items);
-
-        mCorporaPreferences = (PreferenceGroup) getPreferenceScreen().findPreference(
-                SEARCH_CORPORA_PREF);
-
+    public void setCorporaPreferences(PreferenceGroup corporaPreferences) {
+        mCorporaPreferences = corporaPreferences;
         populateSourcePreference();
     }
 
+    public String getCorporaPreferenceKey() {
+        return SEARCH_CORPORA_PREF;
+    }
+
     private SearchSettings getSettings() {
-        return QsbApplication.get(this).getSettings();
+        return mSearchSettings;
     }
 
     private Corpora getCorpora() {
-        return QsbApplication.get(this).getCorpora();
+        return mCorpora;
     }
+
+    private Context getContext() {
+        return mContext;
+    }
+
+    private Resources getResources() {
+        return getContext().getResources();
+    }
+
 
     /**
      * Fills the suggestion source list.
@@ -82,7 +101,7 @@ public class SearchableItemsSettings extends PreferenceActivity
      * Adds a suggestion source to the list of suggestion source checkbox preferences.
      */
     private Preference createCorpusPreference(Corpus corpus) {
-        SearchableItemPreference sourcePref = new SearchableItemPreference(this);
+        SearchableItemPreference sourcePref = new SearchableItemPreference(getContext());
         sourcePref.setKey(SearchSettingsImpl.getCorpusEnabledPreference(corpus));
         // Put web corpus first. The rest are alphabetical.
         if (corpus.isWebCorpus()) {
