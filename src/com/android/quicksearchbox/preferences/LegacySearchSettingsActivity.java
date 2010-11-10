@@ -13,51 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox.preferences;
 
-import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
-
-import android.os.Bundle;
-import android.preference.PreferenceActivity;
 
 /**
  * Activity for setting global search preferences. This is the version for Gingerbread and earlier
  * which to not have support for fragments.
  */
-public class LegacySearchSettingsActivity extends PreferenceActivity {
-
-    private SystemSearchSettingsController mController;
+public class LegacySearchSettingsActivity extends LegacySearchSettingsActivityBase {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mController = createController();
-
-        getPreferenceManager().setSharedPreferencesName(mController.getPreferencesName());
-
-        addPreferencesFromResource(R.xml.legacy_preferences);
-
-        mController.setClearShortcutsPreference((OkCancelPreference)
-                findPreference(mController.getClearShortcutsPreferenceName()));
-
-        mController.setCorporaPreference(findPreference(mController.getCorporaPreferenceName()));
-
+    protected int getPreferencesResourceId() {
+        return R.xml.legacy_preferences;
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mController.onResume();
-    }
-
-    protected SystemSearchSettingsController createController() {
-        QsbApplication app = QsbApplication.get(this);
-        return new SystemSearchSettingsController(app.getSettings(), app.getShortcutRepository());
-    }
-
-
 
 }

@@ -52,12 +52,13 @@
     <!-- Search settings title -->
     <string name="search_settings">Search settings</string>
 
-    <!-- Title for 'Google' category of search settings.
+    <!-- Title for Google Account category of search settings.
          [CHAR LIMIT=20] -->
-    <string name="google_search_category_title">Google</string>
+    <string name="google_settings_category_title">Google Account</string>
 
-    <!-- Title for 'system search' category of search settings -->
-    <string name="system_search_category_title">Phone</string>
+    <!-- Title for 'device' category of search settings 
+        [CHAR LIMIT=20] -->
+    <string name="device_settings_category_title">Device</string>
 
     <!-- Title and summary for 'search sources' link for system search -->
     <string name="search_sources">Searchable items</string>

@@ -15,38 +15,22 @@
  */
 package com.android.quicksearchbox.preferences;
 
-import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.SearchSettingsImpl;
-import com.google.common.annotations.VisibleForTesting;
 
-import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 
 /**
  * Fragment for selecting searchable items
  */
-@VisibleForTesting
-public class SearchableItemsFragment extends PreferenceFragment {
-
-    private SearchableItemsController mController;
+public class SearchableItemsFragment extends SettingsFragmentBase {
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        QsbApplication app = QsbApplication.get(getActivity());
-        mController = new SearchableItemsController(app.getSettings(), app.getCorpora(),
-                getActivity());
-
-        getPreferenceManager().setSharedPreferencesName(SearchSettingsImpl.PREFERENCES_NAME);
-
-        addPreferencesFromResource(R.xml.preferences_searchable_items);
-
-        mController.setCorporaPreferences((PreferenceGroup) getPreferenceScreen().findPreference(
-                mController.getCorporaPreferenceKey()));
-
+    protected int getPreferencesResourceId() {
+        return R.xml.preferences_searchable_items;
     }
 
+    @Override
+    protected void handlePreferenceGroup(PreferenceGroup screen) {
+        getController().handlePreference(screen);
+    }
 }

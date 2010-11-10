@@ -13,26 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox.preferences;
 
 import com.android.quicksearchbox.R;
 
-import android.preference.PreferenceGroup;
-
 /**
- * Activity for selecting searchable items.
+ * 'Device' preferences.
  */
-public class SearchableItemsActivity extends LegacySearchSettingsActivityBase {
+public class DeviceSearchFragment extends SettingsFragmentBase {
 
     @Override
     protected int getPreferencesResourceId() {
-        return R.xml.preferences_searchable_items;
-    }
-
-    @Override
-    protected void handlePreferenceGroup(PreferenceGroup group) {
-        getController().handlePreference(group);
+        return R.xml.device_search_preferences;
     }
 
 }

@@ -31,13 +31,12 @@ import android.util.Log;
 /**
  * Logic backing the searchable items activity or fragment.
  */
-public class SearchableItemsController implements OnPreferenceChangeListener {
+public class SearchableItemsController implements PreferenceController, OnPreferenceChangeListener {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchableItemsSettings";
 
-    // Only used to find the preferences after inflating
-    private static final String SEARCH_CORPORA_PREF = "search_corpora";
+    public static final String SEARCH_CORPORA_PREF = "search_corpora";
 
     private final SearchSettings mSearchSettings;
     private final Corpora mCorpora;
@@ -53,8 +52,8 @@ public class SearchableItemsController implements OnPreferenceChangeListener {
         mContext = context;
     }
 
-    public void setCorporaPreferences(PreferenceGroup corporaPreferences) {
-        mCorporaPreferences = corporaPreferences;
+    public void handlePreference(Preference corporaPreferences) {
+        mCorporaPreferences = (PreferenceGroup) corporaPreferences;
         populateSourcePreference();
     }
 
@@ -121,6 +120,15 @@ public class SearchableItemsController implements OnPreferenceChangeListener {
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         getSettings().broadcastSettingsChanged();
         return true;
+    }
+
+    public void onCreateComplete() {
+    }
+
+    public void onDestroy() {
+    }
+
+    public void onResume() {
     }
 
 }
