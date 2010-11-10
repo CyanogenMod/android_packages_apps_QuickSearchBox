@@ -18,10 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Szukaj"</string>
     <string name="search_widget" msgid="323244086853110381">"Szukaj"</string>
-    <!-- no translation found for remove_from_history (3812349065338505597) -->
-    <skip />
-    <!-- no translation found for remove_from_history_failed (5471604847849215215) -->
-    <skip />
+    <string name="remove_from_history" msgid="3812349065338505597">"Usuń z historii"</string>
+    <string name="remove_from_history_failed" msgid="5471604847849215215">"Usuwanie z historii nie powiodło się"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Przeszukuj"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Wszystko"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Sieć"</string>
@@ -38,8 +36,10 @@
     <string name="clear_shortcuts" msgid="1964107586205103593">"Wyczyść skróty"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Wyczyść skróty do ostatnio wybranych sugestii wyszukiwania"</string>
     <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"Spowoduje to wyczyszczenie wszystkich skrótów do ostatnio wybranych sugestii wyszukiwania."\n\n"(Aby wyczyścić historię przeglądarki, użyj ustawień tej przeglądarki)."</string>
-    <string name="agree" msgid="5918867532928233161">"OK"</string>
-    <string name="disagree" msgid="4631189706900617900">"Anuluj"</string>
+    <!-- no translation found for clear_shortcuts_agree (5623666487205882033) -->
+    <skip />
+    <!-- no translation found for clear_shortcuts_disagree (3667707814933648461) -->
+    <skip />
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"Wyszukiwarka Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Wyszukiwarka Google"</string>
@@ -47,7 +47,4 @@
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Powiedz np.:"</string>
     <string name="voice_search_hint_quotation_start" msgid="566545847023692214">"“"</string>
     <string name="voice_search_hint_quotation_end" msgid="4840921425933402938">"”"</string>
-    <string name="non_web_pane_label" msgid="7886884433908365831">"Więcej"</string>
-    <!-- no translation found for corpus_count_format (1659457893204655410) -->
-    <skip />
 </resources>
