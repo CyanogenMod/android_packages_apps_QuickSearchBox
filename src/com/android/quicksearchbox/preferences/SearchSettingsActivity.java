@@ -15,9 +15,11 @@
  */
 package com.android.quicksearchbox.preferences;
 
+import com.android.quicksearchbox.QsbApplication;
 import com.android.quicksearchbox.R;
 
 import android.preference.PreferenceActivity;
+import android.util.Log;
 
 import java.util.List;
 
@@ -25,6 +27,10 @@ import java.util.List;
  * Activity for setting global search preferences.
  */
 public class SearchSettingsActivity extends PreferenceActivity {
+    private static final String TAG = "QSB.SearchSettingsActivity";
+    private static final boolean DBG = true;
+
+    private static final String CLEAR_SHORTCUTS_FRAGMENT = DeviceSearchFragment.class.getName();
 
     /**
      * Populate the activity with the top-level headers.
@@ -32,6 +38,32 @@ public class SearchSettingsActivity extends PreferenceActivity {
     @Override
     public void onBuildHeaders(List<Header> target) {
         loadHeadersFromResource(R.xml.preferences_headers, target);
+        onHeadersBuilt(target);
+    }
+
+    /**
+     * Get the name of the fragment that contains only a 'clear shortcuts' preference, and hence
+     * can be removed if zero-query shortcuts are disabled. Returns null if no such fragment exists.
+     */
+    protected String getShortcutsOnlyFragment() {
+        return CLEAR_SHORTCUTS_FRAGMENT;
+    }
+
+    protected void onHeadersBuilt(List<Header> target) {
+        String shortcutsFragment = getShortcutsOnlyFragment();
+        if (shortcutsFragment == null) return;
+        if (DBG) Log.d(TAG, "onHeadersBuilt shortcutsFragment=" + shortcutsFragment);
+        if (!QsbApplication.get(this).getConfig().showShortcutsForZeroQuery()) {
+            // remove 'clear shortcuts'
+            for (int i = 0; i < target.size(); ++i) {
+                String fragment = target.get(i).fragment;
+                if (DBG) Log.d(TAG, "fragment " + i + ": " + fragment);
+                if (shortcutsFragment.equals(fragment)) {
+                    target.remove(i);
+                    break;
+                }
+            }
+        }
     }
 
 }

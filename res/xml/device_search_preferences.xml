@@ -17,13 +17,6 @@
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <PreferenceScreen
-                android:key="search_corpora"
-                android:title="@string/search_sources"
-                android:summary="@string/search_sources_summary"
-                android:fragment="com.android.quicksearchbox.preferences.SearchableItemsFragment"
-                />
-
         <com.android.quicksearchbox.preferences.OkCancelPreference
                 android:key="clear_shortcuts"
                 android:persistent="false"

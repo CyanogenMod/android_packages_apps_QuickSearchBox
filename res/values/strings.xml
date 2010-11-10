@@ -54,11 +54,11 @@
 
     <!-- Title for Google Account category of search settings.
          [CHAR LIMIT=20] -->
-    <string name="google_settings_category_title">Google Account</string>
+    <string name="google_settings_category_title">Google search</string>
 
     <!-- Title for 'device' category of search settings 
         [CHAR LIMIT=20] -->
-    <string name="device_settings_category_title">Device</string>
+    <string name="device_settings_category_title">Clear shortcuts</string>
 
     <!-- Title and summary for 'search sources' link for system search -->
     <string name="search_sources">Searchable items</string>

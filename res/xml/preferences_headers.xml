@@ -16,6 +16,10 @@
 
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <header android:fragment="com.android.quicksearchbox.preferences.SearchableItemsFragment"
+        android:title="@string/search_sources"
+    />
+
     <header android:fragment="com.android.quicksearchbox.preferences.DeviceSearchFragment"
         android:title="@string/device_settings_category_title"
     />
