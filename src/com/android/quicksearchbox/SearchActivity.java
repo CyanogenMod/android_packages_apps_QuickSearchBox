@@ -460,11 +460,11 @@ public class SearchActivity extends Activity {
     }
 
     protected SuggestionCursor getCurrentSuggestions() {
-        return mSearchActivityView.getCurrentSuggestions();
+        return mSearchActivityView.getCurrentPromotedSuggestions();
     }
 
-    protected SuggestionCursor getCurrentSuggestions(SuggestionsAdapter adapter, int position) {
-        SuggestionCursor suggestions = adapter.getCurrentSuggestions();
+    protected SuggestionCursor getCurrentSuggestions(SuggestionsAdapter<?> adapter, int position) {
+        SuggestionCursor suggestions = adapter.getCurrentPromotedSuggestions();
         if (suggestions == null) {
             return null;
         }
@@ -496,7 +496,7 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private boolean launchSuggestion(SuggestionsAdapter adapter, int position) {
+    private boolean launchSuggestion(SuggestionsAdapter<?> adapter, int position) {
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
         if (suggestions == null) return false;
 
@@ -522,7 +522,7 @@ public class SearchActivity extends Activity {
         launchIntent(intent);
     }
 
-    protected void removeFromHistory(SuggestionsAdapter adapter, int position) {
+    protected void removeFromHistory(SuggestionsAdapter<?> adapter, int position) {
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
         if (suggestions == null) return;
         removeFromHistory(suggestions, position);
@@ -549,7 +549,7 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected void clickedQuickContact(SuggestionsAdapter adapter, int position) {
+    protected void clickedQuickContact(SuggestionsAdapter<?> adapter, int position) {
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
         if (suggestions == null) return;
 
@@ -564,7 +564,7 @@ public class SearchActivity extends Activity {
         getShortcutRepository().reportClick(suggestions, position);
     }
 
-    protected void refineSuggestion(SuggestionsAdapter adapter, int position) {
+    protected void refineSuggestion(SuggestionsAdapter<?> adapter, int position) {
         if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
         SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
         if (suggestions == null) {
@@ -665,19 +665,19 @@ public class SearchActivity extends Activity {
 
     private class ClickHandler implements SuggestionClickListener {
 
-        public void onSuggestionQuickContactClicked(SuggestionsAdapter adapter, int position) {
+        public void onSuggestionQuickContactClicked(SuggestionsAdapter<?> adapter, int position) {
             clickedQuickContact(adapter, position);
         }
 
-        public void onSuggestionClicked(SuggestionsAdapter adapter, int position) {
+        public void onSuggestionClicked(SuggestionsAdapter<?> adapter, int position) {
             launchSuggestion(adapter, position);
         }
 
-        public void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter adapter, int position) {
+        public void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, int position) {
             removeFromHistory(adapter, position);
         }
 
-        public void onSuggestionQueryRefineClicked(SuggestionsAdapter adapter, int position) {
+        public void onSuggestionQueryRefineClicked(SuggestionsAdapter<?> adapter, int position) {
             refineSuggestion(adapter, position);
         }
     }

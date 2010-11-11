@@ -44,6 +44,7 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.ImageButton;
+import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
@@ -70,9 +71,8 @@ public abstract class SearchActivityView extends RelativeLayout
     protected Drawable mQueryTextEmptyBg;
     protected Drawable mQueryTextNotEmptyBg;
 
-    protected SuggestionsView mSuggestionsView;
-
-    protected SuggestionsAdapter mSuggestionsAdapter;
+    protected SuggestionsListView<ListAdapter> mSuggestionsView;
+    protected SuggestionsAdapter<ListAdapter> mSuggestionsAdapter;
 
     protected ImageButton mSearchCloseButton;
     protected ImageButton mSearchGoButton;
@@ -136,7 +136,7 @@ public abstract class SearchActivityView extends RelativeLayout
     }
 
     public void onSuggestionAdapterChanged() {
-        mSuggestionsView.setAdapter(mSuggestionsAdapter);
+        mSuggestionsView.setSuggestionsAdapter(mSuggestionsAdapter);
     }
 
     public abstract void onResume();
@@ -144,13 +144,13 @@ public abstract class SearchActivityView extends RelativeLayout
     public abstract void onStop();
 
     public void start() {
-        mSuggestionsAdapter.registerDataSetObserver(new SuggestionsObserver());
-        mSuggestionsView.setAdapter(mSuggestionsAdapter);
+        mSuggestionsAdapter.getListAdapter().registerDataSetObserver(new SuggestionsObserver());
+        mSuggestionsView.setSuggestionsAdapter(mSuggestionsAdapter);
     }
 
     public void destroy() {
         mSuggestionsAdapter.setSuggestionAdapterChangeListener(null);
-        mSuggestionsView.setAdapter(null);  // closes mSuggestionsAdapter
+        mSuggestionsView.setSuggestionsAdapter(null);  // closes mSuggestionsAdapter
     }
 
     // TODO: Get rid of this. To make it more easily testable,
@@ -163,9 +163,10 @@ public abstract class SearchActivityView extends RelativeLayout
         return getQsbApplication().getVoiceSearch();
     }
 
-    protected SuggestionsAdapter createSuggestionsAdapter() {
-        return new DelayingSuggestionsAdapter(getQsbApplication().getDefaultSuggestionViewFactory(),
-                getQsbApplication().getCorpora());
+    protected SuggestionsAdapter<ListAdapter> createSuggestionsAdapter() {
+        return new DelayingSuggestionsAdapter<ListAdapter>(new SuggestionsListAdapter(
+                getQsbApplication().getDefaultSuggestionViewFactory(), 
+                getQsbApplication().getCorpora()));
     }
 
 
@@ -276,16 +277,12 @@ public abstract class SearchActivityView extends RelativeLayout
     public void setEmptySpaceClickListener(final View.OnClickListener listener) {
     }
 
-    protected SuggestionsAdapter getSuggestionsAdapter() {
-        return mSuggestionsAdapter;
-    }
-
     public Suggestions getSuggestions() {
         return mSuggestionsAdapter.getSuggestions();
     }
 
-    public SuggestionCursor getCurrentSuggestions() {
-        return mSuggestionsAdapter.getCurrentSuggestions();
+    public SuggestionCursor getCurrentPromotedSuggestions() {
+        return mSuggestionsAdapter.getCurrentPromotedSuggestions();
     }
 
     public void setSuggestions(Suggestions suggestions) {
@@ -470,14 +467,14 @@ public abstract class SearchActivityView extends RelativeLayout
         return corpus != null && corpus.isWebCorpus();
     }
 
-    protected boolean onSuggestionKeyDown(SuggestionsAdapter adapter,
+    protected boolean onSuggestionKeyDown(SuggestionsAdapter<?> adapter,
             int position, int keyCode, KeyEvent event) {
         // Treat enter or search as a click
         if (       keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == KeyEvent.KEYCODE_SEARCH
                 || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             if (adapter != null) {
-                SuggestionsAdapter suggestionsAdapter = adapter;
+                SuggestionsAdapter<?> suggestionsAdapter = adapter;
                 suggestionsAdapter.onSuggestionClicked(position);
                 return true;
             } else {
@@ -528,7 +525,7 @@ public abstract class SearchActivityView extends RelativeLayout
                     && v instanceof SuggestionsView) {
                 SuggestionsView view = ((SuggestionsView) v);
                 int position = view.getSelectedPosition();
-                if (onSuggestionKeyDown(view.getAdapter(), position, keyCode, event)) {
+                if (onSuggestionKeyDown(view.getSuggestionsAdapter(), position, keyCode, event)) {
                     return true;
                 }
             }

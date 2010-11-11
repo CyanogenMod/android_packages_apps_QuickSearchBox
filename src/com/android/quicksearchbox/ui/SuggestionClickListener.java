@@ -27,7 +27,7 @@ public interface SuggestionClickListener {
      * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the clicked suggestion.
      */
-    void onSuggestionClicked(SuggestionsAdapter adapter, int position);
+    void onSuggestionClicked(SuggestionsAdapter<?> adapter, int position);
 
     /**
      * Called when a quick contact badge in a suggestion is clicked.
@@ -35,7 +35,7 @@ public interface SuggestionClickListener {
      * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the suggestion.
      */
-    void onSuggestionQuickContactClicked(SuggestionsAdapter adapter, int position);
+    void onSuggestionQuickContactClicked(SuggestionsAdapter<?> adapter, int position);
 
     /**
      * Called when the user requests to remove a suggestion from the search history.
@@ -43,7 +43,7 @@ public interface SuggestionClickListener {
      * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the clicked suggestion.
      */
-    void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter adapter, int position);
+    void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, int position);
 
     /**
      * Called when the "query refine" button of a suggestion is clicked.
@@ -51,5 +51,5 @@ public interface SuggestionClickListener {
      * @param adapter Adapter that contains the clicked suggestion.
      * @param position Position of the suggestion.
      */
-    void onSuggestionQueryRefineClicked(SuggestionsAdapter adapter, int position);
+    void onSuggestionQueryRefineClicked(SuggestionsAdapter<?> adapter, int position);
 }

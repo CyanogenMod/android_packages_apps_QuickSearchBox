@@ -65,7 +65,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     private boolean mIsFromHistory;
     private boolean mRefineable;
     private int mPosition;
-    private SuggestionsAdapter mAdapter;
+    private SuggestionsAdapter<?> mAdapter;
     private KeyListener mKeyListener;
     private boolean mIcon1Enabled = true;
 
@@ -144,7 +144,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
-    public void bindAdapter(SuggestionsAdapter adapter, int position) {
+    public void bindAdapter(SuggestionsAdapter<?> adapter, int position) {
         mAdapter = adapter;
         mPosition = position;
     }
@@ -418,4 +418,5 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
 
     }
+
 }

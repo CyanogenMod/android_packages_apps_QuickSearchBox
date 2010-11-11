@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,315 +13,90 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Corpora;
-import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.Promoter;
-import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SuggestionCursor;
-import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
 
-import android.database.DataSetObserver;
-import android.util.Log;
-import android.view.View;
 import android.view.View.OnFocusChangeListener;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-
-import java.util.HashMap;
+import android.widget.ExpandableListAdapter;
+import android.widget.ListAdapter;
 
 /**
- * Uses a {@link Suggestions} object to back a {@link SuggestionsView}.
+ * Interface for suggestions adapters.
+ *
+ * @param <A> the adapter class used by the UI, probably either {@link ListAdapter} or
+ *      {@link ExpandableListAdapter}.
  */
-public class SuggestionsAdapter extends BaseAdapter {
-
-    private static final boolean DBG = false;
-    private static final String TAG = "QSB.SuggestionsAdapter";
-
-    private final Corpora mCorpora;
-
-    private DataSetObserver mDataSetObserver;
-
-    private Promoter mPromoter;
-
-    private int mMaxPromoted;
-
-    private SuggestionCursor mCursor;
-    private final HashMap<String, Integer> mViewTypeMap;
-    private final SuggestionViewFactory mFallback;
-
-    private Suggestions mSuggestions;
-
-    private SuggestionClickListener mSuggestionClickListener;
-    private OnFocusChangeListener mOnFocusChangeListener;
-
-    private SuggestionsAdapterChangeListener mListener;
-
-    private final CorporaObserver mCorporaObserver = new CorporaObserver();
-
-    private boolean mClosed = false;
-
-    private boolean mIcon1Enabled = true;
-
-    public SuggestionsAdapter(SuggestionViewFactory fallbackFactory, Corpora corpora) {
-        mCorpora = corpora;
-        mFallback = fallbackFactory;
-        mViewTypeMap = new HashMap<String, Integer>();
-        mCorpora.registerDataSetObserver(mCorporaObserver);
-        buildViewTypeMap();
-    }
-
-    public void setSuggestionAdapterChangeListener(SuggestionsAdapterChangeListener l) {
-        mListener = l;
-    }
-
-    private boolean addViewTypes(SuggestionViewFactory f) {
-        boolean changed = false;
-        for (String viewType : f.getSuggestionViewTypes()) {
-            if (!mViewTypeMap.containsKey(viewType)) {
-                mViewTypeMap.put(viewType, mViewTypeMap.size());
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    private boolean buildViewTypeMap() {
-        boolean changed = addViewTypes(mFallback);
-        for (Corpus c : mCorpora.getEnabledCorpora()) {
-            for (Source s : c.getSources()) {
-                SuggestionViewFactory f = s.getSuggestionViewFactory();
-                changed |= addViewTypes(f);
-            }
-        }
-        return changed;
-    }
-
-    public void setMaxPromoted(int maxPromoted) {
-        if (DBG) Log.d(TAG, "setMaxPromoted " + maxPromoted);
-        mMaxPromoted = maxPromoted;
-        onSuggestionsChanged();
-    }
-
-    public void setIcon1Enabled(boolean enabled) {
-        mIcon1Enabled = enabled;
-    }
-
-    public boolean isClosed() {
-        return mClosed;
-    }
-
-    public void close() {
-        setSuggestions(null);
-        mCorpora.unregisterDataSetObserver(mCorporaObserver);
-        mClosed = true;
-    }
-
-    public void setPromoter(Promoter promoter) {
-        mPromoter = promoter;
-        onSuggestionsChanged();
-    }
-
-    public void setSuggestionClickListener(SuggestionClickListener listener) {
-        mSuggestionClickListener = listener;
-    }
-
-    public void setOnFocusChangeListener(OnFocusChangeListener l) {
-        mOnFocusChangeListener = l;
-    }
-
-    public void setSuggestions(Suggestions suggestions) {
-        if (mSuggestions == suggestions) {
-            return;
-        }
-        if (mClosed) {
-            if (suggestions != null) {
-                suggestions.release();
-            }
-            return;
-        }
-        if (mDataSetObserver == null) {
-            mDataSetObserver = new MySuggestionsObserver();
-        }
-        // TODO: delay the change if there are no suggestions for the currently visible tab.
-        if (mSuggestions != null) {
-            mSuggestions.unregisterDataSetObserver(mDataSetObserver);
-            mSuggestions.release();
-        }
-        mSuggestions = suggestions;
-        if (mSuggestions != null) {
-            mSuggestions.registerDataSetObserver(mDataSetObserver);
-        }
-        onSuggestionsChanged();
-    }
-
-    public Suggestions getSuggestions() {
-        return mSuggestions;
-    }
-
-    public int getCount() {
-        return mCursor == null ? 0 : mCursor.getCount();
-    }
-
-    public SuggestionPosition getItem(int position) {
-        if (mCursor == null) return null;
-        return new SuggestionPosition(mCursor, position);
-    }
-
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return mViewTypeMap.size();
-    }
-
-    private String currentSuggestionViewType() {
-        String viewType = mCursor.getSuggestionSource().getSuggestionViewFactory()
-                .getViewType(mCursor);
-        if (!mViewTypeMap.containsKey(viewType)) {
-            throw new IllegalStateException("Unknown viewType " + viewType);
-        }
-        return viewType;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (mCursor == null) {
-            return 0;
-        }
-        mCursor.moveTo(position);
-        return mViewTypeMap.get(currentSuggestionViewType());
-    }
-
-    // Implements Adapter#getView()
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (mCursor == null) {
-            throw new IllegalStateException("getView() called with null cursor");
-        }
-        mCursor.moveTo(position);
-        SuggestionViewFactory factory = mCursor.getSuggestionSource().getSuggestionViewFactory();
-        View v = factory.getView(mCursor, mCursor.getUserQuery(), convertView, parent);
-        if (v == null) {
-            v = mFallback.getView(mCursor, mCursor.getUserQuery(), convertView, parent);
-        }
-        if (v instanceof SuggestionView) {
-            ((SuggestionView) v).setIcon1Enabled(mIcon1Enabled);
-            ((SuggestionView) v).bindAdapter(this, position);
-        } else {
-            SuggestionViewClickListener l = new SuggestionViewClickListener(position);
-            v.setOnClickListener(l);
-        }
-
-        if (mOnFocusChangeListener != null) {
-            v.setOnFocusChangeListener(mOnFocusChangeListener);
-        }
-        return v;
-    }
-
-    protected void onSuggestionsChanged() {
-        if (DBG) Log.d(TAG, "onSuggestionsChanged(" + mSuggestions + ")");
-        SuggestionCursor cursor = getPromoted(mSuggestions);
-        changeCursor(cursor);
-    }
+public interface SuggestionsAdapter<A> {
+    /**
+     * Request a notification when the structure of the adapter changes, usually due to the number
+     * of view types it can provide changing.
+     */
+    void setSuggestionAdapterChangeListener(SuggestionsAdapterChangeListener l);
 
     /**
-     * Gets the cursor containing the currently shown suggestions. The caller should not hold
-     * on to or modify the returned cursor.
+     * Sets the maximum number of promoted suggestions to be provided by this adapter.
      */
-    public SuggestionCursor getCurrentSuggestions() {
-        return mCursor;
-    }
+    void setMaxPromoted(int maxPromoted);
 
     /**
-     * Gets the cursor for the given source.
+     * Sets the suggestion promoter.
      */
-    protected SuggestionCursor getPromoted(Suggestions suggestions) {
-        if (suggestions == null) return null;
-        return suggestions.getPromoted(mPromoter, mMaxPromoted);
-    }
+    void setPromoter(Promoter promoter);
 
     /**
-     * Replace the cursor.
-     *
-     * This does not close the old cursor. Instead, all the cursors are closed in
-     * {@link #setSuggestions(Suggestions)}.
+     * Sets the listener to be notified of clicks on suggestions.
      */
-    private void changeCursor(SuggestionCursor newCursor) {
-        if (DBG) {
-            Log.d(TAG, "changeCursor(" + newCursor + ") count=" +
-                    (newCursor == null ? 0 : newCursor.getCount()));
-        }
-        if (newCursor == mCursor) {
-            if (newCursor != null) {
-                // Shortcuts may have changed without the cursor changing.
-                notifyDataSetChanged();
-            }
-            return;
-        }
-        mCursor = newCursor;
-        if (mCursor != null) {
-            notifyDataSetChanged();
-        } else {
-            notifyDataSetInvalidated();
-        }
-    }
+    void setSuggestionClickListener(SuggestionClickListener listener);
 
-    public void onSuggestionClicked(int position) {
-        if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionClicked(this, position);
-        }
-    }
+    /**
+     * Sets the listener to be notified of focus change events on suggestion views.
+     */
+    void setOnFocusChangeListener(OnFocusChangeListener l);
 
-    public void onSuggestionQuickContactClicked(int position) {
-        if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionQuickContactClicked(this, position);
-        }
-    }
+    /**
+     * Sets the current suggestions.
+     */
+    void setSuggestions(Suggestions suggestions);
 
-    public void onSuggestionRemoveFromHistoryClicked(int position) {
-        if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionRemoveFromHistoryClicked(this, position);
-        }
-    }
+    /**
+     * Gets the current suggestions.
+     */
+    Suggestions getSuggestions();
 
-    public void onSuggestionQueryRefineClicked(int position) {
-        if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionQueryRefineClicked(this, position);
-        }
-    }
+    /**
+     * Gets the current list of promoted suggestions.
+     */
+    SuggestionCursor getCurrentPromotedSuggestions();
 
-    private class MySuggestionsObserver extends DataSetObserver {
-        @Override
-        public void onChanged() {
-            onSuggestionsChanged();
-        }
-    }
+    /**
+     * Handles a regular click on a suggestion.
+     */
+    void onSuggestionClicked(int position);
 
-    private class CorporaObserver extends DataSetObserver {
-        @Override
-        public void onChanged() {
-            if (buildViewTypeMap()) {
-                if (mListener != null) {
-                    mListener.onSuggestionAdapterChanged();
-                }
-            }
-        }
-    }
+    /**
+     * Handles a click on a quick contact badge.
+     */
+    void onSuggestionQuickContactClicked(int position);
 
-    private class SuggestionViewClickListener implements View.OnClickListener {
-        private final int mPosition;
-        public SuggestionViewClickListener(int position) {
-            mPosition = position;
-        }
-        public void onClick(View v) {
-            onSuggestionClicked(mPosition);
-        }
-    }
+    /**
+     * Handles a request to remove a suggestion from history.
+     */
+    void onSuggestionRemoveFromHistoryClicked(int position);
+
+    /**
+     * Handles a click on the query refinement button.
+     */
+    void onSuggestionQueryRefineClicked(int position);
+
+    /**
+     * Gets the adapter to be used by the UI view.
+     */
+    A getListAdapter();
+
+    void setIcon1Enabled(boolean enabled);
 
     /**
      * Callback interface used to notify the view when the adapter has changed (i.e. the number and

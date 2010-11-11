@@ -30,34 +30,29 @@ import android.widget.ListView;
 /**
  * Holds a list of suggestions.
  */
-public class SuggestionsView extends ListView {
+public class SuggestionsView extends ListView implements SuggestionsListView<ListAdapter> {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsView";
 
     private boolean mLimitSuggestionsToViewHeight;
+    private SuggestionsAdapter<ListAdapter> mSuggestionsAdapter;
 
     public SuggestionsView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    @Override
-    public void setAdapter(ListAdapter adapter) {
-        if (!(adapter == null || adapter instanceof SuggestionsAdapter)){
-            throw new ClassCastException(
-                    "SuggestionsView adapter must be a SuggestionsAdapter (got " + adapter + ")");
-        }
-        super.setAdapter(adapter);
+    public void setSuggestionsAdapter(SuggestionsAdapter<ListAdapter> adapter) {
+        super.setAdapter(adapter == null ? null : adapter.getListAdapter());
+        mSuggestionsAdapter = adapter;
         if (mLimitSuggestionsToViewHeight) {
             setMaxPromotedByHeight();
         }
     }
 
-    @Override
-    public SuggestionsAdapter getAdapter() {
-        return (SuggestionsAdapter) super.getAdapter();
+    public SuggestionsAdapter<ListAdapter> getSuggestionsAdapter() {
+        return mSuggestionsAdapter;
     }
-
 
     @Override
     public void onFinishInflate() {
@@ -98,8 +93,7 @@ public class SuggestionsView extends ListView {
     }
 
     private void setMaxPromotedByHeight() {
-        SuggestionsAdapter adapter = getAdapter();
-        if (adapter != null) {
+        if (mSuggestionsAdapter != null) {
             float maxHeight;
             if (getParent() instanceof FrameLayout) {
                 // We put the SuggestionView inside a frame layout so that we know what its
@@ -119,7 +113,7 @@ public class SuggestionsView extends ListView {
                     Log.d(TAG, "view height=" + maxHeight + " suggestion height=" +
                             suggestionHeight + " -> maxSuggestions=" + suggestions);
                 }
-                adapter.setMaxPromoted(suggestions);
+                mSuggestionsAdapter.setMaxPromoted(suggestions);
             }
         }
     }

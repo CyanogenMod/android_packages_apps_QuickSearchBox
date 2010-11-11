@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 
 /**
  * Two-pane variant for the search activity view.
@@ -42,7 +43,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
     // View that shows the results other than the query completions
     private SuggestionsView mResultsView;
-    private SuggestionsAdapter mResultsAdapter;
+    private SuggestionsAdapter<ListAdapter> mResultsAdapter;
     private View mResultsHeader;
 
     public SearchActivityViewTwoPane(Context context) {
@@ -74,7 +75,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
     @Override
     public void onSuggestionAdapterChanged() {
-        mResultsView.setAdapter(mResultsAdapter);
+        mResultsView.setSuggestionsAdapter(mResultsAdapter);
         super.onSuggestionAdapterChanged();
     }
 
@@ -107,12 +108,12 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     public void start() {
         super.start();
-        mResultsView.setAdapter(mResultsAdapter);
+        mResultsView.setSuggestionsAdapter(mResultsAdapter);
     }
 
     @Override
     public void destroy() {
-        mResultsView.setAdapter(null);
+        mResultsView.setSuggestionsAdapter(null);
 
         super.destroy();
     }
@@ -206,7 +207,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
     private void checkHideResultsHeader() {
         if (mResultsHeader != null) {
-            if (mResultsAdapter.getCount() > 0) {
+            if (mResultsAdapter.getListAdapter().getCount() > 0) {
                 mResultsHeader.setVisibility(VISIBLE);
             } else {
                 mResultsHeader.setVisibility(INVISIBLE);
