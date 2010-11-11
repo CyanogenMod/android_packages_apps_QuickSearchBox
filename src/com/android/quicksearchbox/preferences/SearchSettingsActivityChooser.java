@@ -28,7 +28,7 @@ import android.util.Log;
 public class SearchSettingsActivityChooser extends Activity {
 
     private static final String TAG = "QSB.SearchSettingsActivityChooser";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

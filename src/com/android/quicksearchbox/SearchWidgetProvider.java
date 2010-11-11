@@ -109,8 +109,10 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         } else if (ACTION_HIDE_VOICE_SEARCH_HINT.equals(action)) {
             hideVoiceSearchHint(context);
         } else if (ACTION_SHOW_VOICE_SEARCH_HINT_NOW.equals(action)) {
-            showVoiceSearchHintNow(context);
-            getSettings(context).resetVoiceSearchHintFirstSeenTime();
+            if (getConfig(context).allowVoiceSearchHints()) {
+                showVoiceSearchHintNow(context);
+                getSettings(context).resetVoiceSearchHintFirstSeenTime();
+            }
         } else if (ACTION_SHOW_HINT_TEMPORARILY.equals(action)) {
             showVoiceSearchHintNow(context);
         } else if (ACTION_RESET_VOICE_SEARCH_HINT_FIRST_SEEN.equals(action)) {

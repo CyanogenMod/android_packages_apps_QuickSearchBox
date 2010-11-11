@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class SearchSettingsActivity extends PreferenceActivity {
     private static final String TAG = "QSB.SearchSettingsActivity";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private static final String CLEAR_SHORTCUTS_FRAGMENT = DeviceSearchFragment.class.getName();
 
