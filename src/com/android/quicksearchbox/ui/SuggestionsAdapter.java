@@ -64,6 +64,8 @@ public class SuggestionsAdapter extends BaseAdapter {
 
     private boolean mClosed = false;
 
+    private boolean mIcon1Enabled = true;
+
     public SuggestionsAdapter(SuggestionViewFactory fallbackFactory, Corpora corpora) {
         mCorpora = corpora;
         mFallback = fallbackFactory;
@@ -102,6 +104,10 @@ public class SuggestionsAdapter extends BaseAdapter {
         if (DBG) Log.d(TAG, "setMaxPromoted " + maxPromoted);
         mMaxPromoted = maxPromoted;
         onSuggestionsChanged();
+    }
+
+    public void setIcon1Enabled(boolean enabled) {
+        mIcon1Enabled = enabled;
     }
 
     public boolean isClosed() {
@@ -204,6 +210,7 @@ public class SuggestionsAdapter extends BaseAdapter {
             v = mFallback.getView(mCursor, mCursor.getUserQuery(), convertView, parent);
         }
         if (v instanceof SuggestionView) {
+            ((SuggestionView) v).setIcon1Enabled(mIcon1Enabled);
             ((SuggestionView) v).bindAdapter(this, position);
         } else {
             SuggestionViewClickListener l = new SuggestionViewClickListener(position);

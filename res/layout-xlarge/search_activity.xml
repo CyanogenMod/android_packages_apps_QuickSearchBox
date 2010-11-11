@@ -27,15 +27,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="left"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal"
             android:splitMotionEvents="true">
 
         <!-- Begin left_pane for suggestions -->
         <RelativeLayout
                 android:id="@+id/left_pane"
-                android:layout_width="400dp"
+                android:layout_width="@dimen/suggestions_width"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
+                android:layout_marginLeft="16dp"
                 android:layout_marginBottom="12dip"
                 >
 
@@ -53,10 +54,7 @@
                     android:id="@+id/suggestions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="12dip"
                     android:paddingBottom="12dip"
-                    android:paddingRight="12dip"
-                    android:background="@color/pane_background"
                     android:cacheColorHint="@android:color/transparent"
                     android:scrollbars="none"
                     >
@@ -75,43 +73,39 @@
                 android:layout_alignParentRight="true"
                 android:gravity="top"
                 android:orientation="horizontal"
-                android:paddingLeft="12dip"
-                android:paddingRight="12dip"
-                android:background="@color/pane_background"
                 android:clickable="true"
                 >
 
                 <LinearLayout
                     android:id="@+id/search_edit_frame"
                     android:layout_width="0dip"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1.0"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:background="@drawable/textfield_search_empty"
+                    android:background="@drawable/textfield_start"
                     >
 
                     <ImageView
                         android:id="@+id/search_app_icon"
-                        android:layout_height="24dip"
-                        android:layout_width="24dip"
-                        android:layout_marginRight="7dip"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:paddingLeft="8dp"
+                        android:paddingBottom="2dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/magnifying_glass"
+                        android:src="@drawable/ic_search"
                     />
 
                     <com.android.quicksearchbox.ui.QueryTextView
                         android:id="@+id/search_src_text"
                         android:layout_width="0dip"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1.0"
-                        android:layout_marginTop="6dip"
-                        android:layout_marginBottom="6dip"
-                        android:paddingLeft="10dip"
-                        android:paddingRight="10dip"
-                        android:paddingTop="2dip"
-                        android:paddingBottom="2dip"
-                        android:gravity="center_vertical|left"
+                        android:paddingLeft="12dip"
+                        android:paddingRight="8dip"
+                        android:paddingTop="6dip"
+                        android:paddingBottom="6dip"
+                        android:gravity="bottom|left"
                         android:singleLine="true"
                         android:ellipsize="end"
                         android:inputType="text|textAutoComplete"
@@ -127,27 +121,45 @@
                         android:id="@+id/search_close_btn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingLeft="6dip"
-                        android:paddingTop="6dip"
-                        android:paddingBottom="6dip"
-                        android:paddingRight="6dip"
+                        android:paddingBottom="2dp"
+                        android:paddingLeft="12dp"
+                        android:paddingRight="12dp"
                         android:layout_gravity="center"
-                        android:background="@drawable/corpus_edit_items_bg"
-                        android:src="@drawable/ic_btn_close"
+                        android:background="@drawable/button_bg"
+                        android:src="@drawable/ic_clear"
                         />
 
                 </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/search_go_btn"
-                    android:background="@drawable/corpus_edit_items_bg"
-                    android:src="@drawable/ic_btn_search"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="6dip"
-                    android:layout_gravity="center"
-                    android:visibility="gone"
+                <LinearLayout
+                    android:layout_width="62dip"
+                    android:layout_height="36dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/textfield_end" >
+                    <!-- One of these two will be visible at a time -->
+                    <ImageButton
+                        android:id="@+id/search_go_btn"
+                        android:background="@drawable/button_bg"
+                        android:src="@drawable/ic_go"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dip"
+                        android:layout_gravity="center"
+                        />
+                    <ImageButton
+                            android:id="@+id/search_voice_btn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:paddingLeft="14dip"
+                            android:paddingRight="14dip"
+                            android:background="@drawable/button_bg"
+                            android:src="@drawable/ic_btn_speak_now"
+                            android:layout_alignWithParentIfMissing="true"
+                            android:visibility="gone"
                     />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -157,19 +169,18 @@
         <!-- Begin right_pane -->
         <RelativeLayout
                 android:id="@+id/right_pane"
-                android:layout_width="300dp"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="16dp"
                 android:layout_marginBottom="12dip"
                 >
 
             <FrameLayout
                 android:id="@+id/shortcuts_container"
-                android:layout_width="match_parent"
+                android:layout_width="@dimen/shortcuts_width"
                 android:layout_height="match_parent"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentRight="true"
                 android:layout_below="@+id/shortcut_title"
                 android:layout_alignWithParentIfMissing="true"
                 >
@@ -179,10 +190,7 @@
                     android:id="@+id/shortcuts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="12dip"
                     android:paddingBottom="12dip"
-                    android:paddingRight="12dip"
-                    android:background="@color/pane_background"
                     android:cacheColorHint="@android:color/transparent"
                     android:scrollbars="none"
                     >
@@ -195,55 +203,31 @@
                  z-index. -->
             <RelativeLayout
                 android:id="@+id/shortcut_title"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/shortcuts_width"
+                android:layout_height="36dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
-                android:paddingLeft="12dip"
-                android:paddingRight="12dip"
-                android:background="@color/pane_background"
+                android:background="@drawable/section_header"
                 android:clickable="true"
+                android:visibility="invisible"
                 >
-
-                <ImageButton
-                        android:id="@+id/search_voice_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:paddingLeft="6dip"
-                        android:paddingTop="6dip"
-                        android:paddingBottom="6dip"
-                        android:paddingRight="6dip"
-                        android:background="@drawable/corpus_edit_items_bg"
-                        android:src="@drawable/ic_btn_speak_now"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_alignWithParentIfMissing="true"
-                        android:layout_marginRight="-4dip"
-                />
-
-                <ImageButton
-                    android:id="@+id/settings_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_gravity="center"
-                    android:paddingLeft="6dip"
-                    android:paddingTop="6dip"
-                    android:paddingBottom="6dip"
-                    android:paddingRight="6dip"
-                    android:singleLine="true"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:src="@drawable/corpus_edit_icon"
-                    android:background="@drawable/corpus_edit_items_bg"
-                />
 
             </RelativeLayout>
 
         </RelativeLayout>
+
+        <ImageButton
+            android:id="@+id/settings_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|top"
+            android:padding="4dp"
+            android:singleLine="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/button_bg"
+            android:src="@drawable/ic_overflow"
+        />
 
     </LinearLayout>
 </com.android.quicksearchbox.ui.SearchActivityViewTwoPane>
