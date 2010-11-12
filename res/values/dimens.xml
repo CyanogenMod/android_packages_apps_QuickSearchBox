@@ -16,8 +16,6 @@
 
 <resources>
 
-    <color name="search_hint">#808080</color>
-    <color name="pane_background">#C0222233</color>
-    <color name="suggestion_divider">#FF808080</color>
+  <dimen name="suggestion_group_spacing">20dip</dimen>
 
 </resources>

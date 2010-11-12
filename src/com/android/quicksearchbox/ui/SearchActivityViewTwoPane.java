@@ -25,11 +25,13 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.widget.ExpandableListAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 
 /**
  * Two-pane variant for the search activity view.
@@ -42,8 +44,8 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     private ImageView mSettingsButton;
 
     // View that shows the results other than the query completions
-    private SuggestionsView mResultsView;
-    private SuggestionsAdapter<ListAdapter> mResultsAdapter;
+    private ClusteredSuggestionsView mResultsView;
+    private SuggestionsAdapter<ExpandableListAdapter> mResultsAdapter;
     private View mResultsHeader;
 
     public SearchActivityViewTwoPane(Context context) {
@@ -64,13 +66,26 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
         mSettingsButton = (ImageView) findViewById(R.id.settings_icon);
 
-        mResultsView = (SuggestionsView) findViewById(R.id.shortcuts);
-        mResultsAdapter = createSuggestionsAdapter();
+        mResultsView = (ClusteredSuggestionsView) findViewById(R.id.shortcuts);
+        mResultsAdapter = createClusteredSuggestionsAdapter();
         mResultsAdapter.setSuggestionAdapterChangeListener(this);
+        mResultsAdapter.getListAdapter().registerDataSetObserver(new DataSetObserver(){
+            @Override
+            public void onChanged() {
+                mResultsView.expandAll();
+            }
+        });
         mResultsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mResultsHeader = findViewById(R.id.shortcut_title);
 
         mSuggestionsAdapter.setIcon1Enabled(false);
+    }
+
+    protected SuggestionsAdapter<ExpandableListAdapter> createClusteredSuggestionsAdapter() {
+        return new DelayingSuggestionsAdapter<ExpandableListAdapter>(
+                new ClusteredSuggestionsAdapter(
+                        getQsbApplication().getDefaultSuggestionViewFactory(),
+                        getQsbApplication().getCorpora(), getContext()));
     }
 
     @Override
@@ -108,11 +123,13 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     public void start() {
         super.start();
+        mResultsAdapter.getListAdapter().registerDataSetObserver(new ResultsObserver());
         mResultsView.setSuggestionsAdapter(mResultsAdapter);
     }
 
     @Override
     public void destroy() {
+        mResultsAdapter.setSuggestionAdapterChangeListener(null);
         mResultsView.setSuggestionsAdapter(null);
 
         super.destroy();
@@ -199,17 +216,17 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         }
     }
 
-    @Override
-    protected void onSuggestionsChanged() {
-        super.onSuggestionsChanged();
+    protected void onResultsChanged() {
         checkHideResultsHeader();
     }
 
     private void checkHideResultsHeader() {
         if (mResultsHeader != null) {
-            if (mResultsAdapter.getListAdapter().getCount() > 0) {
+            if (!mResultsAdapter.isEmpty()) {
+                if (DBG) Log.d(TAG, "Results non-empty");
                 mResultsHeader.setVisibility(VISIBLE);
             } else {
+                if (DBG) Log.d(TAG, "Results empty");
                 mResultsHeader.setVisibility(INVISIBLE);
             }
         }
@@ -218,6 +235,13 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     public Corpus getSearchCorpus() {
         return getWebCorpus();
+    }
+
+    protected class ResultsObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            onResultsChanged();
+        }
     }
 
 }

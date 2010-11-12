@@ -17,6 +17,7 @@
 package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Corpora;
+import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
 
 import android.view.View;
@@ -34,6 +35,16 @@ public class SuggestionsListAdapter extends SuggestionsAdapterBase<ListAdapter> 
     public SuggestionsListAdapter(SuggestionViewFactory fallbackFactory, Corpora corpora) {
         super(fallbackFactory, corpora);
         mAdapter = new Adapter();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return mAdapter.getCount() == 0;
+    }
+
+    @Override
+    public SuggestionPosition getSuggestion(long suggestionId) {
+        return new SuggestionPosition(getCurrentPromotedSuggestions(), (int) suggestionId);
     }
 
     @Override
@@ -71,7 +82,7 @@ public class SuggestionsListAdapter extends SuggestionsAdapterBase<ListAdapter> 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             return SuggestionsListAdapter.this.getView(
-                    getCurrentPromotedSuggestions(), position, convertView, parent);
+                    getCurrentPromotedSuggestions(), position, position, convertView, parent);
         }
 
         @Override

@@ -169,7 +169,6 @@ public abstract class SearchActivityView extends RelativeLayout
                 getQsbApplication().getCorpora()));
     }
 
-
     protected Corpora getCorpora() {
         return getQsbApplication().getCorpora();
     }
@@ -623,7 +622,7 @@ public abstract class SearchActivityView extends RelativeLayout
         }
     }
 
-    private class SuggestionsObserver extends DataSetObserver {
+    protected class SuggestionsObserver extends DataSetObserver {
         @Override
         public void onChanged() {
             onSuggestionsChanged();

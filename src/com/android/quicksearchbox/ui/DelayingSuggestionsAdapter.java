@@ -18,6 +18,7 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
 
 import android.database.DataSetObserver;
@@ -134,20 +135,24 @@ public class DelayingSuggestionsAdapter<A> implements SuggestionsAdapter<A> {
         return mDelayedAdapter.getSuggestions();
     }
 
-    public void onSuggestionClicked(int position) {
-        mDelayedAdapter.onSuggestionClicked(position);
+    public SuggestionPosition getSuggestion(long suggestionId) {
+        return mDelayedAdapter.getSuggestion(suggestionId);
     }
 
-    public void onSuggestionQueryRefineClicked(int position) {
-        mDelayedAdapter.onSuggestionQueryRefineClicked(position);
+    public void onSuggestionClicked(long suggestionId) {
+        mDelayedAdapter.onSuggestionClicked(suggestionId);
     }
 
-    public void onSuggestionQuickContactClicked(int position) {
-        mDelayedAdapter.onSuggestionQuickContactClicked(position);
+    public void onSuggestionQueryRefineClicked(long suggestionId) {
+        mDelayedAdapter.onSuggestionQueryRefineClicked(suggestionId);
     }
 
-    public void onSuggestionRemoveFromHistoryClicked(int position) {
-        mDelayedAdapter.onSuggestionRemoveFromHistoryClicked(position);
+    public void onSuggestionQuickContactClicked(long suggestionId) {
+        mDelayedAdapter.onSuggestionQuickContactClicked(suggestionId);
+    }
+
+    public void onSuggestionRemoveFromHistoryClicked(long suggestionId) {
+        mDelayedAdapter.onSuggestionRemoveFromHistoryClicked(suggestionId);
     }
 
     public void setMaxPromoted(int maxPromoted) {
@@ -173,6 +178,11 @@ public class DelayingSuggestionsAdapter<A> implements SuggestionsAdapter<A> {
 
     public void setIcon1Enabled(boolean enabled) {
         mDelayedAdapter.setIcon1Enabled(enabled);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return mDelayedAdapter.isEmpty();
     }
 
 }

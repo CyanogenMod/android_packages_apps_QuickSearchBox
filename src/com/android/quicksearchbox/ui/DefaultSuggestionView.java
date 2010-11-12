@@ -64,7 +64,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     private final SuggestionFormatter mSuggestionFormatter;
     private boolean mIsFromHistory;
     private boolean mRefineable;
-    private int mPosition;
+    private long mSuggestionId;
     private SuggestionsAdapter<?> mAdapter;
     private KeyListener mKeyListener;
     private boolean mIcon1Enabled = true;
@@ -144,9 +144,9 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
     }
 
-    public void bindAdapter(SuggestionsAdapter<?> adapter, int position) {
+    public void bindAdapter(SuggestionsAdapter<?> adapter, long suggestionId) {
         mAdapter = adapter;
-        mPosition = position;
+        mSuggestionId = suggestionId;
     }
 
     public void setIcon1Enabled(boolean enabled) {
@@ -283,25 +283,25 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
 
     protected void onSuggestionClicked() {
         if (mAdapter != null) {
-            mAdapter.onSuggestionClicked(mPosition);
+            mAdapter.onSuggestionClicked(mSuggestionId);
         }
     }
 
     protected void onSuggestionQuickContactClicked() {
         if (mAdapter != null) {
-            mAdapter.onSuggestionQuickContactClicked(mPosition);
+            mAdapter.onSuggestionQuickContactClicked(mSuggestionId);
         }
     }
 
     protected void onRemoveFromHistoryClicked() {
         if (mAdapter != null) {
-            mAdapter.onSuggestionRemoveFromHistoryClicked(mPosition);
+            mAdapter.onSuggestionRemoveFromHistoryClicked(mSuggestionId);
         }
     }
 
     protected void onSuggestionQueryRefineClicked() {
         if (mAdapter != null) {
-            mAdapter.onSuggestionQueryRefineClicked(mPosition);
+            mAdapter.onSuggestionQueryRefineClicked(mSuggestionId);
         }
     }
 

@@ -43,13 +43,14 @@ public interface Logger {
     /**
      * Called when a suggestion is clicked.
      *
-     * @param position 0-based position of the suggestion in the UI.
+     * @param suggestionId Suggestion ID; 0-based position of the suggestion in the UI if the list
+     *      is flat.
      * @param suggestionCursor all the suggestions shown in the UI.
      * @param queriedCorpora all corpora that were queried to produce the suggestions in
      *        {@code suggestionCursor}, ordered by rank.
      * @param clickType One of the SUGGESTION_CLICK_TYPE constants.
      */
-    void logSuggestionClick(int position, SuggestionCursor suggestionCursor,
+    void logSuggestionClick(long suggestionId, SuggestionCursor suggestionCursor,
             Collection<Corpus> queriedCorpora, int clickType);
 
     /**

@@ -167,6 +167,10 @@ public class Config {
         return mContext.getResources().getInteger(R.integer.max_promoted_suggestions);
     }
 
+    public int getMaxPromotedResults() {
+        return mContext.getResources().getInteger(R.integer.max_promoted_results);
+    }
+
     /**
      * The number of results to ask each source for.
      */

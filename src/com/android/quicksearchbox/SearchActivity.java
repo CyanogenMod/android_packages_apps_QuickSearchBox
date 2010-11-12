@@ -113,7 +113,7 @@ public class SearchActivity extends Activity {
             mSearchActivityView.limitSuggestionsToViewHeight();
         }
         if (getConfig().showScrollingResults()) {
-            mSearchActivityView.setMaxPromotedResults(getConfig().getMaxPromotedSuggestions());
+            mSearchActivityView.setMaxPromotedResults(getConfig().getMaxPromotedResults());
         } else {
             mSearchActivityView.limitResultsToViewHeight();
         }
@@ -463,8 +463,13 @@ public class SearchActivity extends Activity {
         return mSearchActivityView.getCurrentPromotedSuggestions();
     }
 
-    protected SuggestionCursor getCurrentSuggestions(SuggestionsAdapter<?> adapter, int position) {
-        SuggestionCursor suggestions = adapter.getCurrentPromotedSuggestions();
+    protected SuggestionPosition getCurrentSuggestions(SuggestionsAdapter<?> adapter, long id) {
+        SuggestionPosition pos = adapter.getSuggestion(id);
+        if (pos == null) {
+            return null;
+        }
+        SuggestionCursor suggestions = pos.getCursor();
+        int position = pos.getPosition();
         if (suggestions == null) {
             return null;
         }
@@ -474,7 +479,7 @@ public class SearchActivity extends Activity {
             return null;
         }
         suggestions.moveTo(position);
-        return suggestions;
+        return pos;
     }
 
     protected Set<Corpus> getCurrentIncludedCorpora() {
@@ -496,22 +501,22 @@ public class SearchActivity extends Activity {
         }
     }
 
-    private boolean launchSuggestion(SuggestionsAdapter<?> adapter, int position) {
-        SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
-        if (suggestions == null) return false;
+    private boolean launchSuggestion(SuggestionsAdapter<?> adapter, long id) {
+        SuggestionPosition suggestion = getCurrentSuggestions(adapter, id);
+        if (suggestion == null) return false;
 
-        if (DBG) Log.d(TAG, "Launching suggestion " + position);
+        if (DBG) Log.d(TAG, "Launching suggestion " + id);
         mTookAction = true;
 
         // Log suggestion click
-        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora(),
+        getLogger().logSuggestionClick(id, suggestion.getCursor(), getCurrentIncludedCorpora(),
                 Logger.SUGGESTION_CLICK_TYPE_LAUNCH);
 
         // Create shortcut
-        getShortcutRepository().reportClick(suggestions, position);
+        getShortcutRepository().reportClick(suggestion.getCursor(), suggestion.getPosition());
 
         // Launch intent
-        launchSuggestion(suggestions, position);
+        launchSuggestion(suggestion.getCursor(), suggestion.getPosition());
 
         return true;
     }
@@ -522,10 +527,10 @@ public class SearchActivity extends Activity {
         launchIntent(intent);
     }
 
-    protected void removeFromHistory(SuggestionsAdapter<?> adapter, int position) {
-        SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
-        if (suggestions == null) return;
-        removeFromHistory(suggestions, position);
+    protected void removeFromHistory(SuggestionsAdapter<?> adapter, long id) {
+        SuggestionPosition suggestion = getCurrentSuggestions(adapter, id);
+        if (suggestion == null) return;
+        removeFromHistory(suggestion.getCursor(), suggestion.getPosition());
         // TODO: Log to event log?
     }
 
@@ -549,34 +554,34 @@ public class SearchActivity extends Activity {
         }
     }
 
-    protected void clickedQuickContact(SuggestionsAdapter<?> adapter, int position) {
-        SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
-        if (suggestions == null) return;
+    protected void clickedQuickContact(SuggestionsAdapter<?> adapter, long id) {
+        SuggestionPosition suggestion = getCurrentSuggestions(adapter, id);
+        if (suggestion == null) return;
 
-        if (DBG) Log.d(TAG, "Used suggestion " + position);
+        if (DBG) Log.d(TAG, "Used suggestion " + suggestion.getPosition());
         mTookAction = true;
 
         // Log suggestion click
-        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora(),
+        getLogger().logSuggestionClick(id, suggestion.getCursor(), getCurrentIncludedCorpora(),
                 Logger.SUGGESTION_CLICK_TYPE_QUICK_CONTACT);
 
         // Create shortcut
-        getShortcutRepository().reportClick(suggestions, position);
+        getShortcutRepository().reportClick(suggestion.getCursor(), suggestion.getPosition());
     }
 
-    protected void refineSuggestion(SuggestionsAdapter<?> adapter, int position) {
-        if (DBG) Log.d(TAG, "query refine clicked, pos " + position);
-        SuggestionCursor suggestions = getCurrentSuggestions(adapter, position);
-        if (suggestions == null) {
+    protected void refineSuggestion(SuggestionsAdapter<?> adapter, long id) {
+        if (DBG) Log.d(TAG, "query refine clicked, pos " + id);
+        SuggestionPosition suggestion = getCurrentSuggestions(adapter, id);
+        if (suggestion == null) {
             return;
         }
-        String query = suggestions.getSuggestionQuery();
+        String query = suggestion.getSuggestionQuery();
         if (TextUtils.isEmpty(query)) {
             return;
         }
 
         // Log refine click
-        getLogger().logSuggestionClick(position, suggestions, getCurrentIncludedCorpora(),
+        getLogger().logSuggestionClick(id, suggestion.getCursor(), getCurrentIncludedCorpora(),
                 Logger.SUGGESTION_CLICK_TYPE_REFINE);
 
         // Put query + space in query text view
@@ -665,20 +670,20 @@ public class SearchActivity extends Activity {
 
     private class ClickHandler implements SuggestionClickListener {
 
-        public void onSuggestionQuickContactClicked(SuggestionsAdapter<?> adapter, int position) {
-            clickedQuickContact(adapter, position);
+        public void onSuggestionQuickContactClicked(SuggestionsAdapter<?> adapter, long id) {
+            clickedQuickContact(adapter, id);
         }
 
-        public void onSuggestionClicked(SuggestionsAdapter<?> adapter, int position) {
-            launchSuggestion(adapter, position);
+        public void onSuggestionClicked(SuggestionsAdapter<?> adapter, long id) {
+            launchSuggestion(adapter, id);
         }
 
-        public void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, int position) {
-            removeFromHistory(adapter, position);
+        public void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, long id) {
+            removeFromHistory(adapter, id);
         }
 
-        public void onSuggestionQueryRefineClicked(SuggestionsAdapter<?> adapter, int position) {
-            refineSuggestion(adapter, position);
+        public void onSuggestionQueryRefineClicked(SuggestionsAdapter<?> adapter, long id) {
+            refineSuggestion(adapter, id);
         }
     }
 

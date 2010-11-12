@@ -17,6 +17,7 @@ package com.android.quicksearchbox.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
@@ -26,17 +27,38 @@ import android.widget.ExpandableListView;
 public class ClusteredSuggestionsView extends ExpandableListView
         implements SuggestionsListView<ExpandableListAdapter> {
 
+    SuggestionsAdapter<ExpandableListAdapter> mSuggestionsAdapter;
+
     public ClusteredSuggestionsView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        //TODO
     }
 
     public void setSuggestionsAdapter(SuggestionsAdapter<ExpandableListAdapter> adapter) {
-        //TODO
+        mSuggestionsAdapter = adapter;
+        super.setAdapter(adapter == null ? null : adapter.getListAdapter());
     }
 
     public void setLimitSuggestionsToViewHeight(boolean limit) {
         // not supported
+    }
+
+    @Override
+    public void onFinishInflate() {
+        super.onFinishInflate();
+        setItemsCanFocus(true);
+        setOnGroupClickListener(new OnGroupClickListener(){
+            public boolean onGroupClick(
+                    ExpandableListView parent, View v, int groupPosition, long id) {
+                // disable collapsing / expanding
+                return true;
+            }});
+    }
+
+    public void expandAll() {
+        ExpandableListAdapter adapter = mSuggestionsAdapter.getListAdapter();
+        for (int i = 0; i < adapter.getGroupCount(); ++i) {
+            expandGroup(i);
+        }
     }
 
 }

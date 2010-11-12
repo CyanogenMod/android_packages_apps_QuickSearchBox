@@ -31,7 +31,7 @@ public class MockLogger implements Logger {
             List<Corpus> orderedCorpora) {
     }
 
-    public void logSuggestionClick(int position,
+    public void logSuggestionClick(long id,
             SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora,
             int clickType) {
     }

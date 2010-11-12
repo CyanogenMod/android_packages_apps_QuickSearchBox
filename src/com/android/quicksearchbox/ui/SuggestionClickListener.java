@@ -25,31 +25,35 @@ public interface SuggestionClickListener {
      * Called when a suggestion is clicked.
      *
      * @param adapter Adapter that contains the clicked suggestion.
-     * @param position Position of the clicked suggestion.
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionClicked(SuggestionsAdapter<?> adapter, int position);
+    void onSuggestionClicked(SuggestionsAdapter<?> adapter, long suggestionId);
 
     /**
      * Called when a quick contact badge in a suggestion is clicked.
      *
      * @param adapter Adapter that contains the clicked suggestion.
-     * @param position Position of the suggestion.
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionQuickContactClicked(SuggestionsAdapter<?> adapter, int position);
+    void onSuggestionQuickContactClicked(SuggestionsAdapter<?> adapter, long suggestionId);
 
     /**
      * Called when the user requests to remove a suggestion from the search history.
      *
      * @param adapter Adapter that contains the clicked suggestion.
-     * @param position Position of the clicked suggestion.
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, int position);
+    void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, long suggestionId);
 
     /**
      * Called when the "query refine" button of a suggestion is clicked.
      *
      * @param adapter Adapter that contains the clicked suggestion.
-     * @param position Position of the suggestion.
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionQueryRefineClicked(SuggestionsAdapter<?> adapter, int position);
+    void onSuggestionQueryRefineClicked(SuggestionsAdapter<?> adapter, long suggestionId);
 }

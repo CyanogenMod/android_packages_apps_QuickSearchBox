@@ -33,7 +33,7 @@ public interface SuggestionView {
      * @param adapter The adapter of the list which the view is appearing in
      * @param position The position of this view with the list.
      */
-    void bindAdapter(SuggestionsAdapter<?> adapter, int position);
+    void bindAdapter(SuggestionsAdapter<?> adapter, long position);
 
     /**
      * Call this with false to turn off the icon on the left. By default it is visible.

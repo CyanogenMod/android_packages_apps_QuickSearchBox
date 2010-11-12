@@ -67,12 +67,12 @@ public class EventLogLogger implements Logger {
                 latency, currentCorpus, enabledCorpora, onCreateLatency);
     }
 
-    public void logSuggestionClick(int position, SuggestionCursor suggestionCursor,
+    public void logSuggestionClick(long id, SuggestionCursor suggestionCursor,
             Collection<Corpus> queriedCorpora, int clickType) {
         String suggestions = getSuggestions(suggestionCursor);
         String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
-        EventLogTags.writeQsbClick(position, suggestions, corpora, numChars,
+        EventLogTags.writeQsbClick(id, suggestions, corpora, numChars,
                 clickType);
     }
 

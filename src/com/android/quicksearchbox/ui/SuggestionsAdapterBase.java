@@ -77,6 +77,8 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
         mListener = l;
     }
 
+    public abstract boolean isEmpty();
+
     private boolean addViewTypes(SuggestionViewFactory f) {
         boolean changed = false;
         for (String viewType : f.getSuggestionViewTypes()) {
@@ -161,6 +163,8 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
         return mSuggestions;
     }
 
+    public abstract SuggestionPosition getSuggestion(long suggestionId);
+
     protected int getPromotedCount() {
         return mPromotedSuggestions == null ? 0 : mPromotedSuggestions.getCount();
     }
@@ -195,7 +199,7 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
         return mViewTypeMap.size();
     }
 
-    protected View getView(SuggestionCursor suggestions, int position,
+    protected View getView(SuggestionCursor suggestions, int position, long suggestionId,
             View convertView, ViewGroup parent) {
         suggestions.moveTo(position);
         SuggestionViewFactory factory = suggestions.getSuggestionSource().getSuggestionViewFactory();
@@ -205,9 +209,9 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
         }
         if (v instanceof SuggestionView) {
             ((SuggestionView) v).setIcon1Enabled(mIcon1Enabled);
-            ((SuggestionView) v).bindAdapter(this, position);
+            ((SuggestionView) v).bindAdapter(this, suggestionId);
         } else {
-            SuggestionViewClickListener l = new SuggestionViewClickListener(position);
+            SuggestionViewClickListener l = new SuggestionViewClickListener(suggestionId);
             v.setOnClickListener(l);
         }
 
@@ -265,27 +269,27 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
         }
     }
 
-    public void onSuggestionClicked(int position) {
+    public void onSuggestionClicked(long suggestionId) {
         if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionClicked(this, position);
+            mSuggestionClickListener.onSuggestionClicked(this, suggestionId);
         }
     }
 
-    public void onSuggestionQuickContactClicked(int position) {
+    public void onSuggestionQuickContactClicked(long suggestionId) {
         if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionQuickContactClicked(this, position);
+            mSuggestionClickListener.onSuggestionQuickContactClicked(this, suggestionId);
         }
     }
 
-    public void onSuggestionRemoveFromHistoryClicked(int position) {
+    public void onSuggestionRemoveFromHistoryClicked(long suggestionId) {
         if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionRemoveFromHistoryClicked(this, position);
+            mSuggestionClickListener.onSuggestionRemoveFromHistoryClicked(this, suggestionId);
         }
     }
 
-    public void onSuggestionQueryRefineClicked(int position) {
+    public void onSuggestionQueryRefineClicked(long suggestionId) {
         if (mSuggestionClickListener != null) {
-            mSuggestionClickListener.onSuggestionQueryRefineClicked(this, position);
+            mSuggestionClickListener.onSuggestionQueryRefineClicked(this, suggestionId);
         }
     }
 
@@ -314,12 +318,12 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
     }
 
     private class SuggestionViewClickListener implements View.OnClickListener {
-        private final int mPosition;
-        public SuggestionViewClickListener(int position) {
-            mPosition = position;
+        private final long mSuggestionId;
+        public SuggestionViewClickListener(long suggestionId) {
+            mSuggestionId = suggestionId;
         }
         public void onClick(View v) {
-            onSuggestionClicked(mPosition);
+            onSuggestionClicked(mSuggestionId);
         }
     }
 

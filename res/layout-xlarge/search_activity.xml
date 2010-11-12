@@ -57,6 +57,8 @@
                     android:paddingBottom="12dip"
                     android:cacheColorHint="@android:color/transparent"
                     android:scrollbars="none"
+                    android:divider="@color/suggestion_divider"
+                    android:dividerHeight="1dip"
                     >
                 </view>
 
@@ -186,13 +188,15 @@
                 >
 
                 <view
-                    class="com.android.quicksearchbox.ui.SuggestionsView"
+                    class="com.android.quicksearchbox.ui.ClusteredSuggestionsView"
                     android:id="@+id/shortcuts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingBottom="12dip"
                     android:cacheColorHint="@android:color/transparent"
                     android:scrollbars="none"
+                    android:groupIndicator="@android:color/transparent"
+                    android:childDivider="@color/suggestion_divider"
                     >
 
                  </view>

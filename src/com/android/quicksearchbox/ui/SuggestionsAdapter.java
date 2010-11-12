@@ -17,6 +17,7 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
 
 import android.view.View.OnFocusChangeListener;
@@ -62,9 +63,20 @@ public interface SuggestionsAdapter<A> {
     void setSuggestions(Suggestions suggestions);
 
     /**
+     * Indicates if there's any suggestions in this adapter.
+     */
+    boolean isEmpty();
+
+    /**
      * Gets the current suggestions.
      */
     Suggestions getSuggestions();
+
+    /**
+     * Gets the cursor and position corresponding to the given suggestion ID.
+     * @param suggestionId Suggestion ID.
+     */
+    SuggestionPosition getSuggestion(long suggestionId);
 
     /**
      * Gets the current list of promoted suggestions.
@@ -73,23 +85,35 @@ public interface SuggestionsAdapter<A> {
 
     /**
      * Handles a regular click on a suggestion.
+     *
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionClicked(int position);
+    void onSuggestionClicked(long suggestionId);
 
     /**
      * Handles a click on a quick contact badge.
+     *
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionQuickContactClicked(int position);
+    void onSuggestionQuickContactClicked(long suggestionId);
 
     /**
      * Handles a request to remove a suggestion from history.
+     *
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionRemoveFromHistoryClicked(int position);
+    void onSuggestionRemoveFromHistoryClicked(long suggestionId);
 
     /**
      * Handles a click on the query refinement button.
+     *
+     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
+     *      will be the position within the list.
      */
-    void onSuggestionQueryRefineClicked(int position);
+    void onSuggestionQueryRefineClicked(long suggestionId);
 
     /**
      * Gets the adapter to be used by the UI view.

@@ -36,6 +36,10 @@ public class SuggestionPosition extends AbstractSuggestionWrapper {
         mPosition = suggestionPos;
     }
 
+    public SuggestionCursor getCursor() {
+        return mCursor;
+    }
+
     /**
      * Gets the suggestion cursor, moved to point to the right suggestion.
      */

@@ -14,10 +14,10 @@
      limitations under the License.
 -->
 
-<resources>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/suggestion_group_spacing"
+>
 
-    <color name="search_hint">#808080</color>
-    <color name="pane_background">#C0222233</color>
-    <color name="suggestion_divider">#FF808080</color>
-
-</resources>
+</FrameLayout>
