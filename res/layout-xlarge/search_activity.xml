@@ -178,30 +178,23 @@
                 android:layout_marginBottom="12dip"
                 >
 
-            <FrameLayout
-                android:id="@+id/shortcuts_container"
+            <view
+                class="com.android.quicksearchbox.ui.ClusteredSuggestionsView"
+                android:id="@+id/shortcuts"
                 android:layout_width="@dimen/shortcuts_width"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@+id/shortcut_title"
                 android:layout_alignWithParentIfMissing="true"
+                android:layout_below="@+id/shortcut_title"
+                android:cacheColorHint="@android:color/transparent"
+                android:scrollbars="none"
+                android:groupIndicator="@android:color/transparent"
+                android:childDivider="@color/suggestion_divider"
+                android:fadingEdge="vertical"
+                android:fadingEdgeLength="20dip"
                 >
 
-                <view
-                    class="com.android.quicksearchbox.ui.ClusteredSuggestionsView"
-                    android:id="@+id/shortcuts"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="12dip"
-                    android:cacheColorHint="@android:color/transparent"
-                    android:scrollbars="none"
-                    android:groupIndicator="@android:color/transparent"
-                    android:childDivider="@color/suggestion_divider"
-                    >
-
-                 </view>
-
-            </FrameLayout>
+             </view>
 
             <!-- The search plate is after the suggestions, to give it a higher
                  z-index. -->
