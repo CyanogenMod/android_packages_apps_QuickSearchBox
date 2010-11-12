@@ -116,7 +116,7 @@ public class BlendingPromoterTest extends AndroidTestCase {
 
     private void maxPromotedTest(int maxPromoted) {
         SuggestionCursor shortcuts = cursor(mS11, mS12, mS21, mS22, mWeb1, mWeb2);
-        ListSuggestionCursor promoted = promote(config(), shortcuts, maxPromoted);
+        ListSuggestionCursorNoDuplicates promoted = promote(config(), shortcuts, maxPromoted);
         int expectedCount = Math.min(maxPromoted, shortcuts.getCount());
         assertEquals(expectedCount, promoted.getCount());
         int count = Math.min(maxPromoted, shortcuts.getCount());
@@ -130,10 +130,10 @@ public class BlendingPromoterTest extends AndroidTestCase {
         return promote(config, shortcuts, maxPromoted);
     }
 
-    private ListSuggestionCursor promote(Config config, SuggestionCursor shortcuts,
+    private ListSuggestionCursorNoDuplicates promote(Config config, SuggestionCursor shortcuts,
             int maxPromoted) {
         BlendingPromoter promoter = new BlendingPromoter(config);
-        ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
+        ListSuggestionCursorNoDuplicates promoted = new ListSuggestionCursorNoDuplicates(mQuery);
         promoter.promoteShortcuts(shortcuts, maxPromoted, promoted);
         return promoted;
     }
