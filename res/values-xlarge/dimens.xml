@@ -14,9 +14,9 @@
      limitations under the License.
 -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:startColor="#E8000000"
-        android:endColor="#C0000000"
-        android:angle="270" />
-</shape>
+<resources>
+
+  <dimen name="suggestions_width">600dp</dimen>
+  <dimen name="shortcuts_width">390dp</dimen>
+
+</resources>

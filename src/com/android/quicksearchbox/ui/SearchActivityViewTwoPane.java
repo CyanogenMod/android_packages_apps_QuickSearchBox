@@ -35,13 +35,15 @@ import android.widget.ImageView;
  */
 public class SearchActivityViewTwoPane extends SearchActivityView {
 
-    private static final int TINT_ANIMATION_DURATION = 400; // in millis
+    private static final int TINT_ANIMATION_DURATION = 300; // in millis
+    private static final int TINT_ANIMATION_START_DELAY = 400; // in millis
 
     private ImageView mSettingsButton;
 
     // View that shows the results other than the query completions
     private SuggestionsView mResultsView;
     private SuggestionsAdapter mResultsAdapter;
+    private View mResultsHeader;
 
     public SearchActivityViewTwoPane(Context context) {
         super(context);
@@ -65,6 +67,9 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         mResultsAdapter = createSuggestionsAdapter();
         mResultsAdapter.setSuggestionAdapterChangeListener(this);
         mResultsView.setOnKeyListener(new SuggestionsViewKeyListener());
+        mResultsHeader = findViewById(R.id.shortcut_title);
+
+        mSuggestionsAdapter.setIcon1Enabled(false);
     }
 
     @Override
@@ -81,15 +86,17 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     private void setupWallpaperTint() {
         // Alpha fade-in the background tint when the activity resumes.
         final Drawable drawable = getBackground();
+        drawable.setAlpha(0);
         ValueAnimator animator = ObjectAnimator.ofInt(drawable, "alpha", 0, 255);
-        // TODO: Remove this listener when the alpha animation update issue is fixed.
+        animator.setDuration(TINT_ANIMATION_DURATION);
         animator.addUpdateListener(new AnimatorUpdateListener() {
 
             public void onAnimationUpdate(ValueAnimator animator) {
                 drawable.invalidateSelf();
             }
         });
-        animator.setDuration(TINT_ANIMATION_DURATION);
+        animator.setStartDelay(TINT_ANIMATION_START_DELAY);
+        animator.setInterpolator(new android.view.animation.LinearInterpolator());
         animator.start();
     }
 
@@ -128,11 +135,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     public void showCorpusSelectionDialog() {
         // not used
-    }
-
-    @Override
-    protected boolean shouldShowVoiceSearch(boolean queryEmpty) {
-        return true;
     }
 
     @Override
@@ -199,6 +201,17 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     protected void onSuggestionsChanged() {
         super.onSuggestionsChanged();
+        checkHideResultsHeader();
+    }
+
+    private void checkHideResultsHeader() {
+        if (mResultsHeader != null) {
+            if (mResultsAdapter.getCount() > 0) {
+                mResultsHeader.setVisibility(VISIBLE);
+            } else {
+                mResultsHeader.setVisibility(INVISIBLE);
+            }
+        }
     }
 
     @Override

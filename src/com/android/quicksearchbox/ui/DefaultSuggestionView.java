@@ -67,6 +67,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     private int mPosition;
     private SuggestionsAdapter mAdapter;
     private KeyListener mKeyListener;
+    private boolean mIcon1Enabled = true;
 
     public DefaultSuggestionView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -88,7 +89,7 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         super.onFinishInflate();
         mText1 = (TextView) findViewById(R.id.text1);
         mText2 = (TextView) findViewById(R.id.text2);
-        mIcon1 = new AsyncIcon((ImageView) findViewById(R.id.icon1)){
+        mIcon1 = new AsyncIcon((ImageView) findViewById(R.id.icon1)) {
             // override default icon (when no other available) with default source icon
             @Override
             protected String getFallbackIconId(Source source) {
@@ -128,7 +129,9 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
         }
         setText1(text1);
         setText2(text2);
-        mIcon1.set(suggestion.getSuggestionSource(), suggestion.getSuggestionIcon1());
+        if (mIcon1Enabled) {
+            mIcon1.set(suggestion.getSuggestionSource(), suggestion.getSuggestionIcon1());
+        }
         mIcon2.set(suggestion.getSuggestionSource(), suggestion.getSuggestionIcon2());
         updateIsFromHistory(suggestion);
         updateRefinable(suggestion);
@@ -144,6 +147,13 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
     public void bindAdapter(SuggestionsAdapter adapter, int position) {
         mAdapter = adapter;
         mPosition = position;
+    }
+
+    public void setIcon1Enabled(boolean enabled) {
+        mIcon1Enabled = enabled;
+        if (mIcon1 != null && mIcon1.mView != null) {
+            mIcon1.mView.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        }
     }
 
     protected boolean needsContextMenu() {
@@ -176,10 +186,10 @@ public class DefaultSuggestionView extends RelativeLayout implements SuggestionV
             });
             mIcon2.getView().setFocusable(true);
             mIcon2.getView().setOnKeyListener(mKeyListener);
-            Drawable icon2 = getContext().getResources().getDrawable(R.drawable.edit_query);
+            Drawable icon2 = getContext().getResources().getDrawable(R.drawable.ic_commit);
             Drawable background =
                     getContext().getResources().getDrawable(R.drawable.edit_query_background);
-            mIcon2.setDrawable(icon2, background, String.valueOf(R.drawable.edit_query));
+            mIcon2.setDrawable(icon2, background, String.valueOf(R.drawable.ic_commit));
         } else {
             mIcon2.getView().setOnClickListener(null);
             mIcon2.getView().setFocusable(false);

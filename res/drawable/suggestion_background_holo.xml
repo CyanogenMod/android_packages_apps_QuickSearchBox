@@ -14,9 +14,13 @@
      limitations under the License.
 -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:startColor="#E8000000"
-        android:endColor="#C0000000"
-        android:angle="270" />
-</shape>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true"
+          android:drawable="@drawable/list_bg_pressed_search" />
+
+    <item android:state_focused="true"
+          android:drawable="@drawable/list_bg_pressed_search" />
+
+    <item android:drawable="@drawable/list_bg_search" />
+
+</selector>
