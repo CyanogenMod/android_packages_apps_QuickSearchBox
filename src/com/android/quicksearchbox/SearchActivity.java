@@ -54,17 +54,19 @@ public class SearchActivity extends Activity {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchActivity";
-    private static final boolean TRACE = false;
 
     private static final String SCHEME_CORPUS = "qsb.corpus";
 
     public static final String INTENT_ACTION_QSB_AND_SELECT_CORPUS
             = "com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS";
 
+    private static final String INTENT_EXTRA_TRACE_START_UP = "trace_start_up";
+
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_CORPUS = "corpus";
     private static final String INSTANCE_KEY_QUERY = "query";
 
+    private boolean mTraceStartUp;
     // Measures time from for last onCreate()/onNewIntent() call.
     private LatencyTracker mStartLatencyTracker;
     // Measures time spent inside onCreate()
@@ -100,7 +102,12 @@ public class SearchActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        if (TRACE) startMethodTracing();
+        mTraceStartUp = getIntent().hasExtra(INTENT_EXTRA_TRACE_START_UP);
+        if (mTraceStartUp) {
+            String traceFile = new File(getDir("traces", 0), "qsb-start.trace").getAbsolutePath();
+            Log.i(TAG, "Writing start-up trace to " + traceFile);
+            Debug.startMethodTracing(traceFile);
+        }
         recordStartTime();
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
@@ -174,12 +181,6 @@ public class SearchActivity extends Activity {
 
     protected SearchActivityView getSearchActivityView() {
         return mSearchActivityView;
-    }
-
-    private void startMethodTracing() {
-        File traceDir = getDir("traces", 0);
-        String traceFile = new File(traceDir, "qsb.trace").getAbsolutePath();
-        Debug.startMethodTracing(traceFile);
     }
 
     @Override
@@ -355,7 +356,7 @@ public class SearchActivity extends Activity {
         super.onResume();
         updateSuggestionsBuffered();
         mSearchActivityView.onResume();
-        if (TRACE) Debug.stopMethodTracing();
+        if (mTraceStartUp) Debug.stopMethodTracing();
     }
 
     @Override
