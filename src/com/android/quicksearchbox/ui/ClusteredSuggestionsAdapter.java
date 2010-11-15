@@ -17,10 +17,12 @@ package com.android.quicksearchbox.ui;
 
 import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.CorpusResult;
+import com.android.quicksearchbox.ListSuggestionCursor;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Suggestion;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionPosition;
+import com.android.quicksearchbox.SuggestionUtils;
 import com.android.quicksearchbox.Suggestions;
 
 import android.content.Context;
@@ -31,6 +33,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListAdapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Adapter for suggestions list where suggestions are clustered by corpus.
@@ -81,24 +84,52 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
 
     private class Adapter extends BaseExpandableListAdapter {
 
-        private ArrayList<CorpusResult> mCorpusGroups;
+        private ArrayList<SuggestionCursor> mCorpusGroups;
+        /**
+         * The number of corpora that have promoted suggestions displayed in the first cluster.
+         */
+        private int mPromotedCorpora;
 
         public void buildCorpusGroups() {
             Suggestions suggestions = getSuggestions();
+            SuggestionCursor promoted = getCurrentPromotedSuggestions();
+            HashSet<String> promotedSuggestions = new HashSet<String>();
+            if (promoted != null && promoted.getCount() > 0) {
+                promoted.moveTo(0);
+                do {
+                    promotedSuggestions.add(SuggestionUtils.getSuggestionKey(promoted));
+                } while (promoted.moveToNext());
+            }
             if (suggestions == null) {
                 mCorpusGroups = null;
+                mPromotedCorpora = 0;
             } else {
+                HashSet<String> promotedCorpora = new HashSet<String>();
                 if (mCorpusGroups == null) {
-                    mCorpusGroups = new ArrayList<CorpusResult>();
+                    mCorpusGroups = new ArrayList<SuggestionCursor>();
                 } else {
                     mCorpusGroups.clear();
                 }
                 // TODO order corpora by usage
                 for (CorpusResult result : suggestions.getCorpusResults()) {
-                    if (!result.getCorpus().isWebCorpus() && result.getCount() > 0) {
-                        mCorpusGroups.add(result);
+                    ListSuggestionCursor corpusSuggestions = new ListSuggestionCursor(
+                            result.getUserQuery());
+                    for (int i = 0; i < result.getCount(); ++i) {
+                        result.moveTo(i);
+                        if (!result.isWebSearchSuggestion()) {
+                            if (promotedSuggestions.contains(
+                                    SuggestionUtils.getSuggestionKey(result))) {
+                                promotedCorpora.add(result.getCorpus().getName());
+                            } else {
+                                corpusSuggestions.add(new SuggestionPosition(result, i));
+                            }
+                        }
+                    }
+                    if (corpusSuggestions.getCount() > 0) {
+                        mCorpusGroups.add(corpusSuggestions);
                     }
                 }
+                mPromotedCorpora = promotedCorpora.size();
             }
         }
 
@@ -165,7 +196,7 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
         }
 
         private int promotedGroupCount() {
-            return promotedCount() == 0 ? 0 : 1;
+            return (promotedCount() == 0 || mPromotedCorpora == 1) ? 0 : 1;
         }
 
         private int corpusGroupCount() {

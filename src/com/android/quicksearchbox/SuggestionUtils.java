@@ -61,4 +61,44 @@ public class SuggestionUtils {
         return intent;
     }
 
+    /**
+     * Gets a unique key that identifies a suggestion. This is used to avoid
+     * duplicate suggestions.
+     */
+    public static String getSuggestionKey(Suggestion suggestion) {
+        String action = makeKeyComponent(suggestion.getSuggestionIntentAction());
+        String data = makeKeyComponent(normalizeUrl(suggestion.getSuggestionIntentDataString()));
+        String query = makeKeyComponent(normalizeUrl(suggestion.getSuggestionQuery()));
+        // calculating accurate size of string builder avoids an allocation vs starting with
+        // the default size and having to expand.
+        int size = action.length() + 2 + data.length() + query.length();
+        return new StringBuilder(size)
+                .append(action)
+                .append('#')
+                .append(data)
+                .append('#')
+                .append(query)
+                .toString();
+    }
+
+    private static String makeKeyComponent(String str) {
+        return str == null ? "" : str;
+    }
+
+    /** Simple url normalization that strips http:// and empty paths, i.e.,
+     *  http://www.google.com/ -> www.google.com.  Used to prevent obvious
+     * duplication of nav suggestions, bookmarks and urls entered by the user.
+     */
+    private static String normalizeUrl(String url) {
+        if (url != null && url.startsWith("http://")) {
+            int start = 7;   // length of http://
+            int end = url.length();
+            if (url.indexOf('/', start) == end - 1) {
+                end--;
+            }
+            return url.substring(start, end);
+        }
+        return url;
+    }
+
 }

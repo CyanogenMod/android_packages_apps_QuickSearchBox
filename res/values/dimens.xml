@@ -16,6 +16,6 @@
 
 <resources>
 
-  <dimen name="suggestion_group_spacing">20dip</dimen>
+  <dimen name="suggestion_group_spacing">28dip</dimen>
 
 </resources>
