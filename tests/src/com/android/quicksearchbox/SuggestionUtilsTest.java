@@ -24,41 +24,41 @@ import android.test.suitebuilder.annotation.SmallTest;
 @SmallTest
 public class SuggestionUtilsTest extends AndroidTestCase {
 
-    public void testUrlsWithAndWithoutSchemeEquivilant() {
-        assertsUrlsEquivilant("http://www.google.com", "www.google.com");
+    public void testUrlsWithAndWithoutSchemeEquivalent() {
+        assertsUrlsEquivalent("http://www.google.com", "www.google.com");
     }
 
-    public void testUrlsWithAndWithoutPathEquivilant() {
-        assertsUrlsEquivilant("http://www.google.com/", "www.google.com");
-        assertsUrlsEquivilant("www.google.com/", "http://www.google.com");
-        assertsUrlsNotEquivilant("www.google.com/search/", "http://www.google.com/search");
+    public void testUrlsWithAndWithoutPathEquivalent() {
+        assertsUrlsEquivalent("http://www.google.com/", "www.google.com");
+        assertsUrlsEquivalent("www.google.com/", "http://www.google.com");
+        assertsUrlsNotEquivalent("www.google.com/search/", "http://www.google.com/search");
     }
 
-    public void testHttpAndHttpsUrlsNotEquivilant() {
-        assertsUrlsNotEquivilant("https://www.google.com/", "http://www.google.com/");
-        assertsUrlsNotEquivilant("https://www.google.com", "www.google.com");
+    public void testHttpAndHttpsUrlsNotEquivalent() {
+        assertsUrlsNotEquivalent("https://www.google.com/", "http://www.google.com/");
+        assertsUrlsNotEquivalent("https://www.google.com", "www.google.com");
     }
 
-    public void testNonHttpUrlsEquivilant() {
-        assertsUrlsEquivilant("gopher://www.google.com/", "gopher://www.google.com");
+    public void testNonHttpUrlsEquivalent() {
+        assertsUrlsEquivalent("gopher://www.google.com/", "gopher://www.google.com");
     }
 
-    public void testNonHttpUrlsAndNoSchemeNotEquivilant() {
-        assertsUrlsNotEquivilant("gopher://www.google.com", "www.google.com");
+    public void testNonHttpUrlsAndNoSchemeNotEquivalent() {
+        assertsUrlsNotEquivalent("gopher://www.google.com", "www.google.com");
     }
 
-    public void testUrlsWithDifferentPathsNotEquivilant() {
-        assertsUrlsNotEquivilant("www.google.com/search", "www.google.com");
-        assertsUrlsNotEquivilant("http://www.google.com/search", "www.google.com");
-        assertsUrlsNotEquivilant("www.google.com/search", "http://www.google.com");
+    public void testUrlsWithDifferentPathsNotEquivalent() {
+        assertsUrlsNotEquivalent("www.google.com/search", "www.google.com");
+        assertsUrlsNotEquivalent("http://www.google.com/search", "www.google.com");
+        assertsUrlsNotEquivalent("www.google.com/search", "http://www.google.com");
     }
 
-    private void assertsUrlsEquivilant(String url1, String url2) {
+    private void assertsUrlsEquivalent(String url1, String url2) {
         assertTrue("Urls " + url1 + " and " + url2 + " not equal",
                 SuggestionUtils.normalizeUrl(url1).equals(SuggestionUtils.normalizeUrl(url2)));
     }
 
-    private void assertsUrlsNotEquivilant(String url1, String url2) {
+    private void assertsUrlsNotEquivalent(String url1, String url2) {
         assertFalse("Urls " + url1 + " and " + url2 + " equal",
                 SuggestionUtils.normalizeUrl(url1).equals(SuggestionUtils.normalizeUrl(url2)));
     }
