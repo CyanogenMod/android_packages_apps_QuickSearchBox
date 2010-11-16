@@ -16,6 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import android.app.SearchManager;
 import android.content.Intent;
 import android.net.Uri;
@@ -85,18 +87,34 @@ public class SuggestionUtils {
         return str == null ? "" : str;
     }
 
-    /** Simple url normalization that strips http:// and empty paths, i.e.,
-     *  http://www.google.com/ -> www.google.com.  Used to prevent obvious
+    private static final String SCHEME_SEPARATOR = "://";
+    private static final String DEFAULT_SCHEME = "http";
+
+    /**
+     * Simple url normalization that adds http:// if no scheme exists, and
+     * strips empty paths, e.g.,
+     * www.google.com/ -> http://www.google.com.  Used to prevent obvious
      * duplication of nav suggestions, bookmarks and urls entered by the user.
      */
-    private static String normalizeUrl(String url) {
-        if (url != null && url.startsWith("http://")) {
-            int start = 7;   // length of http://
-            int end = url.length();
-            if (url.indexOf('/', start) == end - 1) {
+    @VisibleForTesting
+    static String normalizeUrl(String url) {
+        String normalized;
+        if (url != null) {
+            int start;
+            int schemePos = url.indexOf(SCHEME_SEPARATOR);
+            if (schemePos == -1) {
+                // no scheme - add the default
+                normalized = DEFAULT_SCHEME + SCHEME_SEPARATOR + url;
+                start = DEFAULT_SCHEME.length() + SCHEME_SEPARATOR.length();
+            } else {
+                normalized = url;
+                start = schemePos + SCHEME_SEPARATOR.length();
+            }
+            int end = normalized.length();
+            if (normalized.indexOf('/', start) == end - 1) {
                 end--;
             }
-            return url.substring(start, end);
+            return normalized.substring(0, end);
         }
         return url;
     }
