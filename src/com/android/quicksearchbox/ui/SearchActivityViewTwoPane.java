@@ -21,16 +21,18 @@ import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Suggestions;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.drawable.Drawable;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -40,8 +42,9 @@ import android.widget.PopupMenu;
  */
 public class SearchActivityViewTwoPane extends SearchActivityView {
 
-    private static final int TINT_ANIMATION_DURATION = 300; // in millis
-    private static final int TINT_ANIMATION_START_DELAY = 400; // in millis
+    private static final int ENTRY_ANIMATION_START_DELAY = 50; // in millis
+    private static final int ENTRY_ANIMATION_DURATION = 150; // in millis
+    private static final float ANIMATION_STARTING_WIDTH_FACTOR = 0.6f;
 
     private ImageView mMenuButton;
 
@@ -49,6 +52,8 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     private ClusteredSuggestionsView mResultsView;
     private SuggestionsAdapter<ExpandableListAdapter> mResultsAdapter;
     private View mResultsHeader;
+    private View mSearchPlate;
+    private boolean mJustCreated;
 
     public SearchActivityViewTwoPane(Context context) {
         super(context);
@@ -83,6 +88,8 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         });
         mResultsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mResultsHeader = findViewById(R.id.shortcut_title);
+        mSearchPlate = findViewById(R.id.left_pane);
+        mJustCreated = true;
     }
 
     private void showPopupMenu() {
@@ -101,24 +108,36 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
     @Override
     public void onResume() {
-        setupWallpaperTint();
+        if (mJustCreated) {
+            setupEntryAnimations();
+            mJustCreated = false;
+        }
     }
 
-    private void setupWallpaperTint() {
-        // Alpha fade-in the background tint when the activity resumes.
-        final Drawable drawable = getBackground();
-        drawable.setAlpha(0);
-        ValueAnimator animator = ObjectAnimator.ofInt(drawable, "alpha", 0, 255);
-        animator.setDuration(TINT_ANIMATION_DURATION);
-        animator.addUpdateListener(new AnimatorUpdateListener() {
+    private void setupEntryAnimations() {
+        // TODO: Use the left/top of the source bounds to start the animation from
+        final int endingWidth = getResources().getDimensionPixelSize(R.dimen.suggestions_width);
+        final int startingWidth = (int) (endingWidth * ANIMATION_STARTING_WIDTH_FACTOR);
+
+        ViewGroup.LayoutParams params = mSearchPlate.getLayoutParams();
+        params.width = startingWidth;
+        mSearchPlate.setLayoutParams(params);
+
+        Animator animator = ObjectAnimator.ofInt(mSearchPlate, "alpha", 0, 255);
+        animator.setDuration(ENTRY_ANIMATION_DURATION);
+        ((ValueAnimator)animator).addUpdateListener(new AnimatorUpdateListener() {
 
             public void onAnimationUpdate(ValueAnimator animator) {
-                drawable.invalidateSelf();
+                ViewGroup.LayoutParams params = mSearchPlate.getLayoutParams();
+                params.width = startingWidth
+                        + (int) ((Integer) animator.getAnimatedValue() / 255f
+                                * (endingWidth - startingWidth));
+                mSearchPlate.setLayoutParams(params);
             }
         });
-        animator.setStartDelay(TINT_ANIMATION_START_DELAY);
-        animator.setInterpolator(new android.view.animation.LinearInterpolator());
+        animator.setStartDelay(ENTRY_ANIMATION_START_DELAY);
         animator.start();
+
     }
 
     @Override
@@ -216,6 +235,18 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
     protected void onResultsChanged() {
         checkHideResultsHeader();
+    }
+
+    @Override
+    protected void updateQueryTextView(boolean queryEmpty) {
+        super.updateQueryTextView(queryEmpty);
+        if (mSearchCloseButton == null) return;
+
+        if (queryEmpty) {
+            mSearchCloseButton.setImageResource(R.drawable.ic_clear_off);
+        } else {
+            mSearchCloseButton.setImageResource(R.drawable.ic_clear);
+        }
     }
 
     private void checkHideResultsHeader() {

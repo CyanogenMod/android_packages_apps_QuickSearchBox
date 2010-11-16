@@ -328,7 +328,7 @@ public abstract class SearchActivityView extends RelativeLayout {
         updateVoiceSearchButton(queryEmpty);
     }
 
-    private void updateQueryTextView(boolean queryEmpty) {
+    protected void updateQueryTextView(boolean queryEmpty) {
         if (queryEmpty) {
             if (isSearchCorpusWeb()) {
                 mQueryTextView.setBackgroundDrawable(mQueryTextEmptyBg);
