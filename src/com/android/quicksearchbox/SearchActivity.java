@@ -37,6 +37,8 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -357,7 +359,24 @@ public class SearchActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getSettings().addMenuItems(menu);
+        addHelpMenuItem(menu);
         return true;
+    }
+
+    private void addHelpMenuItem(Menu menu) {
+        Intent helpIntent = getHelpIntent();
+        if (helpIntent != null) {
+            MenuInflater inflater = new MenuInflater(this);
+            inflater.inflate(R.menu.help, menu);
+            MenuItem item = menu.findItem(R.id.menu_help);
+            item.setIntent(helpIntent);
+        }
+    }
+
+    private Intent getHelpIntent() {
+        String helpUrl = getConfig().getHelpUrl();
+        if (TextUtils.isEmpty(helpUrl)) return null;
+        return new Intent(Intent.ACTION_VIEW, Uri.parse(helpUrl));
     }
 
     @Override

@@ -76,6 +76,9 @@
     <!--[CHAR LIMIT=30] Text used on the button to cancel in the dialog shown after choosing the 'clear search shortcuts' setting. -->
     <string name="clear_shortcuts_disagree">"Don't clear shortcuts"</string>
 
+    <!-- Help menu item. Opens a web page with information about how to use Quick Search Box.
+         [CHAR LIMIT=20] -->
+    <string name="menu_help">Help</string>
 
     <!-- Search source label for the Google search source. -->
     <string name="google_search_label">Google</string>

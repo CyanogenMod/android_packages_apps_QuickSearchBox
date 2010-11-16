@@ -325,4 +325,8 @@ public class Config {
         return mContext.getResources().getBoolean(R.bool.show_scrolling_results);
     }
 
+    public String getHelpUrl() {
+        return getContext().getString(R.string.help_url);
+    }
+
 }
