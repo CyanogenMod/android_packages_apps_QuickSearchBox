@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.quicksearchbox;
 
 /**
- * A blending promoter that only promotes non-web suggestions.
+ * {@link SuggestionFilter} that accepts only results (not web suggestions).
  */
-public class ResultPromoter extends BlendingPromoter {
+public class ResultFilter implements SuggestionFilter {
 
-    public ResultPromoter(Config config) {
-        super(config);
+    public ResultFilter() {
     }
 
-    @Override
-    protected boolean accept(Suggestion s) {
+    public boolean accept(Suggestion s) {
         return !s.isWebSearchSuggestion();
     }
 

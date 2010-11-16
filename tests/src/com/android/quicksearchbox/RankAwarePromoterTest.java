@@ -43,7 +43,7 @@ public class RankAwarePromoterTest extends AndroidTestCase {
             public int getNumSuggestionsAboveKeyboard() {
                 return NUM_SUGGESTIONS_ABOVE_KEYBOARD;
             }
-        });
+        }, null);
     }
 
     public void testPromotesExpectedSuggestions() {

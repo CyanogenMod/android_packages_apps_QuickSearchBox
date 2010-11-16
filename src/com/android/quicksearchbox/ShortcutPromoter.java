@@ -24,10 +24,13 @@ import com.google.common.collect.HashMultiset;
  * (from non-web sources) and blends results
  * from multiple sources.
  */
-public class BlendingPromoter extends RankAwarePromoter {
+public class ShortcutPromoter extends AbstractPromoter {
 
-    public BlendingPromoter(Config config) {
-        super(config);
+    private final Promoter mNext;
+
+    public ShortcutPromoter(Config config, Promoter next, SuggestionFilter filter) {
+        super(filter, config);
+        mNext = next;
     }
 
     @Override
@@ -35,7 +38,9 @@ public class BlendingPromoter extends RankAwarePromoter {
             ListSuggestionCursor promoted) {
         promoteShortcuts(suggestions.getShortcuts(), maxPromoted, promoted);
 
-        super.pickPromoted(suggestions, maxPromoted, promoted);
+        if (mNext != null) {
+            mNext.pickPromoted(suggestions, maxPromoted, promoted);
+        }
     }
 
     @VisibleForTesting

@@ -80,15 +80,21 @@ public class ResultPromoterTest extends AndroidTestCase {
         assertSameSuggestionsNoOrder(expected, promoted);
     }
 
+    private ShortcutPromoter createResultPromoter() {
+        ResultFilter results = new ResultFilter();
+        return new ShortcutPromoter(config(), new RankAwarePromoter(config(), results), results);
+    }
+
     private ListSuggestionCursor promoteShortcuts(SuggestionCursor shortcuts) {
-        ResultPromoter promoter = new ResultPromoter(config());
+        ShortcutPromoter promoter = createResultPromoter();
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
         promoter.promoteShortcuts(shortcuts, MAX_PROMOTED_SUGGESTIONS, promoted);
         return promoted;
     }
 
     private ListSuggestionCursor promoteSuggestions(List<CorpusResult> suggestions) {
-        ResultPromoter promoter = new ResultPromoter(config());
+        ResultFilter results = new ResultFilter();
+        RankAwarePromoter promoter = new RankAwarePromoter(config(), results);
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
         promoter.promoteSuggestions(suggestions, MAX_PROMOTED_SUGGESTIONS, promoted);
         return promoted;

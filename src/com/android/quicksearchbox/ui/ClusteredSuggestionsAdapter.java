@@ -85,10 +85,6 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
     private class Adapter extends BaseExpandableListAdapter {
 
         private ArrayList<SuggestionCursor> mCorpusGroups;
-        /**
-         * The number of corpora that have promoted suggestions displayed in the first cluster.
-         */
-        private int mPromotedCorpora;
 
         public void buildCorpusGroups() {
             Suggestions suggestions = getSuggestions();
@@ -102,9 +98,7 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
             }
             if (suggestions == null) {
                 mCorpusGroups = null;
-                mPromotedCorpora = 0;
             } else {
-                HashSet<String> promotedCorpora = new HashSet<String>();
                 if (mCorpusGroups == null) {
                     mCorpusGroups = new ArrayList<SuggestionCursor>();
                 } else {
@@ -117,10 +111,8 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
                     for (int i = 0; i < result.getCount(); ++i) {
                         result.moveTo(i);
                         if (!result.isWebSearchSuggestion()) {
-                            if (promotedSuggestions.contains(
+                            if (!promotedSuggestions.contains(
                                     SuggestionUtils.getSuggestionKey(result))) {
-                                promotedCorpora.add(result.getCorpus().getName());
-                            } else {
                                 corpusSuggestions.add(new SuggestionPosition(result, i));
                             }
                         }
@@ -129,7 +121,6 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
                         mCorpusGroups.add(corpusSuggestions);
                     }
                 }
-                mPromotedCorpora = promotedCorpora.size();
             }
         }
 
@@ -196,7 +187,7 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
         }
 
         private int promotedGroupCount() {
-            return (promotedCount() == 0 || mPromotedCorpora == 1) ? 0 : 1;
+            return (promotedCount() == 0) ? 0 : 1;
         }
 
         private int corpusGroupCount() {

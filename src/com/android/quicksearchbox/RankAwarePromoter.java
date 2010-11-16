@@ -26,21 +26,16 @@ import java.util.LinkedList;
 /**
  * A promoter that gives preference to suggestions from higher ranking corpora.
  */
-public class RankAwarePromoter implements Promoter {
+public class RankAwarePromoter extends AbstractPromoter {
 
     private static final boolean DBG = false;
     private static final String TAG = "QSB.RankAwarePromoter";
 
-    private final Config mConfig;
-
-    public RankAwarePromoter(Config config) {
-        mConfig = config;
+    public RankAwarePromoter(Config config, SuggestionFilter filter) {
+        super(filter, config);
     }
 
-    protected Config getConfig() {
-        return mConfig;
-    }
-
+    @Override
     public void pickPromoted(Suggestions suggestions,
             int maxPromoted, ListSuggestionCursor promoted) {
         promoteSuggestions(suggestions.getCorpusResults(), maxPromoted, promoted);
@@ -157,7 +152,7 @@ public class RankAwarePromoter implements Promoter {
     }
 
     private int getSlotsAboveKeyboard() {
-        return mConfig.getNumSuggestionsAboveKeyboard();
+        return getConfig().getNumSuggestionsAboveKeyboard();
     }
 
     /**
@@ -208,16 +203,6 @@ public class RankAwarePromoter implements Promoter {
             }
         } while (cursor.moveToNext() && addedCount < count);
         return addedCount;
-    }
-
-    /**
-     * Determines if a suggestion should be added to the promoted suggestion list.
-     *
-     * @param s The suggestion in question
-     * @return true to include it in the results
-     */
-    protected boolean accept(Suggestion s) {
-        return true;
     }
 
 }

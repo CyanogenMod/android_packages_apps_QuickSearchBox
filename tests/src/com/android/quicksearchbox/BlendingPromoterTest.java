@@ -22,7 +22,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
 /**
- * Tests for {@link BlendingPromoter}.
+ * Tests for {@link ShortcutPromoter}.
  */
 @MediumTest
 public class BlendingPromoterTest extends AndroidTestCase {
@@ -132,7 +132,8 @@ public class BlendingPromoterTest extends AndroidTestCase {
 
     private ListSuggestionCursorNoDuplicates promote(Config config, SuggestionCursor shortcuts,
             int maxPromoted) {
-        BlendingPromoter promoter = new BlendingPromoter(config);
+        ShortcutPromoter promoter = new ShortcutPromoter(config,
+                new RankAwarePromoter(config, null), null);
         ListSuggestionCursorNoDuplicates promoted = new ListSuggestionCursorNoDuplicates(mQuery);
         promoter.promoteShortcuts(shortcuts, maxPromoted, promoted);
         return promoted;

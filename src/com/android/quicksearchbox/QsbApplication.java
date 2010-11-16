@@ -372,7 +372,7 @@ public class QsbApplication {
     }
 
     public Promoter createBlendingPromoter() {
-        return new BlendingPromoter(getConfig());
+        return new ShortcutPromoter(getConfig(), new RankAwarePromoter(getConfig(), null), null);
     }
 
     public Promoter createSingleCorpusPromoter(Corpus corpus) {
@@ -388,7 +388,8 @@ public class QsbApplication {
     }
 
     public Promoter createResultsPromoter() {
-        return new ResultPromoter(getConfig());
+        SuggestionFilter resultFilter = new ResultFilter();
+        return new ShortcutPromoter(getConfig(), null, resultFilter);
     }
 
     /**

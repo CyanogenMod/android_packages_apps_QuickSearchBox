@@ -56,7 +56,14 @@
   <!-- The maximum promoted suggestions -->
   <integer name="max_promoted_suggestions">8</integer>
 
+  <!-- Maximum number of results to promote -->
   <integer name="max_promoted_results">4</integer>
+
+  <!-- Maximum number of shortcuts to promote from the web. -->
+  <integer name="max_shortcuts_per_web_source">8</integer>
+
+  <!-- Maximum number of shortcuts to promote from each non-web source. -->
+  <integer name="max_shortcuts_per_non_web_source">2</integer>
 
   <!-- The number of columns in the corpus selection dialog -->
   <integer name="corpus_selection_dialog_columns">4</integer>
