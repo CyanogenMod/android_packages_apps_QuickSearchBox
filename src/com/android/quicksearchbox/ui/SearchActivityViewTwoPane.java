@@ -29,9 +29,12 @@ import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 
 /**
  * Two-pane variant for the search activity view.
@@ -41,7 +44,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     private static final int TINT_ANIMATION_DURATION = 300; // in millis
     private static final int TINT_ANIMATION_START_DELAY = 400; // in millis
 
-    private ImageView mSettingsButton;
+    private ImageView mMenuButton;
 
     // View that shows the results other than the query completions
     private ClusteredSuggestionsView mResultsView;
@@ -64,7 +67,16 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mSettingsButton = (ImageView) findViewById(R.id.settings_icon);
+        mMenuButton = (ImageView) findViewById(R.id.menu_button);
+        mMenuButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(getContext(), mMenuButton);
+                Menu menu = popup.getMenu();
+                getActivity().onCreateOptionsMenu(menu);
+                getActivity().onPrepareOptionsMenu(menu);
+                popup.show();
+            }
+        });
 
         mResultsView = (ClusteredSuggestionsView) findViewById(R.id.shortcuts);
         mResultsAdapter = createClusteredSuggestionsAdapter();
@@ -170,12 +182,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     @Override
     public void limitResultsToViewHeight() {
         mResultsView.setLimitSuggestionsToViewHeight(true);
-    }
-
-
-    @Override
-    public void setSettingsButtonClickListener(OnClickListener listener) {
-        mSettingsButton.setOnClickListener(listener);
     }
 
     @Override

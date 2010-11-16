@@ -251,8 +251,6 @@ public abstract class SearchActivityView extends RelativeLayout
 
     public abstract void showCorpusSelectionDialog();
 
-    public abstract void setSettingsButtonClickListener(View.OnClickListener listener);
-
     public void setVoiceSearchButtonClickListener(View.OnClickListener listener) {
         if (mVoiceSearchButton != null) {
             mVoiceSearchButton.setOnClickListener(listener);
