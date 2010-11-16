@@ -107,10 +107,6 @@ public class SearchActivityViewSinglePane extends SearchActivityView {
     }
 
     @Override
-    public void setSettingsButtonClickListener(View.OnClickListener listener) {
-    }
-
-    @Override
     public void showCorpusSelectionDialog() {
         if (mCorpusSelectionDialog == null) {
             mCorpusSelectionDialog = getActivity().getCorpusSelectionDialog();

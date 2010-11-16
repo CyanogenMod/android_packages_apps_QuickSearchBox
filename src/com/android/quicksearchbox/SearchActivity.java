@@ -139,12 +139,6 @@ public class SearchActivity extends Activity {
 
         mSearchActivityView.setSuggestionClickListener(new ClickHandler());
 
-        mSearchActivityView.setSettingsButtonClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                onSettingsClicked();
-            }
-        });
-
         mSearchActivityView.setVoiceSearchButtonClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 onVoiceSearchClicked();
@@ -450,10 +444,6 @@ public class SearchActivity extends Activity {
         // Start voice search
         Intent intent = searchCorpus.createVoiceSearchIntent(mAppSearchData);
         launchIntent(intent);
-    }
-
-    protected void onSettingsClicked() {
-        startActivity(getSettings().getSearchSettingsIntent());
     }
 
     protected Corpus getSearchCorpus() {
