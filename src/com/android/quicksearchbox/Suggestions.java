@@ -23,6 +23,8 @@ import android.database.DataSetObserver;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,13 +52,15 @@ public class Suggestions {
 
     /** The sources that are expected to report. */
     private final List<Corpus> mExpectedCorpora;
+    private final HashMap<String, Integer> mCorpusPositions;
 
     /**
      * All {@link SuggestionCursor} objects that have been published so far,
-     * in the order that they were published.
+     * in the same order as {@link #mExpectedCorpora}. There may be {@code null} items
+     * in the array, if not all corpora have published yet.
      * This object may only be accessed on the UI thread.
      * */
-    private final ArrayList<CorpusResult> mCorpusResults;
+    private final CorpusResult[] mCorpusResults;
 
     private CorpusResult mWebResult;
 
@@ -67,7 +71,13 @@ public class Suggestions {
     public Suggestions(String query, List<Corpus> expectedCorpora) {
         mQuery = query;
         mExpectedCorpora = expectedCorpora;
-        mCorpusResults = new ArrayList<CorpusResult>(mExpectedCorpora.size());
+        mCorpusResults = new CorpusResult[mExpectedCorpora.size()];
+        // create a map of corpus name -> position in mExpectedCorpora for sorting later
+        // (we want to keep the ordering of corpora in mCorpusResults).
+        mCorpusPositions = new HashMap<String, Integer>();
+        for (int i = 0; i < mExpectedCorpora.size(); ++i) {
+            mCorpusPositions.put(mExpectedCorpora.get(i).getName(), i);
+        }
         if (DBG) {
             Log.d(TAG, "new Suggestions [" + hashCode() + "] query \"" + query
                     + "\" expected corpora: " + mExpectedCorpora);
@@ -159,7 +169,17 @@ public class Suggestions {
      */
     public boolean isDone() {
         // TODO: Handle early completion because we have all the results we want.
-        return mDone || mCorpusResults.size() >= mExpectedCorpora.size();
+        return mDone || countCorpusResults() >= mExpectedCorpora.size();
+    }
+
+    private int countCorpusResults() {
+        int count = 0;
+        for (int i = 0; i < mCorpusResults.length; ++i) {
+            if (mCorpusResults[i] != null) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -183,9 +203,16 @@ public class Suggestions {
               throw new IllegalArgumentException("Got result for wrong query: "
                     + mQuery + " != " + corpusResult.getUserQuery());
             }
-            mCorpusResults.add(corpusResult);
-            if (corpusResult.getCorpus().isWebCorpus()) {
-                mWebResult = corpusResult;
+            Integer pos = mCorpusPositions.get(corpusResult.getCorpus().getName());
+            if (pos == null) {
+                Log.w(TAG, "Got unexpected CorpusResult from corpus " +
+                        corpusResult.getCorpus().getName());
+                corpusResult.close();
+            } else {
+                mCorpusResults[pos] = corpusResult;
+                if (corpusResult.getCorpus().isWebCorpus()) {
+                    mWebResult = corpusResult;
+                }
             }
         }
         notifyDataSetChanged();
@@ -234,9 +261,11 @@ public class Suggestions {
         }
 
         for (CorpusResult result : mCorpusResults) {
-            result.close();
+            if (result != null) {
+                result.close();
+            }
         }
-        mCorpusResults.clear();
+        Arrays.fill(mCorpusResults, null);
     }
 
     public boolean isClosed() {
@@ -292,7 +321,13 @@ public class Suggestions {
      * the returned iterator.
      */
     public Iterable<CorpusResult> getCorpusResults() {
-        return mCorpusResults;
+        ArrayList<CorpusResult> results = new ArrayList<CorpusResult>(mCorpusResults.length);
+        for (int i = 0; i < mCorpusResults.length; ++i) {
+            if (mCorpusResults[i] != null) {
+                results.add(mCorpusResults[i]);
+            }
+        }
+        return results;
     }
 
     public CorpusResult getCorpusResult(Corpus corpus) {
@@ -316,13 +351,13 @@ public class Suggestions {
         if (isClosed()) {
             throw new IllegalStateException("Called getSourceCount() when closed.");
         }
-        return mCorpusResults == null ? 0 : mCorpusResults.size();
+        return countCorpusResults();
     }
 
     @Override
     public String toString() {
         return "Suggestions@" + hashCode() + "{expectedCorpora=" + mExpectedCorpora
-                + ",mCorpusResults.size()=" + mCorpusResults.size() + "}";
+                + ",countCorpusResults()=" + countCorpusResults() + "}";
     }
 
     private class MyShortcutsObserver extends DataSetObserver {
