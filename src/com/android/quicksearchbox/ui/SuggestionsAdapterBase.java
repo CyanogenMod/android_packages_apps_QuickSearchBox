@@ -79,6 +79,11 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
 
     public abstract boolean isEmpty();
 
+    /**
+     * Indicates if this adapter will publish suggestions other than those in the promoted list.
+     */
+    public abstract boolean willPublishNonPromotedSuggestions();
+
     private boolean addViewTypes(SuggestionViewFactory f) {
         boolean changed = false;
         for (String viewType : f.getSuggestionViewTypes()) {

@@ -43,6 +43,11 @@ public class SuggestionsListAdapter extends SuggestionsAdapterBase<ListAdapter> 
     }
 
     @Override
+    public boolean willPublishNonPromotedSuggestions() {
+        return false;
+    }
+
+    @Override
     public SuggestionPosition getSuggestion(long suggestionId) {
         return new SuggestionPosition(getCurrentPromotedSuggestions(), (int) suggestionId);
     }

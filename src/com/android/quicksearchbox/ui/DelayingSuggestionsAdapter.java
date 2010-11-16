@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox.ui;
 
+import com.android.quicksearchbox.CorpusResult;
 import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionPosition;
@@ -73,7 +74,17 @@ public class DelayingSuggestionsAdapter<A> implements SuggestionsAdapter<A> {
     private boolean shouldPublish(Suggestions suggestions) {
         if (suggestions.isDone()) return true;
         SuggestionCursor cursor = mDelayedAdapter.getPromoted(suggestions);
-        return cursor != null && cursor.getCount() > 0;
+        if (cursor != null && cursor.getCount() > 0) {
+            return true;
+        } else if (mDelayedAdapter.willPublishNonPromotedSuggestions()) {
+            Iterable<CorpusResult> results = suggestions.getCorpusResults();
+            for (CorpusResult result : results) {
+                if (result.getCount() > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void setPendingSuggestions(Suggestions suggestions) {

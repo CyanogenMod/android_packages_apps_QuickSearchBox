@@ -122,7 +122,9 @@ public class Suggestions {
     public Set<Corpus> getIncludedCorpora() {
         HashSet<Corpus> corpora = new HashSet<Corpus>();
         for (CorpusResult result : mCorpusResults) {
-            corpora.add(result.getCorpus());
+            if (result != null) {
+                corpora.add(result.getCorpus());
+            }
         }
         return corpora;
     }

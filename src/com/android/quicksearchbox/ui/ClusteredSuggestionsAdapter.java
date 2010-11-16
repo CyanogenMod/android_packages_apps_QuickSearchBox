@@ -61,6 +61,11 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
     }
 
     @Override
+    public boolean willPublishNonPromotedSuggestions() {
+        return true;
+    }
+
+    @Override
     public SuggestionPosition getSuggestion(long suggestionId) {
         return mAdapter.getChildById(suggestionId);
     }
