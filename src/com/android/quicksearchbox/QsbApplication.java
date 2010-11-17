@@ -372,7 +372,8 @@ public class QsbApplication {
     }
 
     public Promoter createBlendingPromoter() {
-        return new ShortcutPromoter(getConfig(), new RankAwarePromoter(getConfig(), null), null);
+        return new ShortcutPromoter(getConfig(),
+                new RankAwarePromoter(getConfig(), null, null), null);
     }
 
     public Promoter createSingleCorpusPromoter(Corpus corpus) {

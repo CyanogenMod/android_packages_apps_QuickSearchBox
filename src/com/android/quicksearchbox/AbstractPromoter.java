@@ -21,15 +21,24 @@ package com.android.quicksearchbox;
 public abstract class AbstractPromoter implements Promoter {
 
     private final SuggestionFilter mFilter;
+    private final Promoter mNext;
     private final Config mConfig;
 
-    protected AbstractPromoter(SuggestionFilter filter, Config config) {
+    protected AbstractPromoter(SuggestionFilter filter, Promoter next, Config config) {
         mFilter = filter;
+        mNext = next;
         mConfig = config;
     }
 
-    @Override
-    public abstract void pickPromoted(
+    public void pickPromoted(
+            Suggestions suggestions, int maxPromoted, ListSuggestionCursor promoted) {
+        doPickPromoted(suggestions, maxPromoted, promoted);
+        if (mNext != null) {
+            mNext.pickPromoted(suggestions, maxPromoted, promoted);
+        }
+    }
+
+    protected abstract void doPickPromoted(
             Suggestions suggestions, int maxPromoted, ListSuggestionCursor promoted);
 
     protected Config getConfig() {

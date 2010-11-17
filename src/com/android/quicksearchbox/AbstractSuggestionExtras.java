@@ -17,10 +17,40 @@ package com.android.quicksearchbox;
 
 import org.json.JSONException;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 /**
  * Abstract SuggestionExtras supporting flattening to JSON.
  */
 public abstract class AbstractSuggestionExtras implements SuggestionExtras {
+
+    private final SuggestionExtras mMore;
+
+    protected AbstractSuggestionExtras(SuggestionExtras more) {
+        mMore = more;
+    }
+
+    public Collection<String> getExtraColumnNames() {
+        HashSet<String> columns = new HashSet<String>();
+        columns.addAll(doGetExtraColumnNames());
+        if (mMore != null) {
+            columns.addAll(mMore.getExtraColumnNames());
+        }
+        return columns;
+    }
+
+    protected abstract Collection<String> doGetExtraColumnNames();
+
+    public String getExtra(String columnName) {
+        String extra = doGetExtra(columnName);
+        if (extra == null && mMore != null) {
+            extra = mMore.getExtra(columnName);
+        }
+        return extra;
+    }
+
+    protected abstract String doGetExtra(String columnName);
 
     public String toJsonString() throws JSONException {
         return new JsonBackedSuggestionExtras(this).toString();

@@ -133,7 +133,7 @@ public class BlendingPromoterTest extends AndroidTestCase {
     private ListSuggestionCursorNoDuplicates promote(Config config, SuggestionCursor shortcuts,
             int maxPromoted) {
         ShortcutPromoter promoter = new ShortcutPromoter(config,
-                new RankAwarePromoter(config, null), null);
+                new RankAwarePromoter(config, null, null), null);
         ListSuggestionCursorNoDuplicates promoted = new ListSuggestionCursorNoDuplicates(mQuery);
         promoter.promoteShortcuts(shortcuts, maxPromoted, promoted);
         return promoted;

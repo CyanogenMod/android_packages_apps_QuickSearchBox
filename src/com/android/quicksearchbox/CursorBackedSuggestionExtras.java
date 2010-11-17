@@ -83,12 +83,14 @@ public class CursorBackedSuggestionExtras extends AbstractSuggestionExtras {
     }
 
     private CursorBackedSuggestionExtras(Cursor cursor, int position, List<String> extraColumns) {
+        super(null);
         mCursor = cursor;
         mCursorPosition = position;
         mExtraColumns = extraColumns;
     }
 
-    public String getExtra(String columnName) {
+    @Override
+    public String doGetExtra(String columnName) {
         try {
             mCursor.moveToPosition(mCursorPosition);
             int columnIdx = mCursor.getColumnIndex(columnName);
@@ -101,7 +103,8 @@ public class CursorBackedSuggestionExtras extends AbstractSuggestionExtras {
         }
     }
 
-    public List<String> getExtraColumnNames() {
+    @Override
+    public List<String> doGetExtraColumnNames() {
         return mExtraColumns;
     }
 
