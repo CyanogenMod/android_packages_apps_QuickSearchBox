@@ -60,6 +60,9 @@
         [CHAR LIMIT=20] -->
     <string name="device_settings_category_title">Clear shortcuts</string>
 
+    <!-- Title for 'system search' category of search settings -->
+    <string name="system_search_category_title">Phone</string>
+
     <!-- Title and summary for 'search sources' link for system search -->
     <string name="search_sources">Searchable items</string>
     <string name="search_sources_summary">Choose what to search on the phone</string>
