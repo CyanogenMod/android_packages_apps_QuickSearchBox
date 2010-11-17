@@ -222,9 +222,4 @@ public class MockSource implements Source {
         return this;
     }
 
-    @Override
-    public SuggestionViewFactory getSuggestionViewFactory() {
-        return null;
-    }
-
 }

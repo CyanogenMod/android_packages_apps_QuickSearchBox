@@ -179,16 +179,8 @@ public class DelayingSuggestionsAdapter<A> implements SuggestionsAdapter<A> {
         mDelayedAdapter.setPromoter(promoter);
     }
 
-    public void setSuggestionAdapterChangeListener(SuggestionsAdapterChangeListener l) {
-        mDelayedAdapter.setSuggestionAdapterChangeListener(l);
-    }
-
     public void setSuggestionClickListener(SuggestionClickListener listener) {
         mDelayedAdapter.setSuggestionClickListener(listener);
-    }
-
-    public void setIcon1Enabled(boolean enabled) {
-        mDelayedAdapter.setIcon1Enabled(enabled);
     }
 
     @Override

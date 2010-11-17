@@ -26,13 +26,40 @@
     <style name="SuggestionText1">
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">@dimen/suggestion_text1_size</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingRight">2dip</item>
+        <item name="android:gravity">left|center_vertical</item>
     </style>
 
     <style name="SuggestionText2">
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">@dimen/suggestion_text2_size</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_height">@dimen/suggestion_text2_height</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingBottom">4dip</item>
+        <item name="android:paddingRight">2dip</item>
+        <item name="android:gravity">left|top</item>
+    </style>
+
+    <style name="SuggestionIcon1">
+        <item name="android:layout_height">@dimen/suggestion_icon_size</item>
+        <item name="android:layout_width">@dimen/suggestion_icon_size</item>
+        <item name="android:paddingLeft">2dip</item>
+        <item name="android:paddingTop">2dip</item>
+        <item name="android:paddingBottom">2dip</item>
+    </style>
+
+    <style name="SuggestionIcon2">
+        <item name="android:layout_height">@dimen/suggestion_icon_size</item>
+        <item name="android:layout_width">@dimen/suggestion_icon_size</item>
     </style>
 
     <style name="SuggestionText1.Query" parent="@style/SuggestionText1">

@@ -55,12 +55,10 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    @Override
     public Collection<String> getSuggestionViewTypes() {
         return Collections.singletonList(mViewType);
     }
 
-    @Override
     public View getView(SuggestionCursor suggestion, String userQuery,
             View convertView, ViewGroup parent) {
         if (convertView == null || !convertView.getClass().equals(mViewClass)) {
@@ -74,9 +72,12 @@ public class SuggestionViewInflater implements SuggestionViewFactory {
         return convertView;
     }
 
-    @Override
     public String getViewType(Suggestion suggestion) {
         return mViewType;
+    }
+
+    public boolean canCreateView(Suggestion suggestion) {
+        return true;
     }
 
 }

@@ -83,7 +83,7 @@ public class SearchableSource extends AbstractSource {
         mVersionCode = pkgInfo.versionCode;
     }
 
-    protected SearchableInfo getSearchableInfo() {
+    public SearchableInfo getSearchableInfo() {
         return mSearchable;
     }
 

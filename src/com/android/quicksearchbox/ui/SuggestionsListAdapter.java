@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
 
@@ -32,8 +31,8 @@ public class SuggestionsListAdapter extends SuggestionsAdapterBase<ListAdapter> 
 
     private Adapter mAdapter;
 
-    public SuggestionsListAdapter(SuggestionViewFactory fallbackFactory, Corpora corpora) {
-        super(fallbackFactory, corpora);
+    public SuggestionsListAdapter(SuggestionViewFactory viewFactory) {
+        super(viewFactory);
         mAdapter = new Adapter();
     }
 

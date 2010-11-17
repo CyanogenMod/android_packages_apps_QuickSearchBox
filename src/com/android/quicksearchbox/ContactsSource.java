@@ -15,9 +15,6 @@
  */
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.ui.ContactSuggestionView;
-import com.android.quicksearchbox.ui.SuggestionViewFactory;
-import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 import android.app.SearchableInfo;
@@ -33,12 +30,6 @@ public class ContactsSource extends SearchableSource {
     public ContactsSource(Context context, SearchableInfo searchable, Handler uiThread,
             NamedTaskExecutor iconLoader) throws NameNotFoundException {
         super(context, searchable, uiThread, iconLoader);
-    }
-
-    @Override
-    public SuggestionViewFactory createSuggestionViewFactory() {
-        return new SuggestionViewInflater(ContactSuggestionView.VIEW_ID,
-                ContactSuggestionView.class, R.layout.contact_suggestion, getContext());
     }
 
 }

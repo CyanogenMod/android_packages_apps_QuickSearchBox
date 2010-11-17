@@ -19,4 +19,9 @@
   <dimen name="suggestions_width">600dp</dimen>
   <dimen name="shortcuts_width">390dp</dimen>
 
+  <dimen name="suggestion_text1_size">18sp</dimen>
+  <dimen name="suggestion_text2_size">14sp</dimen>
+
+  <dimen name="suggestion_text2_height">26dip</dimen>
+
 </resources>

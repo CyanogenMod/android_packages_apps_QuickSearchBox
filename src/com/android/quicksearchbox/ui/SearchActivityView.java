@@ -27,7 +27,6 @@ import com.android.quicksearchbox.SearchActivity;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.Suggestions;
 import com.android.quicksearchbox.VoiceSearch;
-import com.android.quicksearchbox.ui.SuggestionsAdapter.SuggestionsAdapterChangeListener;
 
 import android.app.Activity;
 import android.content.Context;
@@ -53,8 +52,7 @@ import java.util.Arrays;
 /**
  *
  */
-public abstract class SearchActivityView extends RelativeLayout 
-        implements SuggestionsAdapterChangeListener {
+public abstract class SearchActivityView extends RelativeLayout {
     protected static final boolean DBG = false;
     protected static final String TAG = "QSB.SearchActivityView";
 
@@ -108,7 +106,6 @@ public abstract class SearchActivityView extends RelativeLayout
         mSuggestionsView.setOnFocusChangeListener(new SuggestListFocusListener());
 
         mSuggestionsAdapter = createSuggestionsAdapter();
-        mSuggestionsAdapter.setSuggestionAdapterChangeListener(this);
         // TODO: why do we need focus listeners both on the SuggestionsView and the individual
         // suggestions?
         mSuggestionsAdapter.setOnFocusChangeListener(new SuggestListFocusListener());
@@ -135,10 +132,6 @@ public abstract class SearchActivityView extends RelativeLayout
         mUpdateSuggestions = true;
     }
 
-    public void onSuggestionAdapterChanged() {
-        mSuggestionsView.setSuggestionsAdapter(mSuggestionsAdapter);
-    }
-
     public abstract void onResume();
 
     public abstract void onStop();
@@ -149,7 +142,6 @@ public abstract class SearchActivityView extends RelativeLayout
     }
 
     public void destroy() {
-        mSuggestionsAdapter.setSuggestionAdapterChangeListener(null);
         mSuggestionsView.setSuggestionsAdapter(null);  // closes mSuggestionsAdapter
     }
 
@@ -165,8 +157,7 @@ public abstract class SearchActivityView extends RelativeLayout
 
     protected SuggestionsAdapter<ListAdapter> createSuggestionsAdapter() {
         return new DelayingSuggestionsAdapter<ListAdapter>(new SuggestionsListAdapter(
-                getQsbApplication().getDefaultSuggestionViewFactory(), 
-                getQsbApplication().getCorpora()));
+                getQsbApplication().getSuggestionViewFactory()));
     }
 
     protected Corpora getCorpora() {

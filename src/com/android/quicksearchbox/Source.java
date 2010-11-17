@@ -16,7 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.util.NowOrLater;
 
 import android.content.ComponentName;
@@ -177,10 +176,5 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      * source.
      */
     Source getRoot();
-
-    /**
-     * Get the factory used to create views for suggestions from this source.
-     */
-    SuggestionViewFactory getSuggestionViewFactory();
 
 }

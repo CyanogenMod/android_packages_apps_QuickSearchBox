@@ -31,11 +31,6 @@ import android.widget.ListAdapter;
  *      {@link ExpandableListAdapter}.
  */
 public interface SuggestionsAdapter<A> {
-    /**
-     * Request a notification when the structure of the adapter changes, usually due to the number
-     * of view types it can provide changing.
-     */
-    void setSuggestionAdapterChangeListener(SuggestionsAdapterChangeListener l);
 
     /**
      * Sets the maximum number of promoted suggestions to be provided by this adapter.
@@ -119,15 +114,5 @@ public interface SuggestionsAdapter<A> {
      * Gets the adapter to be used by the UI view.
      */
     A getListAdapter();
-
-    void setIcon1Enabled(boolean enabled);
-
-    /**
-     * Callback interface used to notify the view when the adapter has changed (i.e. the number and
-     * type of views returned has changed).
-     */
-    public interface SuggestionsAdapterChangeListener {
-        void onSuggestionAdapterChanged();
-    }
 
 }

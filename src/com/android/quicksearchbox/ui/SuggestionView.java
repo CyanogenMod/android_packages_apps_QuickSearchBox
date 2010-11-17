@@ -35,8 +35,4 @@ public interface SuggestionView {
      */
     void bindAdapter(SuggestionsAdapter<?> adapter, long position);
 
-    /**
-     * Call this with false to turn off the icon on the left. By default it is visible.
-     */
-    void setIcon1Enabled(boolean enabled);
 }
