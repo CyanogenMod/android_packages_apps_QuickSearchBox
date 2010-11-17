@@ -23,7 +23,7 @@ import android.view.Menu;
  */
 public class MockSearchSettings implements SearchSettings {
 
-    public void addMenuItems(Menu menu) {
+    public void addMenuItems(Menu menu, boolean showDisabled) {
     }
 
     public void broadcastSettingsChanged() {
@@ -57,9 +57,6 @@ public class MockSearchSettings implements SearchSettings {
 
     public Intent getSearchSettingsIntent() {
         return null;
-    }
-
-    public void updateMenuItems(Menu menu) {
     }
 
     public boolean allowWebSearchShortcuts() {

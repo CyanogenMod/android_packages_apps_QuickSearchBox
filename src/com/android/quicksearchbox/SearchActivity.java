@@ -356,11 +356,16 @@ public class SearchActivity extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getSettings().addMenuItems(menu);
-        addHelpMenuItem(menu);
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // Since the menu items are dynamic, we recreate the menu every time.
+        menu.clear();
+        createMenuItems(menu, true);
         return true;
+    }
+
+    public void createMenuItems(Menu menu, boolean showDisabled) {
+        getSettings().addMenuItems(menu, showDisabled);
+        addHelpMenuItem(menu);
     }
 
     private void addHelpMenuItem(Menu menu) {
@@ -377,13 +382,6 @@ public class SearchActivity extends Activity {
         String helpUrl = getConfig().getHelpUrl();
         if (TextUtils.isEmpty(helpUrl)) return null;
         return new Intent(Intent.ACTION_VIEW, Uri.parse(helpUrl));
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        getSettings().updateMenuItems(menu);
-        return true;
     }
 
     @Override

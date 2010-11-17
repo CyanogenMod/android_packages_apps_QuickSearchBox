@@ -115,14 +115,11 @@ public class SearchSettingsImpl implements SearchSettings {
         getContext().sendBroadcast(intent);
     }
 
-    public void addMenuItems(Menu menu) {
+    public void addMenuItems(Menu menu, boolean showDisabled) {
         MenuInflater inflater = new MenuInflater(getContext());
         inflater.inflate(R.menu.settings, menu);
         MenuItem item = menu.findItem(R.id.menu_settings);
         item.setIntent(getSearchSettingsIntent());
-    }
-
-    public void updateMenuItems(Menu menu) {
     }
 
     public Intent getSearchSettingsIntent() {
