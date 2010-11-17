@@ -116,16 +116,9 @@ public class CorpusSelectionDialog extends Dialog {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getSettings().addMenuItems(menu);
-        return true;
-    }
-
-    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        getSettings().updateMenuItems(menu);
+        menu.clear();
+        getSettings().addMenuItems(menu, true);
         return true;
     }
 

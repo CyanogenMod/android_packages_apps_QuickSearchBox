@@ -35,9 +35,7 @@ public interface SearchSettings {
      */
     public void broadcastSettingsChanged();
 
-    public void addMenuItems(Menu menu);
-
-    public void updateMenuItems(Menu menu);
+    public void addMenuItems(Menu menu, boolean showDisabled);
 
     public int getNextVoiceSearchHintIndex(int size);
 

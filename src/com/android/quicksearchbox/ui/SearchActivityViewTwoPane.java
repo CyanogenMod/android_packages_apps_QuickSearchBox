@@ -70,11 +70,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         mMenuButton = (ImageView) findViewById(R.id.menu_button);
         mMenuButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                PopupMenu popup = new PopupMenu(getContext(), mMenuButton);
-                Menu menu = popup.getMenu();
-                getActivity().onCreateOptionsMenu(menu);
-                getActivity().onPrepareOptionsMenu(menu);
-                popup.show();
+                showPopupMenu();
             }
         });
 
@@ -91,6 +87,13 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         mResultsHeader = findViewById(R.id.shortcut_title);
 
         mSuggestionsAdapter.setIcon1Enabled(false);
+    }
+
+    private void showPopupMenu() {
+        PopupMenu popup = new PopupMenu(getContext(), mMenuButton);
+        Menu menu = popup.getMenu();
+        getActivity().createMenuItems(menu, false);
+        popup.show();
     }
 
     protected SuggestionsAdapter<ExpandableListAdapter> createClusteredSuggestionsAdapter() {
