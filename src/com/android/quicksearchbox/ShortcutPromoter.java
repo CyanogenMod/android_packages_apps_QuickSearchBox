@@ -26,21 +26,14 @@ import com.google.common.collect.HashMultiset;
  */
 public class ShortcutPromoter extends AbstractPromoter {
 
-    private final Promoter mNext;
-
     public ShortcutPromoter(Config config, Promoter next, SuggestionFilter filter) {
-        super(filter, config);
-        mNext = next;
+        super(filter, next, config);
     }
 
     @Override
-    public void pickPromoted(Suggestions suggestions, int maxPromoted,
+    public void doPickPromoted(Suggestions suggestions, int maxPromoted,
             ListSuggestionCursor promoted) {
         promoteShortcuts(suggestions.getShortcuts(), maxPromoted, promoted);
-
-        if (mNext != null) {
-            mNext.pickPromoted(suggestions, maxPromoted, promoted);
-        }
     }
 
     @VisibleForTesting

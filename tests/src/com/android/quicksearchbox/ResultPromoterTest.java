@@ -82,7 +82,8 @@ public class ResultPromoterTest extends AndroidTestCase {
 
     private ShortcutPromoter createResultPromoter() {
         ResultFilter results = new ResultFilter();
-        return new ShortcutPromoter(config(), new RankAwarePromoter(config(), results), results);
+        return new ShortcutPromoter(config(),
+                new RankAwarePromoter(config(), results, null), results);
     }
 
     private ListSuggestionCursor promoteShortcuts(SuggestionCursor shortcuts) {
@@ -94,7 +95,7 @@ public class ResultPromoterTest extends AndroidTestCase {
 
     private ListSuggestionCursor promoteSuggestions(List<CorpusResult> suggestions) {
         ResultFilter results = new ResultFilter();
-        RankAwarePromoter promoter = new RankAwarePromoter(config(), results);
+        RankAwarePromoter promoter = new RankAwarePromoter(config(), results, null);
         ListSuggestionCursor promoted = new ListSuggestionCursor(mQuery);
         promoter.promoteSuggestions(suggestions, MAX_PROMOTED_SUGGESTIONS, promoted);
         return promoted;

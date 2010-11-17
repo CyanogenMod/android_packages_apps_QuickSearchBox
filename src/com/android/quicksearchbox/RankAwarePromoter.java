@@ -31,12 +31,12 @@ public class RankAwarePromoter extends AbstractPromoter {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.RankAwarePromoter";
 
-    public RankAwarePromoter(Config config, SuggestionFilter filter) {
-        super(filter, config);
+    public RankAwarePromoter(Config config, SuggestionFilter filter, Promoter next) {
+        super(filter, next, config);
     }
 
     @Override
-    public void pickPromoted(Suggestions suggestions,
+    public void doPickPromoted(Suggestions suggestions,
             int maxPromoted, ListSuggestionCursor promoted) {
         promoteSuggestions(suggestions.getCorpusResults(), maxPromoted, promoted);
     }

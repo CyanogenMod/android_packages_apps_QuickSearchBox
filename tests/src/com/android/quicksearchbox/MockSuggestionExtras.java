@@ -26,6 +26,7 @@ public class MockSuggestionExtras extends AbstractSuggestionExtras {
     HashMap<String, Object> mMap;
 
     public MockSuggestionExtras() {
+        super(null);
         mMap = new HashMap<String, Object>();
     }
 
@@ -34,12 +35,14 @@ public class MockSuggestionExtras extends AbstractSuggestionExtras {
         return this;
     }
 
-    public String getExtra(String columnName) {
+    @Override
+    public String doGetExtra(String columnName) {
         Object o = mMap.get(columnName);
         return o == null ? null : o.toString();
     }
 
-    public Collection<String> getExtraColumnNames() {
+    @Override
+    public Collection<String> doGetExtraColumnNames() {
         return mMap.keySet();
     }
 
