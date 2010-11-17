@@ -20,6 +20,7 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -102,6 +103,16 @@ public class ShortcutsProvider extends ContentProvider {
             Log.e(TAG, "Missing " + EXTRA_SHORTCUT_SOURCE);
             return;
         }
+
+        String sourceAction = shortcut.getAsString(SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
+        if (Intent.ACTION_WEB_SEARCH.equals(sourceAction)) {
+            if (DBG) {
+                Log.d(TAG, "Ignoring shortcut from " + sourceName +
+                        "because its intent action was ACTION_WEB_SEARCH.");
+            }
+            return;
+        }
+
         final ComponentName sourceComponent = ComponentName.unflattenFromString(sourceName);
         if (!checkCallingPackage(sourceComponent.getPackageName())) {
             Log.w(TAG, "Got shortcut for " + sourceComponent + " from a different process");
