@@ -18,10 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Buscar"</string>
     <string name="search_widget" msgid="323244086853110381">"Buscar"</string>
-    <!-- no translation found for remove_from_history (3812349065338505597) -->
-    <skip />
-    <!-- no translation found for remove_from_history_failed (5471604847849215215) -->
-    <skip />
+    <string name="remove_from_history" msgid="3812349065338505597">"Suprimir del historial"</string>
+    <string name="remove_from_history_failed" msgid="5471604847849215215">"Se produjo un error al eliminar el artículo del historial."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Buscar"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Todos"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
@@ -31,16 +29,18 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Buscar Google Apps"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Configuración de búsqueda"</string>
     <string name="search_settings" msgid="4101951238194600323">"Configuración de búsqueda"</string>
-    <string name="google_search_category_title" msgid="2997358135219618688">"Google"</string>
-    <string name="system_search_category_title" msgid="1507902891285388819">"Teléfono"</string>
+    <!-- no translation found for google_settings_category_title (627345776816265580) -->
+    <skip />
+    <!-- no translation found for device_settings_category_title (2378889894648580869) -->
+    <skip />
     <string name="search_sources" msgid="505874718206340313">"Elementos de búsqueda"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Selecciona lo que deseas buscar en el teléfono."</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Borrar accesos directos"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Borrar accesos directos a resultados de búsqueda seleccionados últimamente"</string>
     <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"Se borrarán todos los accesos directos a los resultados de búsqueda seleccionados últimamente."\n\n"(Para borrar el historial de tu navegador, utiliza la configuración  del navegador)."</string>
-    <!-- no translation found for clear_shortcuts_agree (5623666487205882033) -->
-    <skip />
-    <!-- no translation found for clear_shortcuts_disagree (3667707814933648461) -->
+    <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Borrar accesos directos"</string>
+    <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"No borrar accesos directos"</string>
+    <!-- no translation found for menu_help (8466596486018760239) -->
     <skip />
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"Búsqueda de Google"</string>

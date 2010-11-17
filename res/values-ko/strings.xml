@@ -19,7 +19,7 @@
     <string name="app_name" msgid="1504397077706378597">"검색"</string>
     <string name="search_widget" msgid="323244086853110381">"검색"</string>
     <string name="remove_from_history" msgid="3812349065338505597">"기록에서 삭제"</string>
-    <string name="remove_from_history_failed" msgid="5471604847849215215">"기록에서 항목을 제거하지 못했습니다."</string>
+    <string name="remove_from_history_failed" msgid="5471604847849215215">"검색기록에서 항목을 삭제하지 못했습니다."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"검색"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"모두"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"웹"</string>
@@ -29,16 +29,18 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"애플리케이션 검색"</string>
     <string name="menu_settings" msgid="5600043319144155953">"검색 설정"</string>
     <string name="search_settings" msgid="4101951238194600323">"검색 설정"</string>
-    <string name="google_search_category_title" msgid="2997358135219618688">"Google"</string>
-    <string name="system_search_category_title" msgid="1507902891285388819">"휴대전화"</string>
+    <!-- no translation found for google_settings_category_title (627345776816265580) -->
+    <skip />
+    <!-- no translation found for device_settings_category_title (2378889894648580869) -->
+    <skip />
     <string name="search_sources" msgid="505874718206340313">"검색 가능한 항목"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"휴대전화에서 검색할 항목 선택"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"바로가기 삭제"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"최근에 선택한 추천검색어에 대한 바로가기 삭제"</string>
     <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"최근에 선택한 추천검색어의 바로가기가 모두 삭제됩니다."\n\n"브라우저 기록을 삭제하려면 브라우저의 설정을 사용하세요."</string>
-    <!-- no translation found for clear_shortcuts_agree (5623666487205882033) -->
-    <skip />
-    <!-- no translation found for clear_shortcuts_disagree (3667707814933648461) -->
+    <string name="clear_shortcuts_agree" msgid="5623666487205882033">"바로가기 삭제"</string>
+    <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"바로가기 삭제 안함"</string>
+    <!-- no translation found for menu_help (8466596486018760239) -->
     <skip />
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"Google 검색"</string>
