@@ -19,7 +19,6 @@ package com.android.quicksearchbox.ui;
 import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.R;
-import com.google.common.collect.Multiset;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -55,19 +54,12 @@ public class CorporaAdapter extends BaseAdapter {
 
     private String mCurrentCorpusName;
 
-    private Multiset<String> mCorpusResultCounts;
-
     public CorporaAdapter(Context context, Corpora corpora, int corpusViewRes) {
         mContext = context;
         mCorpora = corpora;
         mCorpusViewRes = corpusViewRes;
         mCorpora.registerDataSetObserver(mCorporaObserver);
         updateCorpora();
-    }
-
-    public void setCorpusResultCounts(Multiset<String> corpusResultCounts) {
-        mCorpusResultCounts = corpusResultCounts;
-        notifyDataSetChanged();
     }
 
     public void setCurrentCorpus(Corpus corpus) {
@@ -170,14 +162,7 @@ public class CorporaAdapter extends BaseAdapter {
         if (corpus == null) {
             return mContext.getText(R.string.corpus_label_global);
         } else {
-            CharSequence label = corpus.getLabel();
-            if (mCorpusResultCounts != null) {
-                int resultCount = mCorpusResultCounts.count(corpus.getName());
-                if (resultCount > 0) {
-                    return mContext.getString(R.string.corpus_count_format, label, resultCount);
-                }
-            }
-            return label;
+            return corpus.getLabel();
         }
     }
 

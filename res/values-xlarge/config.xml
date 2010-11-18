@@ -35,4 +35,8 @@
        that can't be used. -->
   <bool name="show_non_all_corpora_in_settings">false</bool>
 
+  <!-- On x-large devices, use the desktop version for SRPs. -->
+  <string name="google_search_base" translatable="false">
+      http://www.google.com/search?hl=%1$s</string>
+
 </resources>
