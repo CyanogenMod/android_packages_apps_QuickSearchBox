@@ -68,9 +68,6 @@
   <!-- The number of columns in the corpus selection dialog -->
   <integer name="corpus_selection_dialog_columns">4</integer>
 
-  <!-- The height of suggestions views. -->
-  <dimen name="suggestion_view_height">56dip</dimen>
-
   <!-- Whether or not to show zero-query suggestions -->
   <bool name="show_zero_query_suggestions">true</bool>
 

@@ -30,7 +30,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ImageView;
@@ -76,7 +75,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
         mResultsView = (ClusteredSuggestionsView) findViewById(R.id.shortcuts);
         mResultsAdapter = createClusteredSuggestionsAdapter();
-        mResultsAdapter.setSuggestionAdapterChangeListener(this);
         mResultsAdapter.getListAdapter().registerDataSetObserver(new DataSetObserver(){
             @Override
             public void onChanged() {
@@ -85,8 +83,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         });
         mResultsView.setOnKeyListener(new SuggestionsViewKeyListener());
         mResultsHeader = findViewById(R.id.shortcut_title);
-
-        mSuggestionsAdapter.setIcon1Enabled(false);
     }
 
     private void showPopupMenu() {
@@ -99,14 +95,8 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     protected SuggestionsAdapter<ExpandableListAdapter> createClusteredSuggestionsAdapter() {
         return new DelayingSuggestionsAdapter<ExpandableListAdapter>(
                 new ClusteredSuggestionsAdapter(
-                        getQsbApplication().getDefaultSuggestionViewFactory(),
-                        getQsbApplication().getCorpora(), getContext()));
-    }
-
-    @Override
-    public void onSuggestionAdapterChanged() {
-        mResultsView.setSuggestionsAdapter(mResultsAdapter);
-        super.onSuggestionAdapterChanged();
+                        getQsbApplication().getSuggestionViewFactory(),
+                        getContext()));
     }
 
     @Override
@@ -144,7 +134,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
 
     @Override
     public void destroy() {
-        mResultsAdapter.setSuggestionAdapterChangeListener(null);
         mResultsView.setSuggestionsAdapter(null);
 
         super.destroy();

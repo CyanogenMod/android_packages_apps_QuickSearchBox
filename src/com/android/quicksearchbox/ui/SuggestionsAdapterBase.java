@@ -15,10 +15,7 @@
  */
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Corpora;
-import com.android.quicksearchbox.Corpus;
 import com.android.quicksearchbox.Promoter;
-import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.Suggestion;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionPosition;
@@ -40,8 +37,6 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SuggestionsAdapter";
 
-    private final Corpora mCorpora;
-
     private DataSetObserver mDataSetObserver;
 
     private Promoter mPromoter;
@@ -50,31 +45,23 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
 
     private SuggestionCursor mPromotedSuggestions;
     private final HashMap<String, Integer> mViewTypeMap;
-    private final SuggestionViewFactory mFallback;
+    private final SuggestionViewFactory mViewFactory;
 
     private Suggestions mSuggestions;
 
     private SuggestionClickListener mSuggestionClickListener;
     private OnFocusChangeListener mOnFocusChangeListener;
 
-    private SuggestionsAdapterChangeListener mListener;
-
-    private final CorporaObserver mCorporaObserver = new CorporaObserver();
-
     private boolean mClosed = false;
 
-    private boolean mIcon1Enabled = true;
-
-    protected SuggestionsAdapterBase(SuggestionViewFactory fallbackFactory, Corpora corpora) {
-        mCorpora = corpora;
-        mFallback = fallbackFactory;
+    protected SuggestionsAdapterBase(SuggestionViewFactory viewFactory) {
+        mViewFactory = viewFactory;
         mViewTypeMap = new HashMap<String, Integer>();
-        mCorpora.registerDataSetObserver(mCorporaObserver);
-        buildViewTypeMap();
-    }
-
-    public void setSuggestionAdapterChangeListener(SuggestionsAdapterChangeListener l) {
-        mListener = l;
+        for (String viewType : mViewFactory.getSuggestionViewTypes()) {
+            if (!mViewTypeMap.containsKey(viewType)) {
+                mViewTypeMap.put(viewType, mViewTypeMap.size());
+            }
+        }
     }
 
     public abstract boolean isEmpty();
@@ -84,36 +71,10 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
      */
     public abstract boolean willPublishNonPromotedSuggestions();
 
-    private boolean addViewTypes(SuggestionViewFactory f) {
-        boolean changed = false;
-        for (String viewType : f.getSuggestionViewTypes()) {
-            if (!mViewTypeMap.containsKey(viewType)) {
-                mViewTypeMap.put(viewType, mViewTypeMap.size());
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    private boolean buildViewTypeMap() {
-        boolean changed = addViewTypes(mFallback);
-        for (Corpus c : mCorpora.getEnabledCorpora()) {
-            for (Source s : c.getSources()) {
-                SuggestionViewFactory f = s.getSuggestionViewFactory();
-                changed |= addViewTypes(f);
-            }
-        }
-        return changed;
-    }
-
     public void setMaxPromoted(int maxPromoted) {
         if (DBG) Log.d(TAG, "setMaxPromoted " + maxPromoted);
         mMaxPromoted = maxPromoted;
         onSuggestionsChanged();
-    }
-
-    public void setIcon1Enabled(boolean enabled) {
-        mIcon1Enabled = enabled;
     }
 
     public boolean isClosed() {
@@ -122,7 +83,6 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
 
     public void close() {
         setSuggestions(null);
-        mCorpora.unregisterDataSetObserver(mCorporaObserver);
         mClosed = true;
     }
 
@@ -184,8 +144,7 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
     }
 
     private String suggestionViewType(Suggestion suggestion) {
-        String viewType = suggestion.getSuggestionSource().getSuggestionViewFactory()
-                .getViewType(suggestion);
+        String viewType = mViewFactory.getViewType(suggestion);
         if (!mViewTypeMap.containsKey(viewType)) {
             throw new IllegalStateException("Unknown viewType " + viewType);
         }
@@ -207,13 +166,8 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
     protected View getView(SuggestionCursor suggestions, int position, long suggestionId,
             View convertView, ViewGroup parent) {
         suggestions.moveTo(position);
-        SuggestionViewFactory factory = suggestions.getSuggestionSource().getSuggestionViewFactory();
-        View v = factory.getView(suggestions, suggestions.getUserQuery(), convertView, parent);
-        if (v == null) {
-            v = mFallback.getView(suggestions, suggestions.getUserQuery(), convertView, parent);
-        }
+        View v = mViewFactory.getView(suggestions, suggestions.getUserQuery(), convertView, parent);
         if (v instanceof SuggestionView) {
-            ((SuggestionView) v).setIcon1Enabled(mIcon1Enabled);
             ((SuggestionView) v).bindAdapter(this, suggestionId);
         } else {
             SuggestionViewClickListener l = new SuggestionViewClickListener(suggestionId);
@@ -308,17 +262,6 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
         @Override
         public void onChanged() {
             onSuggestionsChanged();
-        }
-    }
-
-    private class CorporaObserver extends DataSetObserver {
-        @Override
-        public void onChanged() {
-            if (buildViewTypeMap()) {
-                if (mListener != null) {
-                    mListener.onSuggestionAdapterChanged();
-                }
-            }
         }
     }
 

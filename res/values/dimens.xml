@@ -18,4 +18,14 @@
 
   <dimen name="suggestion_group_spacing">28dip</dimen>
 
+  <!-- The height of suggestions views. -->
+  <dimen name="suggestion_view_height">56dip</dimen>
+
+  <dimen name="suggestion_icon_size">48dip</dimen>
+
+  <dimen name="suggestion_text1_size">16sp</dimen>
+  <dimen name="suggestion_text2_size">13sp</dimen>
+
+  <dimen name="suggestion_text2_height">28dip</dimen>
+
 </resources>

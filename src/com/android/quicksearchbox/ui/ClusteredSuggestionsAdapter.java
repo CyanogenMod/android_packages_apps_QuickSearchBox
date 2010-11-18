@@ -15,7 +15,6 @@
  */
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Corpora;
 import com.android.quicksearchbox.CorpusResult;
 import com.android.quicksearchbox.ListSuggestionCursor;
 import com.android.quicksearchbox.R;
@@ -47,9 +46,8 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
     private final Context mContext;
     private final LayoutInflater mInflater;
 
-    public ClusteredSuggestionsAdapter(SuggestionViewFactory fallbackFactory,
-            Corpora corpora, Context context) {
-        super(fallbackFactory, corpora);
+    public ClusteredSuggestionsAdapter(SuggestionViewFactory viewFactory, Context context) {
+        super(viewFactory);
         mAdapter = new Adapter();
         mContext = context;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

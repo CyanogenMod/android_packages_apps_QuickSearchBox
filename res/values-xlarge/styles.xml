@@ -23,16 +23,4 @@
         <item name="android:focusable">true</item>
     </style>
 
-    <style name="SuggestionText1">
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="SuggestionText2">
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
 </resources>

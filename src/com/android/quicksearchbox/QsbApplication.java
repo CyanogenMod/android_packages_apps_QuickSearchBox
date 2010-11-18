@@ -18,9 +18,8 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.google.GoogleSource;
 import com.android.quicksearchbox.google.GoogleSuggestClient;
-import com.android.quicksearchbox.ui.DefaultSuggestionView;
+import com.android.quicksearchbox.ui.DefaultSuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
-import com.android.quicksearchbox.ui.SuggestionViewInflater;
 import com.android.quicksearchbox.util.Factory;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
@@ -56,7 +55,7 @@ public class QsbApplication {
     private NamedTaskExecutor mSourceTaskExecutor;
     private ThreadFactory mQueryThreadFactory;
     private SuggestionsProvider mSuggestionsProvider;
-    private SuggestionViewFactory mDefaultSuggestionViewFactory;
+    private SuggestionViewFactory mSuggestionViewFactory;
     private GoogleSource mGoogleSource;
     private VoiceSearch mVoiceSearch;
     private Logger mLogger;
@@ -358,17 +357,16 @@ public class QsbApplication {
      * Gets the default suggestion view factory.
      * May only be called from the main thread.
      */
-    public SuggestionViewFactory getDefaultSuggestionViewFactory() {
+    public SuggestionViewFactory getSuggestionViewFactory() {
         checkThread();
-        if (mDefaultSuggestionViewFactory == null) {
-            mDefaultSuggestionViewFactory = createDefaultSuggestionViewFactory();
+        if (mSuggestionViewFactory == null) {
+            mSuggestionViewFactory = createSuggestionViewFactory();
         }
-        return mDefaultSuggestionViewFactory;
+        return mSuggestionViewFactory;
     }
 
-    protected SuggestionViewFactory createDefaultSuggestionViewFactory() {
-        return new SuggestionViewInflater(DefaultSuggestionView.VIEW_ID,
-                DefaultSuggestionView.class, R.layout.suggestion, getContext());
+    protected SuggestionViewFactory createSuggestionViewFactory() {
+        return new DefaultSuggestionViewFactory(getContext());
     }
 
     public Promoter createBlendingPromoter() {

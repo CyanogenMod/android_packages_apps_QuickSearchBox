@@ -55,4 +55,9 @@ public interface SuggestionViewFactory {
      */
     View getView(SuggestionCursor suggestion, String userQuery, View convertView, ViewGroup parent);
 
+    /**
+     * Checks whether this factory can create views for the given suggestion.
+     */
+    boolean canCreateView(Suggestion suggestion);
+
 }
