@@ -388,30 +388,6 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     /**
-     * Overrides the handling of the back key to dismiss the activity.
-     */
-    @Override
-    public boolean dispatchKeyEventPreIme(KeyEvent event) {
-        Activity activity = getActivity();
-        if (activity != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            KeyEvent.DispatcherState state = getKeyDispatcherState();
-            if (state != null) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN
-                        && event.getRepeatCount() == 0) {
-                    state.startTracking(event, this);
-                    return true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && !event.isCanceled() && state.isTracking(event)) {
-                    hideInputMethod();
-                    activity.onBackPressed();
-                    return true;
-                }
-            }
-        }
-        return super.dispatchKeyEventPreIme(event);
-    }
-
-    /**
      * If the input method is in fullscreen mode, and the selector corpus
      * is All or Web, use the web search suggestions as completions.
      */
