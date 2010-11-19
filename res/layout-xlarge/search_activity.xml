@@ -56,8 +56,8 @@
                     android:paddingBottom="12dip"
                     android:cacheColorHint="@android:color/transparent"
                     android:scrollbars="none"
-                    android:divider="@color/suggestion_divider"
-                    android:dividerHeight="1dip"
+                    android:divider="@android:color/transparent"
+                    android:dividerHeight="0px"
                     >
                 </view>
 
@@ -187,7 +187,9 @@
                 android:scrollbars="none"
                 android:groupIndicator="@null"
                 android:listSelector="@android:color/transparent"
-                android:childDivider="@color/suggestion_divider"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0px"
+                android:childDivider="@android:color/transparent"
                 android:fadingEdge="vertical"
                 android:fadingEdgeLength="20dip"
                 >

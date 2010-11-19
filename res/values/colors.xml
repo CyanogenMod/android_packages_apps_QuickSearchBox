@@ -18,6 +18,5 @@
 
     <color name="search_hint">#808080</color>
     <color name="pane_background">#C0222233</color>
-    <color name="suggestion_divider">#FF404040</color>
 
 </resources>
