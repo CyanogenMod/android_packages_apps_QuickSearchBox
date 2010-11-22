@@ -58,7 +58,7 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
     private static final int HTTP_TIMEOUT_MS = 1000;
 
     // TODO: this should be defined somewhere
-    private static final String HTTP_TIMEOUT = "http.connection-manager.timeout";
+    private static final String HTTP_TIMEOUT = "http.conn-manager.timeout";
 
     private final HttpClient mHttpClient;
 
