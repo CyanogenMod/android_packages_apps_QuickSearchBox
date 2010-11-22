@@ -42,7 +42,7 @@ import android.widget.PopupMenu;
  */
 public class SearchActivityViewTwoPane extends SearchActivityView {
 
-    private static final int ENTRY_ANIMATION_START_DELAY = 50; // in millis
+    private static final int ENTRY_ANIMATION_START_DELAY = 150; // in millis
     private static final int ENTRY_ANIMATION_DURATION = 150; // in millis
     private static final float ANIMATION_STARTING_WIDTH_FACTOR = 0.6f;
 
