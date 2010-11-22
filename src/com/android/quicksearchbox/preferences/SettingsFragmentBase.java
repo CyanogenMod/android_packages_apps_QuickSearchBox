@@ -54,7 +54,7 @@ public abstract class SettingsFragmentBase extends PreferenceFragment {
 
     protected PreferenceControllerFactory createController() {
         QsbApplication app = QsbApplication.get(getActivity());
-        return new PreferenceControllerFactory(app.getSettings(), getActivity());
+        return app.createPreferenceControllerFactory(getActivity());
     }
 
     protected String getPreferencesName() {

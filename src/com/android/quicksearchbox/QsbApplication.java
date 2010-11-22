@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.google.GoogleSource;
 import com.android.quicksearchbox.google.GoogleSuggestClient;
+import com.android.quicksearchbox.preferences.PreferenceControllerFactory;
 import com.android.quicksearchbox.ui.DefaultSuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.util.Factory;
@@ -27,6 +28,7 @@ import com.android.quicksearchbox.util.PriorityThreadFactory;
 import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
 import com.google.common.util.concurrent.NamingThreadFactory;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -459,6 +461,10 @@ public class QsbApplication {
 
     protected TextAppearanceFactory createTextAppearanceFactory() {
         return new TextAppearanceFactory(getContext());
+    }
+
+    public PreferenceControllerFactory createPreferenceControllerFactory(Activity activity) {
+        return new PreferenceControllerFactory(getSettings(), activity);
     }
 
 }
