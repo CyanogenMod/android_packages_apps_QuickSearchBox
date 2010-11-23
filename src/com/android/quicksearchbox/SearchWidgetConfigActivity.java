@@ -16,8 +16,8 @@
 
 package com.android.quicksearchbox;
 
+import com.android.common.SharedPreferencesCompat;
 import com.android.quicksearchbox.ui.CorporaAdapter;
-import com.android.quicksearchbox.util.Compat;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -115,7 +115,7 @@ public class SearchWidgetConfigActivity extends DialogActivity {
         String corpusName = corpus == null ? null : corpus.getName();
         SharedPreferences.Editor prefs = getWidgetPreferences(this).edit();
         prefs.putString(getCorpusNameKey(appWidgetId), corpusName);
-        Compat.applyPrefs(prefs);
+        SharedPreferencesCompat.apply(prefs);
     }
 
     public static String getWidgetCorpusName(Context context, int appWidgetId) {
@@ -126,7 +126,7 @@ public class SearchWidgetConfigActivity extends DialogActivity {
     public static void setWidgetShowingHint(Context context, int appWidgetId, boolean showing) {
         SharedPreferences.Editor prefs = getWidgetPreferences(context).edit();
         prefs.putBoolean(getShowingHintKey(appWidgetId), showing);
-        Compat.applyPrefs(prefs);
+        SharedPreferencesCompat.apply(prefs);
     }
 
     public static boolean getWidgetShowingHint(Context context, int appWidgetId) {

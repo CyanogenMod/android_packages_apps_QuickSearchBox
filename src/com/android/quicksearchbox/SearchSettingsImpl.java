@@ -16,7 +16,7 @@
 
 package com.android.quicksearchbox;
 
-import com.android.quicksearchbox.util.Compat;
+import com.android.common.SharedPreferencesCompat;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -108,23 +108,23 @@ public class SearchSettingsImpl implements SearchSettings {
     }
 
     protected void storeBoolean(String name, boolean value) {
-        Compat.applyPrefs(getSearchPreferences().edit().putBoolean(name, value));
+        SharedPreferencesCompat.apply(getSearchPreferences().edit().putBoolean(name, value));
     }
 
     protected void storeInt(String name, int value) {
-        Compat.applyPrefs(getSearchPreferences().edit().putInt(name, value));
+        SharedPreferencesCompat.apply(getSearchPreferences().edit().putInt(name, value));
     }
 
     protected void storeLong(String name, long value) {
-        Compat.applyPrefs(getSearchPreferences().edit().putLong(name, value));
+        SharedPreferencesCompat.apply(getSearchPreferences().edit().putLong(name, value));
     }
 
     protected void storeString(String name, String value) {
-        Compat.applyPrefs(getSearchPreferences().edit().putString(name, value));
+        SharedPreferencesCompat.apply(getSearchPreferences().edit().putString(name, value));
     }
 
     protected void removePref(String name) {
-        Compat.applyPrefs(getSearchPreferences().edit().remove(name));
+        SharedPreferencesCompat.apply(getSearchPreferences().edit().remove(name));
     }
 
     /**
@@ -176,7 +176,7 @@ public class SearchSettingsImpl implements SearchSettings {
             int lastVoiceSearchVersion = prefs.getInt(LAST_SEEN_VOICE_SEARCH_VERSION, 0);
             long firstHintTime = prefs.getLong(FIRST_VOICE_HINT_DISPLAY_TIME, 0);
             if (firstHintTime == 0 || currentVoiceSearchVersion != lastVoiceSearchVersion) {
-                Compat.applyPrefs(prefs.edit()
+                SharedPreferencesCompat.apply(prefs.edit()
                         .putInt(LAST_SEEN_VOICE_SEARCH_VERSION, currentVoiceSearchVersion)
                         .putLong(FIRST_VOICE_HINT_DISPLAY_TIME, currentTime));
                 firstHintTime = currentTime;
