@@ -56,7 +56,7 @@ public abstract class LegacySearchSettingsActivityBase extends PreferenceActivit
 
     protected PreferenceControllerFactory createController() {
         QsbApplication app = QsbApplication.get(this);
-        return new PreferenceControllerFactory(app.getSettings(), this);
+        return app.createPreferenceControllerFactory(this);
     }
 
     protected String getPreferencesName() {
