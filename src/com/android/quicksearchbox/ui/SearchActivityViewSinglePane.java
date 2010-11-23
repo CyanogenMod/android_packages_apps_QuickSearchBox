@@ -78,7 +78,7 @@ public class SearchActivityViewSinglePane extends SearchActivityView {
         if (mCorpusIndicator != null) {
             Drawable sourceIcon;
             if (corpus == null) {
-                sourceIcon = getContext().getResources().getDrawable(R.drawable.search_app_icon);
+                sourceIcon = getContext().getResources().getDrawable(R.mipmap.search_app_icon);
             } else {
                 sourceIcon = corpus.getCorpusIcon();
             }

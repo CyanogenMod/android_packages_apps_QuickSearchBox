@@ -152,7 +152,7 @@ public class CorporaAdapter extends BaseAdapter {
 
     protected Drawable getCorpusIcon(Corpus corpus) {
         if (corpus == null) {
-            return mContext.getResources().getDrawable(R.drawable.search_app_icon);
+            return mContext.getResources().getDrawable(R.mipmap.search_app_icon);
         } else {
             return corpus.getCorpusIcon();
         }

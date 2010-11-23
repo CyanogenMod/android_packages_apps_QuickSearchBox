@@ -36,7 +36,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application android:label="@string/app_name"
-                 android:icon="@drawable/search_app_icon"
+                 android:icon="@mipmap/search_app_icon"
                  android:name=".QsbApplicationWrapper"
                  android:theme="@style/Theme.QuickSearchBox"
                  android:hardwareAccelerated="true">
@@ -140,7 +140,7 @@
 
         <activity android:name=".google.GoogleSearch"
                 android:label="@string/google_search_label"
-                android:icon="@drawable/google_icon"
+                android:icon="@mipmap/google_icon"
                 android:theme="@android:style/Theme.NoDisplay"
                 android:excludeFromRecents="true">
             <intent-filter>

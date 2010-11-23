@@ -332,7 +332,7 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static Uri getCorpusIconUri(Context context, Corpus corpus) {
         if (corpus == null) {
-            return Util.getResourceUri(context, R.drawable.search_app_icon);
+            return Util.getResourceUri(context, R.mipmap.search_app_icon);
         }
         return corpus.getCorpusIconUri();
     }

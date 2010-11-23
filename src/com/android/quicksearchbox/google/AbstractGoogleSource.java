@@ -86,7 +86,7 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
 
     @Override
     protected int getSourceIconResource() {
-        return R.drawable.google_icon;
+        return R.mipmap.google_icon;
     }
 
     public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
