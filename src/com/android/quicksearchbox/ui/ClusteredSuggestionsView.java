@@ -55,9 +55,11 @@ public class ClusteredSuggestionsView extends ExpandableListView
     }
 
     public void expandAll() {
-        ExpandableListAdapter adapter = mSuggestionsAdapter.getListAdapter();
-        for (int i = 0; i < adapter.getGroupCount(); ++i) {
-            expandGroup(i);
+        if (mSuggestionsAdapter != null) {
+            ExpandableListAdapter adapter = mSuggestionsAdapter.getListAdapter();
+            for (int i = 0; i < adapter.getGroupCount(); ++i) {
+                expandGroup(i);
+            }
         }
     }
 

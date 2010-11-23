@@ -229,25 +229,33 @@ public abstract class SuggestionsAdapterBase<A> implements SuggestionsAdapter<A>
     }
 
     public void onSuggestionClicked(long suggestionId) {
-        if (mSuggestionClickListener != null) {
+        if (mClosed) {
+            Log.w(TAG, "onSuggestionClicked after close");
+        } else if (mSuggestionClickListener != null) {
             mSuggestionClickListener.onSuggestionClicked(this, suggestionId);
         }
     }
 
     public void onSuggestionQuickContactClicked(long suggestionId) {
-        if (mSuggestionClickListener != null) {
+        if (mClosed) {
+            Log.w(TAG, "onSuggestionQuickContactClicked after close");
+        } else if (mSuggestionClickListener != null) {
             mSuggestionClickListener.onSuggestionQuickContactClicked(this, suggestionId);
         }
     }
 
     public void onSuggestionRemoveFromHistoryClicked(long suggestionId) {
-        if (mSuggestionClickListener != null) {
+        if (mClosed) {
+            Log.w(TAG, "onSuggestionRemoveFromHistoryClicked after close");
+        } else if (mSuggestionClickListener != null) {
             mSuggestionClickListener.onSuggestionRemoveFromHistoryClicked(this, suggestionId);
         }
     }
 
     public void onSuggestionQueryRefineClicked(long suggestionId) {
-        if (mSuggestionClickListener != null) {
+        if (mClosed) {
+            Log.w(TAG, "onSuggestionQueryRefineClicked after close");
+        } else if (mSuggestionClickListener != null) {
             mSuggestionClickListener.onSuggestionQueryRefineClicked(this, suggestionId);
         }
     }
