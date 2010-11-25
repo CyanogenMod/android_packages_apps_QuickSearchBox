@@ -40,7 +40,6 @@ public class Config {
     protected static final long DAY_MILLIS = 86400000L;
 
     private static final int NUM_PROMOTED_SOURCES = 3;
-    private static final int MAX_PROMOTED_SUGGESTIONS = 8;
     private static final int MAX_RESULTS_PER_SOURCE = 50;
     private static final long SOURCE_TIMEOUT_MILLIS = 10000;
 
@@ -68,6 +67,9 @@ public class Config {
     private static final long VOICE_SEARCH_HINT_CHANGE_PERIOD = 2L * MINUTE_MILLIS;
 
     private static final long VOICE_SEARCH_HINT_VISIBLE_PERIOD = 6L * MINUTE_MILLIS;
+
+    private static final int HTTP_CONNECT_TIMEOUT_MILLIS = 4000;
+    private static final int HTTP_READ_TIMEOUT_MILLIS = 4000;
 
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
@@ -327,6 +329,14 @@ public class Config {
 
     public String getHelpUrl() {
         return getContext().getString(R.string.help_url);
+    }
+
+    public int getHttpConnectTimeout() {
+        return HTTP_CONNECT_TIMEOUT_MILLIS;
+    }
+
+    public int getHttpReadTimeout() {
+        return HTTP_READ_TIMEOUT_MILLIS;
     }
 
 }

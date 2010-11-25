@@ -228,7 +228,8 @@ public class QsbApplication {
     }
 
     protected Sources createSources() {
-        return new SearchableSources(getContext(), getMainThreadHandler(), getIconLoaderExecutor());
+        return new SearchableSources(getContext(), getMainThreadHandler(),
+                getIconLoaderExecutor(), getConfig());
     }
 
     protected CorpusFactory createCorpusFactory() {
@@ -407,7 +408,7 @@ public class QsbApplication {
 
     protected GoogleSource createGoogleSource() {
         return new GoogleSuggestClient(getContext(), getMainThreadHandler(),
-                getIconLoaderExecutor());
+                getIconLoaderExecutor(), getConfig());
     }
 
     /**

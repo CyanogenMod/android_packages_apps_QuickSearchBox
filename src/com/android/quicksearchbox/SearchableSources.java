@@ -42,6 +42,7 @@ public class SearchableSources implements Sources {
     private final Context mContext;
     private final SearchManager mSearchManager;
     private final Handler mUiThread;
+    private final Config mConfig;
 
     // All suggestion sources, by name.
     private HashMap<String, Source> mSources;
@@ -55,11 +56,13 @@ public class SearchableSources implements Sources {
      *
      * @param context Used for looking up source information etc.
      */
-    public SearchableSources(Context context, Handler uiThread, NamedTaskExecutor iconLoader) {
+    public SearchableSources(Context context, Handler uiThread,
+            NamedTaskExecutor iconLoader, Config config) {
         mContext = context;
         mSearchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         mUiThread = uiThread;
         mIconLoaderExecutor = iconLoader;
+        mConfig = config;
     }
 
     protected Context getContext() {
@@ -76,6 +79,10 @@ public class SearchableSources implements Sources {
 
     protected NamedTaskExecutor getIconLoaderExecutor() {
         return mIconLoaderExecutor;
+    }
+
+    protected Config getConfig() {
+        return mConfig;
     }
 
     public Collection<Source> getSources() {

@@ -16,6 +16,7 @@
 
 package com.android.quicksearchbox.google;
 
+import com.android.quicksearchbox.Config;
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.Source;
 import com.android.quicksearchbox.SourceResult;
@@ -55,19 +56,19 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
 
     private static final String USER_AGENT = "Android/1.0";
     private String mSuggestUri;
-    private static final int HTTP_TIMEOUT_MS = 1000;
 
     // TODO: this should be defined somewhere
     private static final String HTTP_TIMEOUT = "http.conn-manager.timeout";
 
     private final HttpClient mHttpClient;
 
-    public GoogleSuggestClient(Context context, Handler uiThread, NamedTaskExecutor iconLoader) {
+    public GoogleSuggestClient(Context context, Handler uiThread,
+            NamedTaskExecutor iconLoader, Config config) {
         super(context, uiThread, iconLoader);
         mHttpClient = new DefaultHttpClient();
         HttpParams params = mHttpClient.getParams();
         HttpProtocolParams.setUserAgent(params, USER_AGENT);
-        params.setLongParameter(HTTP_TIMEOUT, HTTP_TIMEOUT_MS);
+        params.setLongParameter(HTTP_TIMEOUT, config.getHttpConnectTimeout());
 
         // NOTE:  Do not look up the resource here;  Localization changes may not have completed
         // yet (e.g. we may still be reading the SIM card).
