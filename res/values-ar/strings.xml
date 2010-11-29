@@ -31,7 +31,7 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"البحث في التطبيقات"</string>
     <string name="menu_settings" msgid="5600043319144155953">"إعدادات البحث"</string>
     <string name="search_settings" msgid="4101951238194600323">"إعدادات البحث"</string>
-    <!-- no translation found for google_settings_category_title (627345776816265580) -->
+    <!-- no translation found for google_settings_category_title (770300575312669210) -->
     <skip />
     <!-- no translation found for device_settings_category_title (2378889894648580869) -->
     <skip />
@@ -50,7 +50,7 @@
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"بحث Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"بحث Google"</string>
-    <!-- no translation found for google_search_description (6583849182671608994) -->
+    <!-- no translation found for google_search_description (659411505885375623) -->
     <skip />
     <!-- no translation found for voice_search_hint_title (9160095960228453779) -->
     <skip />
