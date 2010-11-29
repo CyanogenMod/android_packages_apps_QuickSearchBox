@@ -114,6 +114,12 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().overridePendingTransition(R.anim.fade_in_fast, R.anim.fade_out_fast);
+    }
+
     private void setupEntryAnimations() {
         // TODO: Use the left/top of the source bounds to start the animation from
         final int endingWidth = getResources().getDimensionPixelSize(R.dimen.suggestions_width);

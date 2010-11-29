@@ -136,6 +136,10 @@ public abstract class SearchActivityView extends RelativeLayout {
 
     public abstract void onStop();
 
+    public void onPause() {
+        // Override if necessary
+    }
+
     public void start() {
         mSuggestionsAdapter.getListAdapter().registerDataSetObserver(new SuggestionsObserver());
         mSuggestionsView.setSuggestionsAdapter(mSuggestionsAdapter);
