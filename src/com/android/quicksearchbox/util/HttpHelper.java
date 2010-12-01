@@ -47,7 +47,7 @@ public interface HttpHelper {
         /**
          * Creates a new request.
          */
-        protected GetRequest() {
+        public GetRequest() {
         }
 
         /**
@@ -55,7 +55,7 @@ public interface HttpHelper {
          *
          * @param url Request URI.
          */
-        protected GetRequest(String url) {
+        public GetRequest(String url) {
             mUrl = url;
         }
 
