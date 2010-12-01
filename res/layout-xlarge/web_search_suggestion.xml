@@ -31,7 +31,7 @@
 
     <TextView android:id="@+id/text1"
         style="@style/SuggestionText1"
-        android:layout_marginLeft="@dimen/suggestion_icon_size"
+        android:layout_marginLeft="41dip"
         android:singleLine="false"
         android:maxLines="2"
         android:ellipsize="start"

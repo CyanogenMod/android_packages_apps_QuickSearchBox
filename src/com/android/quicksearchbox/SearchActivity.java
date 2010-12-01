@@ -341,6 +341,13 @@ public class SearchActivity extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        if (DBG) Log.d(TAG, "onPause()");
+        mSearchActivityView.onPause();
+        super.onPause();
+    }
+
+    @Override
     protected void onRestart() {
         if (DBG) Log.d(TAG, "onRestart()");
         super.onRestart();
