@@ -71,6 +71,8 @@ public class Config {
     private static final int HTTP_CONNECT_TIMEOUT_MILLIS = 4000;
     private static final int HTTP_READ_TIMEOUT_MILLIS = 4000;
 
+    private static final String USER_AGENT = "Android/1.0";
+
     private final Context mContext;
     private HashSet<String> mDefaultCorpora;
     private HashSet<String> mHiddenCorpora;
@@ -339,4 +341,7 @@ public class Config {
         return HTTP_READ_TIMEOUT_MILLIS;
     }
 
+    public String getUserAgent() {
+        return USER_AGENT;
+    }
 }

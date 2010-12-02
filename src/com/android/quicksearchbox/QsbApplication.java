@@ -22,6 +22,8 @@ import com.android.quicksearchbox.preferences.PreferenceControllerFactory;
 import com.android.quicksearchbox.ui.DefaultSuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.util.Factory;
+import com.android.quicksearchbox.util.HttpHelper;
+import com.android.quicksearchbox.util.JavaNetHttpHelper;
 import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
 import com.android.quicksearchbox.util.PriorityThreadFactory;
@@ -64,6 +66,7 @@ public class QsbApplication {
     private SuggestionFormatter mSuggestionFormatter;
     private TextAppearanceFactory mTextAppearanceFactory;
     private NamedTaskExecutor mIconLoaderExecutor;
+    private HttpHelper mHttpHelper;
 
     public QsbApplication(Context context) {
         // the application context does not use the theme from the <application> tag
@@ -468,4 +471,16 @@ public class QsbApplication {
         return new PreferenceControllerFactory(getSettings(), activity);
     }
 
+    public HttpHelper getHttpHelper() {
+        if (mHttpHelper == null) {
+            mHttpHelper = createHttpHelper();
+        }
+        return mHttpHelper;
+    }
+
+    protected HttpHelper createHttpHelper() {
+        return new JavaNetHttpHelper(
+                new JavaNetHttpHelper.PassThroughRewriter(),
+                getConfig().getUserAgent());
+    }
 }
