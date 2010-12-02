@@ -174,4 +174,14 @@ public class JavaNetHttpHelper implements HttpHelper {
         mReadTimeout = timeoutMillis;
     }
 
+    /**
+     * A Url rewriter that does nothing, i.e., returns the
+     * url that is passed to it.
+     */
+    public static class PassThroughRewriter implements UrlRewriter {
+        @Override
+        public String rewrite(String url) {
+            return url;
+        }
+    }
 }
