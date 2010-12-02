@@ -82,9 +82,6 @@
                 android:label="@string/search_settings"
                 android:excludeFromRecents="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.search.action.SEARCH_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -146,10 +143,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.WEB_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.MONKEY" />
             </intent-filter>
             <meta-data android:name="android.app.searchable"
                 android:resource="@xml/google_searchable" />
