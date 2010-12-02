@@ -63,4 +63,24 @@ public class MockSearchSettings implements SearchSettings {
         return true;
     }
 
+    public boolean shouldUseGoogleCom() {
+        return true;
+    }
+
+    public void setUseGoogleCom(boolean useGoogleCom) {
+        // Do nothing.
+    }
+
+    public long getSearchBaseUrlApplyTime() {
+        return -1L;
+    }
+
+    public String getSearchBaseUrl() {
+        return "http://www.google.com/search";
+    }
+
+    public void setSearchBaseUrl(String searchBaseUrl) {
+        // Do nothing.
+    }
+
 }

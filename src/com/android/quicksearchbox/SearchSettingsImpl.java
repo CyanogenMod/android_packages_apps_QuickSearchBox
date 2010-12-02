@@ -22,6 +22,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -56,6 +57,19 @@ public class SearchSettingsImpl implements SearchSettings {
      * Preference key for the version of voice search we last got hints from.
      */
     private static final String LAST_SEEN_VOICE_SEARCH_VERSION = "voice_search_version";
+
+    /**
+     * Preference key for storing whether searches always go to google.com.
+     */
+    private static final String USE_GOOGLE_COM = "use_google_com";
+
+    private static final String SEARCH_BASE_URL = "search_base_url";
+
+    /**
+     * This is the time at which the base URL was stored, and is set using
+     * @link{System.currentTimeMillis()}.
+     */
+    private static final String SEARCH_BASE_URL_APPLY_TIME = "search_base_url_apply_time";
 
     /**
      * Prefix of per-corpus enable preference
@@ -197,4 +211,38 @@ public class SearchSettingsImpl implements SearchSettings {
         return true;
     }
 
+    /**
+     * @return true if user searches should always be based at google.com, false
+     *     otherwise.
+     */
+    @Override
+    public boolean shouldUseGoogleCom() {
+        // Note that this preserves the old behaviour of using google.com
+        // for searches, with the gl= parameter set.
+        return getSearchPreferences().getBoolean(USE_GOOGLE_COM, true);
+    }
+
+    @Override
+    public void setUseGoogleCom(boolean useGoogleCom) {
+        storeBoolean(USE_GOOGLE_COM, useGoogleCom);
+    }
+
+    public long getSearchBaseUrlApplyTime() {
+        return getSearchPreferences().getLong(SEARCH_BASE_URL_APPLY_TIME, -1);
+    }
+
+    public String getSearchBaseUrl() {
+        // Its better that an exception is thrown at this point, because
+        // this should always be called after checking that
+        // getSearchBaseUrlApplyTime() >= 0.
+        return getSearchPreferences().getString(SEARCH_BASE_URL, null);
+    }
+
+    public void setSearchBaseUrl(String searchBaseUrl) {
+        Editor sharedPrefEditor = getSearchPreferences().edit();
+        sharedPrefEditor.putString(SEARCH_BASE_URL, searchBaseUrl);
+        sharedPrefEditor.putLong(SEARCH_BASE_URL_APPLY_TIME, System.currentTimeMillis());
+
+        SharedPreferencesCompat.apply(sharedPrefEditor);
+    }
 }

@@ -21,6 +21,10 @@ import android.view.Menu;
 
 /**
  * Interface for search settings.
+ *
+ * NOTE: Currently, this is not used very widely, in most instances
+ * implementers of this interface are passed around by class name.
+ * Should this be deprecated ?
  */
 public interface SearchSettings {
 
@@ -47,4 +51,17 @@ public interface SearchSettings {
 
     public boolean allowWebSearchShortcuts();
 
+    /**
+     * Determines whether google.com should be used as the base path
+     * for all searches (as opposed to using its country specific variants).
+     */
+    public boolean shouldUseGoogleCom();
+
+    public void setUseGoogleCom(boolean useGoogleCom);
+
+    public long getSearchBaseUrlApplyTime();
+
+    public String getSearchBaseUrl();
+
+    public void setSearchBaseUrl(String searchBaseUrl);
 }
