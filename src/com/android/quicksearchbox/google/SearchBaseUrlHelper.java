@@ -82,7 +82,7 @@ public class SearchBaseUrlHelper {
     /**
      * @return the base url for searches.
      */
-    public synchronized String getSearchBaseUrl() {
+    public String getSearchBaseUrl() {
         return mSearchSettings.getSearchBaseUrl();
     }
 
@@ -124,7 +124,7 @@ public class SearchBaseUrlHelper {
                 GoogleSearch.getLanguage(Locale.getDefault())));
     }
 
-    private synchronized void setSearchBaseUrl(String searchDomain) {
+    private void setSearchBaseUrl(String searchDomain) {
         if (DBG) Log.d(TAG, "Setting search domain to : " + searchDomain);
 
         mSearchSettings.setSearchBaseUrl(searchDomain);

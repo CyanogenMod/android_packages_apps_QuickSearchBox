@@ -118,7 +118,7 @@ public class SearchSettingsImpl implements SearchSettings {
         return getSearchPreferences().getBoolean(sourceEnabledPref, defaultEnabled);
     }
 
-    protected SharedPreferences getSearchPreferences() {
+    public SharedPreferences getSearchPreferences() {
         return getContext().getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
     }
 
