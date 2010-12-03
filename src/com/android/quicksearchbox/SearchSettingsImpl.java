@@ -64,7 +64,12 @@ public class SearchSettingsImpl implements SearchSettings {
      */
     public static final String USE_GOOGLE_COM_PREF = "use_google_com";
 
-    private static final String SEARCH_BASE_URL = "search_base_url";
+    /**
+     * Preference key for the base search URL. This value is normally set by
+     * a SearchBaseUrlHelper instance. Public so classes can listen to changes
+     * on this key.
+     */
+    public static final String SEARCH_BASE_URL_PREF = "search_base_url";
 
     /**
      * This is the time at which the base URL was stored, and is set using
@@ -238,13 +243,13 @@ public class SearchSettingsImpl implements SearchSettings {
         // Its better that an exception is thrown at this point, because
         // this should always be called after checking that
         // getSearchBaseUrlApplyTime() >= 0.
-        return getSearchPreferences().getString(SEARCH_BASE_URL, null);
+        return getSearchPreferences().getString(SEARCH_BASE_URL_PREF, null);
     }
 
     @Override
     public void setSearchBaseUrl(String searchBaseUrl) {
         Editor sharedPrefEditor = getSearchPreferences().edit();
-        sharedPrefEditor.putString(SEARCH_BASE_URL, searchBaseUrl);
+        sharedPrefEditor.putString(SEARCH_BASE_URL_PREF, searchBaseUrl);
         sharedPrefEditor.putLong(SEARCH_BASE_URL_APPLY_TIME, System.currentTimeMillis());
 
         SharedPreferencesCompat.apply(sharedPrefEditor);
