@@ -59,9 +59,10 @@ public class SearchSettingsImpl implements SearchSettings {
     private static final String LAST_SEEN_VOICE_SEARCH_VERSION = "voice_search_version";
 
     /**
-     * Preference key for storing whether searches always go to google.com.
+     * Preference key for storing whether searches always go to google.com. Public
+     * so that it can be used by PreferenceControllers.
      */
-    private static final String USE_GOOGLE_COM = "use_google_com";
+    public static final String USE_GOOGLE_COM_PREF = "use_google_com";
 
     private static final String SEARCH_BASE_URL = "search_base_url";
 
@@ -219,18 +220,20 @@ public class SearchSettingsImpl implements SearchSettings {
     public boolean shouldUseGoogleCom() {
         // Note that this preserves the old behaviour of using google.com
         // for searches, with the gl= parameter set.
-        return getSearchPreferences().getBoolean(USE_GOOGLE_COM, true);
+        return getSearchPreferences().getBoolean(USE_GOOGLE_COM_PREF, true);
     }
 
     @Override
     public void setUseGoogleCom(boolean useGoogleCom) {
-        storeBoolean(USE_GOOGLE_COM, useGoogleCom);
+        storeBoolean(USE_GOOGLE_COM_PREF, useGoogleCom);
     }
 
+    @Override
     public long getSearchBaseUrlApplyTime() {
         return getSearchPreferences().getLong(SEARCH_BASE_URL_APPLY_TIME, -1);
     }
 
+    @Override
     public String getSearchBaseUrl() {
         // Its better that an exception is thrown at this point, because
         // this should always be called after checking that
@@ -238,6 +241,7 @@ public class SearchSettingsImpl implements SearchSettings {
         return getSearchPreferences().getString(SEARCH_BASE_URL, null);
     }
 
+    @Override
     public void setSearchBaseUrl(String searchBaseUrl) {
         Editor sharedPrefEditor = getSearchPreferences().edit();
         sharedPrefEditor.putString(SEARCH_BASE_URL, searchBaseUrl);
