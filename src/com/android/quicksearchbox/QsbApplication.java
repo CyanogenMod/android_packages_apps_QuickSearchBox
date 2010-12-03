@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import com.android.quicksearchbox.google.GoogleSource;
 import com.android.quicksearchbox.google.GoogleSuggestClient;
+import com.android.quicksearchbox.google.SearchBaseUrlHelper;
 import com.android.quicksearchbox.preferences.PreferenceControllerFactory;
 import com.android.quicksearchbox.ui.DefaultSuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
@@ -67,6 +68,7 @@ public class QsbApplication {
     private TextAppearanceFactory mTextAppearanceFactory;
     private NamedTaskExecutor mIconLoaderExecutor;
     private HttpHelper mHttpHelper;
+    private SearchBaseUrlHelper mSearchBaseUrlHelper;
 
     public QsbApplication(Context context) {
         // the application context does not use the theme from the <application> tag
@@ -471,7 +473,7 @@ public class QsbApplication {
         return new PreferenceControllerFactory(getSettings(), activity);
     }
 
-    public HttpHelper getHttpHelper() {
+    public synchronized HttpHelper getHttpHelper() {
         if (mHttpHelper == null) {
             mHttpHelper = createHttpHelper();
         }
@@ -482,5 +484,18 @@ public class QsbApplication {
         return new JavaNetHttpHelper(
                 new JavaNetHttpHelper.PassThroughRewriter(),
                 getConfig().getUserAgent());
+    }
+
+    public synchronized SearchBaseUrlHelper getSearchBaseUrlHelper() {
+        if (mSearchBaseUrlHelper == null) {
+            mSearchBaseUrlHelper = createSearchBaseUrlHelper();
+        }
+
+        return mSearchBaseUrlHelper;
+    }
+
+    protected SearchBaseUrlHelper createSearchBaseUrlHelper() {
+        return new SearchBaseUrlHelper(getContext(), getHttpHelper(),
+                getSettings());
     }
 }

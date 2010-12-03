@@ -17,7 +17,7 @@
 package com.android.quicksearchbox.google;
 
 import com.android.common.Search;
-import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.QsbApplication;
 
 import android.app.Activity;
 import android.app.SearchManager;
@@ -40,8 +40,9 @@ public class GoogleSearch extends Activity {
     private static final String TAG = "GoogleSearch";
     private static final boolean DBG = false;
 
-    // The template URL we should use to format google search requests.
-    private String mGoogleSearchUrlBase = null;
+    // Used to figure out which domain to base search requests
+    // on.
+    private SearchBaseUrlHelper mSearchDomainHelper;
 
     // "source" parameter for Google search requests from unknown sources (e.g. apps). This will get
     // prefixed with the string 'android-' before being sent on the wire.
@@ -52,9 +53,15 @@ public class GoogleSearch extends Activity {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         String action = intent != null ? intent.getAction() : null;
+
+        // This should probably be moved so as to
+        // send out the request to /checksearchdomain as early as possible.
+        mSearchDomainHelper = QsbApplication.get(this).getSearchBaseUrlHelper();
+
         if (Intent.ACTION_WEB_SEARCH.equals(action) || Intent.ACTION_SEARCH.equals(action)) {
             handleWebSearchIntent(intent);
         }
+
         finish();
     }
 
@@ -69,6 +76,7 @@ public class GoogleSearch extends Activity {
             hl.append('-');
             hl.append(country);
         }
+
         if (DBG) Log.d(TAG, "language " + language + ", country " + country + " -> hl=" + hl);
         return hl.toString();
     }
@@ -78,13 +86,6 @@ public class GoogleSearch extends Activity {
         if (TextUtils.isEmpty(query)) {
             Log.w(TAG, "Got search intent with no query.");
             return;
-        }
-
-        if (mGoogleSearchUrlBase == null) {
-            Locale l = Locale.getDefault();
-            String language = getLanguage(l);
-            mGoogleSearchUrlBase = getResources().getString(
-                    R.string.google_search_base, language);
         }
 
         // If the caller specified a 'source' url parameter, use that and if not use default.
@@ -104,7 +105,7 @@ public class GoogleSearch extends Activity {
         }
 
         try {
-            String searchUri = mGoogleSearchUrlBase
+            String searchUri = mSearchDomainHelper.getSearchBaseUrl()
                     + "&source=android-" + source
                     + "&q=" + URLEncoder.encode(query, "UTF-8");
             Intent launchUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri));

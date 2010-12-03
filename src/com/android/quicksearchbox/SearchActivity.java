@@ -114,6 +114,10 @@ public class SearchActivity extends Activity {
         if (DBG) Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
+        // This forces the HTTP request to check the users domain to be
+        // sent as early as possible.
+        QsbApplication.get(this).getSearchBaseUrlHelper();
+
         mSearchActivityView = setupContentView();
 
         if (getConfig().showScrollingSuggestions()) {
