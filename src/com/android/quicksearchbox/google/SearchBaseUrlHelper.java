@@ -18,9 +18,11 @@ package com.android.quicksearchbox.google;
 
 import com.android.quicksearchbox.R;
 import com.android.quicksearchbox.SearchSettings;
+import com.android.quicksearchbox.SearchSettingsImpl;
 import com.android.quicksearchbox.util.HttpHelper;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
@@ -30,7 +32,7 @@ import java.util.Locale;
 /**
  * Helper to build the base URL for all search requests.
  */
-public class SearchBaseUrlHelper {
+public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final boolean DBG = false;
     private static final String TAG = "QSB.SearchBaseUrlHelper";
 
@@ -48,10 +50,15 @@ public class SearchBaseUrlHelper {
      * request if shouldUseGoogleCom is false.
      */
     public SearchBaseUrlHelper(Context context, HttpHelper helper,
-            SearchSettings searchSettings) {
+            SearchSettings searchSettings, SharedPreferences prefs) {
         mHttpHelper = helper;
         mContext = context;
         mSearchSettings = searchSettings;
+
+        // Note: This earlier used an inner class, but that causes issues
+        // because SharedPreferencesImpl uses a WeakHashMap< > and the listener
+        // will be GC'ed unless we keep a reference to it here.
+        prefs.registerOnSharedPreferenceChangeListener(this);
 
         maybeUpdateBaseUrlSetting(false);
     }
@@ -87,6 +94,32 @@ public class SearchBaseUrlHelper {
     }
 
     /**
+     * @return the search domain. This is of the form "google.co.xx" or "google.com",
+     *     used by UI code.
+     */
+    public String getSearchDomain() {
+        String baseUrl = getSearchBaseUrl();
+
+        final int start = baseUrl.indexOf(".google.");
+        final int endMobile = baseUrl.indexOf("/m");
+        final int endDesktop = baseUrl.indexOf("/search");
+        if (start > 0) {
+            if (endMobile > 0) {
+                // This is a mobile URL. (/m)
+                return baseUrl.substring(start + 1, endMobile);
+            }
+            if (endDesktop > 0) {
+                // This is a desktop URL. (/search)
+                return baseUrl.substring(start + 1, endDesktop);
+            }
+        }
+
+        if (DBG) Log.w(TAG, "Unable to extract search domain from URL" + baseUrl);
+
+        return baseUrl;
+    }
+
+    /**
      * Issue a request to google.com/searchdomaincheck to retrieve the base
      * URL for search requests.
      */
@@ -112,6 +145,8 @@ public class SearchBaseUrlHelper {
                 String searchDomain = mContext.getResources().getString(
                         R.string.google_search_base_pattern, domain,
                         GoogleSearch.getLanguage(Locale.getDefault()));
+
+                if (DBG) Log.d(TAG, "Request to /searchdomaincheck succeeded");
                 setSearchBaseUrl(searchDomain);
                 return null;
             }
@@ -128,5 +163,14 @@ public class SearchBaseUrlHelper {
         if (DBG) Log.d(TAG, "Setting search domain to : " + searchDomain);
 
         mSearchSettings.setSearchBaseUrl(searchDomain);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+        // Listen for changes only to the SEARCH_BASE_URL preference.
+        if (DBG) Log.d(TAG, "Handling changed preference : " + key);
+        if (SearchSettingsImpl.USE_GOOGLE_COM_PREF.equals(key)) {
+            maybeUpdateBaseUrlSetting(true);
+        }
     }
 }

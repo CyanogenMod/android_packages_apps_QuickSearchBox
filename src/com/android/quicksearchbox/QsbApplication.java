@@ -495,7 +495,8 @@ public class QsbApplication {
     }
 
     protected SearchBaseUrlHelper createSearchBaseUrlHelper() {
+        // This cast to "SearchSettingsImpl" is somewhat ugly.
         return new SearchBaseUrlHelper(getContext(), getHttpHelper(),
-                getSettings());
+                getSettings(), ((SearchSettingsImpl)getSettings()).getSearchPreferences());
     }
 }
