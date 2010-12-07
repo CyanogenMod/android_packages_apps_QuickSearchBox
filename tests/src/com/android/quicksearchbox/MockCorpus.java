@@ -60,10 +60,6 @@ public class MockCorpus implements Corpus {
         return null;
     }
 
-    public SuggestionData createSearchShortcut(String query) {
-        return null;
-    }
-
     public Drawable getCorpusIcon() {
         return null;
     }

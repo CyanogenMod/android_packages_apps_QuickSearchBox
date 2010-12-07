@@ -87,10 +87,6 @@ public class MultiSourceCorpusTest extends AndroidTestCase {
             return null;
         }
 
-        public SuggestionData createSearchShortcut(String query) {
-            return null;
-        }
-
         public Intent createVoiceSearchIntent(Bundle appData) {
             return null;
         }

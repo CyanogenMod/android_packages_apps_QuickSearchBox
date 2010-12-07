@@ -202,10 +202,6 @@ public class MockSource implements Source {
         return null;
     }
 
-    public SuggestionData createSearchShortcut(String query) {
-        return null;
-    }
-
     public Intent createVoiceSearchIntent(Bundle appData) {
         return null;
     }

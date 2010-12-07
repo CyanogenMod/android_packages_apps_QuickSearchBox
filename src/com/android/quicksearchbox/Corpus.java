@@ -70,8 +70,6 @@ public interface Corpus extends SuggestionCursorProvider<CorpusResult> {
 
     Intent createVoiceSearchIntent(Bundle appData);
 
-    SuggestionData createSearchShortcut(String query);
-
     boolean isWebCorpus();
 
     /**

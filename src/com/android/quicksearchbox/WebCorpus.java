@@ -100,24 +100,6 @@ public class WebCorpus extends MultiSourceCorpus {
         return intent;
     }
 
-    public SuggestionData createSearchShortcut(String query) {
-        SuggestionData shortcut = new SuggestionData(mWebSearchSource);
-        if (isUrl(query)) {
-            shortcut.setIntentAction(Intent.ACTION_VIEW);
-            shortcut.setIcon1(String.valueOf(R.drawable.globe));
-            shortcut.setText1(query);
-            // Set query so that trackball selection works
-            shortcut.setSuggestionQuery(query);
-            shortcut.setIntentData(URLUtil.guessUrl(query));
-        } else {
-            shortcut.setIntentAction(Intent.ACTION_WEB_SEARCH);
-            shortcut.setIcon1(String.valueOf(R.drawable.magnifying_glass));
-            shortcut.setText1(query);
-            shortcut.setSuggestionQuery(query);
-        }
-        return shortcut;
-    }
-
     public Intent createVoiceSearchIntent(Bundle appData) {
         // TODO in 2-pane mode, mWebSearchSource may be NULL
         // this functionality should be moved elsewhere.

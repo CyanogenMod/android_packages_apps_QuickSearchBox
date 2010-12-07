@@ -441,14 +441,6 @@ public class SearchActivity extends Activity {
         // Log search start
         getLogger().logSearch(getCorpus(), method, query.length());
 
-        // Create shortcut
-        SuggestionData searchShortcut = searchCorpus.createSearchShortcut(query);
-        if (searchShortcut != null) {
-            ListSuggestionCursor cursor = new ListSuggestionCursor(query);
-            cursor.add(searchShortcut);
-            getShortcutRepository().reportClick(cursor, 0);
-        }
-
         // Start search
         startSearch(searchCorpus, query);
         return true;
