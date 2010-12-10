@@ -25,6 +25,7 @@ import com.android.quicksearchbox.SuggestionUtils;
 import com.android.quicksearchbox.Suggestions;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,8 @@ import java.util.HashSet;
  * Adapter for suggestions list where suggestions are clustered by corpus.
  */
 public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<ExpandableListAdapter> {
+
+    private static final String TAG = "QSB.ClusteredSuggestionsAdapter";
 
     private final static int GROUP_SHIFT = 32;
     private final static long CHILD_MASK = 0xffffffff;
@@ -107,7 +110,6 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
                 } else {
                     mCorpusGroups.clear();
                 }
-                // TODO order corpora by usage
                 for (CorpusResult result : suggestions.getCorpusResults()) {
                     ListSuggestionCursor corpusSuggestions = new ListSuggestionCursor(
                             result.getUserQuery());
@@ -148,13 +150,21 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
         @Override
         public Suggestion getChild(int groupPosition, int childPosition) {
             SuggestionCursor c = getGroup(groupPosition);
-            c.moveTo(childPosition);
+            if (c != null) {
+                c.moveTo(childPosition);
                 return new SuggestionPosition(c, childPosition);
+            }
+            return null;
         }
 
         public SuggestionPosition getChildById(long childId) {
-            return new SuggestionPosition(getGroup(getGroupPosition(childId)),
-                    getChildPosition(getChildPosition(childId)));
+            SuggestionCursor groupCursor = getGroup(getGroupPosition(childId));
+            if (groupCursor != null) {
+                return new SuggestionPosition(groupCursor, getChildPosition(childId));
+            } else {
+                Log.w(TAG, "Invalid childId " + Long.toHexString(childId) + " (invalid group)");
+                return null;
+            }
         }
 
         @Override
@@ -166,13 +176,15 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild,
                 View convertView, ViewGroup parent) {
             SuggestionCursor cursor = getGroup(groupPosition);
+            if (cursor == null) return null;
             return getView(cursor, childPosition, getCombinedChildId(groupPosition, childPosition),
                     convertView, parent);
         }
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            return getGroup(groupPosition).getCount();
+            SuggestionCursor group = getGroup(groupPosition);
+            return group == null ? 0 : group.getCount();
         }
 
         @Override
@@ -180,7 +192,9 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
             if (groupPosition < promotedGroupCount()) {
                 return getCurrentPromotedSuggestions();
             } else {
-                return mCorpusGroups.get(groupPosition - promotedGroupCount());
+                int pos = groupPosition - promotedGroupCount();
+                if ((pos < 0 ) || (pos >= mCorpusGroups.size())) return null;
+                return mCorpusGroups.get(pos);
             }
         }
 
