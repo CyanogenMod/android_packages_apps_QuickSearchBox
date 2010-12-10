@@ -25,6 +25,7 @@ import com.android.quicksearchbox.util.NowOrLater;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -174,15 +175,19 @@ public class DefaultSuggestionView extends BaseSuggestionView {
             mView = view;
         }
 
-        public void set(final Source source, final String iconId) {
-            if (iconId != null) {
-                mWantedId = iconId;
+        public void set(final Source source, final String sourceIconId) {
+            if (sourceIconId != null) {
+                // The iconId can just be a package-relative resource ID, which may overlap with
+                // other packages. Make sure it's globally unique.
+                Uri iconUri = source.getIconUri(sourceIconId);
+                final String uniqueIconId = iconUri == null ? null : iconUri.toString();
+                mWantedId = uniqueIconId;
                 if (!TextUtils.equals(mWantedId, mCurrentId)) {
-                    if (DBG) Log.d(TAG, "getting icon Id=" + iconId);
-                    NowOrLater<Drawable> icon = source.getIcon(iconId);
+                    if (DBG) Log.d(TAG, "getting icon Id=" + uniqueIconId);
+                    NowOrLater<Drawable> icon = source.getIcon(sourceIconId);
                     if (icon.haveNow()) {
                         if (DBG) Log.d(TAG, "getIcon ready now");
-                        handleNewDrawable(icon.getNow(), iconId, source);
+                        handleNewDrawable(icon.getNow(), uniqueIconId, source);
                     } else {
                         // make sure old icon is not visible while new one is loaded
                         if (DBG) Log.d(TAG , "getIcon getting later");
@@ -190,12 +195,12 @@ public class DefaultSuggestionView extends BaseSuggestionView {
                         icon.getLater(new Consumer<Drawable>(){
                             public boolean consume(Drawable icon) {
                                 if (DBG) {
-                                    Log.d(TAG, "IconConsumer.consume got id " + iconId +
+                                    Log.d(TAG, "IconConsumer.consume got id " + uniqueIconId +
                                             " want id " + mWantedId);
                                 }
                                 // ensure we have not been re-bound since the request was made.
-                                if (TextUtils.equals(iconId, mWantedId)) {
-                                    handleNewDrawable(icon, iconId, source);
+                                if (TextUtils.equals(uniqueIconId, mWantedId)) {
+                                    handleNewDrawable(icon, uniqueIconId, source);
                                     return true;
                                 }
                                 return false;
