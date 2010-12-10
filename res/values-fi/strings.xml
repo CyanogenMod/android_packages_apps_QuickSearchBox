@@ -31,8 +31,7 @@
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Sovellushaku"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Hakuasetukset"</string>
     <string name="search_settings" msgid="4101951238194600323">"Hakuasetukset"</string>
-    <!-- no translation found for google_settings_category_title (770300575312669210) -->
-    <skip />
+    <string name="google_settings_category_title" msgid="770300575312669210">"Google-haku"</string>
     <!-- no translation found for device_settings_category_title (2378889894648580869) -->
     <skip />
     <string name="system_search_category_title" msgid="1507902891285388819">"Puhelin"</string>
@@ -50,8 +49,7 @@
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"Google-haku"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Google-haku"</string>
-    <!-- no translation found for google_search_description (659411505885375623) -->
-    <skip />
+    <string name="google_search_description" msgid="659411505885375623">"Google-haun ehdotukset"</string>
     <!-- no translation found for voice_search_hint_title (9160095960228453779) -->
     <skip />
     <!-- no translation found for voice_search_hint_quotation_start (566545847023692214) -->
