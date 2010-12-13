@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Locale;
@@ -90,7 +91,9 @@ public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreference
      * @return the base url for searches.
      */
     public String getSearchBaseUrl() {
-        return mSearchSettings.getSearchBaseUrl();
+        String domain = mSearchSettings.getSearchBaseUrl();
+        if (TextUtils.isEmpty(domain)) domain = getDefaultBaseUrl();
+        return domain;
     }
 
     /**
