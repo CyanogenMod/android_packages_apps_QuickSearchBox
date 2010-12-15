@@ -72,13 +72,28 @@ public class GoogleSearch extends Activity {
         String language = locale.getLanguage();
         StringBuilder hl = new StringBuilder(language);
         String country = locale.getCountry();
-        if (!TextUtils.isEmpty(country)) {
+
+        if (!TextUtils.isEmpty(country) && useLangCountryHl(language, country)) {
             hl.append('-');
             hl.append(country);
         }
 
         if (DBG) Log.d(TAG, "language " + language + ", country " + country + " -> hl=" + hl);
         return hl.toString();
+    }
+
+    // TODO: This is a workaround for bug 3232296. When that is fixed, this method can be removed.
+    private static boolean useLangCountryHl(String language, String country) {
+        // lang-country is currently only supported for a small number of locales
+        if ("en".equals(language)) {
+            return "GB".equals(country);
+        } else if ("zh".equals(language)) {
+            return "CN".equals(country) || "TW".equals(country);
+        } else if ("pt".equals(language)) {
+            return "BR".equals(country) || "PT".equals(country);
+        } else {
+            return false;
+        }
     }
 
     private void handleWebSearchIntent(Intent intent) {
