@@ -18,7 +18,7 @@
     android:minWidth="294dip"
     android:minHeight="72dip"
     android:updatePeriodMillis="0"
-    android:previewImage="@drawable/preview"
+    android:previewImage="@drawable/search_widget_preview"
     android:initialLayout="@layout/search_widget" >
 
 </appwidget-provider>
