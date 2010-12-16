@@ -69,13 +69,13 @@ public class SearchSettingsImpl implements SearchSettings {
      * a SearchBaseUrlHelper instance. Public so classes can listen to changes
      * on this key.
      */
-    public static final String SEARCH_BASE_URL_PREF = "search_base_url";
+    public static final String SEARCH_BASE_DOMAIN_PREF = "search_base_domain";
 
     /**
      * This is the time at which the base URL was stored, and is set using
      * @link{System.currentTimeMillis()}.
      */
-    private static final String SEARCH_BASE_URL_APPLY_TIME = "search_base_url_apply_time";
+    private static final String SEARCH_BASE_DOMAIN_APPLY_TIME = "search_base_domain_apply_time";
 
     /**
      * Prefix of per-corpus enable preference
@@ -234,23 +234,23 @@ public class SearchSettingsImpl implements SearchSettings {
     }
 
     @Override
-    public long getSearchBaseUrlApplyTime() {
-        return getSearchPreferences().getLong(SEARCH_BASE_URL_APPLY_TIME, -1);
+    public long getSearchBaseDomainApplyTime() {
+        return getSearchPreferences().getLong(SEARCH_BASE_DOMAIN_APPLY_TIME, -1);
     }
 
     @Override
-    public String getSearchBaseUrl() {
+    public String getSearchBaseDomain() {
         // Its better that an exception is thrown at this point, because
         // this should always be called after checking that
         // getSearchBaseUrlApplyTime() >= 0.
-        return getSearchPreferences().getString(SEARCH_BASE_URL_PREF, null);
+        return getSearchPreferences().getString(SEARCH_BASE_DOMAIN_PREF, null);
     }
 
     @Override
-    public void setSearchBaseUrl(String searchBaseUrl) {
+    public void setSearchBaseDomain(String searchBaseUrl) {
         Editor sharedPrefEditor = getSearchPreferences().edit();
-        sharedPrefEditor.putString(SEARCH_BASE_URL_PREF, searchBaseUrl);
-        sharedPrefEditor.putLong(SEARCH_BASE_URL_APPLY_TIME, System.currentTimeMillis());
+        sharedPrefEditor.putString(SEARCH_BASE_DOMAIN_PREF, searchBaseUrl);
+        sharedPrefEditor.putLong(SEARCH_BASE_DOMAIN_APPLY_TIME, System.currentTimeMillis());
 
         SharedPreferencesCompat.apply(sharedPrefEditor);
     }

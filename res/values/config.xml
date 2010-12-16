@@ -103,7 +103,10 @@
   <!-- request to google.com/searchdomaincheck and is of the form -->
   <!-- .google.co.xx -->
   <string name="google_search_base_pattern" translatable="false">
-      http://www%1$s/m?hl=%2$s</string>
+      http://%1$s/m?hl=%2$s</string>
+  <!-- The default search domain for search result pages -->
+  <string name="default_search_domain" translatable="false">
+      .google.com</string>
 
   <!-- Note that this is the standard suggest url.  It uses the current locale for language -->
   <!-- (t%1$s) and should not need to be replaced by locale or mcc selected resources. -->

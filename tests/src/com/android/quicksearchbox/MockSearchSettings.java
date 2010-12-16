@@ -71,15 +71,15 @@ public class MockSearchSettings implements SearchSettings {
         // Do nothing.
     }
 
-    public long getSearchBaseUrlApplyTime() {
+    public long getSearchBaseDomainApplyTime() {
         return -1L;
     }
 
-    public String getSearchBaseUrl() {
-        return "http://www.google.com/search";
+    public String getSearchBaseDomain() {
+        return "www.google.com";
     }
 
-    public void setSearchBaseUrl(String searchBaseUrl) {
+    public void setSearchBaseDomain(String searchBaseUrl) {
         // Do nothing.
     }
 

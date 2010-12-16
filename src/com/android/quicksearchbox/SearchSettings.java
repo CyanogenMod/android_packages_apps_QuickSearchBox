@@ -59,9 +59,9 @@ public interface SearchSettings {
 
     public void setUseGoogleCom(boolean useGoogleCom);
 
-    public long getSearchBaseUrlApplyTime();
+    public long getSearchBaseDomainApplyTime();
 
-    public String getSearchBaseUrl();
+    public String getSearchBaseDomain();
 
-    public void setSearchBaseUrl(String searchBaseUrl);
+    public void setSearchBaseDomain(String searchBaseUrl);
 }

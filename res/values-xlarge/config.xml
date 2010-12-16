@@ -43,6 +43,6 @@
   <!-- request to google.com/searchdomaincheck and is of the form -->
   <!-- .google.co.xx -->
   <string name="google_search_base_pattern" translatable="false">
-      http://www%1$s/search?hl=%2$s</string>
+      http://%1$s/search?hl=%2$s</string>
 
 </resources>

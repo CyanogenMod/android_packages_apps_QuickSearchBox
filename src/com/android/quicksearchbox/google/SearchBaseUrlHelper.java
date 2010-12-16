@@ -24,7 +24,6 @@ import com.android.quicksearchbox.util.HttpHelper;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -74,13 +73,13 @@ public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreference
      *     expired.
      */
     public void maybeUpdateBaseUrlSetting(boolean force) {
-        long lastUpdateTime = mSearchSettings.getSearchBaseUrlApplyTime();
+        long lastUpdateTime = mSearchSettings.getSearchBaseDomainApplyTime();
         long currentTime = System.currentTimeMillis();
 
         if (force || lastUpdateTime == -1 ||
                 currentTime - lastUpdateTime >= SEARCH_BASE_URL_EXPIRY_MS) {
             if (mSearchSettings.shouldUseGoogleCom()) {
-                setSearchBaseUrl(getDefaultBaseUrl());
+                setSearchBaseDomain(getDefaultBaseDomain());
             } else {
                 checkSearchDomain();
             }
@@ -91,9 +90,8 @@ public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreference
      * @return the base url for searches.
      */
     public String getSearchBaseUrl() {
-        String domain = mSearchSettings.getSearchBaseUrl();
-        if (TextUtils.isEmpty(domain)) domain = getDefaultBaseUrl();
-        return domain;
+        return mContext.getResources().getString(R.string.google_search_base_pattern,
+                getSearchDomain(), GoogleSearch.getLanguage(Locale.getDefault()));
     }
 
     /**
@@ -101,25 +99,12 @@ public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreference
      *     used by UI code.
      */
     public String getSearchDomain() {
-        String baseUrl = getSearchBaseUrl();
-
-        final int start = baseUrl.indexOf(".google.");
-        final int endMobile = baseUrl.indexOf("/m");
-        final int endDesktop = baseUrl.indexOf("/search");
-        if (start > 0) {
-            if (endMobile > 0) {
-                // This is a mobile URL. (/m)
-                return baseUrl.substring(start + 1, endMobile);
-            }
-            if (endDesktop > 0) {
-                // This is a desktop URL. (/search)
-                return baseUrl.substring(start + 1, endDesktop);
-            }
+        String domain = mSearchSettings.getSearchBaseDomain();
+        if (domain.startsWith(".")) {
+            if (DBG) Log.d(TAG, "Prepending www to " + domain);
+            domain = "www" + domain;
         }
-
-        if (DBG) Log.w(TAG, "Unable to extract search domain from URL" + baseUrl);
-
-        return baseUrl;
+        return domain;
     }
 
     /**
@@ -140,32 +125,26 @@ public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreference
                     if (DBG) Log.d(TAG, "Request to /searchdomaincheck failed : " + e);
                     // Swallow any exceptions thrown by the HTTP helper, in
                     // this rare case, we just use the default URL.
-                    setSearchBaseUrl(getDefaultBaseUrl());
+                    domain = getDefaultBaseDomain();
 
                     return null;
                 }
 
-                String searchDomain = mContext.getResources().getString(
-                        R.string.google_search_base_pattern, domain,
-                        GoogleSearch.getLanguage(Locale.getDefault()));
-
                 if (DBG) Log.d(TAG, "Request to /searchdomaincheck succeeded");
-                setSearchBaseUrl(searchDomain);
+                setSearchBaseDomain(domain);
                 return null;
             }
         }.execute();
     }
 
-    private String getDefaultBaseUrl() {
-        return (mContext.getResources().getString(
-                R.string.google_search_base,
-                GoogleSearch.getLanguage(Locale.getDefault())));
+    private String getDefaultBaseDomain() {
+        return mContext.getResources().getString(R.string.default_search_domain);
     }
 
-    private void setSearchBaseUrl(String searchDomain) {
-        if (DBG) Log.d(TAG, "Setting search domain to : " + searchDomain);
+    private void setSearchBaseDomain(String domain) {
+        if (DBG) Log.d(TAG, "Setting search domain to : " + domain);
 
-        mSearchSettings.setSearchBaseUrl(searchDomain);
+        mSearchSettings.setSearchBaseDomain(domain);
     }
 
     @Override
