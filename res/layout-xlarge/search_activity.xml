@@ -108,7 +108,7 @@
                         android:singleLine="true"
                         android:ellipsize="end"
                         android:inputType="text|textAutoComplete"
-                        android:background="@drawable/ic_google_hint"
+                        android:background="@drawable/textfield_search_empty_google"
                         android:textSize="18sp"
                         android:textStyle="normal"
                         android:textColor="@android:color/primary_text_dark"
@@ -124,7 +124,7 @@
                         android:paddingRight="12dp"
                         android:layout_gravity="center"
                         android:background="@drawable/button_bg"
-                        android:src="@drawable/ic_clear_off"
+                        android:src="@drawable/ic_clear_disabled"
                         />
 
                 </LinearLayout>

@@ -249,7 +249,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         if (mSearchCloseButton == null) return;
 
         if (queryEmpty) {
-            mSearchCloseButton.setImageResource(R.drawable.ic_clear_off);
+            mSearchCloseButton.setImageResource(R.drawable.ic_clear_disabled);
         } else {
             mSearchCloseButton.setImageResource(R.drawable.ic_clear);
         }
