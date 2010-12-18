@@ -100,6 +100,23 @@ public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreference
      */
     public String getSearchDomain() {
         String domain = mSearchSettings.getSearchBaseDomain();
+
+        if (domain == null) {
+            if (DBG) {
+                Log.w(TAG, "Search base domain was null, last apply time=" +
+                        mSearchSettings.getSearchBaseDomainApplyTime());
+            }
+
+            // This is required to deal with the case wherein getSearchDomain
+            // is called before checkSearchDomain returns a valid URL. This will
+            // happen *only* on the first run of the app when the "use google.com"
+            // option is unchecked. In other cases, the previously set domain (or
+            // the default) will be returned.
+            //
+            // We have no choice in this case but to use the default search domain.
+            domain = getDefaultBaseDomain();
+        }
+
         if (domain.startsWith(".")) {
             if (DBG) Log.d(TAG, "Prepending www to " + domain);
             domain = "www" + domain;
@@ -132,6 +149,7 @@ public class SearchBaseUrlHelper implements SharedPreferences.OnSharedPreference
 
                 if (DBG) Log.d(TAG, "Request to /searchdomaincheck succeeded");
                 setSearchBaseDomain(domain);
+
                 return null;
             }
         }.execute();

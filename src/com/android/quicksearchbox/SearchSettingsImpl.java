@@ -240,9 +240,10 @@ public class SearchSettingsImpl implements SearchSettings {
 
     @Override
     public String getSearchBaseDomain() {
-        // Its better that an exception is thrown at this point, because
-        // this should always be called after checking that
-        // getSearchBaseUrlApplyTime() >= 0.
+        // Note that the only time this will return null is on the first run
+        // of the app, or when settings have been cleared. Callers should
+        // ideally check that getSearchBaseDomainApplyTime() is not -1 before
+        // calling this function.
         return getSearchPreferences().getString(SEARCH_BASE_DOMAIN_PREF, null);
     }
 
