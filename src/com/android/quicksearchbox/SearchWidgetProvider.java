@@ -546,16 +546,18 @@ public class SearchWidgetProvider extends BroadcastReceiver {
         public void updateWidget(Context context,AppWidgetManager appWidgetMgr) {
             if (DBG) Log.d(TAG, "Updating appwidget " + mAppWidgetId);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
-            // Corpus indicator
-            // Before Froyo, android.resource URI could not be used in ImageViews.
-            if (QsbApplication.isFroyoOrLater()) {
-                views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
-            }
-            setOnClickActivityIntent(context, views, R.id.corpus_indicator,
-                    mCorpusIndicatorIntent);
+//            // Corpus indicator
+//            // TODO: remove completely, never used on xlarge devices
+//            // Before Froyo, android.resource URI could not be used in ImageViews.
+//            if (QsbApplication.isFroyoOrLater()) {
+//                views.setImageViewUri(R.id.corpus_indicator, mCorpusIconUri);
+//            }
+//            setOnClickActivityIntent(context, views, R.id.corpus_indicator,
+//                    mCorpusIndicatorIntent);
             // Query TextView
-            views.setCharSequence(R.id.search_widget_text, "setHint", mQueryTextViewHint);
-            setBackgroundResource(views, R.id.search_widget_text, mQueryTextViewBackgroundResource);
+// Not used on tablet
+//            views.setCharSequence(R.id.search_widget_text, "setHint", mQueryTextViewHint);
+//            setBackgroundResource(views, R.id.search_widget_text, mQueryTextViewBackgroundResource);
 
             setOnClickActivityIntent(context, views, R.id.search_widget_text,
                     mQueryTextViewIntent);
@@ -568,26 +570,27 @@ public class SearchWidgetProvider extends BroadcastReceiver {
                 views.setViewVisibility(R.id.search_widget_voice_btn, View.GONE);
             }
 
-            // Voice Search hints
-            if (mShowHint && !TextUtils.isEmpty(mVoiceSearchHint)) {
-                views.setTextViewText(R.id.voice_search_hint_text, mVoiceSearchHint);
-
-                Intent voiceSearchHelp = getVoiceSearchHelpIntent(context);
-                if (voiceSearchHelp == null) voiceSearchHelp = mVoiceSearchIntent;
-                setOnClickActivityIntent(context, views, R.id.voice_search_hint,
-                        voiceSearchHelp);
-
-                PendingIntent hideIntent = createBroadcast(context, ACTION_HIDE_VOICE_SEARCH_HINT);
-                views.setOnClickPendingIntent(R.id.voice_search_hint_close_button, hideIntent);
-
-                views.setViewVisibility(R.id.voice_search_hint_container, View.VISIBLE);
-                views.setViewVisibility(R.id.search_widget_text, View.GONE);
-                views.setViewVisibility(R.id.corpus_indicator, View.GONE);
-            } else {
-                views.setViewVisibility(R.id.voice_search_hint_container, View.GONE);
-                views.setViewVisibility(R.id.search_widget_text, View.VISIBLE);
-                views.setViewVisibility(R.id.corpus_indicator, View.VISIBLE);
-            }
+//            // Voice Search hints
+// TODO: remove completely, never turned on
+//            if (mShowHint && !TextUtils.isEmpty(mVoiceSearchHint)) {
+//                views.setTextViewText(R.id.voice_search_hint_text, mVoiceSearchHint);
+//
+//                Intent voiceSearchHelp = getVoiceSearchHelpIntent(context);
+//                if (voiceSearchHelp == null) voiceSearchHelp = mVoiceSearchIntent;
+//                setOnClickActivityIntent(context, views, R.id.voice_search_hint,
+//                        voiceSearchHelp);
+//
+//                PendingIntent hideIntent = createBroadcast(context, ACTION_HIDE_VOICE_SEARCH_HINT);
+//                views.setOnClickPendingIntent(R.id.voice_search_hint_close_button, hideIntent);
+//
+//                views.setViewVisibility(R.id.voice_search_hint_container, View.VISIBLE);
+//                views.setViewVisibility(R.id.search_widget_text, View.GONE);
+//                views.setViewVisibility(R.id.corpus_indicator, View.GONE);
+//            } else {
+//                views.setViewVisibility(R.id.voice_search_hint_container, View.GONE);
+//                views.setViewVisibility(R.id.search_widget_text, View.VISIBLE);
+//                views.setViewVisibility(R.id.corpus_indicator, View.VISIBLE);
+//            }
             appWidgetMgr.updateAppWidget(mAppWidgetId, views);
         }
 
