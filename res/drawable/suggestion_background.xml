@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!-- Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,23 +14,7 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item
-        android:state_focused="true"
-        android:state_pressed="true"
-        android:state_window_focused="true"
-        android:drawable="@drawable/suggestion_background_pressed" />
-
-    <item
-        android:state_focused="false"
-        android:state_pressed="true"
-        android:state_window_focused="true"
-        android:drawable="@drawable/suggestion_background_pressed" />
-
-    <item
-        android:state_focused="true"
-        android:state_window_focused="true"
-        android:drawable="@drawable/suggestion_background_focus" />
-
-</selector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/pressable_suggestion" />
+    <item android:drawable="@drawable/list_bg" />
+</layer-list>

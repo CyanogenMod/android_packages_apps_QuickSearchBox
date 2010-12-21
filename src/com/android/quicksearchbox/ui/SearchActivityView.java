@@ -28,7 +28,6 @@ import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.Suggestions;
 import com.android.quicksearchbox.VoiceSearch;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
@@ -436,14 +435,13 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     protected boolean onSuggestionKeyDown(SuggestionsAdapter<?> adapter,
-            int position, int keyCode, KeyEvent event) {
+            long suggestionId, int keyCode, KeyEvent event) {
         // Treat enter or search as a click
         if (       keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == KeyEvent.KEYCODE_SEARCH
                 || keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             if (adapter != null) {
-                SuggestionsAdapter<?> suggestionsAdapter = adapter;
-                suggestionsAdapter.onSuggestionClicked(position);
+                adapter.onSuggestionClicked(suggestionId);
                 return true;
             } else {
                 return false;
@@ -490,10 +488,10 @@ public abstract class SearchActivityView extends RelativeLayout {
     protected class SuggestionsViewKeyListener implements View.OnKeyListener {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && v instanceof SuggestionsView) {
-                SuggestionsView view = ((SuggestionsView) v);
-                int position = view.getSelectedPosition();
-                if (onSuggestionKeyDown(view.getSuggestionsAdapter(), position, keyCode, event)) {
+                    && v instanceof SuggestionsListView<?>) {
+                SuggestionsListView<?> listView = (SuggestionsListView<?>) v;
+                if (onSuggestionKeyDown(listView.getSuggestionsAdapter(), 
+                        listView.getSelectedItemId(), keyCode, event)) {
                     return true;
                 }
             }
@@ -547,7 +545,7 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     private boolean forwardKeyToQueryTextView(int keyCode, KeyEvent event) {
-        if (!event.isSystem() && !isDpadKey(keyCode)) {
+        if (!event.isSystem() && shouldForwardToQueryTextView(keyCode)) {
             if (DBG) Log.d(TAG, "Forwarding key to query box: " + event);
             if (mQueryTextView.requestFocus()) {
                 return mQueryTextView.dispatchKeyEvent(event);
@@ -556,16 +554,18 @@ public abstract class SearchActivityView extends RelativeLayout {
         return false;
     }
 
-    private boolean isDpadKey(int keyCode) {
+    private boolean shouldForwardToQueryTextView(int keyCode) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_UP:
             case KeyEvent.KEYCODE_DPAD_DOWN:
             case KeyEvent.KEYCODE_DPAD_LEFT:
             case KeyEvent.KEYCODE_DPAD_RIGHT:
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                return true;
-            default:
+            case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_SEARCH:
                 return false;
+            default:
+                return true;
         }
     }
 

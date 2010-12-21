@@ -131,7 +131,9 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
 
         @Override
         public long getCombinedChildId(long groupId, long childId) {
-            return (groupId << GROUP_SHIFT) | (childId & CHILD_MASK);
+            // add one to the child ID to ensure that the group elements do not have the same ID
+            // as the first child within the group.
+            return (groupId << GROUP_SHIFT) | ((childId + 1) & CHILD_MASK);
         }
 
         @Override
@@ -140,7 +142,7 @@ public class ClusteredSuggestionsAdapter extends SuggestionsAdapterBase<Expandab
         }
 
         public int getChildPosition(long childId) {
-            return (int) (childId & CHILD_MASK);
+            return (int) (childId & CHILD_MASK) - 1;
         }
 
         public int getGroupPosition(long childId) {

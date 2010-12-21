@@ -27,7 +27,6 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
@@ -87,6 +86,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
             }
         });
         mResultsView.setOnKeyListener(new SuggestionsViewKeyListener());
+        mResultsView.setFocusable(true);
         mResultsHeader = findViewById(R.id.shortcut_title);
         mSearchPlate = findViewById(R.id.left_pane);
         mJustCreated = true;

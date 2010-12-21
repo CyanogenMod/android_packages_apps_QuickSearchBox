@@ -17,7 +17,7 @@
 <view
     xmlns:android="http://schemas.android.com/apk/res/android"
     class="com.android.quicksearchbox.ui.WebSearchSuggestionView"
-    style="@style/Suggestion">
+    style="@style/FocusingSuggestion">
 
     <!-- Icons come first in the layout, since their placement doesn't depend on
          the placement of the text views. -->
@@ -37,7 +37,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:src="@drawable/ic_commit"
-        android:background="@drawable/edit_query_background"
+        android:background="@drawable/suggestion_highlight"
     />
 
     <TextView android:id="@+id/text1"

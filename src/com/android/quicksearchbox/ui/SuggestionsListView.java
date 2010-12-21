@@ -49,6 +49,16 @@ public interface SuggestionsListView<A> {
     void setSuggestionsAdapter(SuggestionsAdapter<A> adapter);
 
     /**
+     * Gets the adapter for the list.
+     */
+    SuggestionsAdapter<A> getSuggestionsAdapter();
+
+    /**
+     * Gets the ID of the currently selected item.
+     */
+    long getSelectedItemId();
+
+    /**
      * Set whether or not to limit suggestions by view height. If {@code true}, only enough
      * suggestions to fill the view without scrolling will be shown.
      */

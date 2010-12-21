@@ -38,6 +38,10 @@ public class ClusteredSuggestionsView extends ExpandableListView
         super.setAdapter(adapter == null ? null : adapter.getListAdapter());
     }
 
+    public SuggestionsAdapter<ExpandableListAdapter> getSuggestionsAdapter() {
+        return mSuggestionsAdapter;
+    }
+
     public void setLimitSuggestionsToViewHeight(boolean limit) {
         // not supported
     }
@@ -45,7 +49,7 @@ public class ClusteredSuggestionsView extends ExpandableListView
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        setItemsCanFocus(true);
+        setItemsCanFocus(false);
         setOnGroupClickListener(new OnGroupClickListener(){
             public boolean onGroupClick(
                     ExpandableListView parent, View v, int groupPosition, long id) {
