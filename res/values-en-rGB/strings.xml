@@ -18,10 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Search"</string>
     <string name="search_widget" msgid="323244086853110381">"Search"</string>
-    <!-- no translation found for remove_from_history (3812349065338505597) -->
-    <skip />
-    <!-- no translation found for remove_from_history_failed (5471604847849215215) -->
-    <skip />
+    <string name="remove_from_history" msgid="3812349065338505597">"Remove from history"</string>
+    <string name="remove_from_history_failed" msgid="5471604847849215215">"Removing item from history failed"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Search"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"All"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
@@ -32,20 +30,16 @@
     <string name="menu_settings" msgid="5600043319144155953">"Search Settings"</string>
     <string name="search_settings" msgid="4101951238194600323">"Search Settings"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Google Search"</string>
-    <!-- no translation found for device_settings_category_title (2378889894648580869) -->
-    <skip />
+    <string name="device_settings_category_title" msgid="2378889894648580869">"Clear shortcuts"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Phone"</string>
     <string name="search_sources" msgid="505874718206340313">"Searchable items"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Choose what to search on the phone"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Clear short cuts"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Clear shortcuts to recently chosen search suggestions"</string>
     <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"This will clear all shortcuts to recently chosen search suggestions."\n\n"(To clear your Browser history, use the Browser\'s settings.)"</string>
-    <!-- no translation found for clear_shortcuts_agree (5623666487205882033) -->
-    <skip />
-    <!-- no translation found for clear_shortcuts_disagree (3667707814933648461) -->
-    <skip />
-    <!-- no translation found for menu_help (8466596486018760239) -->
-    <skip />
+    <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Clear shortcuts"</string>
+    <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Don\'t clear shortcuts"</string>
+    <string name="menu_help" msgid="8466596486018760239">"Help"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"Google Search"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Google Search"</string>
