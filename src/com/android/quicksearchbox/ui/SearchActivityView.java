@@ -265,9 +265,6 @@ public abstract class SearchActivityView extends RelativeLayout {
         mExitClickListener = listener;
     }
 
-    public void setEmptySpaceClickListener(final View.OnClickListener listener) {
-    }
-
     public Suggestions getSuggestions() {
         return mSuggestionsAdapter.getSuggestions();
     }

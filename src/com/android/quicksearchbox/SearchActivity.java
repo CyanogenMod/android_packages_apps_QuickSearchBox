@@ -157,7 +157,6 @@ public class SearchActivity extends Activity {
             }
         };
         mSearchActivityView.setExitClickListener(finishOnClick);
-        mSearchActivityView.setEmptySpaceClickListener(finishOnClick);
 
         // First get setup from intent
         Intent intent = getIntent();

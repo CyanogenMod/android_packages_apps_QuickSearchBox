@@ -208,11 +208,6 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     }
 
     @Override
-    public void setEmptySpaceClickListener(final View.OnClickListener listener) {
-        findViewById(R.id.panes).setOnClickListener(listener);
-    }
-
-    @Override
     public void setSuggestions(Suggestions suggestions) {
         super.setSuggestions(suggestions);
         suggestions.acquire();
