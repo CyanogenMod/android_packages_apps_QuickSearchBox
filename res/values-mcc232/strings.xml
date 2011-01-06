@@ -24,5 +24,5 @@
     <!-- should be mirrored by changes in apps/Browser. -->
     <!-- Do not translate.  This string is an internal URI, not seen in the UI. -->
     <string name="google_suggest_base" translatable="false">
-        http://www.google.com/complete/search?hl=%1$s&amp;gl=at&amp;</string>
+        http://www.google.com/complete/search?hl=%1$s&amp;gl=at&amp;client=android&amp;q=</string>
 </resources>
