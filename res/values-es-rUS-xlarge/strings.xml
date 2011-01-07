@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- XL -->
+    <string name="corpus_label_apps" msgid="797658780154032987">"Google Apps"</string>
+    <!-- XL -->
+    <string name="corpus_hint_apps" msgid="2923164340206162722">"Buscar Google Apps"</string>
+    <!-- XL -->
+    <string name="google_app_label" msgid="5559504793224129790">"Búsqueda con Google"</string>
+    <!-- XL -->
+    <string name="google_search_hint" msgid="1983517090072566983">"Búsqueda con Google"</string>
+</resources>
