@@ -44,6 +44,8 @@ import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,7 +116,7 @@ public abstract class SearchActivityView extends RelativeLayout {
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
-        mQueryTextView.setOnKeyListener(new QueryTextViewKeyListener());
+        mQueryTextView.setOnEditorActionListener(new QueryTextEditorActionListener());
         mQueryTextView.setOnFocusChangeListener(new QueryTextViewFocusListener());
         mQueryTextEmptyBg = mQueryTextView.getBackground();
 
@@ -517,17 +519,21 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     /**
-     * Handles non-text keys in the query text view.
+     * This class handles enter key presses in the query text view.
      */
-    private class QueryTextViewKeyListener implements View.OnKeyListener {
-        public boolean onKey(View view, int keyCode, KeyEvent event) {
-            // Handle IME search action key
-            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                // if no action was taken, consume the key event so that the keyboard
-                // remains on screen.
-                return !onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
+    private class QueryTextEditorActionListener implements OnEditorActionListener {
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            boolean consumed = false;
+            if (event != null) {
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    consumed = onSearchClicked(Logger.SEARCH_METHOD_KEYBOARD);
+                } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    // we have to consume the down event so that we receive the up event too
+                    consumed = true;
+                }
             }
-            return false;
+            if (DBG) Log.d(TAG, "onEditorAction consumed=" + consumed);
+            return consumed;
         }
     }
 
