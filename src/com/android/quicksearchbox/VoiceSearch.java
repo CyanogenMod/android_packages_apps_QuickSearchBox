@@ -16,6 +16,7 @@
 package com.android.quicksearchbox;
 
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ComponentInfo;
@@ -103,4 +104,7 @@ public class VoiceSearch {
         }
     }
 
+    public ComponentName getComponent() {
+        return createVoiceSearchIntent().resolveActivity(getContext().getPackageManager());
+    }
 }

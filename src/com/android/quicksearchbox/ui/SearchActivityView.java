@@ -50,9 +50,6 @@ import android.widget.TextView.OnEditorActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/**
- *
- */
 public abstract class SearchActivityView extends RelativeLayout {
     protected static final boolean DBG = false;
     protected static final String TAG = "QSB.SearchActivityView";
@@ -114,6 +111,7 @@ public abstract class SearchActivityView extends RelativeLayout {
         mSearchCloseButton = (ImageButton) findViewById(R.id.search_close_btn);
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
+        mVoiceSearchButton.setImageDrawable(getVoiceSearchIcon());
 
         mQueryTextView.addTextChangedListener(new SearchTextWatcher());
         mQueryTextView.setOnEditorActionListener(new QueryTextEditorActionListener());
@@ -156,7 +154,11 @@ public abstract class SearchActivityView extends RelativeLayout {
         return QsbApplication.get(getContext());
     }
 
-    private VoiceSearch getVoiceSearch() {
+    protected Drawable getVoiceSearchIcon() {
+        return getResources().getDrawable(R.drawable.ic_btn_speak_now);
+    }
+
+    protected VoiceSearch getVoiceSearch() {
         return getQsbApplication().getVoiceSearch();
     }
 

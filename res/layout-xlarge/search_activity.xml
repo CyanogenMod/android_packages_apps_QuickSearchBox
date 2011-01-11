@@ -130,7 +130,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="78dip"
                     android:layout_height="36dp"
                     android:orientation="horizontal"
                     android:gravity="center"
@@ -140,24 +140,20 @@
                         android:id="@+id/search_go_btn"
                         android:background="@drawable/button_bg"
                         android:src="@drawable/ic_go"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:scaleType="centerInside"
-                        android:paddingRight="21dip"
-                        android:paddingLeft="21dip"
                         />
                     <ImageButton
                         android:id="@+id/search_voice_btn"
                         android:background="@drawable/button_bg"
                         android:src="@drawable/ic_btn_speak_now"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:visibility="gone"
                         android:scaleType="centerInside"
-                        android:paddingRight="24dip"
-                        android:paddingLeft="24dip"
                     />
                 </LinearLayout>
 
