@@ -216,15 +216,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right|top"
-            android:paddingTop="10dp"
-            android:paddingRight="4dip"
+            android:paddingTop="5dip"
+            android:paddingRight="10dip"
             android:paddingLeft="10dip"
             android:paddingBottom="10dip"
             android:singleLine="true"
             android:clickable="true"
             android:focusable="true"
             android:background="@drawable/button_bg"
-            android:src="@drawable/ic_overflow"
+            android:src="@drawable/ic_menu_moreoverflow_normal_holo_dark"
         />
 
     </LinearLayout>
