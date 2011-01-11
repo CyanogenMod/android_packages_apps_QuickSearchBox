@@ -25,8 +25,14 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
@@ -44,6 +50,7 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
     private static final int ENTRY_ANIMATION_START_DELAY = 150; // in millis
     private static final int ENTRY_ANIMATION_DURATION = 150; // in millis
     private static final float ANIMATION_STARTING_WIDTH_FACTOR = 0.6f;
+    private static final String TOOLBAR_ICON_METADATA_NAME = "com.android.launcher.toolbar_icon";
 
     private ImageView mMenuButton;
 
@@ -162,6 +169,32 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         mResultsView.setSuggestionsAdapter(null);
 
         super.destroy();
+    }
+
+    @Override
+    protected Drawable getVoiceSearchIcon() {
+        ComponentName voiceSearch = getVoiceSearch().getComponent();
+        if (voiceSearch != null) {
+            // this code copied from Launcher to get the same icon that's displayed on home screen
+            try {
+                PackageManager packageManager = getContext().getPackageManager();
+                // Look for the toolbar icon specified in the activity meta-data
+                Bundle metaData = packageManager.getActivityInfo(
+                        voiceSearch, PackageManager.GET_META_DATA).metaData;
+                if (metaData != null) {
+                    int iconResId = metaData.getInt(TOOLBAR_ICON_METADATA_NAME);
+                    if (iconResId != 0) {
+                        Resources res = packageManager.getResourcesForActivity(voiceSearch);
+                        if (DBG) Log.d(TAG, "Got toolbar icon from Voice Search");
+                        return res.getDrawable(iconResId);
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                // Do nothing
+            }
+        }
+        if (DBG) Log.d(TAG, "Failed to get toolbar icon from Voice Search; using default.");
+        return super.getVoiceSearchIcon();
     }
 
     @Override
