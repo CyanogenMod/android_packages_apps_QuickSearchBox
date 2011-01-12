@@ -37,6 +37,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -54,7 +55,7 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
     private static final boolean DBG = false;
     private static final String LOG_TAG = "GoogleSearch";
 
-    private static final String USER_AGENT = "Android/1.0";
+    private static final String USER_AGENT = "Android/" + Build.VERSION.RELEASE;
     private String mSuggestUri;
 
     // TODO: this should be defined somewhere
@@ -108,8 +109,7 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
                 Locale l = Locale.getDefault();
                 String language = GoogleSearch.getLanguage(l);
                 mSuggestUri = getContext().getResources().getString(R.string.google_suggest_base,
-                                                                    language)
-                        + "json=true&q=";
+                                                                    language);
             }
 
             String suggestUri = mSuggestUri + query;
