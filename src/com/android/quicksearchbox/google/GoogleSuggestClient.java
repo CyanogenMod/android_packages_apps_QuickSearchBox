@@ -35,6 +35,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -51,7 +52,7 @@ public class GoogleSuggestClient extends GoogleSource {
     private static final boolean DBG = false;
     private static final String LOG_TAG = "GoogleSearch";
 
-    private static final String USER_AGENT = "Android/1.0";
+    private static final String USER_AGENT = "Android/" + Build.VERSION.RELEASE;
     private String mSuggestUri;
     private static final int HTTP_TIMEOUT_MS = 1000;
 
@@ -134,8 +135,7 @@ public class GoogleSuggestClient extends GoogleSource {
                 }
                 mSuggestUri = getContext().getResources().getString(R.string.google_suggest_base,
                                                                     language,
-                                                                    country)
-                        + "json=true&q=";
+                                                                    country);
             }
 
             String suggestUri = mSuggestUri + query;
