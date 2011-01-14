@@ -14,14 +14,22 @@
      limitations under the License.
 -->
 
-<RelativeLayout
+<!-- Fills the entire widget slot to allow position the visible widget inside. -->
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="12dip"
+    >
+
+<!-- The visible widget. -->
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentLeft="true"
+    android:layout_marginTop="1dip"
     android:layout_marginLeft="12dip"
     android:layout_marginRight="12dip"
-    android:layout_marginBottom="12dip"
     android:background="@drawable/bg_search_widget_holo"
     >
 
@@ -29,9 +37,6 @@
                 android:id="@+id/search_plate"
                 android:layout_width="match_parent"
                 android:layout_height="62dip"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
                 android:gravity="top|left"
                 android:orientation="horizontal"
                 android:clickable="true"
@@ -84,4 +89,5 @@
 
             </LinearLayout>
 
-</RelativeLayout>
+</FrameLayout>
+</FrameLayout>
