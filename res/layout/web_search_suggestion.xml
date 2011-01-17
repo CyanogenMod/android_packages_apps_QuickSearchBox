@@ -22,7 +22,7 @@
     <!-- Icons come first in the layout, since their placement doesn't depend on
          the placement of the text views. -->
     <ImageView android:id="@+id/icon1"
-        style="@style/SuggestionIcon1"
+        style="@style/WebSuggestionIcon1"
         android:scaleType="centerInside"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"

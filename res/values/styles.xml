@@ -61,6 +61,9 @@
         <item name="android:paddingBottom">2dip</item>
     </style>
 
+    <style name="WebSuggestionIcon1" parent="@style/SuggestionIcon1">
+    </style>
+
     <style name="SuggestionIcon2">
         <item name="android:layout_height">@dimen/suggestion_icon_size</item>
         <item name="android:layout_width">@dimen/suggestion_icon_size</item>
