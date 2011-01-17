@@ -61,6 +61,16 @@ public class WebSearchSuggestionView extends BaseSuggestionView {
         CharSequence text1 = mSuggestionFormatter.formatSuggestion(userQuery,
                 suggestion.getSuggestionText1());
         setText1(text1);
+        setIsHistorySuggestion(suggestion.isHistorySuggestion());
+    }
+
+    private void setIsHistorySuggestion(boolean isHistory) {
+        if (isHistory) {
+            mIcon1.setImageResource(R.drawable.history_suggestion);
+            mIcon1.setVisibility(VISIBLE);
+        } else {
+            mIcon1.setVisibility(INVISIBLE);
+        }
     }
 
     private class KeyListener implements View.OnKeyListener {
