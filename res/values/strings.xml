@@ -20,9 +20,9 @@
     <!-- Search widget -->
     <string name="search_widget">Search</string>
 
-    <!-- Label for option in suggetion context menu to delete the
-         item from the history. [CHAR_LIMIT=40] -->
-    <string name="remove_from_history">Remove from history</string>
+    <!-- Text in the dialog for confirming whether to remove an item from the search
+         history. [CHAR_LIMIT=40] -->
+    <string name="remove_from_history">Remove from search history</string>
 
     <!-- Toast text shown when the app fails to remove an item from
          the search history. [CHAR_LIMIT=60] -->
