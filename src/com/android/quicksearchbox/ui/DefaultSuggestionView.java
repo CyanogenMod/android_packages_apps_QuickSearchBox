@@ -111,7 +111,7 @@ public class DefaultSuggestionView extends BaseSuggestionView {
 
         if (DBG) {
             Log.d(TAG, "bindAsSuggestion(), text1=" + text1 + ",text2=" + text2 + ",q='" +
-                    userQuery + ",fromHistory=" + isFromHistory());
+                    userQuery + ",fromHistory=" + isFromHistory(suggestion));
         }
     }
 
