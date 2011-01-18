@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -537,6 +538,26 @@ public class SearchActivity extends Activity {
         launchIntent(intent);
     }
 
+    protected void removeFromHistoryClicked(final SuggestionsAdapter<?> adapter,
+            final long id) {
+        SuggestionPosition suggestion = getCurrentSuggestions(adapter, id);
+        if (suggestion == null) return;
+        CharSequence title = suggestion.getSuggestionText1();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(R.string.remove_from_history)
+                .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // TODO: what if the suggestions have changed?
+                                removeFromHistory(adapter, id);
+                            }
+                        })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.show();
+    }
+
     protected void removeFromHistory(SuggestionsAdapter<?> adapter, long id) {
         SuggestionPosition suggestion = getCurrentSuggestions(adapter, id);
         if (suggestion == null) return;
@@ -689,7 +710,7 @@ public class SearchActivity extends Activity {
         }
 
         public void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, long id) {
-            removeFromHistory(adapter, id);
+            removeFromHistoryClicked(adapter, id);
         }
 
         public void onSuggestionQueryRefineClicked(SuggestionsAdapter<?> adapter, long id) {

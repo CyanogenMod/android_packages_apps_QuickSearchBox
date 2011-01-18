@@ -22,9 +22,6 @@ import com.android.quicksearchbox.Suggestion;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.ContextMenu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -39,7 +36,6 @@ public abstract class BaseSuggestionView extends RelativeLayout implements Sugge
     protected TextView mText2;
     protected ImageView mIcon1;
     protected ImageView mIcon2;
-    private boolean mIsFromHistory;
     private long mSuggestionId;
     private SuggestionsAdapter<?> mAdapter;
 
@@ -66,8 +62,13 @@ public abstract class BaseSuggestionView extends RelativeLayout implements Sugge
 
     public void bindAsSuggestion(Suggestion suggestion, String userQuery) {
         setOnClickListener(new ClickListener());
-        updateIsFromHistory(suggestion);
-        setLongClickable(needsContextMenu());
+        if (isFromHistory(suggestion)) {
+            setLongClickable(true);
+            setOnLongClickListener(new LongClickListener());
+        } else {
+            setLongClickable(false);
+            setOnLongClickListener(null);
+        }
     }
 
     public void bindAdapter(SuggestionsAdapter<?> adapter, long suggestionId) {
@@ -75,16 +76,8 @@ public abstract class BaseSuggestionView extends RelativeLayout implements Sugge
         mSuggestionId = suggestionId;
     }
 
-    protected boolean needsContextMenu() {
-        return isFromHistory();
-    }
-
-    protected boolean isFromHistory() {
-        return mIsFromHistory;
-    }
-
-    protected void updateIsFromHistory(Suggestion suggestion) {
-        mIsFromHistory = suggestion.isSuggestionShortcut() || suggestion.isHistorySuggestion();
+    protected boolean isFromHistory(Suggestion suggestion) {
+        return suggestion.isSuggestionShortcut() || suggestion.isHistorySuggestion();
     }
 
     /**
@@ -103,17 +96,6 @@ public abstract class BaseSuggestionView extends RelativeLayout implements Sugge
             mText2.setVisibility(GONE);
         } else {
             mText2.setVisibility(VISIBLE);
-        }
-    }
-
-    @Override
-    protected void onCreateContextMenu(ContextMenu menu) {
-        super.onCreateContextMenu(menu);
-        if (isFromHistory()) {
-            MenuInflater inflater = new MenuInflater(getContext());
-            inflater.inflate(R.menu.remove_from_history, menu);
-            MenuItem removeFromHistory = menu.findItem(R.id.remove_from_history);
-            removeFromHistory.setOnMenuItemClickListener(new RemoveFromHistoryListener());
         }
     }
 
@@ -147,10 +129,10 @@ public abstract class BaseSuggestionView extends RelativeLayout implements Sugge
         }
     }
 
-    private class RemoveFromHistoryListener implements MenuItem.OnMenuItemClickListener {
-        public boolean onMenuItemClick(MenuItem item) {
+    private class LongClickListener implements View.OnLongClickListener {
+        public boolean onLongClick(View v) {
             onRemoveFromHistoryClicked();
-            return false;
+            return true;
         }
     }
 
