@@ -20,6 +20,7 @@ import com.android.quicksearchbox.R;
 
 import android.preference.PreferenceActivity;
 import android.util.Log;
+import android.view.Menu;
 
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class SearchSettingsActivity extends PreferenceActivity {
 
     private static final String CLEAR_SHORTCUTS_FRAGMENT = DeviceSearchFragment.class.getName();
 
+    private static final String ACTIVITY_HELP_CONTEXT = "settings";
+
     /**
      * Populate the activity with the top-level headers.
      */
@@ -39,6 +42,17 @@ public class SearchSettingsActivity extends PreferenceActivity {
     public void onBuildHeaders(List<Header> target) {
         loadHeadersFromResource(R.xml.preferences_headers, target);
         onHeadersBuilt(target);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getQsbApplication().getHelp().addHelpMenuItem(menu, ACTIVITY_HELP_CONTEXT);
+        return true;
+    }
+
+    protected QsbApplication getQsbApplication() {
+        return QsbApplication.get(this);
     }
 
     /**
