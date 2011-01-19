@@ -18,6 +18,7 @@ package com.android.quicksearchbox;
 
 import android.app.AlarmManager;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Process;
 import android.util.Log;
 
@@ -329,8 +330,8 @@ public class Config {
         return mContext.getResources().getBoolean(R.bool.show_scrolling_results);
     }
 
-    public String getHelpUrl() {
-        return getContext().getString(R.string.help_url);
+    public Uri getHelpUrl(String activity) {
+        return null;
     }
 
     public int getHttpConnectTimeout() {

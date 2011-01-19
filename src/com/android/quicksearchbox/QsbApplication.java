@@ -499,4 +499,9 @@ public class QsbApplication {
         return new SearchBaseUrlHelper(getContext(), getHttpHelper(),
                 getSettings(), ((SearchSettingsImpl)getSettings()).getSearchPreferences());
     }
+
+    public Help getHelp() {
+        // No point caching this, it's super cheap.
+        return new Help(getContext(), getConfig());
+    }
 }

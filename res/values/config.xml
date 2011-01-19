@@ -87,10 +87,6 @@
        in All mode. -->
   <bool name="show_non_all_corpora_in_settings">true</bool>
 
-  <!-- URL for the Help web page. There is currently no help URL for the
-       open-source Quick Search Box.-->
-  <string name="help_url" translatable="false"></string>
-
   <!-- Note that this is the standard search url.  It uses the current locale for language -->
   <!-- (%1$s) and shouldn't need to be replaced by locale or mcc selected resources. -->
   <!-- Any changes to this (especially in terms of adding/removing the MCC-specific flavors) -->
