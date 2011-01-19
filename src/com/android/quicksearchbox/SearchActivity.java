@@ -38,8 +38,6 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -68,6 +66,8 @@ public class SearchActivity extends Activity {
     // Keys for the saved instance state.
     private static final String INSTANCE_KEY_CORPUS = "corpus";
     private static final String INSTANCE_KEY_QUERY = "query";
+
+    private static final String ACTIVITY_HELP_CONTEXT = "search";
 
     private boolean mTraceStartUp;
     // Measures time from for last onCreate()/onNewIntent() call.
@@ -376,23 +376,7 @@ public class SearchActivity extends Activity {
 
     public void createMenuItems(Menu menu, boolean showDisabled) {
         getSettings().addMenuItems(menu, showDisabled);
-        addHelpMenuItem(menu);
-    }
-
-    private void addHelpMenuItem(Menu menu) {
-        Intent helpIntent = getHelpIntent();
-        if (helpIntent != null) {
-            MenuInflater inflater = new MenuInflater(this);
-            inflater.inflate(R.menu.help, menu);
-            MenuItem item = menu.findItem(R.id.menu_help);
-            item.setIntent(helpIntent);
-        }
-    }
-
-    private Intent getHelpIntent() {
-        String helpUrl = getConfig().getHelpUrl();
-        if (TextUtils.isEmpty(helpUrl)) return null;
-        return new Intent(Intent.ACTION_VIEW, Uri.parse(helpUrl));
+        getQsbApplication().getHelp().addHelpMenuItem(menu, ACTIVITY_HELP_CONTEXT);
     }
 
     @Override
