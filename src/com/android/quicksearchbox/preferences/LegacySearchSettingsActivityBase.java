@@ -83,6 +83,12 @@ public abstract class LegacySearchSettingsActivityBase extends PreferenceActivit
     }
 
     @Override
+    public void onStop() {
+        mController.onStop();
+        super.onStop();
+    }
+
+    @Override
     public void onDestroy() {
         mController.onDestroy();
         super.onDestroy();

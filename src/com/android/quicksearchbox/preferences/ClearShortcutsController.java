@@ -59,6 +59,9 @@ public class ClearShortcutsController implements PreferenceController {
     public void onCreateComplete() {
     }
 
+    public void onStop() {
+    }
+
     public void onDestroy() {
     }
 

@@ -70,6 +70,12 @@ public class PreferenceControllerFactory implements PreferenceController {
         }
     }
 
+    public void onStop() {
+        for (PreferenceController controller : mControllers) {
+            controller.onStop();
+        }
+    }
+
     public void onDestroy() {
         for (PreferenceController controller : mControllers) {
             controller.onDestroy();

@@ -125,6 +125,9 @@ public class SearchableItemsController implements PreferenceController, OnPrefer
     public void onCreateComplete() {
     }
 
+    public void onStop() {
+    }
+
     public void onDestroy() {
     }
 
