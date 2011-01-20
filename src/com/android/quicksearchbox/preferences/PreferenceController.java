@@ -41,6 +41,11 @@ public interface PreferenceController {
     void onResume();
 
     /**
+     * Called from {@link Activity#onStop}.
+     */
+    void onStop();
+
+    /**
      * called from {@link Activity#onDestroy}
      */
     void onDestroy();

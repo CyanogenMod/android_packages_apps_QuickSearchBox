@@ -81,6 +81,12 @@ public abstract class SettingsFragmentBase extends PreferenceFragment {
     }
 
     @Override
+    public void onStop() {
+        mController.onStop();
+        super.onStop();
+    }
+
+    @Override
     public void onDestroy() {
         mController.onDestroy();
         super.onDestroy();
