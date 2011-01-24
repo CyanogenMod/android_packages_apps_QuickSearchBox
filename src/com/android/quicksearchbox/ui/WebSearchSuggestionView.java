@@ -66,7 +66,7 @@ public class WebSearchSuggestionView extends BaseSuggestionView {
 
     private void setIsHistorySuggestion(boolean isHistory) {
         if (isHistory) {
-            mIcon1.setImageResource(R.drawable.history_suggestion);
+            mIcon1.setImageResource(R.drawable.ic_history_suggestion);
             mIcon1.setVisibility(VISIBLE);
         } else {
             mIcon1.setVisibility(INVISIBLE);
