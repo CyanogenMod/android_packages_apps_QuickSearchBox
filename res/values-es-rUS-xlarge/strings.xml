@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- XL -->
-    <!-- outdated translation 691421643154073887 -->     <string name="remove_from_history" msgid="3555006883492512727">"Suprimir del historial"</string>
+    <string name="remove_from_history" msgid="3555006883492512727">"Eliminar del historial de búsqueda"</string>
     <!-- XL -->
     <string name="corpus_label_apps" msgid="797658780154032987">"Google Apps"</string>
     <!-- XL -->
