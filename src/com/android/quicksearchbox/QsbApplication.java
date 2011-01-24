@@ -80,10 +80,7 @@ public class QsbApplication {
     }
 
     public static boolean isHoneycombOrLater() {
-        // TODO while Honeycomb is still under development, this doesn't work. When honeycomb is
-        // done, this needs to be changed,
-        //return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-        return true;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     }
 
     public static QsbApplication get(Context context) {
