@@ -36,12 +36,19 @@ public class Help {
     }
 
     public void addHelpMenuItem(Menu menu, String activityName) {
+        addHelpMenuItem(menu, activityName, false);
+    }
+
+    public void addHelpMenuItem(Menu menu, String activityName, boolean showAsAction) {
         Intent helpIntent = getHelpIntent(activityName);
         if (helpIntent != null) {
             MenuInflater inflater = new MenuInflater(mContext);
             inflater.inflate(R.menu.help, menu);
             MenuItem item = menu.findItem(R.id.menu_help);
             item.setIntent(helpIntent);
+            if (showAsAction) {
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            }
         }
     }
 
