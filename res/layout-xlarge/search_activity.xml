@@ -34,7 +34,7 @@
                 android:id="@+id/left_pane"
                 android:layout_width="@dimen/suggestions_width"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginBottom="12dip"
                 >
 
@@ -68,7 +68,7 @@
                 android:id="@+id/search_plate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="12dp"
+                android:paddingTop="11dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
