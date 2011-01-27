@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Szukaj"</string>
     <string name="search_widget" msgid="323244086853110381">"Szukaj"</string>
-    <!-- outdated translation 3812349065338505597 -->     <string name="remove_from_history" msgid="6675934305676944437">"Usuń z historii"</string>
+    <!-- outdated translation 691421643154073887 -->     <string name="remove_from_history" msgid="6675934305676944437">"Usuń z historii"</string>
     <string name="remove_from_history_failed" msgid="5471604847849215215">"Usunięcie pozycji z historii nie powiodło się"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Przeszukuj"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Wszystko"</string>
