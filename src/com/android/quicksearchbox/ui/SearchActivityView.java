@@ -80,7 +80,7 @@ public abstract class SearchActivityView extends RelativeLayout {
 
     private QueryListener mQueryListener;
     private SearchClickListener mSearchClickListener;
-    private View.OnClickListener mExitClickListener;
+    protected View.OnClickListener mExitClickListener;
 
     public SearchActivityView(Context context) {
         super(context);
@@ -291,6 +291,10 @@ public abstract class SearchActivityView extends RelativeLayout {
         return q == null ? "" : q.toString();
     }
 
+    public boolean isQueryEmpty() {
+        return TextUtils.isEmpty(getQuery());
+    }
+
     /**
      * Sets the text in the query box. Does not update the suggestions.
      */
@@ -323,7 +327,7 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     protected void updateUi() {
-        updateUi(getQuery().length() == 0);
+        updateUi(isQueryEmpty());
     }
 
     protected void updateUi(boolean queryEmpty) {
@@ -389,6 +393,31 @@ public abstract class SearchActivityView extends RelativeLayout {
 
     public void showInputMethodForQuery() {
         mQueryTextView.showInputMethod();
+    }
+
+    /**
+     * Dismiss the activity if BACK is pressed when the search box is empty.
+     */
+    @Override
+    public boolean dispatchKeyEventPreIme(KeyEvent event) {
+        SearchActivity activity = getActivity();
+        if (activity != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                && isQueryEmpty()) {
+            KeyEvent.DispatcherState state = getKeyDispatcherState();
+            if (state != null) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    state.startTracking(event, this);
+                    return true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && !event.isCanceled() && state.isTracking(event)) {
+                    hideInputMethod();
+                    activity.onBackPressed();
+                    return true;
+                }
+            }
+        }
+        return super.dispatchKeyEventPreIme(event);
     }
 
     /**
@@ -612,9 +641,8 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     private class CloseClickListener implements OnClickListener {
-
         public void onClick(View v) {
-            if (!TextUtils.isEmpty(mQueryTextView.getText())) {
+            if (!isQueryEmpty()) {
                 mQueryTextView.setText("");
             } else {
                 mExitClickListener.onClick(v);
