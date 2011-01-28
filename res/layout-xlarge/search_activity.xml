@@ -21,11 +21,25 @@
     android:layout_height="match_parent"
 >
 
+    <!-- A background area that when touched dismisses the activity if the search box is empty.
+         The top and bottom margins are here to avoid accidental dismissal when
+         using the keyboard or the widgets along the top of the screen. -->
+    <FrameLayout
+            android:id="@+id/dismiss_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="80dip"
+            android:layout_marginBottom="30dip"
+            />
+
     <LinearLayout
             android:id="@+id/panes"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="left"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
             android:orientation="horizontal"
             android:splitMotionEvents="true">
 
