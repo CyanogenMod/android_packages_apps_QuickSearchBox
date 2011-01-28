@@ -27,7 +27,7 @@
     <string name="corpus_label_apps" msgid="73123028704144731">"Aplikacje"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Nazwy zainstalowanych aplikacji"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Szukaj w aplikacjach"</string>
-    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Aplikacje i usługa Market"</string>
+    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Aplikacje i Android Market"</string>
     <string name="corpus_description_apps_market" msgid="6676825865398169853">"Aplikacje zainstalowane i pochodzące z usługi Market"</string>
     <string name="corpus_hint_apps_market" msgid="627025611326022658">"Szukaj w aplikacjach i usłudze Market"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Ustawienia wyszukiwania"</string>
