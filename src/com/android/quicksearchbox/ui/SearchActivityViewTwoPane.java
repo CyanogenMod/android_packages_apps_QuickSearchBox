@@ -97,6 +97,15 @@ public class SearchActivityViewTwoPane extends SearchActivityView {
         mResultsHeader = findViewById(R.id.shortcut_title);
         mSearchPlate = findViewById(R.id.left_pane);
         mJustCreated = true;
+
+        View dismissBg = findViewById(R.id.dismiss_bg);
+        dismissBg.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (isQueryEmpty() && mExitClickListener != null) {
+                    mExitClickListener.onClick(v);
+                }
+            }
+        });
     }
 
     private void showPopupMenu() {
