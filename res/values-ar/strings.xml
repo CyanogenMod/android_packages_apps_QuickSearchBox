@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"بحث"</string>
     <string name="search_widget" msgid="323244086853110381">"بحث"</string>
-    <!-- outdated translation 691421643154073887 -->     <string name="remove_from_history" msgid="6675934305676944437">"إزالة من السجل"</string>
+    <string name="remove_from_history" msgid="6675934305676944437">"إزالة من سجل البحث"</string>
     <string name="remove_from_history_failed" msgid="5471604847849215215">"إخفاق إزالة العنصر من السجل"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"بحث"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"الكل"</string>
