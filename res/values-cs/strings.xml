@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Hledat"</string>
     <string name="search_widget" msgid="323244086853110381">"Hledat"</string>
-    <!-- outdated translation 691421643154073887 -->     <string name="remove_from_history" msgid="6675934305676944437">"Odebrat z historie"</string>
+    <string name="remove_from_history" msgid="6675934305676944437">"Odebrat z historie vyhledávání"</string>
     <string name="remove_from_history_failed" msgid="5471604847849215215">"Odebrání položky z historie se nezdařilo"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Hledat"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Vše"</string>
