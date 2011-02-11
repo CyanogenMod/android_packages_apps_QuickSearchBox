@@ -26,7 +26,6 @@ import com.android.quicksearchbox.util.NamedTaskExecutor;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.util.EntityUtils;
@@ -36,6 +35,7 @@ import org.json.JSONException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.http.AndroidHttpClient;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
@@ -66,9 +66,8 @@ public class GoogleSuggestClient extends AbstractGoogleSource {
     public GoogleSuggestClient(Context context, Handler uiThread,
             NamedTaskExecutor iconLoader, Config config) {
         super(context, uiThread, iconLoader);
-        mHttpClient = new DefaultHttpClient();
+        mHttpClient = AndroidHttpClient.newInstance(USER_AGENT, context);
         HttpParams params = mHttpClient.getParams();
-        HttpProtocolParams.setUserAgent(params, USER_AGENT);
         params.setLongParameter(HTTP_TIMEOUT, config.getHttpConnectTimeout());
 
         // NOTE:  Do not look up the resource here;  Localization changes may not have completed
