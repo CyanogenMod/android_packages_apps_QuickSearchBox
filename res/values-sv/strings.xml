@@ -24,8 +24,8 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"Alla"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Webb"</string>
     <string name="corpus_description_web" msgid="5553049179123250409">"Googles webbsökning, bokmärken och webbläsarhistorik"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"Program"</string>
-    <string name="corpus_description_apps" msgid="7434542427108237469">"Namn på installerade program"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"Appar"</string>
+    <string name="corpus_description_apps" msgid="7434542427108237469">"Namn på installerade appar"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Sök i Apps"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Sökinställningar"</string>
     <string name="search_settings" msgid="4101951238194600323">"Sökinställningar"</string>
