@@ -25,7 +25,7 @@
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
     <string name="corpus_description_web" msgid="5553049179123250409">"Zoeken op internet, bladwijzers en browsergeschiedenis"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Google Apps"</string>
-    <string name="corpus_description_apps" msgid="7434542427108237469">"Namen van geïnstalleerde toepassingen"</string>
+    <string name="corpus_description_apps" msgid="7434542427108237469">"Namen van geïnstalleerde apps"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Zoeken in Google Apps"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Zoekinstellingen"</string>
     <string name="search_settings" msgid="4101951238194600323">"Zoekinstellingen"</string>
