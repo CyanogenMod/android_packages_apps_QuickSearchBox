@@ -27,9 +27,9 @@
     <string name="corpus_label_apps" msgid="73123028704144731">"Programmer"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Navn på installerte programmer"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Søkeprogrammer"</string>
-    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Programmer og marked"</string>
-    <string name="corpus_description_apps_market" msgid="6676825865398169853">"Installerte programmer og programmer fra marked"</string>
-    <string name="corpus_hint_apps_market" msgid="627025611326022658">"Søkeprogrammer og marked"</string>
+    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Apper og Android Market"</string>
+    <string name="corpus_description_apps_market" msgid="6676825865398169853">"Installerte apper og apper fra Android Market"</string>
+    <string name="corpus_hint_apps_market" msgid="627025611326022658">"Søk i apper og på Android Market"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Innstillinger for søk"</string>
     <string name="search_settings" msgid="4101951238194600323">"Innstillinger for søk"</string>
     <string name="web_search_category_title" msgid="3696363552067530526">"Internett"</string>
