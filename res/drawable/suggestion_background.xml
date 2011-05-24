@@ -15,6 +15,5 @@
 -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/pressable_suggestion" />
-    <item android:drawable="@drawable/list_bg" />
+    <item android:drawable="@android:color/transparent" />
 </layer-list>

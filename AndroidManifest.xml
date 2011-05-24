@@ -15,8 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.android.quicksearchbox"
-      android:versionCode="110" android:versionName="1.1">
+      package="com.android.quicksearchbox" >
 
     <original-package android:name="com.android.quicksearchbox" />
 
@@ -78,7 +77,7 @@
                 android:authorities="com.android.quicksearchbox.shortcuts">
         </provider>
 
-        <activity android:name=".preferences.SearchSettingsActivityChooser"
+        <activity android:name=".preferences.SearchSettingsActivity"
                 android:label="@string/search_settings"
                 android:excludeFromRecents="true">
             <intent-filter>
@@ -89,16 +88,6 @@
                 <action android:name="android.search.action.WEB_SEARCH_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <activity android:name=".preferences.SearchSettingsActivity"
-                android:label="@string/search_settings"
-                android:excludeFromRecents="true">
-        </activity>
-
-        <activity android:name=".preferences.LegacySearchSettingsActivity"
-                android:label="@string/search_settings"
-                android:excludeFromRecents="true">
         </activity>
 
         <activity android:name=".preferences.SearchableItemsActivity"
@@ -126,14 +115,6 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/search_widget_info" />
         </receiver>
-
-        <!-- This class name is referenced in res/xml/search_widget_info.xml -->
-        <activity android:name="com.android.quicksearchbox.SearchWidgetConfigActivity"
-                android:theme="@style/Theme.QuickSearchBox.SearchWidgetConfig">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
 
         <activity android:name=".google.GoogleSearch"
                 android:label="@string/google_search_label"

@@ -334,7 +334,7 @@ public class Suggestions {
 
     public CorpusResult getCorpusResult(Corpus corpus) {
         for (CorpusResult result : mCorpusResults) {
-            if (result.getCorpus().equals(corpus)) {
+            if (result != null && corpus.equals(result.getCorpus())) {
                 return result;
             }
         }
