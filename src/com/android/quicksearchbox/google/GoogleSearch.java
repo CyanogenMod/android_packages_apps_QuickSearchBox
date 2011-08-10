@@ -20,8 +20,12 @@ import com.android.common.Search;
 import com.android.quicksearchbox.QsbApplication;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
@@ -97,10 +101,19 @@ public class GoogleSearch extends Activity {
     }
 
     private void handleWebSearchIntent(Intent intent) {
+        Intent launchUriIntent = createLaunchUriIntentFromSearchIntent(intent);
+        PendingIntent pending =
+            intent.getParcelableExtra(SearchManager.EXTRA_WEB_SEARCH_PENDINGINTENT);
+        if (pending == null || !launchPendingIntent(pending, launchUriIntent)) {
+            launchIntent(launchUriIntent);
+        }
+    }
+
+    private Intent createLaunchUriIntentFromSearchIntent(Intent intent) {
         String query = intent.getStringExtra(SearchManager.QUERY);
         if (TextUtils.isEmpty(query)) {
             Log.w(TAG, "Got search intent with no query.");
-            return;
+            return null;
         }
 
         // If the caller specified a 'source' url parameter, use that and if not use default.
@@ -126,9 +139,30 @@ public class GoogleSearch extends Activity {
             Intent launchUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri));
             launchUriIntent.putExtra(Browser.EXTRA_APPLICATION_ID, applicationId);
             launchUriIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(launchUriIntent);
+            return launchUriIntent;
         } catch (UnsupportedEncodingException e) {
             Log.w(TAG, "Error", e);
+            return null;
+        }
+
+    }
+
+    private void launchIntent(Intent intent) {
+        try {
+            Log.i(TAG, "Launching intent: " + intent.toUri(0));
+            startActivity(intent);
+        } catch (ActivityNotFoundException ex) {
+            Log.w(TAG, "No activity found to handle: " + intent);
+        }
+    }
+
+    private boolean launchPendingIntent(PendingIntent pending, Intent fillIn) {
+        try {
+            pending.send(this, Activity.RESULT_OK, fillIn);
+            return true;
+        } catch (PendingIntent.CanceledException ex) {
+            Log.i(TAG, "Pending intent cancelled: " + pending);
+            return false;
         }
     }
 
