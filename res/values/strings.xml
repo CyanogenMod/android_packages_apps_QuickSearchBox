@@ -26,7 +26,7 @@
 
     <!-- Toast text shown when the app fails to remove an item from
          the search history. [CHAR_LIMIT=60] -->
-    <string name="remove_from_history_failed">Removing item from history failed</string>
+    <string name="remove_from_history_failed">Couldn\'t remove item from history</string>
 
     <!-- Source selector -->
     <string name="corpus_selection_heading">Search</string>
