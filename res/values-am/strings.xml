@@ -20,7 +20,7 @@
     <string name="search_widget" msgid="323244086853110381">"ፍለጋ"</string>
     <!-- no translation found for remove_from_history (6675934305676944437) -->
     <skip />
-    <string name="remove_from_history_failed" msgid="5471604847849215215">"አይነት ከታሪክ ውስጥ ማስወገድ ተስኗል"</string>
+    <!-- outdated translation 5471604847849215215 -->     <string name="remove_from_history_failed" msgid="7326173491060133769">"አይነት ከታሪክ ውስጥ ማስወገድ ተስኗል"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"ፍለጋ"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"ሁሉም"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"ድረ"</string>

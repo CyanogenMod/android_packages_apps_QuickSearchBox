@@ -19,7 +19,7 @@
     <string name="app_name" msgid="1504397077706378597">"Paghahanap"</string>
     <string name="search_widget" msgid="323244086853110381">"Paghahanap"</string>
     <string name="remove_from_history" msgid="6675934305676944437">"Alisin mula sa kasaysayan ng paghahanap"</string>
-    <string name="remove_from_history_failed" msgid="5471604847849215215">"Nabigo ang pag-aalis ng item mula sa kasaysayan"</string>
+    <!-- outdated translation 5471604847849215215 -->     <string name="remove_from_history_failed" msgid="7326173491060133769">"Nabigo ang pag-aalis ng item mula sa kasaysayan"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Paghahanap"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Lahat"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
