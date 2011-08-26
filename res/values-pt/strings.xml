@@ -19,7 +19,7 @@
     <string name="app_name" msgid="1504397077706378597">"Pesquisa"</string>
     <string name="search_widget" msgid="323244086853110381">"Pesquisa"</string>
     <string name="remove_from_history" msgid="6675934305676944437">"Remover do histórico de pesquisa"</string>
-    <!-- outdated translation 5471604847849215215 -->     <string name="remove_from_history_failed" msgid="7326173491060133769">"Falha ao remover o item do histórico"</string>
+    <string name="remove_from_history_failed" msgid="7326173491060133769">"Não foi possível remover o item do histórico"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Pesquisa"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Todos"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>

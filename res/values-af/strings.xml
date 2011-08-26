@@ -20,7 +20,7 @@
     <string name="search_widget" msgid="323244086853110381">"Soek"</string>
     <!-- no translation found for remove_from_history (6675934305676944437) -->
     <skip />
-    <!-- outdated translation 5471604847849215215 -->     <string name="remove_from_history_failed" msgid="7326173491060133769">"Kon nie item uit geskiedenis verwyder nie"</string>
+    <string name="remove_from_history_failed" msgid="7326173491060133769">"Kon nie item uit geskiedenis verwyder nie"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Soek"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Alle"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>

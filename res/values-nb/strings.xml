@@ -19,7 +19,7 @@
     <string name="app_name" msgid="1504397077706378597">"Søk"</string>
     <string name="search_widget" msgid="323244086853110381">"Søk"</string>
     <string name="remove_from_history" msgid="6675934305676944437">"Fjern fra søkelogg"</string>
-    <!-- outdated translation 5471604847849215215 -->     <string name="remove_from_history_failed" msgid="7326173491060133769">"Fjerning av loggelement mislyktes"</string>
+    <string name="remove_from_history_failed" msgid="7326173491060133769">"Kunne ikke fjerne elementet fra loggen"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Søk"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Alle"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Internett"</string>

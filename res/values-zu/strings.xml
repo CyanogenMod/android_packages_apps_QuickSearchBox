@@ -20,7 +20,7 @@
     <string name="search_widget" msgid="323244086853110381">"Sesha"</string>
     <!-- no translation found for remove_from_history (6675934305676944437) -->
     <skip />
-    <!-- outdated translation 5471604847849215215 -->     <string name="remove_from_history_failed" msgid="7326173491060133769">"Ukukhipha intwana emlandweni kwehlulekile"</string>
+    <string name="remove_from_history_failed" msgid="7326173491060133769">"Yehlulekile ukusuza into kumlando"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Sesha"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Konke"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Iwebhu"</string>
