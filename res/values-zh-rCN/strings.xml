@@ -19,7 +19,7 @@
     <string name="app_name" msgid="1504397077706378597">"搜索"</string>
     <string name="search_widget" msgid="323244086853110381">"搜索"</string>
     <string name="remove_from_history" msgid="6675934305676944437">"从搜索记录中删除"</string>
-    <!-- outdated translation 5471604847849215215 -->     <string name="remove_from_history_failed" msgid="7326173491060133769">"从历史记录中删除条目时失败"</string>
+    <string name="remove_from_history_failed" msgid="7326173491060133769">"无法从记录中删除项目"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"搜索"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"全部"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"网络"</string>
