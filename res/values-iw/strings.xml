@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"חיפוש Google"</string>
     <string name="google_search_description" msgid="659411505885375623">"ההצעות של חיפוש Google"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"נסה לומר:"</string>
-    <string name="voice_search_hint_quotation_start" msgid="566545847023692214">"???"</string>
-    <string name="voice_search_hint_quotation_end" msgid="4840921425933402938">"???"</string>
+    <string name="voice_search_hint_quotation_start" msgid="566545847023692214">"“"</string>
+    <string name="voice_search_hint_quotation_end" msgid="4840921425933402938">"”"</string>
 </resources>
