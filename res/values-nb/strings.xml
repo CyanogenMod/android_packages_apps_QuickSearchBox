@@ -24,8 +24,8 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"Alle"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Internett"</string>
     <string name="corpus_description_web" msgid="5553049179123250409">"Nettsøk, bokmerker og nettleserlogg"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"Programmer"</string>
-    <string name="corpus_description_apps" msgid="7434542427108237469">"Navn på installerte programmer"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"Apper"</string>
+    <string name="corpus_description_apps" msgid="7434542427108237469">"Navn på installerte apper"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Søkeprogrammer"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Innstillinger for søk"</string>
     <string name="search_settings" msgid="4101951238194600323">"Innstillinger for søk"</string>
