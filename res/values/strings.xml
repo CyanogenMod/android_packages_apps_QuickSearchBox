@@ -22,11 +22,11 @@
 
     <!-- Text in the dialog for confirming whether to remove an item from the search
          history. [CHAR_LIMIT=40] -->
-    <string name="remove_from_history">Remove from search history</string>
+    <string name="remove_from_history">Do you want to remove this item from the search history?</string>
 
     <!-- Toast text shown when the app fails to remove an item from
          the search history. [CHAR_LIMIT=60] -->
-    <string name="remove_from_history_failed">Couldn\'t remove item from history</string>
+    <string name="remove_from_history_failed">Couldn\'t remove item from history.</string>
 
     <!-- Source selector -->
     <string name="corpus_selection_heading">Search</string>
@@ -35,14 +35,14 @@
     <!-- Name of the combined Web source shown in QSB -->
     <string name="corpus_label_web">Web</string>
     <!-- Description of the combined Web source shown in QSB -->
-    <string name="corpus_description_web">Web search, bookmarks and browser history</string>
+    <string name="corpus_description_web">Web search, bookmarks, and browser history</string>
 
     <!-- Name of the Apps source shown in QSB -->
     <string name="corpus_label_apps">Apps</string>
     <!-- Settings description for the Apps source shown in QSB -->
     <string name="corpus_description_apps">Names of installed applications</string>
     <!-- Search hint for the Apps source shown in QSB -->
-    <string name="corpus_hint_apps">Search Apps</string>
+    <string name="corpus_hint_apps">Search apps</string>
 
     <!-- Search settings stuff -->
 
@@ -73,7 +73,7 @@
     <string name="clear_shortcuts_summary">Clear shortcuts to recently chosen search suggestions</string>
 
     <!--[CHAR LIMIT=200] Title used in the dialog shown after choosing the 'clear search shortcuts' setting. -->
-    <string name="clear_shortcuts_prompt">"This will clear all shortcuts to recently chosen search suggestions."\n\n"(To clear your Browser history, use the Browser's settings.)"</string>
+    <string name="clear_shortcuts_prompt">"Do you want to clear all shortcuts to recently chosen search suggestions?"\n\n"To clear your Browser history, use the Browser's settings."</string>
     <!--[CHAR LIMIT=30] Text used on the button to clear shortcuts in the dialog shown after choosing the 'clear search shortcuts' setting. -->
     <string name="clear_shortcuts_agree">Clear shortcuts</string>
     <!--[CHAR LIMIT=30] Text used on the button to cancel in the dialog shown after choosing the 'clear search shortcuts' setting. -->
@@ -100,8 +100,8 @@
     <!-- Title for Voice Search hints bubble -->
     <string name="voice_search_hint_title">Try saying:</string>
     <!-- Starting quotation marks of the voice search hint -->
-    <string name="voice_search_hint_quotation_start">“</string>
+    <string name="voice_search_hint_quotation_start">\"</string>
     <!-- Ending quotation marks of the voice search hint -->
-    <string name="voice_search_hint_quotation_end">”</string>
+    <string name="voice_search_hint_quotation_end">\"</string>
 
 </resources>
