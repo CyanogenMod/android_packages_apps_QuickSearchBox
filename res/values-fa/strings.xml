@@ -18,15 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"جستجو"</string>
     <string name="search_widget" msgid="323244086853110381">"جستجو"</string>
-    <string name="remove_from_history" msgid="6675934305676944437">"حذف از سابقه جستجو"</string>
-    <string name="remove_from_history_failed" msgid="7326173491060133769">"نمی‌توان مورد را از سابقه حذف کرد"</string>
+    <!-- outdated translation 6675934305676944437 -->     <string name="remove_from_history" msgid="8904048551022097518">"حذف از سابقه جستجو"</string>
+    <!-- outdated translation 7326173491060133769 -->     <string name="remove_from_history_failed" msgid="1200923379897420942">"نمی‌توان مورد را از سابقه حذف کرد"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"جستجو"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"همه"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"وب"</string>
-    <string name="corpus_description_web" msgid="5553049179123250409">"جستجوی وب، نشانک ها و سابقه جستجو"</string>
+    <!-- outdated translation 5553049179123250409 -->     <string name="corpus_description_web" msgid="6248923252805408647">"جستجوی وب، نشانک ها و سابقه جستجو"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"برنامه های کاربردی"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"نام های برنامه های نصب شده"</string>
-    <string name="corpus_hint_apps" msgid="4230401643970165739">"جستجوی Apps"</string>
+    <!-- outdated translation 4230401643970165739 -->     <string name="corpus_hint_apps" msgid="7759612845120599537">"جستجوی Apps"</string>
     <string name="menu_settings" msgid="5600043319144155953">"تنظیمات جستجو"</string>
     <string name="search_settings" msgid="4101951238194600323">"تنظیمات جستجو"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"جستجوی Google"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"انتخاب چیزی که باید در گوشی جستجو شود"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"پاک کردن میانبرها"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"پاک کردن میانبرهای پیشنهادات جستجوی انتخاب شده اخیر"</string>
-    <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"این همه میانبرهای پیشنهادات جستجوی انتخاب شده اخیر را پاک می کند "\n\n" (برای پاک کردن سابقه مرورگر، از تنظیمات مرورگر استفاده کنید.)"</string>
+    <!-- outdated translation 1383427830703301130 -->     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"این همه میانبرهای پیشنهادات جستجوی انتخاب شده اخیر را پاک می کند "\n\n" (برای پاک کردن سابقه مرورگر، از تنظیمات مرورگر استفاده کنید.)"</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"پاک کردن میانبرها"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"میانبرها پاک نشود"</string>
     <string name="menu_help" msgid="8466596486018760239">"راهنما"</string>
@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"جستجوی Google"</string>
     <string name="google_search_description" msgid="659411505885375623">"پیشنهادات جستجوی Google"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"بگویید:"</string>
-    <string name="voice_search_hint_quotation_start" msgid="566545847023692214">"“"</string>
-    <string name="voice_search_hint_quotation_end" msgid="4840921425933402938">"”"</string>
+    <!-- outdated translation 566545847023692214 -->     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"“"</string>
+    <!-- outdated translation 4840921425933402938 -->     <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"”"</string>
 </resources>
