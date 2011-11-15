@@ -21,7 +21,7 @@
     <string name="search_widget">Search</string>
 
     <!-- Text in the dialog for confirming whether to remove an item from the search
-         history. [CHAR_LIMIT=40] -->
+         history. [CHAR_LIMIT=NONE] -->
     <string name="remove_from_history">Do you want to remove this item from the search history?</string>
 
     <!-- Toast text shown when the app fails to remove an item from
