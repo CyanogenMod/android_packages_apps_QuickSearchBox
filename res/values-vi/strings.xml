@@ -34,9 +34,9 @@
     <string name="system_search_category_title" msgid="1507902891285388819">"Điện thoại"</string>
     <string name="search_sources" msgid="505874718206340313">"Mục có thể tìm kiếm"</string>
     <string name="search_sources_summary" msgid="9181194249796408374">"Chọn nội dung tìm kiếm trên điện thoại"</string>
-    <string name="clear_shortcuts" msgid="1964107586205103593">"Xoá lối tắt"</string>
-    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Xoá lối tắt tới đề xuất tìm kiếm đã chọn gần đây"</string>
-    <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"Thao tác này sẽ xoá tất cả lối tắt tới đề xuất tìm kiếm được chọn gần đây."\n\n"(Để xoá lịch sử Trình duyệt, hãy sử dụng cài đặt của Trình duyệt)."</string>
+    <string name="clear_shortcuts" msgid="1964107586205103593">"Xóa lối tắt"</string>
+    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Xóa lối tắt tới đề xuất tìm kiếm đã chọn gần đây"</string>
+    <string name="clear_shortcuts_prompt" msgid="1383427830703301130">"Thao tác này sẽ xóa tất cả lối tắt tới đề xuất tìm kiếm được chọn gần đây."\n\n"(Để xóa lịch sử Trình duyệt, hãy sử dụng cài đặt của Trình duyệt)."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Xóa lối tắt"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Không xóa lối tắt"</string>
     <string name="menu_help" msgid="8466596486018760239">"Trợ giúp"</string>
