@@ -18,15 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"搜尋"</string>
     <string name="search_widget" msgid="323244086853110381">"搜尋"</string>
-    <!-- outdated translation 6675934305676944437 -->     <string name="remove_from_history" msgid="8904048551022097518">"從搜尋記錄中移除"</string>
-    <!-- outdated translation 7326173491060133769 -->     <string name="remove_from_history_failed" msgid="1200923379897420942">"無法從記錄中移除項目"</string>
+    <string name="remove_from_history" msgid="8904048551022097518">"您要從搜尋記錄中移除這個項目嗎？"</string>
+    <string name="remove_from_history_failed" msgid="1200923379897420942">"無法移除記錄中的項目。"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"搜尋"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"全部"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"網頁"</string>
-    <!-- outdated translation 5553049179123250409 -->     <string name="corpus_description_web" msgid="6248923252805408647">"網頁搜尋、書籤和瀏覽器記錄"</string>
+    <string name="corpus_description_web" msgid="6248923252805408647">"網頁搜尋、書籤和瀏覽記錄"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"應用程式"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"已安裝的應用程式名稱"</string>
-    <!-- outdated translation 4230401643970165739 -->     <string name="corpus_hint_apps" msgid="7759612845120599537">"搜尋應用程式"</string>
+    <string name="corpus_hint_apps" msgid="7759612845120599537">"搜尋應用程式"</string>
     <string name="menu_settings" msgid="5600043319144155953">"搜尋設定"</string>
     <string name="search_settings" msgid="4101951238194600323">"搜尋設定"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Google 搜尋"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"選取要在手機上搜尋的內容"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"清除搜尋捷徑"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"清除最近選擇搜尋建議時建立的所有捷徑"</string>
-    <!-- outdated translation 1383427830703301130 -->     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"這會清除最近選擇搜尋建議時建立的所有捷徑。"\n\n"(若要清除瀏覽記錄，請使用瀏覽器的設定選項)。"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"您要清除所有連結到最近選擇的搜尋建議的捷徑嗎？"\n\n"如要清除瀏覽記錄，請使用瀏覽器的設定選項。"</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"清除捷徑"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"不清除捷徑"</string>
     <string name="menu_help" msgid="8466596486018760239">"說明"</string>
@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"Google 搜尋"</string>
     <string name="google_search_description" msgid="659411505885375623">"Google 搜尋建議"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"請說："</string>
-    <!-- outdated translation 566545847023692214 -->     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"“"</string>
-    <!-- outdated translation 4840921425933402938 -->     <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"”"</string>
+    <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"「"</string>
+    <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"」"</string>
 </resources>

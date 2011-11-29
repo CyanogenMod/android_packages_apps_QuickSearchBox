@@ -18,15 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Haku"</string>
     <string name="search_widget" msgid="323244086853110381">"Haku"</string>
-    <!-- outdated translation 6675934305676944437 -->     <string name="remove_from_history" msgid="8904048551022097518">"Poista hakuhistoriasta"</string>
-    <!-- outdated translation 7326173491060133769 -->     <string name="remove_from_history_failed" msgid="1200923379897420942">"Kohteen poisto historiasta epäonnistui."</string>
+    <string name="remove_from_history" msgid="8904048551022097518">"Haluatko poistaa kohteen hakuhistoriasta?"</string>
+    <string name="remove_from_history_failed" msgid="1200923379897420942">"Kohteen poisto historiasta epäonnistui."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Haku"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Kaikki"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Verkko"</string>
-    <!-- outdated translation 5553049179123250409 -->     <string name="corpus_description_web" msgid="6248923252805408647">"Verkkohaku, kirjanmerkit ja selaushistoria"</string>
+    <string name="corpus_description_web" msgid="6248923252805408647">"Verkkohaku, kirjanmerkit ja selaushistoria"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Sovellukset"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Asennettujen sovelluksien nimet"</string>
-    <!-- outdated translation 4230401643970165739 -->     <string name="corpus_hint_apps" msgid="7759612845120599537">"Sovellushaku"</string>
+    <string name="corpus_hint_apps" msgid="7759612845120599537">"Hae sovelluksia"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Hakuasetukset"</string>
     <string name="search_settings" msgid="4101951238194600323">"Hakuasetukset"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Google-haku"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Valitse, mitä haluat hakea"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Tyhjennä pikakuvakkeet"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Tyhjennä äskettäin valittujen hakuehdotuksien pikakuvakkeet."</string>
-    <!-- outdated translation 1383427830703301130 -->     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Tämä tyhjentää kaikki äskettäin valittujen hakuehdotuksien pikakuvakkeet."\n\n"(Käytä selaimen asetuksia, jos haluat tyhjentää selaushistoriasi)"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Haluatko poistaa kaikki pikakuvakkeet äskettäin valittuihin hakuehdotuksiin?"\n\n"Voit poistaa selaushistorian selaimen asetuksissa."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Tyhjennä pikakuvakkeet"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Älä tyhjennä pikakuvakkeita"</string>
     <string name="menu_help" msgid="8466596486018760239">"Ohje"</string>
@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"Google-haku"</string>
     <string name="google_search_description" msgid="659411505885375623">"Google-haun ehdotukset"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Kokeile sanoa:"</string>
-    <!-- outdated translation 566545847023692214 -->     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"\""</string>
-    <!-- outdated translation 4840921425933402938 -->     <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"\""</string>
+    <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"\""</string>
+    <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"\""</string>
 </resources>

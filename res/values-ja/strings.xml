@@ -18,15 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"検索"</string>
     <string name="search_widget" msgid="323244086853110381">"検索"</string>
-    <!-- outdated translation 6675934305676944437 -->     <string name="remove_from_history" msgid="8904048551022097518">"検索履歴から削除"</string>
-    <!-- outdated translation 7326173491060133769 -->     <string name="remove_from_history_failed" msgid="1200923379897420942">"検索履歴から項目を削除できませんでした"</string>
+    <string name="remove_from_history" msgid="8904048551022097518">"この項目を検索履歴から削除してよろしいですか？"</string>
+    <string name="remove_from_history_failed" msgid="1200923379897420942">"検索履歴から項目を削除できませんでした。"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"検索"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"すべて"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"ウェブ"</string>
-    <!-- outdated translation 5553049179123250409 -->     <string name="corpus_description_web" msgid="6248923252805408647">"ウェブ検索、ブックマーク、ブラウザ履歴"</string>
+    <string name="corpus_description_web" msgid="6248923252805408647">"ウェブ検索、ブックマーク、ブラウザ履歴"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"アプリケーション"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"インストールされているアプリケーション名"</string>
-    <!-- outdated translation 4230401643970165739 -->     <string name="corpus_hint_apps" msgid="7759612845120599537">"アプリケーションを検索"</string>
+    <string name="corpus_hint_apps" msgid="7759612845120599537">"アプリを検索"</string>
     <string name="menu_settings" msgid="5600043319144155953">"検索設定"</string>
     <string name="search_settings" msgid="4101951238194600323">"検索設定"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Google検索"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"携帯内部の検索する対象を選択する"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"ショートカットを消去"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"最近選択した検索候補へのショートカットを消去する"</string>
-    <!-- outdated translation 1383427830703301130 -->     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"最近選択した検索候補へのショートカットがすべて削除されます。"\n\n"（ブラウザの履歴を消去するにはブラウザの設定を使用してください。）"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"最近選択された検索のヒントのショートカットをすべて消去してよろしいですか？"\n\n"ブラウザ履歴を消去する場合は、ブラウザの設定を使用してください。"</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"ショートカットを消去"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"ショートカットを消去しない"</string>
     <string name="menu_help" msgid="8466596486018760239">"ヘルプ"</string>
@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"Google検索"</string>
     <string name="google_search_description" msgid="659411505885375623">"Googleの検索候補"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"話してみてください:"</string>
-    <!-- outdated translation 566545847023692214 -->     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"「"</string>
-    <!-- outdated translation 4840921425933402938 -->     <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"」"</string>
+    <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"\""</string>
+    <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"\""</string>
 </resources>

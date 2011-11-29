@@ -18,15 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Ieškoti"</string>
     <string name="search_widget" msgid="323244086853110381">"Ieškoti"</string>
-    <!-- outdated translation 6675934305676944437 -->     <string name="remove_from_history" msgid="8904048551022097518">"Pašalinti iš paieškos istorijos"</string>
-    <!-- outdated translation 7326173491060133769 -->     <string name="remove_from_history_failed" msgid="1200923379897420942">"Nepavyko pašalinti elemento iš istorijos"</string>
+    <string name="remove_from_history" msgid="8904048551022097518">"Ar norite pašal. šį el. iš p. istorijos?"</string>
+    <string name="remove_from_history_failed" msgid="1200923379897420942">"Nepavyko pašalinti elemento iš istorijos."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Ieškoti"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Visi"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Žiniatinklis"</string>
-    <!-- outdated translation 5553049179123250409 -->     <string name="corpus_description_web" msgid="6248923252805408647">"Paieška žiniatinklyje, žymės ir naršyklės istorija"</string>
+    <string name="corpus_description_web" msgid="6248923252805408647">"Žiniatinklio paieška, žymės ir naršyklės istorija"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"„Apps“"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Įdiegtų programų pavadinimai"</string>
-    <!-- outdated translation 4230401643970165739 -->     <string name="corpus_hint_apps" msgid="7759612845120599537">"Ieškoti „Apps“"</string>
+    <string name="corpus_hint_apps" msgid="7759612845120599537">"Paieškos programėlės"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Paieškos nustatymai"</string>
     <string name="search_settings" msgid="4101951238194600323">"Paieškos nustatymai"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"„Google“ paieška"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Pasirinkite, ko ieškosite telefone"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Išvalyti sparčiuosius klavišus"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Išvalyti pasirinktų paieškos pasiūlymų sparčiuosius klavišus"</string>
-    <!-- outdated translation 1383427830703301130 -->     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Bus išvalyti visi paskutiniu metu pasirinkti paieškos pasiūlymų spartieji klavišai."\n\n"(Jei norite išvalyti naršyklės istoriją, naudokite naršyklės nustatymus.)"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Ar norite išvalyti visas nuorodas į neseniai pasirinktus paieškos pasiūlymus?"\n\n"Jei norite išvalyti naršyklės istoriją, naudokite naršyklės nustatymus."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Išval. sparč. klav."</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Neišvalyti sparčiųjų klavišų"</string>
     <string name="menu_help" msgid="8466596486018760239">"Pagalba"</string>
@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"„Google“ paieška"</string>
     <string name="google_search_description" msgid="659411505885375623">"„Google“ paieškos siūlymai"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Pabandykite pasakyti:"</string>
-    <!-- outdated translation 566545847023692214 -->     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"„"</string>
-    <!-- outdated translation 4840921425933402938 -->     <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"“"</string>
+    <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"„"</string>
+    <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"“"</string>
 </resources>

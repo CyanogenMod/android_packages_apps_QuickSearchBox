@@ -18,15 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Iskanje"</string>
     <string name="search_widget" msgid="323244086853110381">"Iskanje"</string>
-    <!-- outdated translation 6675934305676944437 -->     <string name="remove_from_history" msgid="8904048551022097518">"Odstrani iz zgodovine iskanja"</string>
-    <!-- outdated translation 7326173491060133769 -->     <string name="remove_from_history_failed" msgid="1200923379897420942">"Elementa ni bilo mogoče odstraniti iz zgodovine"</string>
+    <string name="remove_from_history" msgid="8904048551022097518">"Ali želite ta element izbrisati iz zgodovine iskanja?"</string>
+    <string name="remove_from_history_failed" msgid="1200923379897420942">"Elementa ni bilo mogoče odstraniti iz zgodovine."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Iskanje"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Vse"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Splet"</string>
-    <!-- outdated translation 5553049179123250409 -->     <string name="corpus_description_web" msgid="6248923252805408647">"Spletno iskanje, zaznamki in zgodovina brskalnika"</string>
+    <string name="corpus_description_web" msgid="6248923252805408647">"Spletno iskanje, zaznamki in zgodovina brskanja"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Google Aplikacije"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Imena nameščenih programov"</string>
-    <!-- outdated translation 4230401643970165739 -->     <string name="corpus_hint_apps" msgid="7759612845120599537">"Iskanje po Google Aplikacijah"</string>
+    <string name="corpus_hint_apps" msgid="7759612845120599537">"Iskanje programov"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Nastavitve iskanja"</string>
     <string name="search_settings" msgid="4101951238194600323">"Nastavitve iskanja"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Iskanje Google"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Izberite, kaj želite iskati v telefonu"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Počisti bližnjice"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Počisti bližnjice do nazadnje izbranih predlogov iskanja"</string>
-    <!-- outdated translation 1383427830703301130 -->     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"To dejanje počisti vse bližnjice do nazadnje izbranih predlogov iskanja."\n\n"(Če želite počistiti zgodovino brskalnika, uporabite nastavitve brskalnika.)"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Ali želite izbrisati vse bližnjice do nedavno izbranih predlogov iskanja?"\n\n"Zgodovino brskanja lahko izbrišete v nastavitvah brskalnika."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Počisti bližnjice"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Ne počisti bližnjic"</string>
     <string name="menu_help" msgid="8466596486018760239">"Pomoč"</string>
@@ -45,6 +45,6 @@
     <string name="google_search_hint" msgid="8374014384681586649">"Iskanje Google"</string>
     <string name="google_search_description" msgid="659411505885375623">"Priporočila Iskanja Google"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Recite:"</string>
-    <!-- outdated translation 566545847023692214 -->     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"»"</string>
-    <!-- outdated translation 4840921425933402938 -->     <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"«"</string>
+    <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"»"</string>
+    <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"«"</string>
 </resources>
