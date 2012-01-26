@@ -25,10 +25,12 @@
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Tschertga"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Tut"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
-    <!-- outdated translation 5553049179123250409 -->     <string name="corpus_description_web" msgid="6248923252805408647">"\"Tschertga en il web, segnapaginas e cronologia dal navigatur\""</string>
+    <!-- no translation found for corpus_description_web (6248923252805408647) -->
+    <skip />
     <string name="corpus_label_apps" msgid="73123028704144731">"Applicaziuns"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Nums da las applicaziuns installadas"</string>
-    <!-- outdated translation 4230401643970165739 -->     <string name="corpus_hint_apps" msgid="7759612845120599537">"Tschertgar en las applicaziuns"</string>
+    <!-- no translation found for corpus_hint_apps (7759612845120599537) -->
+    <skip />
     <string name="menu_settings" msgid="5600043319144155953">"Parameters da tschertgar"</string>
     <string name="search_settings" msgid="4101951238194600323">"Parameters da tschertgar"</string>
     <!-- no translation found for google_settings_category_title (770300575312669210) -->
@@ -40,7 +42,8 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Tscherna da las funtaunas che duain vegnir retschertgadas"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Stizzar las scursanidas"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Stizzar las scursanidas a propostas da tschertga utilisadas dacurt"</string>
-    <!-- outdated translation 1383427830703301130 -->     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"\"Tut las scursanidas a propostas da tschertga tschernidas dacurt vegnan stizzadas."\n\n"(Per stizzar la cronologia dal navigatur, utilisai ils parameters dal navigatur.)\""</string>
+    <!-- no translation found for clear_shortcuts_prompt (6487883523491520343) -->
+    <skip />
     <!-- no translation found for clear_shortcuts_agree (5623666487205882033) -->
     <skip />
     <!-- no translation found for clear_shortcuts_disagree (3667707814933648461) -->
@@ -54,6 +57,8 @@
     <skip />
     <!-- no translation found for voice_search_hint_title (9160095960228453779) -->
     <skip />
-    <!-- outdated translation 566545847023692214 -->     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"«"</string>
-    <!-- outdated translation 4840921425933402938 -->     <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"»"</string>
+    <!-- no translation found for voice_search_hint_quotation_start (5648752104255950621) -->
+    <skip />
+    <!-- no translation found for voice_search_hint_quotation_end (3400099768332101719) -->
+    <skip />
 </resources>
