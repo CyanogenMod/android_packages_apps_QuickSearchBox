@@ -26,7 +26,7 @@
     <string name="corpus_description_web" msgid="5553049179123250409">"Websuche, Lesezeichen und Browserverlauf"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Apps"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Namen der installierten Apps"</string>
-    <string name="corpus_hint_apps" msgid="4230401643970165739">"Apps durchsuchen"</string>
+    <string name="corpus_hint_apps" msgid="4230401643970165739">"In Apps suchen"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Sucheinstellungen"</string>
     <string name="search_settings" msgid="4101951238194600323">"Sucheinstellungen"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Google-Suche"</string>
