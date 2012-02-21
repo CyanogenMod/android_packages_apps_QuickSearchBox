@@ -41,7 +41,7 @@
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Moenie kortpaaie uitvee nie"</string>
     <string name="menu_help" msgid="8466596486018760239">"Hulp"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
-    <string name="google_app_label" msgid="7877830942664670350">"Google Soek"</string>
+    <string name="google_app_label" msgid="7877830942664670350">"Google Search"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Google Search"</string>
     <string name="google_search_description" msgid="659411505885375623">"Google Search-voorstelle"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Sê eerder:"</string>
