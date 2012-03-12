@@ -27,8 +27,8 @@
     <string name="corpus_label_apps" msgid="73123028704144731">"Apps"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Nama aplikasi yang terpasang"</string>
     <string name="corpus_hint_apps" msgid="7759612845120599537">"Telusuri apl"</string>
-    <string name="menu_settings" msgid="5600043319144155953">"Pengaturan penelusuran"</string>
-    <string name="search_settings" msgid="4101951238194600323">"Pengaturan penelusuran"</string>
+    <string name="menu_settings" msgid="5600043319144155953">"Setelan penelusuran"</string>
+    <string name="search_settings" msgid="4101951238194600323">"Setelan penelusuran"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Google Penelusuran"</string>
     <string name="device_settings_category_title" msgid="2378889894648580869">"Hapus pintasan"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Telepon"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Pilih apa yang ditelusuri pada ponsel"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Hapus pintasan"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Menghapus pintasan pada saran penelusuran yang dipilih baru-baru ini"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Hapus semua pintasan ke saran penelusuran yang baru-baru ini dipilih?"\n\n"Untuk menghapus riwayat Browser Anda, gunakan pengaturan Browser."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Hapus semua pintasan ke saran penelusuran yang baru-baru ini dipilih?"\n\n"Untuk menghapus riwayat Browser Anda, gunakan setelan Browser."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Hapus pintasan"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Jangan hapus pintasan"</string>
     <string name="menu_help" msgid="8466596486018760239">"Bantuan"</string>
