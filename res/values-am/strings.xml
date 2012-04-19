@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"ስልኩ ላይ ምን እንደሚፈለግ ምረጥ"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"አቋራጮችን አጥራ"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"በቅርብ ጊዜ የተመረጡ የፍለጋ ምክሮች አቋራጮችን አጥራ"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"በቅርቡ ለተመረጡት የፍለጋ አስተያየቶች ሁሉንም አቋራጮች ማጽዳት ትፈልጋለህ?"\n\n"የአሳሸ ታሪክህን ለማጽዳት፤የአሳሹን ቅንጅቶች ተጠቀም፡፡"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"በቅርቡ ለተመረጡት የፍለጋ አስተያየቶች ሁሉንም አቋራጮች ማጽዳት ትፈልጋለህ?"\n\n"የአሳሸ ታሪክህን ለማጽዳት፤የአሳሹን ቅንብሮች  ተጠቀም፡፡"</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"አቋራጮች አጥራ"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"አቋራጮች አታጥራ"</string>
     <string name="menu_help" msgid="8466596486018760239">"እገዛ"</string>
