@@ -29,7 +29,7 @@ import com.android.quicksearchbox.util.NamedTaskExecutor;
 import com.android.quicksearchbox.util.PerNameExecutor;
 import com.android.quicksearchbox.util.PriorityThreadFactory;
 import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
-import com.google.common.util.concurrent.NamingThreadFactory;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import android.app.Activity;
 import android.content.Context;
@@ -278,8 +278,12 @@ public class QsbApplication {
     }
 
     protected ShortcutRepository createShortcutRepository() {
-        ThreadFactory logThreadFactory = new NamingThreadFactory("ShortcutRepositoryWriter #%d",
-                new PriorityThreadFactory(Process.THREAD_PRIORITY_BACKGROUND));
+        ThreadFactory logThreadFactory =
+                new ThreadFactoryBuilder()
+                .setNameFormat("ShortcutRepository #%d")
+                .setThreadFactory(new PriorityThreadFactory(
+                        Process.THREAD_PRIORITY_BACKGROUND))
+                .build();
         Executor logExecutor = Executors.newSingleThreadExecutor(logThreadFactory);
         return ShortcutRepositoryImplLog.create(getContext(), getConfig(), getCorpora(),
             getShortcutRefresher(), getMainThreadHandler(), logExecutor);
@@ -334,8 +338,10 @@ public class QsbApplication {
     protected ThreadFactory createQueryThreadFactory() {
         String nameFormat = "QSB #%d";
         int priority = getConfig().getQueryThreadPriority();
-        return new NamingThreadFactory(nameFormat,
-                new PriorityThreadFactory(priority));
+        return new ThreadFactoryBuilder()
+                .setNameFormat(nameFormat)
+                .setThreadFactory(new PriorityThreadFactory(priority))
+                .build();
     }
 
     /**
