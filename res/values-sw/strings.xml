@@ -39,7 +39,7 @@
     <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Unataka kuondoa njia zote za mkato za mapendekezo ya utafutaji yaliyochaguliwa hivi karibuni?"\n\n" Ili kuondoa historia ya Kivinjari chako tumia mipangilio ya Kivinjari."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Futa njia za mkato"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Usifute njia za mkato"</string>
-    <string name="menu_help" msgid="8466596486018760239">"Msaada"</string>
+    <string name="menu_help" msgid="8466596486018760239">"Usaidizi"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_app_label" msgid="7877830942664670350">"Utafutaji wa Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Utafutaji wa Google"</string>
