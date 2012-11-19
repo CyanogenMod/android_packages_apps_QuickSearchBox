@@ -74,8 +74,8 @@
         </activity>
 
         <provider android:name=".ShortcutsProvider"
-                android:authorities="com.android.quicksearchbox.shortcuts">
-        </provider>
+            android:authorities="com.android.quicksearchbox.shortcuts"
+            android:exported="true" />
 
         <activity android:name=".preferences.SearchSettingsActivity"
                 android:label="@string/search_settings"
@@ -131,7 +131,8 @@
 
         <provider android:name=".google.GoogleSuggestionProvider"
             android:label="@string/google_search_label"
-            android:authorities="com.android.quicksearchbox.google" />
+            android:authorities="com.android.quicksearchbox.google"
+            android:exported="true" />
 
     </application>
 </manifest>

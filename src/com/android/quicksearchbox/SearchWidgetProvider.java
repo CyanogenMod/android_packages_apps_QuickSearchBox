@@ -143,7 +143,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static class SearchWidgetState {
         private final int mAppWidgetId;
-        private Intent mCorpusIndicatorIntent;
         private Intent mQueryTextViewIntent;
         private Intent mVoiceSearchIntent;
 
@@ -163,18 +162,8 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             if (DBG) Log.d(TAG, "Updating appwidget " + mAppWidgetId);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
 
-            // Corpus indicator
-            if (mCorpusIndicatorIntent != null) {
-                setOnClickActivityIntent(context, views, R.id.search_icon,
-                        mCorpusIndicatorIntent);
-            }
-
-            // Text view
-            if (mQueryTextViewIntent != null) {
-                setOnClickActivityIntent(context, views, R.id.search_widget_text,
-                        mQueryTextViewIntent);
-            }
-
+            setOnClickActivityIntent(context, views, R.id.search_widget_text,
+                    mQueryTextViewIntent);
             // Voice Search button
             if (mVoiceSearchIntent != null) {
                 setOnClickActivityIntent(context, views, R.id.search_widget_voice_btn,
