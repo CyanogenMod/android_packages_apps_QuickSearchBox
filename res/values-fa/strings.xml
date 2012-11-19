@@ -24,8 +24,8 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"همه"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"وب"</string>
     <string name="corpus_description_web" msgid="6248923252805408647">"جستجوی وب، نشانک‌ها و سابقه مرورگر"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"برنامه های کاربردی"</string>
-    <string name="corpus_description_apps" msgid="7434542427108237469">"نام های برنامه های نصب شده"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"برنامه‌های کاربردی"</string>
+    <string name="corpus_description_apps" msgid="7434542427108237469">"نام‌های برنامه‌های نصب شده"</string>
     <string name="corpus_hint_apps" msgid="7759612845120599537">"جستجوی برنامه‌ها"</string>
     <string name="menu_settings" msgid="5600043319144155953">"تنظیمات جستجو"</string>
     <string name="search_settings" msgid="4101951238194600323">"تنظیمات جستجو"</string>

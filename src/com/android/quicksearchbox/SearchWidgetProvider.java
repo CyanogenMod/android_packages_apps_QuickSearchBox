@@ -143,7 +143,6 @@ public class SearchWidgetProvider extends BroadcastReceiver {
 
     private static class SearchWidgetState {
         private final int mAppWidgetId;
-        private Intent mCorpusIndicatorIntent;
         private Intent mQueryTextViewIntent;
         private Intent mVoiceSearchIntent;
 
