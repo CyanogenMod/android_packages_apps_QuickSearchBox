@@ -163,10 +163,11 @@ public class SearchWidgetProvider extends BroadcastReceiver {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.search_widget);
 
             // Corpus indicator
-            if (mCorpusIndicatorIntent != null) {
+            // fixme missing apis
+            /*if (mCorpusIndicatorIntent != null) {
                 setOnClickActivityIntent(context, views, R.id.search_icon,
                         mCorpusIndicatorIntent);
-            }
+            }*/
 
             // Text view
             if (mQueryTextViewIntent != null) {
