@@ -41,11 +41,11 @@
     <string name="corpus_hint_apps">Search Apps</string>
 
     <!-- Name of the Apps and Market source shown in QSB -->
-    <string name="corpus_label_apps_market">Apps and Market</string>
+    <string name="corpus_label_apps_market">Apps and Play Store</string>
     <!-- Settings description for the Apps and Market source shown in QSB -->
-    <string name="corpus_description_apps_market">Installed Apps and Apps from Market</string>
+    <string name="corpus_description_apps_market">Installed Apps and Apps from Play Store</string>
     <!-- Search hint for the Apps source shown in QSB -->
-    <string name="corpus_hint_apps_market">Search Apps and Market</string>
+    <string name="corpus_hint_apps_market">Search Apps and Play Store</string>
 
 
     <!-- Search settings stuff -->
