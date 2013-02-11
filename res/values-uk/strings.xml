@@ -24,7 +24,7 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"Усі"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Веб"</string>
     <string name="corpus_description_web" msgid="6248923252805408647">"Веб-пошук, закладки й історія веб-переглядача"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"Служби"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"Програми"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Назви встановлених програм"</string>
     <string name="corpus_hint_apps" msgid="7759612845120599537">"Пошук у програмах"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Налашт-ня пошуку"</string>
