@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2009 The Android Open Source Project
+<!-- Copyright (C) 2009 The Android Open Source Project
+     Copyright (C) 2013 The CyanogenMod Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
- -->
+-->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
@@ -27,9 +28,9 @@
     <string name="corpus_label_apps" msgid="73123028704144731">"Applications"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Noms des applications installées"</string>
     <string name="corpus_hint_apps" msgid="4230401643970165739">"Rechercher dans les applications"</string>
-    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Applications et Android Market"</string>
-    <string name="corpus_description_apps_market" msgid="6676825865398169853">"Applications installées et applications Android Market"</string>
-    <string name="corpus_hint_apps_market" msgid="627025611326022658">"Rechercher dans les applications et Android Market"</string>
+    <string name="corpus_label_apps_market" msgid="7625179316335589490">"Applications et Google Play"</string>
+    <string name="corpus_description_apps_market" msgid="6676825865398169853">"Applications installées et applications Google Play"</string>
+    <string name="corpus_hint_apps_market" msgid="627025611326022658">"Rechercher dans les applications et Google Play"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Paramètres de recherche"</string>
     <string name="search_settings" msgid="4101951238194600323">"Paramètres de recherche"</string>
     <string name="web_search_category_title" msgid="3696363552067530526">"Web"</string>
