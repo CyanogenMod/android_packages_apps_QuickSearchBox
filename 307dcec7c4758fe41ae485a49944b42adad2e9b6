@@ -1,0 +1,11 @@
+Change-Id: I351351286b73406e079025348fdb94e35f274cbf
+Code-Review+2: Marco Brohet <therbom@gmail.com>
+Verified+1: Marco Brohet <therbom@gmail.com>
+Code-Review+1: Julien Gainza <gainza.julien@gmail.com>
+Code-Review+1: Delphin PETER <delphinpeter@gmail.com>
+Code-Review+1: Thibault LEMOINE <thibaultblizz@gmail.com>
+Submitted-by: Marco Brohet <therbom@gmail.com>
+Submitted-at: Fri, 08 Mar 2013 12:46:48 -0800
+Reviewed-on: http://review.cyanogenmod.org/33036
+Project: CyanogenMod/android_packages_apps_QuickSearchBox
+Branch: refs/heads/gingerbread
