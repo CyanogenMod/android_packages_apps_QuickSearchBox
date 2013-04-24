@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"搜尋"</string>
     <string name="search_widget" msgid="323244086853110381">"搜尋"</string>
-    <string name="remove_from_history" msgid="8904048551022097518">"您要從搜尋記錄中移除這個項目嗎？"</string>
+    <string name="remove_from_history" msgid="8904048551022097518">"您要從搜尋紀錄中移除這個項目嗎？"</string>
     <string name="remove_from_history_failed" msgid="1200923379897420942">"無法移除記錄中的項目。"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"搜尋"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"全部"</string>
