@@ -29,7 +29,7 @@
     <string name="corpus_hint_apps" msgid="7759612845120599537">"Поиск приложений"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Настройки поиска"</string>
     <string name="search_settings" msgid="4101951238194600323">"Настройки поиска"</string>
-    <string name="google_settings_category_title" msgid="770300575312669210">"Поиск Google"</string>
+    <string name="google_settings_category_title" msgid="770300575312669210">"Google Поиск"</string>
     <string name="device_settings_category_title" msgid="2378889894648580869">"Удалить ярлыки"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"Телефон"</string>
     <string name="search_sources" msgid="505874718206340313">"Источники поиска"</string>
@@ -41,8 +41,8 @@
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Не очищать ярлыки"</string>
     <string name="menu_help" msgid="8466596486018760239">"Справка"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
-    <string name="google_app_label" msgid="7877830942664670350">"Поиск Google"</string>
-    <string name="google_search_hint" msgid="8374014384681586649">"Поиск Google"</string>
+    <string name="google_app_label" msgid="7877830942664670350">"Google Поиск"</string>
+    <string name="google_search_hint" msgid="8374014384681586649">"Google Поиск"</string>
     <string name="google_search_description" msgid="659411505885375623">"Поисковые подсказки Google"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"Попробуйте сказать:"</string>
     <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"\""</string>
