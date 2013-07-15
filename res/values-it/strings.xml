@@ -24,7 +24,7 @@
     <string name="corpus_label_global" msgid="8787849559975296772">"Tutto"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Web"</string>
     <string name="corpus_description_web" msgid="6248923252805408647">"Ricerca web, segnalibri e cronologia browser"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"Applicazioni"</string>
+    <string name="corpus_label_apps" msgid="73123028704144731">"App"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Nomi delle applicazioni installate"</string>
     <string name="corpus_hint_apps" msgid="7759612845120599537">"Cerca nelle applicazioni"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Impostazioni ricerca"</string>
