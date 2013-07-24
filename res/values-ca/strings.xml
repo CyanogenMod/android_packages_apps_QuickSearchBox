@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"Cerca"</string>
     <string name="search_widget" msgid="323244086853110381">"Cerca"</string>
-    <string name="remove_from_history" msgid="8904048551022097518">"Vols eliminar element d\'histo. de cerca?"</string>
+    <string name="remove_from_history" msgid="8904048551022097518">"Eliminar aquest element de l\'historial?"</string>
     <string name="remove_from_history_failed" msgid="1200923379897420942">"No s\'ha pogut eliminar l\'element de l\'historial."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Cerca"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Tots"</string>
@@ -26,7 +26,7 @@
     <string name="corpus_description_web" msgid="6248923252805408647">"Cerca web, marcadors i historial del navegador"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Aplicacions"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Noms d\'aplicacions instal·lades"</string>
-    <string name="corpus_hint_apps" msgid="7759612845120599537">"Aplicacions de cerca"</string>
+    <string name="corpus_hint_apps" msgid="7759612845120599537">"Cerca a les aplicacions"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Configuració de la cerca"</string>
     <string name="search_settings" msgid="4101951238194600323">"Configuració de la cerca"</string>
     <string name="google_settings_category_title" msgid="770300575312669210">"Cerca de Google"</string>
@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Trieu què voleu cercar al telèfon"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Esborra les dreceres"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Esborra les dreceres als suggeriments de cerca seleccionats recentment"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vols esborrar totes les dreceres als suggeriments de cerca que hagis seleccionat recentment?"\n\n"Per esborrar l\'historial del navegador, fes servir la configuració del navegador."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vols esborrar totes les dreceres als suggeriments de cerca seleccionats recentment?"\n\n"Per esborrar l\'historial del navegador, fes-ne servir les opcions de configuració."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Esborra les dreceres"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"No esborris les dreceres"</string>
     <string name="menu_help" msgid="8466596486018760239">"Ajuda"</string>

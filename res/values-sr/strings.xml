@@ -23,7 +23,7 @@
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Претрага"</string>
     <string name="corpus_label_global" msgid="8787849559975296772">"Све"</string>
     <string name="corpus_label_web" msgid="3551946782975352067">"Веб"</string>
-    <string name="corpus_description_web" msgid="6248923252805408647">"Веб претрага, обележивачи и историја прегледача"</string>
+    <string name="corpus_description_web" msgid="6248923252805408647">"Веб-претрага, обележивачи и историја прегледача"</string>
     <string name="corpus_label_apps" msgid="73123028704144731">"Апликације"</string>
     <string name="corpus_description_apps" msgid="7434542427108237469">"Називи инсталираних апликација"</string>
     <string name="corpus_hint_apps" msgid="7759612845120599537">"Претражите апликације"</string>
