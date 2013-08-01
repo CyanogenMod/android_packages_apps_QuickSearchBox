@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"选择要在手机上搜索的内容"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"清除快捷方式"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"清除最近所选搜索建议的快捷方式"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"您要清除所有近期选择的搜索建议的快捷方式吗？"\n\n"要清除浏览器历史记录，请使用浏览器的设置。"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"您要清除所有近期选择的搜索建议的快捷方式吗？\n\n要清除浏览器历史记录，请使用浏览器的设置。"</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"清除快捷方式"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"不清除快捷方式"</string>
     <string name="menu_help" msgid="8466596486018760239">"帮助"</string>

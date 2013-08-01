@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Izberite, kaj želite iskati v telefonu"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Počisti bližnjice"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Počisti bližnjice do nazadnje izbranih predlogov iskanja"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Ali želite izbrisati vse bližnjice do nedavno izbranih predlogov iskanja?"\n\n"Zgodovino brskanja lahko izbrišete v nastavitvah brskalnika."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Ali želite izbrisati vse bližnjice do nedavno izbranih predlogov iskanja?\n\nZgodovino brskanja lahko izbrišete v nastavitvah brskalnika."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Počisti bližnjice"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Ne počisti bližnjic"</string>
     <string name="menu_help" msgid="8466596486018760239">"Pomoč"</string>

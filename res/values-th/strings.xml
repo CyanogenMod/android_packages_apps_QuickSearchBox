@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"เลือกสิ่งที่จะค้นหาบนโทรศัพท์"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"ล้างข้อมูลทางลัด"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"ล้างทางลัดไปยังการแนะนำคำค้นหาที่เลือกไว้เมื่อไม่นานมานี้"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"คุณต้องการล้างทางลัดทั้งหมดรวมถึงคำแนะนำการค้นหาที่เลือกเมื่อเร็วๆ นี้ด้วยหรือไม่"\n\n"หากต้องการล้างประวัติเบราว์เซอร์ของคุณ ให้ใช้การตั้งค่าเบราว์เซอร์"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"คุณต้องการล้างทางลัดทั้งหมดรวมถึงคำแนะนำการค้นหาที่เลือกเมื่อเร็วๆ นี้ด้วยหรือไม่\n\nหากต้องการล้างประวัติเบราว์เซอร์ของคุณ ให้ใช้การตั้งค่าเบราว์เซอร์"</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"ล้างข้อมูลทางลัด"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"ไม่ล้างข้อมูลทางลัด"</string>
     <string name="menu_help" msgid="8466596486018760239">"ความช่วยเหลือ"</string>

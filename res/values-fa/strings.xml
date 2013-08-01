@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"انتخاب چیزی که باید در گوشی جستجو شود"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"پاک کردن میانبرها"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"پاک کردن میانبرهای پیشنهادات جستجوی انتخاب شده اخیر"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"آیا می‌خواهید همه میانبرهای مربوط به پیشنهادات جستجوی اخیر را پاک کنید؟"\n\n"برای پاک کردن همه سابقه مرورگر خود، از تنظیمات مرورگر استفاده کنید."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"آیا می‌خواهید همه میانبرهای مربوط به پیشنهادات جستجوی اخیر را پاک کنید؟\n\nبرای پاک کردن همه سابقه مرورگر خود، از تنظیمات مرورگر استفاده کنید."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"پاک کردن میانبرها"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"میانبرها پاک نشود"</string>
     <string name="menu_help" msgid="8466596486018760239">"راهنما"</string>

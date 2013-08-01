@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Scegli che cosa cercare sul cellulare"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Cancella scorciatoie"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Cancella scorciatoie a suggerimenti di ricerca scelti di recente"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Cancellare tutte le scorciatoie ai suggerimenti di ricerca recentemente scelti?"\n\n"Per cancellare la cronologia del browser, usa le impostazioni del Browser."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Cancellare tutte le scorciatoie ai suggerimenti di ricerca recentemente scelti?\n\nPer cancellare la cronologia del browser, usa le impostazioni del Browser."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Cancella scorciatoie"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Non cancellare le scorciatoie"</string>
     <string name="menu_help" msgid="8466596486018760239">"Guida"</string>

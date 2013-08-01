@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Sélection des sources à explorer sur le téléphone lors d\'une recherche"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Effacer les raccourcis"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Effacer les raccourcis vers les suggestions de recherche sélectionnées récemment"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Voulez-vous supprimer tous les raccourcis vers les suggestions de recherche choisies récemment ?"\n\n"Pour effacer votre historique de navigation, utilisez les paramètres du navigateur."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Voulez-vous supprimer tous les raccourcis vers les suggestions de recherche choisies récemment ?\n\nPour effacer votre historique de navigation, utilisez les paramètres du navigateur."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Effacer les raccourcis"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Conserver les raccourcis"</string>
     <string name="menu_help" msgid="8466596486018760239">"Aide"</string>

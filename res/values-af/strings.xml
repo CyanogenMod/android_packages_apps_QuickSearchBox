@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Kies wat om te deursoek op die foon"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Vee kortpaaie uit"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Vee kortpaaie na onlangs gekose soekvoorstelle uit"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Wil jy alle kortpaaie na onlangs gekose soekvoorstelle uitvee?"\n\n"Om jou blaaiergeskiedenis uit te vee, gebruik die blaaier se instellings."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Wil jy alle kortpaaie na onlangs gekose soekvoorstelle uitvee?\n\nOm jou blaaiergeskiedenis uit te vee, gebruik die blaaier se instellings."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Vee kortpaaie uit"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Moenie kortpaaie uitvee nie"</string>
     <string name="menu_help" msgid="8466596486018760239">"Hulp"</string>

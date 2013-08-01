@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"選取要在手機上搜尋的內容"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"清除搜尋捷徑"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"清除最近選擇搜尋建議時建立的所有捷徑"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"您要清除所有連結到最近選擇的搜尋建議的捷徑嗎？"\n\n"如要清除瀏覽紀錄，請使用瀏覽器的設定選項。"</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"您要清除所有連結到最近選擇的搜尋建議的捷徑嗎？\n\n如要清除瀏覽紀錄，請使用瀏覽器的設定選項。"</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"清除捷徑"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"不清除捷徑"</string>
     <string name="menu_help" msgid="8466596486018760239">"說明"</string>

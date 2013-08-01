@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Telefonda aranacak öğeleri seçin"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Kısayolları temizle"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"En son seçilen arama önerilerinin kısayollarını temizle"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Son seçilen önerilere yönelik tüm kısayolları temizlemek istiyor musunuz?"\n\n"Tarayıcı geçmişinizi temizlemek için, Tarayıcının ayarlarını kullanın."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Son seçilen önerilere yönelik tüm kısayolları temizlemek istiyor musunuz?\n\nTarayıcı geçmişinizi temizlemek için, Tarayıcının ayarlarını kullanın."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Kısayolları temizle"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Kısayolları silme"</string>
     <string name="menu_help" msgid="8466596486018760239">"Yardım"</string>

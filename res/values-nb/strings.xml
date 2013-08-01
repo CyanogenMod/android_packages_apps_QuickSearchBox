@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Velg hva du vil søke etter på telefonen"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Fjern snarveier"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Fjern snarveier til nylig valgte søkeforslag"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Ønsker du å fjerne alle snarveier til nylig valgte søkeforslag?"\n\n"Du kan tømme nettleserloggen ved hjelp av nettleserinnstillingene."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Ønsker du å fjerne alle snarveier til nylig valgte søkeforslag?\n\nDu kan tømme nettleserloggen ved hjelp av nettleserinnstillingene."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Fjern snarveier"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Ikke fjern snarveier"</string>
     <string name="menu_help" msgid="8466596486018760239">"Hjelp"</string>

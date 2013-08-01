@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Välj vad du vill söka efter med telefonen"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Rensa genvägar"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Ta bort sökvägar till nyligen valda förslag"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vill du ta bort alla genvägar till nyligen valda sökförslag?"\n\n"Om du vill rensa webbläsarhistoriken använder du inställningarna i webbläsaren."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vill du ta bort alla genvägar till nyligen valda sökförslag?\n\nOm du vill rensa webbläsarhistoriken använder du inställningarna i webbläsaren."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Rensa genvägar"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Ta inte bort genvägar"</string>
     <string name="menu_help" msgid="8466596486018760239">"Hjälp"</string>

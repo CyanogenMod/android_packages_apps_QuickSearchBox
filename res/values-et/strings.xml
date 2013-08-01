@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Valige, mida telefonist otsida"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Otseteede kustutamine"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Kustuta hiljuti valitud otsingusoovituste otseteed"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Kas soovite kustutada kõik otseteed hiljuti valitud otsingusoovitustele?"\n\n"Brauseriajaloo kustutamiseks kasutage brauseri seadeid."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Kas soovite kustutada kõik otseteed hiljuti valitud otsingusoovitustele?\n\nBrauseriajaloo kustutamiseks kasutage brauseri seadeid."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Kustuta otseteed"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Ära kustuta otseteid"</string>
     <string name="menu_help" msgid="8466596486018760239">"Abi"</string>

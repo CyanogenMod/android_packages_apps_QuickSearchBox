@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Odaberite što ćete pretraživati na telefonu"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Brisanje prečaca"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Izbrišite prečace do nedavno odabranih prijedloga pretraživanja"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Želite li izbrisati sve prečace do nedavno izabranih prijedloga za pretraživanje? "\n\n"Da biste izbrisali povijest svojeg preglednika, upotrijebite postavke preglednika."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Želite li izbrisati sve prečace do nedavno izabranih prijedloga za pretraživanje? \n\nDa biste izbrisali povijest svojeg preglednika, upotrijebite postavke preglednika."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Izbriši prečace"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Ne briši prečace"</string>
     <string name="menu_help" msgid="8466596486018760239">"Pomoć"</string>

@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"चुनें कि फ़ोन पर क्‍या खोजना है"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"शॉर्टकट साफ़ करें"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"हाल ही में चुने गए खोज सुझावों के शॉर्टकट साफ़ करें"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"क्या आप हाल ही में चुने गए खोज सुझावों के सभी शार्टकट साफ़ करना चाहते हैं?"\n\n"अपन‍ा ब्राउज़र इतिहास साफ़ करने के लिए, ब्राउज़र सेटिंग का उपयोग करें."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"क्या आप हाल ही में चुने गए खोज सुझावों के सभी शार्टकट साफ़ करना चाहते हैं?\n\nअपन‍ा ब्राउज़र इतिहास साफ़ करने के लिए, ब्राउज़र सेटिंग का उपयोग करें."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"शॉर्टकट साफ़ करें"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"शॉर्टकट न हटाएं"</string>
     <string name="menu_help" msgid="8466596486018760239">"सहायता"</string>

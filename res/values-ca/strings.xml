@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Tria què vols cercar al telèfon"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Esborra les dreceres"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Esborra les dreceres als suggeriments de cerca seleccionats recentment"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vols esborrar totes les dreceres als suggeriments de cerca seleccionats recentment?"\n\n"Per esborrar l\'historial del navegador, fes-ne servir les opcions de configuració."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vols esborrar totes les dreceres als suggeriments de cerca seleccionats recentment?\n\nPer esborrar l\'historial del navegador, fes-ne servir les opcions de configuració."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Esborra les dreceres"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"No esborris les dreceres"</string>
     <string name="menu_help" msgid="8466596486018760239">"Ajuda"</string>

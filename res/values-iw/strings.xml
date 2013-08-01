@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"בחר מה לחפש בטלפון"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"מחק קיצורי דרך"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"מחק קיצורי דרך להצעות חיפוש שנבחרו לאחרונה"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"האם ברצונך למחוק את כל קיצורי דרך להצעות חיפוש שנבחרו לאחרונה?"\n\n"כדי לנקות את היסטוריית הדפדפן שלך, השתמש בהגדרות הדפדפן."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"האם ברצונך למחוק את כל קיצורי דרך להצעות חיפוש שנבחרו לאחרונה?\n\nכדי לנקות את היסטוריית הדפדפן שלך, השתמש בהגדרות הדפדפן."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"נקה קיצורים"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"אל תמחק קיצורי דרך"</string>
     <string name="menu_help" msgid="8466596486018760239">"עזרה"</string>

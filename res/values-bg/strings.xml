@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Изберете какво да търсите на телефона"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Изчистване на преките пътища"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Изчистване на преките пътища към наскоро избрани предложения за търсене"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Искате ли да изчистите всички преки пътища към наскоро избраните предложения за търсене?"\n\n"За да изчистите историята на браузъра си, използвайте настройките му."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Искате ли да изчистите всички преки пътища към наскоро избраните предложения за търсене?\n\nЗа да изчистите историята на браузъра си, използвайте настройките му."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Изчистване на преките пътища"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Без изчистване на пътищата"</string>
     <string name="menu_help" msgid="8466596486018760239">"Помощ"</string>

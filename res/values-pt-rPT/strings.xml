@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Seleccionar os itens a pesquisar no telefone"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Limpar atalhos"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Limpar atalhos para sugestões de pesquisa seleccionadas recentemente"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Pretende limpar todos os atalhos para as sugestões de pesquisa escolhidas recentemente?"\n\n"Para limpar o histórico do Navegador, utilize as definições do Navegador."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Pretende limpar todos os atalhos para as sugestões de pesquisa escolhidas recentemente?\n\nPara limpar o histórico do Navegador, utilize as definições do Navegador."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Limpar atalhos"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Não limpar atalhos"</string>
     <string name="menu_help" msgid="8466596486018760239">"Ajuda"</string>

@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Valitse, mitä haluat hakea"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Tyhjennä pikakuvakkeet"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Tyhjennä äskettäin valittujen hakuehdotuksien pikakuvakkeet."</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Haluatko poistaa kaikki pikakuvakkeet äskettäin valittuihin hakuehdotuksiin?"\n\n"Voit poistaa selaushistorian selaimen asetuksissa."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Haluatko poistaa kaikki pikakuvakkeet äskettäin valittuihin hakuehdotuksiin?\n\nVoit poistaa selaushistorian selaimen asetuksissa."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Tyhjennä pikakuvakkeet"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Älä tyhjennä pikakuvakkeita"</string>
     <string name="menu_help" msgid="8466596486018760239">"Ohje"</string>

@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Auswahl für die Suche auf dem Telefon"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Verknüpfungen löschen"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Verknüpfungen mit zuletzt ausgewählten Suchvorschlägen löschen"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Möchten Sie alle Verknüpfungen zu kürzlich gewählten Suchvorschlägen löschen?"\n\n"Verwenden Sie die Browsereinstellungen, um Ihren Browserverlauf zu löschen."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Möchten Sie alle Verknüpfungen zu kürzlich gewählten Suchvorschlägen löschen?\n\nVerwenden Sie die Browsereinstellungen, um Ihren Browserverlauf zu löschen."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Verknüpfungen löschen"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Verknüpfungen nicht löschen"</string>
     <string name="menu_help" msgid="8466596486018760239">"Hilfe"</string>

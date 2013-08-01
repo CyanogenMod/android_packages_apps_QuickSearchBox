@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Pilih apa yang mahu dicari pada telefon"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Padam bersih pintasan"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Padam bersih pintasan ke cadangan carian yang dipilih baru-baru ini"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Adakah anda mahu memadam bersih semua pintasan ke cadangan carian terpilih terbaharu?"\n\n"Untuk memadam bersih sejarah Penyemak Imbas anda, gunakan tetapan Penyemak Imbas."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Adakah anda mahu memadam bersih semua pintasan ke cadangan carian terpilih terbaharu?\n\nUntuk memadam bersih sejarah Penyemak Imbas anda, gunakan tetapan Penyemak Imbas."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Padam bersih pintasan"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Jangan padam bersih pintasan"</string>
     <string name="menu_help" msgid="8466596486018760239">"Bantuan"</string>

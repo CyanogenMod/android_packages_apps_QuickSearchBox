@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Izvēlieties, kādu informāciju vēlaties meklēt tālrunī"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Saīšņu notīrīšana"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Notīrīt saīsnes uz nesen izvēlētiem meklēšanas ieteikumiem"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vai vēlaties notīrīt visas saīsnes nesen izvēlētajiem meklēšanas ieteikumiem?"\n\n"Lai notīrītu pārlūkprogrammas vēsturi, izmantojiet pārlūkprogrammas iestatījumus."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Vai vēlaties notīrīt visas saīsnes nesen izvēlētajiem meklēšanas ieteikumiem?\n\nLai notīrītu pārlūkprogrammas vēsturi, izmantojiet pārlūkprogrammas iestatījumus."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Notīrīt saīsnes"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Nedzēst saīsnes"</string>
     <string name="menu_help" msgid="8466596486018760239">"Palīdzība"</string>

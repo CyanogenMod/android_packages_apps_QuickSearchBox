@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Piliin kung ano ang hahanapin sa telepono"</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"I-clear ang mga shortcut"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"I-clear ang mga shortcut sa kamakailang napiling mga suhestiyon sa paghahanap"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Nais mo bang i-clear ang lahat ng shortcut sa mga kamakailang napiling suhestiyon sa paghahanap? "\n\n" Upang i-clear ang iyong kasaysayan ng Browser, gamitin ang mga setting ng Browser."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Nais mo bang i-clear ang lahat ng shortcut sa mga kamakailang napiling suhestiyon sa paghahanap? \n\n Upang i-clear ang iyong kasaysayan ng Browser, gamitin ang mga setting ng Browser."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"I-clear ang shortcut"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Huwag i-clear ang mga shortcut"</string>
     <string name="menu_help" msgid="8466596486018760239">"Tulong"</string>

@@ -36,7 +36,7 @@
     <string name="search_sources_summary" msgid="9181194249796408374">"Выберите источники, по которым будет осуществляться поиск."</string>
     <string name="clear_shortcuts" msgid="1964107586205103593">"Удалить ярлыки поиска"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"Удалить ярлыки недавно выбранных результатов поиска"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Удалить все ярлыки для недавних поисковых подсказок?"\n\n"Очистить историю можно в настройках браузера."</string>
+    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"Удалить все ярлыки для недавних поисковых подсказок?\n\nОчистить историю можно в настройках браузера."</string>
     <string name="clear_shortcuts_agree" msgid="5623666487205882033">"Удалить ярлыки"</string>
     <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"Не очищать ярлыки"</string>
     <string name="menu_help" msgid="8466596486018760239">"Справка"</string>
