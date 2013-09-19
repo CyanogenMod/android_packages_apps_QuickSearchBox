@@ -122,7 +122,11 @@ public class SearchableCorpusFactory implements CorpusFactory {
 
     protected Corpus createAppsCorpus(Sources sources) {
         Source appsSource = getAppsSource(sources);
-        return new AppsCorpus(mContext, mConfig, appsSource);
+        if (appsSource == null) {
+            return null;
+        } else {
+            return new AppsCorpus(mContext, mConfig, appsSource);
+        }
     }
 
     protected Corpus createSingleSourceCorpus(Source source) {
