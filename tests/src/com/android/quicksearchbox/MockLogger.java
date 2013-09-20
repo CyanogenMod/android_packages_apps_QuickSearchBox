@@ -16,8 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Mock {@code Logger} implementation.
@@ -27,25 +25,24 @@ public class MockLogger implements Logger {
     public MockLogger() {
     }
 
-    public void logStart(int onCreateLatency, int latency, String intentSource, Corpus corpus,
-            List<Corpus> orderedCorpora) {
+    public void logStart(int onCreateLatency, int latency, String intentSource) {
     }
 
     public void logSuggestionClick(long id,
-            SuggestionCursor suggestionCursor, Collection<Corpus> queriedCorpora,
+            SuggestionCursor suggestionCursor,
             int clickType) {
     }
 
-    public void logSearch(Corpus corpus, int startMethod, int numChars) {
+    public void logSearch(int startMethod, int numChars) {
     }
 
-    public void logVoiceSearch(Corpus corpus) {
+    public void logVoiceSearch() {
     }
 
     public void logExit(SuggestionCursor suggestionCursor, int numChars) {
     }
 
-    public void logLatency(CorpusResult result) {
+    public void logLatency(SourceResult result) {
     }
 
 }

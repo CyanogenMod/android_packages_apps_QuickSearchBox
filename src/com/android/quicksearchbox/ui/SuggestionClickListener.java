@@ -31,24 +31,6 @@ public interface SuggestionClickListener {
     void onSuggestionClicked(SuggestionsAdapter<?> adapter, long suggestionId);
 
     /**
-     * Called when a quick contact badge in a suggestion is clicked.
-     *
-     * @param adapter Adapter that contains the clicked suggestion.
-     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
-     *      will be the position within the list.
-     */
-    void onSuggestionQuickContactClicked(SuggestionsAdapter<?> adapter, long suggestionId);
-
-    /**
-     * Called when the user requests to remove a suggestion from the search history.
-     *
-     * @param adapter Adapter that contains the clicked suggestion.
-     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
-     *      will be the position within the list.
-     */
-    void onSuggestionRemoveFromHistoryClicked(SuggestionsAdapter<?> adapter, long suggestionId);
-
-    /**
      * Called when the "query refine" button of a suggestion is clicked.
      *
      * @param adapter Adapter that contains the clicked suggestion.

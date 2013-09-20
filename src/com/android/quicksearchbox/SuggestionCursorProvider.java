@@ -33,8 +33,7 @@ public interface SuggestionCursorProvider<C extends SuggestionCursor> {
      *
      * @param query The user query.
      * @param queryLimit An advisory maximum number of results that the source should return.
-     * @param onlyOne Indicates if this provider is the only one being used for the query.
      * @return The suggestion results. Must not be {@code null}.
      */
-    C getSuggestions(String query, int queryLimit, boolean onlyOne);
+    C getSuggestions(String query, int queryLimit);
 }
