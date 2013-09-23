@@ -16,8 +16,6 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.CorpusResult;
-import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
@@ -73,16 +71,9 @@ public class DelayingSuggestionsAdapter<A> implements SuggestionsAdapter<A> {
      */
     private boolean shouldPublish(Suggestions suggestions) {
         if (suggestions.isDone()) return true;
-        SuggestionCursor cursor = mDelayedAdapter.getPromoted(suggestions);
+        SuggestionCursor cursor = suggestions.getResult();
         if (cursor != null && cursor.getCount() > 0) {
             return true;
-        } else if (mDelayedAdapter.willPublishNonPromotedSuggestions()) {
-            Iterable<CorpusResult> results = suggestions.getCorpusResults();
-            for (CorpusResult result : results) {
-                if (result.getCount() > 0) {
-                    return true;
-                }
-            }
         }
         return false;
     }
@@ -134,51 +125,41 @@ public class DelayingSuggestionsAdapter<A> implements SuggestionsAdapter<A> {
         }
     }
 
+    @Override
     public A getListAdapter() {
         return mDelayedAdapter.getListAdapter();
     }
 
     public SuggestionCursor getCurrentPromotedSuggestions() {
-        return mDelayedAdapter.getCurrentPromotedSuggestions();
+        return mDelayedAdapter.getCurrentSuggestions();
     }
 
+    @Override
     public Suggestions getSuggestions() {
         return mDelayedAdapter.getSuggestions();
     }
 
+    @Override
     public SuggestionPosition getSuggestion(long suggestionId) {
         return mDelayedAdapter.getSuggestion(suggestionId);
     }
 
+    @Override
     public void onSuggestionClicked(long suggestionId) {
         mDelayedAdapter.onSuggestionClicked(suggestionId);
     }
 
+    @Override
     public void onSuggestionQueryRefineClicked(long suggestionId) {
         mDelayedAdapter.onSuggestionQueryRefineClicked(suggestionId);
     }
 
-    public void onSuggestionQuickContactClicked(long suggestionId) {
-        mDelayedAdapter.onSuggestionQuickContactClicked(suggestionId);
-    }
-
-    public void onSuggestionRemoveFromHistoryClicked(long suggestionId) {
-        mDelayedAdapter.onSuggestionRemoveFromHistoryClicked(suggestionId);
-    }
-
-    public void setMaxPromoted(int maxPromoted) {
-        mDelayedAdapter.setMaxPromoted(maxPromoted);
-    }
-
+    @Override
     public void setOnFocusChangeListener(OnFocusChangeListener l) {
         mDelayedAdapter.setOnFocusChangeListener(l);
     }
 
     @Override
-    public void setPromoter(Promoter promoter) {
-        mDelayedAdapter.setPromoter(promoter);
-    }
-
     public void setSuggestionClickListener(SuggestionClickListener listener) {
         mDelayedAdapter.setSuggestionClickListener(listener);
     }

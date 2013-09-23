@@ -16,18 +16,6 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Corpora;
-import com.android.quicksearchbox.Corpus;
-import com.android.quicksearchbox.CorpusResult;
-import com.android.quicksearchbox.Logger;
-import com.android.quicksearchbox.Promoter;
-import com.android.quicksearchbox.QsbApplication;
-import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.SearchActivity;
-import com.android.quicksearchbox.SuggestionCursor;
-import com.android.quicksearchbox.Suggestions;
-import com.android.quicksearchbox.VoiceSearch;
-
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
@@ -47,6 +35,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.quicksearchbox.Logger;
+import com.android.quicksearchbox.QsbApplication;
+import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SearchActivity;
+import com.android.quicksearchbox.SourceResult;
+import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.Suggestions;
+import com.android.quicksearchbox.VoiceSearch;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -59,8 +56,6 @@ public abstract class SearchActivityView extends RelativeLayout {
     // TODO: This should move to android-common or something.
     private static final String IME_OPTION_NO_MICROPHONE = "nm";
 
-    private Corpus mCorpus;
-
     protected QueryTextView mQueryTextView;
     // True if the query was empty on the previous call to updateQuery()
     protected boolean mQueryWasEmpty = true;
@@ -70,7 +65,6 @@ public abstract class SearchActivityView extends RelativeLayout {
     protected SuggestionsListView<ListAdapter> mSuggestionsView;
     protected SuggestionsAdapter<ListAdapter> mSuggestionsAdapter;
 
-    protected ImageButton mSearchCloseButton;
     protected ImageButton mSearchGoButton;
     protected ImageButton mVoiceSearchButton;
 
@@ -108,7 +102,6 @@ public abstract class SearchActivityView extends RelativeLayout {
         // suggestions?
         mSuggestionsAdapter.setOnFocusChangeListener(new SuggestListFocusListener());
 
-        mSearchCloseButton = (ImageButton) findViewById(R.id.search_close_btn);
         mSearchGoButton = (ImageButton) findViewById(R.id.search_go_btn);
         mVoiceSearchButton = (ImageButton) findViewById(R.id.search_voice_btn);
         mVoiceSearchButton.setImageDrawable(getVoiceSearchIcon());
@@ -123,10 +116,6 @@ public abstract class SearchActivityView extends RelativeLayout {
         mButtonsKeyListener = new ButtonsKeyListener();
         mSearchGoButton.setOnKeyListener(mButtonsKeyListener);
         mVoiceSearchButton.setOnKeyListener(mButtonsKeyListener);
-        if (mSearchCloseButton != null) {
-            mSearchCloseButton.setOnKeyListener(mButtonsKeyListener);
-            mSearchCloseButton.setOnClickListener(new CloseClickListener());
-        }
 
         mUpdateSuggestions = true;
     }
@@ -167,72 +156,6 @@ public abstract class SearchActivityView extends RelativeLayout {
                 getQsbApplication().getSuggestionViewFactory()));
     }
 
-    protected Corpora getCorpora() {
-        return getQsbApplication().getCorpora();
-    }
-
-    public Corpus getCorpus() {
-        return mCorpus;
-    }
-
-    protected abstract Promoter createSuggestionsPromoter();
-
-    protected Corpus getCorpus(String sourceName) {
-        if (sourceName == null) return null;
-        Corpus corpus = getCorpora().getCorpus(sourceName);
-        if (corpus == null) {
-            Log.w(TAG, "Unknown corpus " + sourceName);
-            return null;
-        }
-        return corpus;
-    }
-
-    public void onCorpusSelected(String corpusName) {
-        setCorpus(corpusName);
-        focusQueryTextView();
-        showInputMethodForQuery();
-    }
-
-    public void setCorpus(String corpusName) {
-        if (DBG) Log.d(TAG, "setCorpus(" + corpusName + ")");
-        Corpus corpus = getCorpus(corpusName);
-        setCorpus(corpus);
-        updateUi();
-    }
-
-    protected void setCorpus(Corpus corpus) {
-        mCorpus = corpus;
-        mSuggestionsAdapter.setPromoter(createSuggestionsPromoter());
-        Suggestions suggestions = getSuggestions();
-        if (corpus == null || suggestions == null || !suggestions.expectsCorpus(corpus)) {
-            getActivity().updateSuggestions();
-        }
-    }
-
-    public String getCorpusName() {
-        Corpus corpus = getCorpus();
-        return corpus == null ? null : corpus.getName();
-    }
-
-    public abstract Corpus getSearchCorpus();
-
-    public Corpus getWebCorpus() {
-        Corpus webCorpus = getCorpora().getWebCorpus();
-        if (webCorpus == null) {
-            Log.e(TAG, "No web corpus");
-        }
-        return webCorpus;
-    }
-
-    public void setMaxPromotedSuggestions(int maxPromoted) {
-        mSuggestionsView.setLimitSuggestionsToViewHeight(false);
-        mSuggestionsAdapter.setMaxPromoted(maxPromoted);
-    }
-
-    public void limitSuggestionsToViewHeight() {
-        mSuggestionsView.setLimitSuggestionsToViewHeight(true);
-    }
-
     public void setMaxPromotedResults(int maxPromoted) {
     }
 
@@ -246,8 +169,6 @@ public abstract class SearchActivityView extends RelativeLayout {
     public void setSearchClickListener(SearchClickListener listener) {
         mSearchClickListener = listener;
     }
-
-    public abstract void showCorpusSelectionDialog();
 
     public void setVoiceSearchButtonClickListener(View.OnClickListener listener) {
         if (mVoiceSearchButton != null) {
@@ -273,8 +194,8 @@ public abstract class SearchActivityView extends RelativeLayout {
         return mSuggestionsAdapter.getSuggestions();
     }
 
-    public SuggestionCursor getCurrentPromotedSuggestions() {
-        return mSuggestionsAdapter.getCurrentPromotedSuggestions();
+    public SuggestionCursor getCurrentSuggestions() {
+        return mSuggestionsAdapter.getSuggestions().getResult();
     }
 
     public void setSuggestions(Suggestions suggestions) {
@@ -338,18 +259,8 @@ public abstract class SearchActivityView extends RelativeLayout {
 
     protected void updateQueryTextView(boolean queryEmpty) {
         if (queryEmpty) {
-            if (isSearchCorpusWeb()) {
-                mQueryTextView.setBackgroundDrawable(mQueryTextEmptyBg);
-                mQueryTextView.setHint(null);
-            } else {
-                if (mQueryTextNotEmptyBg == null) {
-                    mQueryTextNotEmptyBg =
-                            getResources().getDrawable(R.drawable.textfield_search_empty);
-                }
-                mQueryTextView.setBackgroundDrawable(mQueryTextNotEmptyBg);
-                Corpus corpus = getCorpus();
-                mQueryTextView.setHint(corpus == null ? "" : corpus.getHint());
-            }
+            mQueryTextView.setBackgroundDrawable(mQueryTextEmptyBg);
+            mQueryTextView.setHint(null);
         } else {
             mQueryTextView.setBackgroundResource(R.drawable.textfield_search);
         }
@@ -365,7 +276,7 @@ public abstract class SearchActivityView extends RelativeLayout {
 
     protected void updateVoiceSearchButton(boolean queryEmpty) {
         if (shouldShowVoiceSearch(queryEmpty)
-                && getVoiceSearch().shouldShowVoiceSearch(getCorpus())) {
+                && getVoiceSearch().shouldShowVoiceSearch()) {
             mVoiceSearchButton.setVisibility(View.VISIBLE);
             mQueryTextView.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
         } else {
@@ -436,32 +347,20 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     private CompletionInfo[] webSuggestionsToCompletions(Suggestions suggestions) {
-        // TODO: This should also include include web search shortcuts
-        CorpusResult cursor = suggestions.getWebResult();
+        SourceResult cursor = suggestions.getWebResult();
         if (cursor == null) return null;
         int count = cursor.getCount();
         ArrayList<CompletionInfo> completions = new ArrayList<CompletionInfo>(count);
-        boolean usingWebCorpus = isSearchCorpusWeb();
         for (int i = 0; i < count; i++) {
             cursor.moveTo(i);
-            if (!usingWebCorpus || cursor.isWebSearchSuggestion()) {
-                String text1 = cursor.getSuggestionText1();
-                completions.add(new CompletionInfo(i, i, text1));
-            }
+            String text1 = cursor.getSuggestionText1();
+            completions.add(new CompletionInfo(i, i, text1));
         }
         return completions.toArray(new CompletionInfo[completions.size()]);
     }
 
     protected void onSuggestionsChanged() {
         updateInputMethodSuggestions();
-    }
-
-    /**
-     * Checks if the corpus used for typed searches is the web corpus.
-     */
-    protected boolean isSearchCorpusWeb() {
-        Corpus corpus = getSearchCorpus();
-        return corpus != null && corpus.isWebCorpus();
     }
 
     protected boolean onSuggestionKeyDown(SuggestionsAdapter<?> adapter,
@@ -492,6 +391,7 @@ public abstract class SearchActivityView extends RelativeLayout {
      * Filters the suggestions list when the search text changes.
      */
     private class SearchTextWatcher implements TextWatcher {
+        @Override
         public void afterTextChanged(Editable s) {
             boolean empty = s.length() == 0;
             if (empty != mQueryWasEmpty) {
@@ -505,9 +405,11 @@ public abstract class SearchActivityView extends RelativeLayout {
             }
         }
 
+        @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
 
+        @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
         }
     }
@@ -516,6 +418,7 @@ public abstract class SearchActivityView extends RelativeLayout {
      * Handles key events on the suggestions list view.
      */
     protected class SuggestionsViewKeyListener implements View.OnKeyListener {
+        @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_DOWN
                     && v instanceof SuggestionsListView<?>) {
@@ -531,10 +434,12 @@ public abstract class SearchActivityView extends RelativeLayout {
 
     private class InputMethodCloser implements SuggestionsView.OnScrollListener {
 
+        @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
                 int totalItemCount) {
         }
 
+        @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
             considerHidingInputMethod();
         }
@@ -544,6 +449,7 @@ public abstract class SearchActivityView extends RelativeLayout {
      * Listens for clicks on the source selector.
      */
     private class SearchGoButtonClickListener implements View.OnClickListener {
+        @Override
         public void onClick(View view) {
             onSearchClicked(Logger.SEARCH_METHOD_BUTTON);
         }
@@ -553,6 +459,7 @@ public abstract class SearchActivityView extends RelativeLayout {
      * This class handles enter key presses in the query text view.
      */
     private class QueryTextEditorActionListener implements OnEditorActionListener {
+        @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             boolean consumed = false;
             if (event != null) {
@@ -573,6 +480,7 @@ public abstract class SearchActivityView extends RelativeLayout {
      * by refocusing to EditText.
      */
     private class ButtonsKeyListener implements View.OnKeyListener {
+        @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             return forwardKeyToQueryTextView(keyCode, event);
         }
@@ -607,6 +515,7 @@ public abstract class SearchActivityView extends RelativeLayout {
      * Hides the input method when the suggestions get focus.
      */
     private class SuggestListFocusListener implements OnFocusChangeListener {
+        @Override
         public void onFocusChange(View v, boolean focused) {
             if (DBG) Log.d(TAG, "Suggestions focus change, now: " + focused);
             if (focused) {
@@ -616,6 +525,7 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     private class QueryTextViewFocusListener implements OnFocusChangeListener {
+        @Override
         public void onFocusChange(View v, boolean focused) {
             if (DBG) Log.d(TAG, "Query focus change, now: " + focused);
             if (focused) {
@@ -641,6 +551,7 @@ public abstract class SearchActivityView extends RelativeLayout {
     }
 
     private class CloseClickListener implements OnClickListener {
+        @Override
         public void onClick(View v) {
             if (!isQueryEmpty()) {
                 mQueryTextView.setText("");

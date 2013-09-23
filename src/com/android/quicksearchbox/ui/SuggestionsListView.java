@@ -58,10 +58,4 @@ public interface SuggestionsListView<A> {
      */
     long getSelectedItemId();
 
-    /**
-     * Set whether or not to limit suggestions by view height. If {@code true}, only enough
-     * suggestions to fill the view without scrolling will be shown.
-     */
-    void setLimitSuggestionsToViewHeight(boolean limit);
-
 }

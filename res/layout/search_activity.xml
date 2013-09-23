@@ -51,8 +51,6 @@
         android:layout_alignParentRight="true"
         >
 
-        <include layout="@layout/corpus_indicator" />
-
         <com.android.quicksearchbox.ui.QueryTextView
             android:id="@+id/search_src_text"
             android:layout_width="0dip"

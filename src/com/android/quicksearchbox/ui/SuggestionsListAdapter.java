@@ -16,13 +16,14 @@
 
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.SuggestionPosition;
-import com.android.quicksearchbox.Suggestions;
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
+
+import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.SuggestionPosition;
+import com.android.quicksearchbox.Suggestions;
 
 /**
  * Uses a {@link Suggestions} object to back a {@link SuggestionsView}.
@@ -42,13 +43,8 @@ public class SuggestionsListAdapter extends SuggestionsAdapterBase<ListAdapter> 
     }
 
     @Override
-    public boolean willPublishNonPromotedSuggestions() {
-        return false;
-    }
-
-    @Override
     public SuggestionPosition getSuggestion(long suggestionId) {
-        return new SuggestionPosition(getCurrentPromotedSuggestions(), (int) suggestionId);
+        return new SuggestionPosition(getCurrentSuggestions(), (int) suggestionId);
     }
 
     @Override
@@ -70,12 +66,13 @@ public class SuggestionsListAdapter extends SuggestionsAdapterBase<ListAdapter> 
 
         @Override
         public int getCount() {
-            return getPromotedCount();
+            SuggestionCursor s = getCurrentSuggestions();
+            return s == null ? 0 : s.getCount();
         }
 
         @Override
         public Object getItem(int position) {
-            return getPromotedSuggestion(position);
+            return getSuggestion(position);
         }
 
         @Override
@@ -86,12 +83,12 @@ public class SuggestionsListAdapter extends SuggestionsAdapterBase<ListAdapter> 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             return SuggestionsListAdapter.this.getView(
-                    getCurrentPromotedSuggestions(), position, position, convertView, parent);
+                    getCurrentSuggestions(), position, position, convertView, parent);
         }
 
         @Override
         public int getItemViewType(int position) {
-            return getSuggestionViewType(getCurrentPromotedSuggestions(), position);
+            return getSuggestionViewType(getCurrentSuggestions(), position);
         }
 
         @Override

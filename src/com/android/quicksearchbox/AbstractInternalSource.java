@@ -31,14 +31,17 @@ public abstract class AbstractInternalSource extends AbstractSource {
         super(context, uiThread, iconLoader);
     }
 
+    @Override
     public String getSuggestUri() {
         return null;
     }
 
+    @Override
     public boolean canRead() {
         return true;
     }
 
+    @Override
     public String getDefaultIntentData() {
         return null;
     }
@@ -48,14 +51,17 @@ public abstract class AbstractInternalSource extends AbstractSource {
         return getContext().getPackageName();
     }
 
+    @Override
     public int getQueryThreshold() {
         return 0;
     }
 
+    @Override
     public Drawable getSourceIcon() {
         return getContext().getResources().getDrawable(getSourceIconResource());
     }
 
+    @Override
     public Uri getSourceIconUri() {
         return Uri.parse("android.resource://" + getContext().getPackageName()
                 + "/" +  getSourceIconResource());
@@ -63,20 +69,7 @@ public abstract class AbstractInternalSource extends AbstractSource {
 
     protected abstract int getSourceIconResource();
 
-    public int getVersionCode() {
-        return QsbApplication.get(getContext()).getVersionCode();
-    }
-
-    /**
-     * Shortcuts from previous version are compatible with shortcuts from this version, so we just
-     * return true. If shortcuts become incompatible during an upgrade, some examination of the
-     * version code should be added here.
-     */
     @Override
-    public boolean isVersionCodeCompatible(int version) {
-        return true;
-    }
-
     public boolean queryAfterZeroResults() {
         return true;
     }

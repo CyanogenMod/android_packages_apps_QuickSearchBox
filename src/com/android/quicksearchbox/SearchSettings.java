@@ -16,8 +16,6 @@
 
 package com.android.quicksearchbox;
 
-import android.content.Intent;
-import android.view.Menu;
 
 /**
  * Interface for search settings.
@@ -30,26 +28,16 @@ public interface SearchSettings {
 
     public void upgradeSettingsIfNeeded();
 
-    public Intent getSearchableItemsIntent();
-
-    public boolean isCorpusEnabled(Corpus corpus);
-
     /**
      * Informs our listeners about the updated settings data.
      */
     public void broadcastSettingsChanged();
-
-    public void addMenuItems(Menu menu, boolean showDisabled);
 
     public int getNextVoiceSearchHintIndex(int size);
 
     public void resetVoiceSearchHintFirstSeenTime();
 
     public boolean haveVoiceSearchHintsExpired(int currentVoiceSearchVersion);
-
-    public Intent getSearchSettingsIntent();
-
-    public boolean allowWebSearchShortcuts();
 
     /**
      * Determines whether google.com should be used as the base path
