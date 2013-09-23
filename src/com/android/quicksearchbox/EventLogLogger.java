@@ -57,56 +57,40 @@ public class EventLogLogger implements Logger {
         return mConfig;
     }
 
-    public void logStart(int onCreateLatency, int latency, String intentSource, Corpus corpus,
-            List<Corpus> orderedCorpora) {
+    @Override
+    public void logStart(int onCreateLatency, int latency, String intentSource) {
         // TODO: Add more info to startMethod
         String startMethod = intentSource;
-        String currentCorpus = getCorpusLogName(corpus);
-        String enabledCorpora = getCorpusLogNames(orderedCorpora);
         EventLogTags.writeQsbStart(mPackageName, getVersionCode(), startMethod,
-                latency, currentCorpus, enabledCorpora, onCreateLatency);
+                latency, null, null, onCreateLatency);
     }
 
-    public void logSuggestionClick(long id, SuggestionCursor suggestionCursor,
-            Collection<Corpus> queriedCorpora, int clickType) {
+    @Override
+    public void logSuggestionClick(long id, SuggestionCursor suggestionCursor, int clickType) {
         String suggestions = getSuggestions(suggestionCursor);
-        String corpora = getCorpusLogNames(queriedCorpora);
         int numChars = suggestionCursor.getUserQuery().length();
-        EventLogTags.writeQsbClick(id, suggestions, corpora, numChars,
+        EventLogTags.writeQsbClick(id, suggestions, null, numChars,
                 clickType);
     }
 
-    public void logSearch(Corpus corpus, int startMethod, int numChars) {
-        String corpusName = getCorpusLogName(corpus);
-        EventLogTags.writeQsbSearch(corpusName, startMethod, numChars);
+    @Override
+    public void logSearch(int startMethod, int numChars) {
+        EventLogTags.writeQsbSearch(null, startMethod, numChars);
     }
 
-    public void logVoiceSearch(Corpus corpus) {
-        String corpusName = getCorpusLogName(corpus);
-        EventLogTags.writeQsbVoiceSearch(corpusName);
+    @Override
+    public void logVoiceSearch() {
+        EventLogTags.writeQsbVoiceSearch(null);
     }
 
+    @Override
     public void logExit(SuggestionCursor suggestionCursor, int numChars) {
         String suggestions = getSuggestions(suggestionCursor);
         EventLogTags.writeQsbExit(suggestions, numChars);
     }
 
-    public void logLatency(CorpusResult result) {
-        if (!shouldLogLatency()) return;
-        String corpusName = getCorpusLogName(result.getCorpus());
-        int latency = result.getLatency();
-        int numChars = result.getUserQuery().length();
-        EventLogTags.writeQsbLatency(corpusName, latency, numChars);
-    }
-
-    private boolean shouldLogLatency() {
-        int freq = mConfig.getLatencyLogFrequency();
-        return freq > mRandom.nextInt(1000);
-    }
-
-    private String getCorpusLogName(Corpus corpus) {
-        if (corpus == null) return null;
-        return corpus.getName();
+    @Override
+    public void logLatency(SourceResult result) {
     }
 
     private String getSuggestions(SuggestionCursor cursor) {
@@ -120,16 +104,6 @@ public class EventLogLogger implements Logger {
             if (type == null) type = "";
             String shortcut = cursor.isSuggestionShortcut() ? "shortcut" : "";
             sb.append(source).append(':').append(type).append(':').append(shortcut);
-        }
-        return sb.toString();
-    }
-
-    private String getCorpusLogNames(Collection<Corpus> corpora) {
-        if (corpora == null) return "";
-        StringBuilder sb = new StringBuilder();
-        for (Corpus corpus : corpora) {
-            if (sb.length() > 0) sb.append(LIST_SEPARATOR);
-            sb.append(getCorpusLogName(corpus));
         }
         return sb.toString();
     }

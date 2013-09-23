@@ -56,57 +56,9 @@
             <intent-filter>
                 <action android:name="android.search.action.GLOBAL_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="qsb.corpus" />
             </intent-filter>
-            <!-- Intent sent by corpus indicator in search widget. Opens QSB with
-                 corpus drop-down on top. -->
-            <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.QSB_AND_SELECT_CORPUS" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="qsb.corpus" />
-            </intent-filter>
-            <meta-data android:name="android.app.search.shortcut.provider" android:value="content://com.android.quicksearchbox.shortcuts/shortcuts" />
             <meta-data android:name="com.android.launcher.toolbar_icon" android:resource="@drawable/ic_google_logo_normal" />
         </activity>
-
-        <provider android:name=".ShortcutsProvider"
-            android:authorities="com.android.quicksearchbox.shortcuts"
-            android:exported="true" />
-
-        <activity android:name=".preferences.SearchSettingsActivity"
-                android:label="@string/search_settings"
-                android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.search.action.SEARCH_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.search.action.WEB_SEARCH_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".preferences.SearchableItemsActivity"
-                android:label="@string/search_sources"
-                android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="com.android.quicksearchbox.action.SEARCHABLE_ITEMS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <receiver android:name=".CorporaUpdateReceiver">
-            <intent-filter>
-                <action android:name="android.search.action.SEARCHABLES_CHANGED" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.search.action.SETTINGS_CHANGED" />
-            </intent-filter>
-        </receiver>
 
         <receiver android:name=".SearchWidgetProvider"
                   android:label="@string/app_name">

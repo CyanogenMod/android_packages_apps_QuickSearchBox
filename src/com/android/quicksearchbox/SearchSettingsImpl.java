@@ -16,17 +16,14 @@
 
 package com.android.quicksearchbox;
 
-import com.android.common.SharedPreferencesCompat;
-
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+
+import com.android.common.SharedPreferencesCompat;
 
 /**
  * Manages user settings.
@@ -38,10 +35,6 @@ public class SearchSettingsImpl implements SearchSettings {
 
     // Name of the preferences file used to store search preference
     public static final String PREFERENCES_NAME = "SearchSettings";
-
-    // Intent action that opens the "Searchable Items" preference
-    private static final String ACTION_SEARCHABLE_ITEMS =
-            "com.android.quicksearchbox.action.SEARCHABLE_ITEMS";
 
     /**
      * Preference key used for storing the index of the next voice search hint to show.
@@ -77,11 +70,6 @@ public class SearchSettingsImpl implements SearchSettings {
      */
     private static final String SEARCH_BASE_DOMAIN_APPLY_TIME = "search_base_domain_apply_time";
 
-    /**
-     * Prefix of per-corpus enable preference
-     */
-    private static final String CORPUS_ENABLED_PREF_PREFIX = "enable_corpus_";
-
     private final Context mContext;
 
     private final Config mConfig;
@@ -99,28 +87,8 @@ public class SearchSettingsImpl implements SearchSettings {
         return mConfig;
     }
 
+    @Override
     public void upgradeSettingsIfNeeded() {
-    }
-
-    public Intent getSearchableItemsIntent() {
-        Intent intent = new Intent(ACTION_SEARCHABLE_ITEMS);
-        intent.setPackage(getContext().getPackageName());
-        return intent;
-    }
-
-    /**
-     * Gets the preference key of the preference for whether the given corpus
-     * is enabled. The preference is stored in the {@link #PREFERENCES_NAME}
-     * preferences file.
-     */
-    public static String getCorpusEnabledPreference(Corpus corpus) {
-        return CORPUS_ENABLED_PREF_PREFIX + corpus.getName();
-    }
-
-    public boolean isCorpusEnabled(Corpus corpus) {
-        boolean defaultEnabled = corpus.isCorpusDefaultEnabled();
-        String sourceEnabledPref = getCorpusEnabledPreference(corpus);
-        return getSearchPreferences().getBoolean(sourceEnabledPref, defaultEnabled);
     }
 
     public SharedPreferences getSearchPreferences() {
@@ -150,6 +118,7 @@ public class SearchSettingsImpl implements SearchSettings {
     /**
      * Informs our listeners about the updated settings data.
      */
+    @Override
     public void broadcastSettingsChanged() {
         // We use a message broadcast since the listeners could be in multiple processes.
         Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS_CHANGED);
@@ -157,20 +126,7 @@ public class SearchSettingsImpl implements SearchSettings {
         getContext().sendBroadcast(intent);
     }
 
-    public void addMenuItems(Menu menu, boolean showDisabled) {
-        MenuInflater inflater = new MenuInflater(getContext());
-        inflater.inflate(R.menu.settings, menu);
-        MenuItem item = menu.findItem(R.id.menu_settings);
-        item.setIntent(getSearchSettingsIntent());
-    }
-
-    public Intent getSearchSettingsIntent() {
-        Intent settings = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
-        settings.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        settings.setPackage(getContext().getPackageName());
-        return settings;
-    }
-
+    @Override
     public int getNextVoiceSearchHintIndex(int size) {
             int i = getAndIncrementIntPreference(getSearchPreferences(),
                     NEXT_VOICE_SEARCH_HINT_INDEX_PREF);
@@ -184,10 +140,12 @@ public class SearchSettingsImpl implements SearchSettings {
         return i;
     }
 
+    @Override
     public void resetVoiceSearchHintFirstSeenTime() {
         storeLong(FIRST_VOICE_HINT_DISPLAY_TIME, System.currentTimeMillis());
     }
 
+    @Override
     public boolean haveVoiceSearchHintsExpired(int currentVoiceSearchVersion) {
         SharedPreferences prefs = getSearchPreferences();
 
@@ -211,10 +169,6 @@ public class SearchSettingsImpl implements SearchSettings {
             if (DBG) Log.d(TAG, "Could not determine voice search version; not showing hints.");
             return true;
         }
-    }
-
-    public boolean allowWebSearchShortcuts() {
-        return true;
     }
 
     /**

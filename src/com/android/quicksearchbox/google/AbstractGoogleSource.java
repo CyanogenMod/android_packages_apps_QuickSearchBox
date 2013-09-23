@@ -15,19 +15,18 @@
  */
 package com.android.quicksearchbox.google;
 
-import com.android.quicksearchbox.AbstractInternalSource;
-import com.android.quicksearchbox.Config;
-import com.android.quicksearchbox.CursorBackedSourceResult;
-import com.android.quicksearchbox.R;
-import com.android.quicksearchbox.SourceResult;
-import com.android.quicksearchbox.SuggestionCursor;
-import com.android.quicksearchbox.util.NamedTaskExecutor;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.android.quicksearchbox.AbstractInternalSource;
+import com.android.quicksearchbox.CursorBackedSourceResult;
+import com.android.quicksearchbox.R;
+import com.android.quicksearchbox.SourceResult;
+import com.android.quicksearchbox.SuggestionCursor;
+import com.android.quicksearchbox.util.NamedTaskExecutor;
 
 /**
  * Special source implementation for Google suggestions.
@@ -46,40 +45,50 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
         super(context, uiThread, iconLoader);
     }
 
+    @Override
     public abstract ComponentName getIntentComponent();
 
+    @Override
     public abstract SuggestionCursor refreshShortcut(String shortcutId, String extraData);
 
     /**
      * Called by QSB to get web suggestions for a query.
      */
+    @Override
     public abstract SourceResult queryInternal(String query);
 
     /**
      * Called by external apps to get web suggestions for a query.
      */
+    @Override
     public abstract SourceResult queryExternal(String query);
 
+    @Override
     public Intent createVoiceSearchIntent(Bundle appData) {
         return createVoiceWebSearchIntent(appData);
     }
 
+    @Override
     public String getDefaultIntentAction() {
         return Intent.ACTION_WEB_SEARCH;
     }
 
+    @Override
     public CharSequence getHint() {
         return getContext().getString(R.string.google_search_hint);
     }
 
+    @Override
     public CharSequence getLabel() {
         return getContext().getString(R.string.google_search_label);
     }
 
+    @Override
     public String getName() {
         return GOOGLE_SOURCE_NAME;
     }
 
+    @Override
     public CharSequence getSettingsDescription() {
         return getContext().getString(R.string.google_search_description);
     }
@@ -89,7 +98,8 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
         return R.mipmap.google_icon;
     }
 
-    public SourceResult getSuggestions(String query, int queryLimit, boolean onlySource) {
+    @Override
+    public SourceResult getSuggestions(String query, int queryLimit) {
         return emptyIfNull(queryInternal(query), query);
     }
 
@@ -101,14 +111,12 @@ public abstract class AbstractGoogleSource extends AbstractInternalSource implem
         return result == null ? new CursorBackedSourceResult(this, query) : result;
     }
 
+    @Override
     public boolean voiceSearchEnabled() {
         return true;
     }
 
-    public int getMaxShortcuts(Config config) {
-        return config.getMaxShortcutsPerWebSource();
-    }
-
+    @Override
     public boolean includeInAll() {
         return true;
     }

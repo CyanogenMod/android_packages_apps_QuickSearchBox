@@ -15,12 +15,12 @@
  */
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Suggestion;
-import com.android.quicksearchbox.SuggestionCursor;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.quicksearchbox.Suggestion;
+import com.android.quicksearchbox.SuggestionCursor;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,7 +39,6 @@ public class DefaultSuggestionViewFactory implements SuggestionViewFactory {
     public DefaultSuggestionViewFactory(Context context) {
         mDefaultFactory = new DefaultSuggestionView.Factory(context);
         addFactory(new WebSearchSuggestionView.Factory(context));
-        addFactory(new ContactSuggestionView.Factory(context));
     }
 
     /**
@@ -49,6 +48,7 @@ public class DefaultSuggestionViewFactory implements SuggestionViewFactory {
         mFactories.addFirst(factory);
     }
 
+    @Override
     public Collection<String> getSuggestionViewTypes() {
         if (mViewTypes == null) {
             mViewTypes = new HashSet<String>();
@@ -60,6 +60,7 @@ public class DefaultSuggestionViewFactory implements SuggestionViewFactory {
         return mViewTypes;
     }
 
+    @Override
     public View getView(SuggestionCursor suggestion, String userQuery,
             View convertView, ViewGroup parent) {
         for (SuggestionViewFactory factory : mFactories) {
@@ -70,6 +71,7 @@ public class DefaultSuggestionViewFactory implements SuggestionViewFactory {
         return mDefaultFactory.getView(suggestion, userQuery, convertView, parent);
     }
 
+    @Override
     public String getViewType(Suggestion suggestion) {
         for (SuggestionViewFactory factory : mFactories) {
             if (factory.canCreateView(suggestion)) {
