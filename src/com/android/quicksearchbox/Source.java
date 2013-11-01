@@ -41,22 +41,6 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
     String getSuggestUri();
 
     /**
-     * Gets the version code of the source. This is expected to change when the app that
-     * this source is for is upgraded.
-     */
-    int getVersionCode();
-
-    /**
-     * Indicates if shortcuts from the given version of this source are compatible with the
-     * currently installed version. The version code given will only differ from the currently
-     * installed version after the source has been upgraded.
-     *
-     * @param version version of the source (as returned by {@link #getVersionCode} which originally
-     *      created the shortcut.
-     */
-    boolean isVersionCodeCompatible(int version);
-
-    /**
      * Gets the localized, human-readable label for this source.
      */
     CharSequence getLabel();
@@ -124,11 +108,6 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      */
     boolean includeInAll();
 
-    /**
-     * Gets the maximum number of shortcuts that will be shown from this source.
-     */
-    int getMaxShortcuts(Config config);
-
     Intent createSearchIntent(String query, Bundle appData);
 
     Intent createVoiceSearchIntent(Bundle appData);
@@ -142,20 +121,10 @@ public interface Source extends SuggestionCursorProvider<SourceResult> {
      * Gets suggestions from this source.
      *
      * @param query The user query.
-     * @param onlySource Indicates if this is the only source being queried.
      * @return The suggestion results.
      */
-    SourceResult getSuggestions(String query, int queryLimit, boolean onlySource);
-
-    /**
-     * Updates a shortcut.
-     *
-     * @param shortcutId The id of the shortcut to update.
-     * @param extraData associated with this shortcut.
-     * @return A SuggestionCursor positioned at the updated shortcut.  If the
-     *         cursor is empty or <code>null</code>, the shortcut will be removed.
-     */
-    SuggestionCursor refreshShortcut(String shortcutId, String extraData);
+    @Override
+    SourceResult getSuggestions(String query, int queryLimit);
 
     /**
      * Gets the default intent action for suggestions from this source.

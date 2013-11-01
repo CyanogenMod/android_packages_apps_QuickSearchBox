@@ -16,10 +16,18 @@
 
 package com.android.quicksearchbox;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Process;
+import android.view.ContextThemeWrapper;
+
 import com.android.quicksearchbox.google.GoogleSource;
 import com.android.quicksearchbox.google.GoogleSuggestClient;
 import com.android.quicksearchbox.google.SearchBaseUrlHelper;
-import com.android.quicksearchbox.preferences.PreferenceControllerFactory;
 import com.android.quicksearchbox.ui.DefaultSuggestionViewFactory;
 import com.android.quicksearchbox.ui.SuggestionViewFactory;
 import com.android.quicksearchbox.util.Factory;
@@ -30,16 +38,6 @@ import com.android.quicksearchbox.util.PerNameExecutor;
 import com.android.quicksearchbox.util.PriorityThreadFactory;
 import com.android.quicksearchbox.util.SingleThreadNamedTaskExecutor;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Process;
-import android.view.ContextThemeWrapper;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -52,11 +50,6 @@ public class QsbApplication {
     private Handler mUiThreadHandler;
     private Config mConfig;
     private SearchSettings mSettings;
-    private Sources mSources;
-    private Corpora mCorpora;
-    private CorpusRanker mCorpusRanker;
-    private ShortcutRepository mShortcutRepository;
-    private ShortcutRefresher mShortcutRefresher;
     private NamedTaskExecutor mSourceTaskExecutor;
     private ThreadFactory mQueryThreadFactory;
     private SuggestionsProvider mSuggestionsProvider;
@@ -118,14 +111,6 @@ public class QsbApplication {
         if (mConfig != null) {
             mConfig.close();
             mConfig = null;
-        }
-        if (mShortcutRepository != null) {
-            mShortcutRepository.close();
-            mShortcutRepository = null;
-        }
-        if (mSourceTaskExecutor != null) {
-            mSourceTaskExecutor.close();
-            mSourceTaskExecutor = null;
         }
         if (mSuggestionsProvider != null) {
             mSuggestionsProvider.close();
@@ -190,59 +175,10 @@ public class QsbApplication {
         return new SearchSettingsImpl(getContext(), getConfig());
     }
 
-    /**
-     * Gets all corpora.
-     *
-     * May only be called from the main thread.
-     */
-    public Corpora getCorpora() {
-        checkThread();
-        if (mCorpora == null) {
-            mCorpora = createCorpora(getSources());
-        }
-        return mCorpora;
-    }
-
-    protected Corpora createCorpora(Sources sources) {
-        SearchableCorpora corpora = new SearchableCorpora(getContext(), getSettings(), sources,
-                createCorpusFactory());
-        corpora.update();
-        return corpora;
-    }
-
-    /**
-     * Updates the corpora, if they are loaded.
-     * May only be called from the main thread.
-     */
-    public void updateCorpora() {
-        checkThread();
-        if (mCorpora != null) {
-            mCorpora.update();
-        }
-    }
-
-    protected Sources getSources() {
-        checkThread();
-        if (mSources == null) {
-            mSources = createSources();
-        }
-        return mSources;
-    }
-
-    protected Sources createSources() {
-        return new SearchableSources(getContext(), getMainThreadHandler(),
-                getIconLoaderExecutor(), getConfig());
-    }
-
-    protected CorpusFactory createCorpusFactory() {
-        int numWebCorpusThreads = getConfig().getNumWebCorpusThreads();
-        return new SearchableCorpusFactory(getContext(), getConfig(), getSettings(),
-                createExecutorFactory(numWebCorpusThreads));
-    }
-
     protected Factory<Executor> createExecutorFactory(final int numThreads) {
         final ThreadFactory threadFactory = getQueryThreadFactory();
         return new Factory<Executor>() {
+            @Override
             public Executor create() {
                 return Executors.newFixedThreadPool(numThreads, threadFactory);
             }
@@ -250,62 +186,6 @@ public class QsbApplication {
     }
 
     /**
-     * Gets the corpus ranker.
-     * May only be called from the main thread.
-     */
-    public CorpusRanker getCorpusRanker() {
-        checkThread();
-        if (mCorpusRanker == null) {
-            mCorpusRanker = createCorpusRanker();
-        }
-        return mCorpusRanker;
-    }
-
-    protected CorpusRanker createCorpusRanker() {
-        return new DefaultCorpusRanker(getCorpora(), getShortcutRepository());
-    }
-
-    /**
-     * Gets the shortcut repository.
-     * May only be called from the main thread.
-     */
-    public ShortcutRepository getShortcutRepository() {
-        checkThread();
-        if (mShortcutRepository == null) {
-            mShortcutRepository = createShortcutRepository();
-        }
-        return mShortcutRepository;
-    }
-
-    protected ShortcutRepository createShortcutRepository() {
-        ThreadFactory logThreadFactory =
-                new ThreadFactoryBuilder()
-                .setNameFormat("ShortcutRepository #%d")
-                .setThreadFactory(new PriorityThreadFactory(
-                        Process.THREAD_PRIORITY_BACKGROUND))
-                .build();
-        Executor logExecutor = Executors.newSingleThreadExecutor(logThreadFactory);
-        return ShortcutRepositoryImplLog.create(getContext(), getConfig(), getCorpora(),
-            getShortcutRefresher(), getMainThreadHandler(), logExecutor);
-    }
-
-    /**
-     * Gets the shortcut refresher.
-     * May only be called from the main thread.
-     */
-    public ShortcutRefresher getShortcutRefresher() {
-        checkThread();
-        if (mShortcutRefresher == null) {
-            mShortcutRefresher = createShortcutRefresher();
-        }
-        return mShortcutRefresher;
-    }
-
-    protected ShortcutRefresher createShortcutRefresher() {
-        // For now, ShortcutRefresher gets its own SourceTaskExecutor
-        return new SourceShortcutRefresher(createSourceTaskExecutor());
-    }
-
     /**
      * Gets the source task executor.
      * May only be called from the main thread.
@@ -380,28 +260,6 @@ public class QsbApplication {
         return new DefaultSuggestionViewFactory(getContext());
     }
 
-    public Promoter createBlendingPromoter() {
-        return new ShortcutPromoter(getConfig(),
-                new RankAwarePromoter(getConfig(), null, null), null);
-    }
-
-    public Promoter createSingleCorpusPromoter(Corpus corpus) {
-        return new SingleCorpusPromoter(corpus, Integer.MAX_VALUE);
-    }
-
-    public Promoter createSingleCorpusResultsPromoter(Corpus corpus) {
-        return new SingleCorpusResultsPromoter(corpus, Integer.MAX_VALUE);
-    }
-
-    public Promoter createWebPromoter() {
-        return new WebPromoter(getConfig().getMaxShortcutsPerWebSource());
-    }
-
-    public Promoter createResultsPromoter() {
-        SuggestionFilter resultFilter = new ResultFilter();
-        return new ShortcutPromoter(getConfig(), null, resultFilter);
-    }
-
     /**
      * Gets the Google source.
      * May only be called from the main thread.
@@ -470,10 +328,6 @@ public class QsbApplication {
 
     protected TextAppearanceFactory createTextAppearanceFactory() {
         return new TextAppearanceFactory(getContext());
-    }
-
-    public PreferenceControllerFactory createPreferenceControllerFactory(Activity activity) {
-        return new PreferenceControllerFactory(getSettings(), activity);
     }
 
     public synchronized HttpHelper getHttpHelper() {

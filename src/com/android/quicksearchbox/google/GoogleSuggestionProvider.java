@@ -63,7 +63,7 @@ public class GoogleSuggestionProvider extends ContentProvider {
         return SearchManager.SUGGEST_MIME_TYPE;
     }
 
-    private SourceResult emptyIfNull(SourceResult result, Source source, String query) {
+    private SourceResult emptyIfNull(SourceResult result, GoogleSource source, String query) {
         return result == null ? new CursorBackedSourceResult(source, query) : result;
     }
 

@@ -193,6 +193,7 @@ public class DefaultSuggestionView extends BaseSuggestionView {
                         if (DBG) Log.d(TAG , "getIcon getting later");
                         clearDrawable();
                         icon.getLater(new Consumer<Drawable>(){
+                            @Override
                             public boolean consume(Drawable icon) {
                                 if (DBG) {
                                     Log.d(TAG, "IconConsumer.consume got id " + uniqueIconId +

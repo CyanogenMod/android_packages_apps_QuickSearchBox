@@ -15,7 +15,6 @@
  */
 package com.android.quicksearchbox.ui;
 
-import com.android.quicksearchbox.Promoter;
 import com.android.quicksearchbox.SuggestionCursor;
 import com.android.quicksearchbox.SuggestionPosition;
 import com.android.quicksearchbox.Suggestions;
@@ -31,16 +30,6 @@ import android.widget.ListAdapter;
  *      {@link ExpandableListAdapter}.
  */
 public interface SuggestionsAdapter<A> {
-
-    /**
-     * Sets the maximum number of promoted suggestions to be provided by this adapter.
-     */
-    void setMaxPromoted(int maxPromoted);
-
-    /**
-     * Sets the suggestion promoter.
-     */
-    void setPromoter(Promoter promoter);
 
     /**
      * Sets the listener to be notified of clicks on suggestions.
@@ -74,33 +63,12 @@ public interface SuggestionsAdapter<A> {
     SuggestionPosition getSuggestion(long suggestionId);
 
     /**
-     * Gets the current list of promoted suggestions.
-     */
-    SuggestionCursor getCurrentPromotedSuggestions();
-
-    /**
      * Handles a regular click on a suggestion.
      *
      * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
      *      will be the position within the list.
      */
     void onSuggestionClicked(long suggestionId);
-
-    /**
-     * Handles a click on a quick contact badge.
-     *
-     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
-     *      will be the position within the list.
-     */
-    void onSuggestionQuickContactClicked(long suggestionId);
-
-    /**
-     * Handles a request to remove a suggestion from history.
-     *
-     * @param suggestionId The ID of the suggestion clicked. If the suggestion list is flat, this
-     *      will be the position within the list.
-     */
-    void onSuggestionRemoveFromHistoryClicked(long suggestionId);
 
     /**
      * Handles a click on the query refinement button.
