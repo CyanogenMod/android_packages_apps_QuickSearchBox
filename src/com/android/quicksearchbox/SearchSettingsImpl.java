@@ -17,14 +17,12 @@
 package com.android.quicksearchbox;
 
 import com.android.common.SharedPreferencesCompat;
-import com.android.quicksearchbox.preferences.SearchableItemsFragment;
 
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -107,9 +105,6 @@ public class SearchSettingsImpl implements SearchSettings {
     public Intent getSearchableItemsIntent() {
         Intent intent = new Intent(ACTION_SEARCHABLE_ITEMS);
         intent.setPackage(getContext().getPackageName());
-        intent.putExtra(
-                PreferenceActivity.EXTRA_SHOW_FRAGMENT,
-                SearchableItemsFragment.class.getName());
         return intent;
     }
 
