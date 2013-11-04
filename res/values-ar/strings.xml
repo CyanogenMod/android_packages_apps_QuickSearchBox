@@ -24,7 +24,7 @@
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"محو اختصارات اقتراحات البحث التي تم اختيارها حديثًا"</string>
     <string name="menu_help" msgid="8466596486018760239">"مساعدة"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
-    <string name="google_search_hint" msgid="8374014384681586649">"بحث Google"</string>
-    <string name="google_search_description" msgid="659411505885375623">"اقتراحات بحث Google"</string>
+    <string name="google_search_hint" msgid="8374014384681586649">"‏بحث Google"</string>
+    <string name="google_search_description" msgid="659411505885375623">"‏اقتراحات بحث Google"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"جرّب قول:"</string>
 </resources>
