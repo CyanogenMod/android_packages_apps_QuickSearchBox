@@ -260,7 +260,7 @@ public class SearchActivity extends Activity {
     @Override
     protected void onStop() {
         if (DBG) Log.d(TAG, "onStop()");
-        if (!mTookAction) {
+        if (!mTookAction && mSearchActivityView.getSuggestions() != null) {
             // TODO: This gets logged when starting other activities, e.g. by opening the search
             // settings, or clicking a notification in the status bar.
             // TODO we should log both sets of suggestions in 2-pane mode
