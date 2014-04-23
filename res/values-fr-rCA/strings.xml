@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1504397077706378597">"Recherche"</string>
+    <string name="app_name" msgid="1504397077706378597">"Rechercher"</string>
     <string name="remove_from_history_failed" msgid="1200923379897420942">"Impossible de supprimer l\'élément de l\'historique."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"Rechercher"</string>
     <string name="menu_settings" msgid="5600043319144155953">"Paramètres de recherche"</string>
