@@ -17,34 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1504397077706378597">"සෙවීම"</string>
-    <string name="search_widget" msgid="323244086853110381">"සෙවීම"</string>
-    <string name="remove_from_history" msgid="8904048551022097518">"ඔබට මෙම අයිතමය සෙවුම් ඉතිහාසයෙන් ඉවත් කිරීමට අවශ්‍ය ද?"</string>
     <string name="remove_from_history_failed" msgid="1200923379897420942">"ඉතිහාසය වෙතින් අයිතමය ඉවත් කිරීමට නොහැකි විය."</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"සෙවීම"</string>
-    <string name="corpus_label_global" msgid="8787849559975296772">"සියලු"</string>
-    <string name="corpus_label_web" msgid="3551946782975352067">"වෙබය"</string>
-    <string name="corpus_description_web" msgid="6248923252805408647">"වෙබ් සෙවීම, පිටුසන්, සහ බ්‍රවුසර ඉතිහාසය"</string>
-    <string name="corpus_label_apps" msgid="73123028704144731">"යෙදුම්"</string>
-    <string name="corpus_description_apps" msgid="7434542427108237469">"ස්ථාපනය කළ ඇති යෙදුම් වල නම්"</string>
-    <string name="corpus_hint_apps" msgid="7759612845120599537">"යෙදුම් සොයන්න"</string>
     <string name="menu_settings" msgid="5600043319144155953">"සැකසීම් සොයන්න"</string>
-    <string name="search_settings" msgid="4101951238194600323">"සැකසීම් සොයන්න"</string>
-    <string name="google_settings_category_title" msgid="770300575312669210">"Google සෙවීම"</string>
-    <string name="device_settings_category_title" msgid="2378889894648580869">"කෙටිමං හිස් කරන්න"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"දුරකථනය"</string>
-    <string name="search_sources" msgid="505874718206340313">"සෙවිය හැකි අයිතම"</string>
-    <string name="search_sources_summary" msgid="9181194249796408374">"දුරකථනය මත කුමක් සොයන්නේද යන්න තෝරන්න"</string>
-    <string name="clear_shortcuts" msgid="1964107586205103593">"කෙටිමං හිස් කරන්න"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"ළඟදී තෝරාගත් යෝජනා වලට කෙටිමං හිස් කරන්න"</string>
-    <string name="clear_shortcuts_prompt" msgid="6487883523491520343">"අන්තර්ගත සහ යෙදුම් සඳහා මෑතකදී තෝරාගත් යෝජනා ඉතිහාසය හිස් කිරීමට ඔබට අවශ්‍යද?\n\nවෙබ් බ්‍රවුසරයේ ඉතිහාසය මැකීමට, බ්‍රවුසරයේ සැකසීම් භාවිතා කරන්න."</string>
-    <string name="clear_shortcuts_agree" msgid="5623666487205882033">"කෙටිමං හිස් කරන්න"</string>
-    <string name="clear_shortcuts_disagree" msgid="3667707814933648461">"කෙටිමගවල් ඉවත් නොකරන්න"</string>
     <string name="menu_help" msgid="8466596486018760239">"සහාය"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
-    <string name="google_app_label" msgid="7877830942664670350">"Google සෙවීම"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Google සෙවීම"</string>
     <string name="google_search_description" msgid="659411505885375623">"Google සෙවුම් යෝජනා"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"පැවසීමට උත්සාහ කරන්න:"</string>
-    <string name="voice_search_hint_quotation_start" msgid="5648752104255950621">"\""</string>
-    <string name="voice_search_hint_quotation_end" msgid="3400099768332101719">"\""</string>
 </resources>
