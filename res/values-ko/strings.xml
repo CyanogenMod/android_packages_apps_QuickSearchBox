@@ -21,7 +21,7 @@
     <string name="corpus_selection_heading" msgid="6673422146423301360">"검색"</string>
     <string name="menu_settings" msgid="5600043319144155953">"검색 설정"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"휴대전화"</string>
-    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"최근에 선택한 추천검색어에 대한 바로가기 삭제"</string>
+    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"최근에 선택한 추천 검색어에 대한 바로가기 삭제"</string>
     <string name="menu_help" msgid="8466596486018760239">"도움말"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"Google 검색"</string>

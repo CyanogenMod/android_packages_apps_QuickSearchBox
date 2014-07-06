@@ -21,7 +21,7 @@
     <string name="corpus_selection_heading" msgid="6673422146423301360">"ፍለጋ"</string>
     <string name="menu_settings" msgid="5600043319144155953">"የፍለጋ ቅንብሮች"</string>
     <string name="system_search_category_title" msgid="1507902891285388819">"ስልክ"</string>
-    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"በቅርብ ጊዜ የተመረጡ የፍለጋ ምክሮች አቋራጮችን አጥራ"</string>
+    <string name="clear_shortcuts_summary" msgid="7407553488405249541">"በቅርብ ጊዜ የተመረጡ የፍለጋ ምክሮች አቋራጮችን አጽዳ"</string>
     <string name="menu_help" msgid="8466596486018760239">"እገዛ"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
     <string name="google_search_hint" msgid="8374014384681586649">"የGoogle ፍለጋ"</string>
