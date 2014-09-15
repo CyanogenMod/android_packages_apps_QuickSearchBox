@@ -38,6 +38,7 @@
                  android:icon="@mipmap/search_app_icon"
                  android:name=".QsbApplicationWrapper"
                  android:theme="@style/Theme.QuickSearchBox"
+                 android:supportsRtl="true"
                  android:hardwareAccelerated="true">
         <activity android:name=".SearchActivity"
                   android:label="@string/app_name"

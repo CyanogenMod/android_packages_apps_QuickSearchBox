@@ -21,8 +21,8 @@
     android:orientation="vertical"
     android:paddingTop="9dip"
     android:paddingBottom="3dip"
-    android:paddingLeft="3dip"
-    android:paddingRight="1dip"
+    android:paddingStart="3dip"
+    android:paddingEnd="1dip"
     >
 
     <LinearLayout android:id="@+id/topPanel"
@@ -38,15 +38,15 @@
             android:gravity="center_vertical"
             android:layout_marginTop="6dip"
             android:layout_marginBottom="9dip"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"
+            android:layout_marginStart="10dip"
+            android:layout_marginEnd="10dip"
             >
             <ImageView android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"
                 android:paddingTop="6dip"
-                android:paddingRight="10dip"
+                android:paddingEnd="10dip"
                 android:src="@drawable/ic_dialog_menu_generic" />
             <TextView android:id="@+id/alertTitle"
                 style="?android:attr/textAppearanceLarge"

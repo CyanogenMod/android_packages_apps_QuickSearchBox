@@ -35,9 +35,9 @@
         <item name="android:layout_centerVertical">true</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:paddingLeft">8dip</item>
-        <item name="android:paddingRight">2dip</item>
-        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:paddingStart">8dip</item>
+        <item name="android:paddingEnd">2dip</item>
+        <item name="android:gravity">start|center_vertical</item>
     </style>
 
     <style name="SuggestionText2">
@@ -47,16 +47,16 @@
         <item name="android:singleLine">true</item>
         <item name="android:layout_height">@dimen/suggestion_text2_height</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingStart">8dip</item>
         <item name="android:paddingBottom">4dip</item>
-        <item name="android:paddingRight">2dip</item>
-        <item name="android:gravity">left|top</item>
+        <item name="android:paddingEnd">2dip</item>
+        <item name="android:gravity">start|top</item>
     </style>
 
     <style name="SuggestionIcon1">
         <item name="android:layout_height">@dimen/suggestion_icon_size</item>
         <item name="android:layout_width">@dimen/suggestion_icon_size</item>
-        <item name="android:paddingLeft">2dip</item>
+        <item name="android:paddingStart">2dip</item>
         <item name="android:paddingTop">2dip</item>
         <item name="android:paddingBottom">2dip</item>
     </style>

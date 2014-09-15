@@ -19,7 +19,7 @@
     <item android:drawable="@drawable/textfield_search_empty" />
 
     <item>
-        <bitmap android:src="@drawable/hint_google" android:gravity="left|center_vertical" />
+        <bitmap android:src="@drawable/hint_google" android:gravity="start|center_vertical" />
     </item>
 
 </layer-list>

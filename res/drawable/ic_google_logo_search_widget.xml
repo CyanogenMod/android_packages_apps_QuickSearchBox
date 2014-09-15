@@ -17,11 +17,11 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item>
-        <bitmap android:src="@drawable/ic_mag_search_widget_holo" android:gravity="bottom|left" />
+        <bitmap android:src="@drawable/ic_mag_search_widget_holo" android:gravity="bottom|start" />
     </item>
 
     <item android:left="32dip">
-        <bitmap android:src="@drawable/ic_google_logo_search_widget_holo" android:gravity="bottom|left" />
+        <bitmap android:src="@drawable/ic_google_logo_search_widget_holo" android:gravity="bottom|start" />
     </item>
 
 </layer-list>
