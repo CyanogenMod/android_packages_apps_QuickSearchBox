@@ -20,11 +20,11 @@
     <string name="remove_from_history_failed" msgid="1200923379897420942">"无法从记录中删除该项。"</string>
     <string name="corpus_selection_heading" msgid="6673422146423301360">"搜索"</string>
     <string name="menu_settings" msgid="5600043319144155953">"搜索设置"</string>
-    <string name="system_search_category_title" msgid="1507902891285388819">"电话"</string>
+    <string name="system_search_category_title" msgid="1507902891285388819">"手机"</string>
     <string name="clear_shortcuts_summary" msgid="7407553488405249541">"清除最近所选搜索建议的快捷方式"</string>
     <string name="menu_help" msgid="8466596486018760239">"帮助"</string>
     <string name="google_search_label" msgid="2312345472131797361">"Google"</string>
-    <string name="google_search_hint" msgid="8374014384681586649">"Google 搜索"</string>
-    <string name="google_search_description" msgid="659411505885375623">"Google 搜索建议"</string>
+    <string name="google_search_hint" msgid="8374014384681586649">"Google搜索"</string>
+    <string name="google_search_description" msgid="659411505885375623">"Google搜索建议"</string>
     <string name="voice_search_hint_title" msgid="9160095960228453779">"试着说："</string>
 </resources>
